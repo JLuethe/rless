@@ -1,0 +1,627 @@
+{
+  "schema_version": 1,
+  "scope": "Initial implementation of M0 closure foundations; ownership and final safety coverage remain incomplete.",
+  "runtime_safety_verified": false,
+  "tooling_source_commit": "224174abb40beef9105ca8be3ecc90b50ba3f67e",
+  "runs": {
+    "inventory": {
+      "status": "passed",
+      "source_commit": "224174abb40beef9105ca8be3ecc90b50ba3f67e",
+      "dirty_state": " M README.md\n M docs/current-state.md\n M docs/safety/findings.json\n M docs/safety/m0-progress.md\n M docs/safety/ownership-register.json\n M spec/safety/validation.json\n?? docs/safety/acceptance-bindings.json\n?? docs/safety/acceptance-matrix.json\n?? docs/safety/allocation-hook-review.md\n?? docs/safety/closure-inventory.json\n?? docs/safety/closure-progress.md\n?? docs/safety/ownership-review.json\n?? docs/verification/closure-foundations.json\n?? docs/verification/glibc241-baseline.json\n?? docs/verification/glibc241-environment.json\n",
+      "started_at_utc": "2026-10-24T18:40:00.609313+00:00",
+      "finished_at_utc": "2026-10-24T18:40:11.952226+00:00",
+      "records": [
+        {
+          "name": "tool-rustc",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-rustc",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "rustc",
+            "-vV"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.08692894599516876,
+          "cpu_seconds": 0.05054800000000001,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/tool-rustc.log",
+          "log_sha256": "3490ee6e8bcdb72c1c69a3dd110ba44354faa27549f1f6fce37148b2b8b1f6c6",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-cargo",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-cargo",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "cargo",
+            "-V"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.09307769899896812,
+          "cpu_seconds": 0.043418,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/tool-cargo.log",
+          "log_sha256": "0aace72cfe5464362dc29118bd0d8bd5d5a2a9931ee8704efae227e72f86bf36",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-miri",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-miri",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "cargo",
+            "miri",
+            "--version"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.07699821800633799,
+          "cpu_seconds": 0.06697299999999998,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/tool-miri.log",
+          "log_sha256": "e4515aceed97938f49306c1edf1847fd4c799fb5881520f3ff73dc1862f59e96",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "build-inventory",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "build-inventory",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "cargo",
+            "build",
+            "--locked",
+            "--offline",
+            "--manifest-path",
+            "/home/john/Code/rless/tools/safety/inventory/Cargo.toml"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 2.549322012011544,
+          "cpu_seconds": 3.630144,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/build-inventory.log",
+          "log_sha256": "5bc5fc9c87066f45184834cfc9dcb6e05d044f3ea642ba40d29d58c56817059f",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "source-ast",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "source-ast",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory",
+            "src/bin/lessecho.rs",
+            "src/bin/rless.rs",
+            "src/brac.rs",
+            "src/ch.rs",
+            "src/charset.rs",
+            "src/cmdbuf.rs",
+            "src/command.rs",
+            "src/cvt.rs",
+            "src/decode.rs",
+            "src/edit.rs",
+            "src/evar.rs",
+            "src/fault.rs",
+            "src/filename.rs",
+            "src/forwback.rs",
+            "src/help.rs",
+            "src/ifile.rs",
+            "src/input.rs",
+            "src/jump.rs",
+            "src/lesskey_parse.rs",
+            "src/lib.rs",
+            "src/line.rs",
+            "src/linenum.rs",
+            "src/lmsg.rs",
+            "src/lsystem.rs",
+            "src/mark.rs",
+            "src/optfunc.rs",
+            "src/option.rs",
+            "src/opttbl.rs",
+            "src/os.rs",
+            "src/output.rs",
+            "src/pager.rs",
+            "src/pattern.rs",
+            "src/position.rs",
+            "src/process.rs",
+            "src/prompt.rs",
+            "src/runtime.rs",
+            "src/screen.rs",
+            "src/search.rs",
+            "src/signal.rs",
+            "src/tags.rs",
+            "src/ttyin.rs",
+            "src/version.rs",
+            "src/xbuf.rs",
+            "vendor/c2rust-bitfields-derive/src/lib.rs",
+            "vendor/c2rust-bitfields/c2rust-tests/test_structs.rs",
+            "vendor/c2rust-bitfields/src/lib.rs",
+            "build.rs"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 1.4533136740064947,
+          "cpu_seconds": 1.3490540000000006,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/source-ast.log",
+          "log_sha256": "989b0c8f3628e80439828d829bb8b4d0a0d5b64070c0f1a75e6535225d607828",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory": "e2415d16dec035f99230c7f40c340796fa28deffb86df1decbe6243e934e2627"
+          }
+        },
+        {
+          "name": "inventory-detector-control",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "inventory-detector-control",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory",
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/inventory-fixture.rs"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.023109475994715467,
+          "cpu_seconds": 0.002307000000000503,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/inventory-detector-control.log",
+          "log_sha256": "108199d7d9e928544357f03e561abdae363c51ff3d358f4629808dbf036ce0d7",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "expand-lib",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expand-lib",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "cargo",
+            "rustc",
+            "--locked",
+            "--offline",
+            "--lib",
+            "--",
+            "-Zunpretty=expanded"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 2.586785557999974,
+          "cpu_seconds": 3.6747060000000005,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/expand-lib.log",
+          "log_sha256": "f88d9d68dedba6d135b409ed9a76060f3db7ab789600005414ca2290d7ddf072",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "expanded-ast-lib",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expanded-ast-lib",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory",
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/expanded-lib.rs"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 1.6764151550014503,
+          "cpu_seconds": 1.4776569999999982,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/expanded-ast-lib.log",
+          "log_sha256": "c4c9cd717c2c37ff6d39aefd29f64285c4ff7f6af2cc1ab21c340236661a93d3",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory": "e2415d16dec035f99230c7f40c340796fa28deffb86df1decbe6243e934e2627",
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/expanded-lib.rs": "53c01fb1c7f9597c455e2c7ac512b0c4272d2bf9c489844597a8e4a35db7c56b"
+          }
+        },
+        {
+          "name": "expand-lessecho",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expand-lessecho",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "cargo",
+            "rustc",
+            "--locked",
+            "--offline",
+            "--bin",
+            "lessecho",
+            "--",
+            "-Zunpretty=expanded"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 1.5971000580029795,
+          "cpu_seconds": 1.8002909999999996,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/expand-lessecho.log",
+          "log_sha256": "44f124c29e2b9d3a8fbc97257bf86637ce2eec0d23e8c18cb2f27b4a3bc25034",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "expanded-ast-lessecho",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expanded-ast-lessecho",
+          "profile": "STATIC",
+          "coverage_scope": null,
+          "status": "passed",
+          "command": [
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory",
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/expanded-lessecho.rs"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.06878696000785567,
+          "cpu_seconds": 0.02396100000000123,
+          "log": "/home/john/Code/rless/compat/.runs/closure-inventory-record/expanded-ast-lessecho.log",
+          "log_sha256": "df061ad4aef2dd116df793aa16db6dc9a74a540d9f341691f092e59eda71df8d",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/target/debug/rless-safety-inventory": "e2415d16dec035f99230c7f40c340796fa28deffb86df1decbe6243e934e2627",
+            "/home/john/Code/rless/compat/.runs/closure-inventory-record/expanded-lessecho.rs": "41d6860db74867d125571b032c0c81397559635b1371c4d1173954e5e612a4bf"
+          }
+        }
+      ],
+      "input_fingerprint_sha256": "6e4825926277d62252f799a4d4025c334c13328150ffa5e76b0db940006dee8e",
+      "raw_report_path": "compat/.runs/closure-inventory-record/summary.json",
+      "raw_report_sha256": "dc666e970723657bdad6e9eb4fadffc3ba2315a6856a77f3f419acf3fb110796"
+    },
+    "allocation-hook": {
+      "status": "passed",
+      "source_commit": "224174abb40beef9105ca8be3ecc90b50ba3f67e",
+      "dirty_state": " M README.md\n M docs/current-state.md\n M docs/safety/findings.json\n M docs/safety/m0-progress.md\n M docs/safety/ownership-register.json\n M spec/safety/validation.json\n?? docs/safety/acceptance-bindings.json\n?? docs/safety/acceptance-matrix.json\n?? docs/safety/allocation-hook-review.md\n?? docs/safety/closure-inventory.json\n?? docs/safety/closure-progress.md\n?? docs/safety/ownership-review.json\n?? docs/verification/closure-foundations.json\n?? docs/verification/glibc241-baseline.json\n?? docs/verification/glibc241-environment.json\n",
+      "started_at_utc": "2026-10-24T18:40:12.006524+00:00",
+      "finished_at_utc": "2026-10-24T18:40:12.214254+00:00",
+      "records": [
+        {
+          "name": "allocation-hook-native",
+          "requirement_ids": [
+            "SAFE-MEM-007",
+            "SAFE-VER-005",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": "SAFECASE-MEM-007",
+          "variant": "fail each logical reserve/create boundary",
+          "profile": "NATIVE",
+          "coverage_scope": "partial",
+          "status": "passed",
+          "command": [
+            "/home/john/Code/rless/.venv/bin/python",
+            "/home/john/Code/rless/tools/safety/test_hooks.py",
+            "--normal",
+            "/home/john/Code/rless/target/debug/rless",
+            "--injected",
+            "/home/john/Code/rless/compat/.runs/closure-injection-target/debug/rless"
+          ],
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {},
+          "wall_seconds": 0.15219649800565094,
+          "cpu_seconds": 0.06683399999999999,
+          "log": "/home/john/Code/rless/compat/.runs/closure-hooks-record/allocation-hook-native.log",
+          "log_sha256": "6c8058ac243976c825e9784f34a7077a5826af199d022d2e33f2107365c9c03d",
+          "artifact_hashes": {
+            "/home/john/Code/rless/target/debug/rless": "7f9cb11e2ece39f16aafdd428a1f5b2cb41898d17be8c0e7936ef3d2825c9fe9",
+            "/home/john/Code/rless/compat/.runs/closure-injection-target/debug/rless": "3ab67edb58794aaa59eb7c6db14471883aca310047886ea740ac957f5b28aaea"
+          }
+        }
+      ],
+      "input_fingerprint_sha256": "6e4825926277d62252f799a4d4025c334c13328150ffa5e76b0db940006dee8e",
+      "raw_report_path": "compat/.runs/closure-hooks-record/summary.json",
+      "raw_report_sha256": "945b0ee83ce519b0ec79f78744164d14b0302518468e24e5679969c38055bf4c"
+    }
+  },
+  "tests": {
+    "closure_validator_mutation_controls": 13,
+    "existing_evidence_fault_controls": 18,
+    "observer_regressions": 6,
+    "real_pager_allocation_controls": 7,
+    "normal_rust_tests": 7,
+    "feature_rust_tests": 9
+  },
+  "test_log_sha256": {
+    "compat/.runs/closure-validator-tests.log": "eaa8152eeb03ec5d5cdd4f5497627906c01c98b61b5a9e47cd8f913aa8ee1349",
+    "compat/.runs/closure-infrastructure-tests.log": "4554fa43ee74daf8b7c1f54169a9e98d66822f2c771493d555862724ecd6dcb9",
+    "compat/.runs/closure-observer-tests.log": "66de9b2adae0b744e0fded5e2cd47159294afe3e4aa6a8f830ebfdded67b4ac5",
+    "compat/.runs/closure-feature-rust-tests.log": "414027867ca56939e972d03dcffa25a0f8d6825dfc44e63c986a90b0fd69f549"
+  },
+  "host_native_regression": {
+    "tested_source_commit": "465476f",
+    "scope": "Full normal host regression and clean install passed. Later edits only affect separate safety tooling/ABI runner; application/build/compatibility test inputs remain identical.",
+    "runtime_inputs_identical_to_current": true,
+    "raw_report_path": "compat/.runs/verification-izozh_37/summary.json",
+    "raw_report_sha256": "a2f121a8b069c6cce09cf7b61d4536fca57e4535fc160b7184c321a553c92dd1",
+    "summary": {
+      "started_at_utc": "2026-10-24T18:27:31.058619+00:00",
+      "passed": true,
+      "steps": [
+        {
+          "name": "format",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "rust-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "rust-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "observer",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "corpus",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "negative-candidate",
+          "returncode": 1,
+          "expected_returncode": 1,
+          "passed": true
+        },
+        {
+          "name": "acceptance-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "acceptance-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "reference",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "integrations-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "job-control-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "helpers-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-debug-712",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-debug-20261023",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "integrations-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "job-control-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "helpers-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-release-712",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-release-20261023",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "clean-install",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "acceptance-installed",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        }
+      ],
+      "binaries": {
+        "debug": {
+          "path": "/home/john/Code/rless/target/debug/rless",
+          "sha256": "7f9cb11e2ece39f16aafdd428a1f5b2cb41898d17be8c0e7936ef3d2825c9fe9",
+          "companion_sha256": "2b8885614c174820fdb546c6b47e6e19fa6d16e662bc0b9fc4e9fb5c1fddcea9"
+        },
+        "release": {
+          "path": "/home/john/Code/rless/target/release/rless",
+          "sha256": "82c3e07ed677f10ab8f8a53f3172fe75eddb4271200c74d8e4ecf57c0d14bc82",
+          "companion_sha256": "e32176fc1ef22a0a2d1bc0f49a690bacdea3247ceef549d03db8cb13a7028e89"
+        }
+      },
+      "build_and_test_inputs_sha256": "91912d3f7cf6e0bb85469bbecb056ad9a6dfe40e79e62188a9d5db847bcf667b",
+      "helpers": {
+        "osc8_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+      },
+      "finished_at_utc": "2026-10-24T18:29:48.723198+00:00"
+    }
+  },
+  "ownership": {
+    "entries": 690,
+    "author_inspected_hazard_entries": 2,
+    "pending": 688,
+    "independent_approval": "pending",
+    "ledger": "docs/safety/ownership-review.json"
+  },
+  "acceptance": {
+    "named_variants": 175,
+    "exact_profile_rows": 500,
+    "passed_rows": 0,
+    "partially_implemented_rows": 1,
+    "not_run_rows": 499,
+    "matrix": "docs/safety/acceptance-matrix.json"
+  },
+  "glibc241": {
+    "status": "native-baseline-passed",
+    "source_commit": "9d281f35592d4bfca3c3e98e2a7be49ac9e24f36",
+    "image_id": "4ed3eed82d4b5d725f9d3d20afe950e8a648531cf709eb12e601de307ad38e4d",
+    "runtime": "2.41",
+    "identity": {
+      "uid": 1000,
+      "euid": 1000,
+      "gid": 1000
+    },
+    "baseline_record": "docs/verification/glibc241-baseline.json",
+    "environment_record": "docs/verification/glibc241-environment.json",
+    "safety_profile_status": "ASAN/LSAN/MIRI not-run in this ABI profile; broader fault campaigns remain pending"
+  },
+  "setup_attempts": [
+    {
+      "path": "compat/.runs/closure-glibc241-1/summary.json",
+      "sha256": "86312adce450239019e5b0869ab1a483cbbff47775a5221c3a89dedfa70d65de",
+      "classification": "Missing jsonschema in initial container setup; fixed before accepted run."
+    },
+    {
+      "path": "compat/.runs/closure-glibc241-2/summary.json",
+      "sha256": "d112b8ac7724d4f5829ddc3a58fe323f2ddb883730c59b1f87ab0c25f80aa9fd",
+      "classification": "Debian pyte 0.8.0 omitted frozen blink field; exact hash-pinned observer wheels fixed the environment without changing observations."
+    }
+  ],
+  "remaining": [
+    "688 ownership/alias/native/callback review entries",
+    "other logical allocation, I/O, commit, callback, handoff and cleanup hook sites",
+    "complete M0 fault/oracle controls and required safety profiles including glibc 2.41",
+    "independent boundary review",
+    "M0 closure report before M1 runtime migration",
+    "open leak findings #9/#10 and existing signal hazards"
+  ]
+}

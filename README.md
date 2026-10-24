@@ -23,7 +23,7 @@ pending safety work. The [M0–M4 execution plan](spec/safety/execution-plan.md)
 and [full safety campaigns](spec/safety/campaign-plan.md) specify 28 delivery
 packets, 43 safety requirements and 175 acceptance variants, including the M5
 completion gate. **M0 infrastructure is in progress; no safety phase is verified.**
-See the [M0 progress and initial findings](docs/safety/m0-progress.md). No safety
+See the [M0 closure progress and reference ABI results](docs/safety/closure-progress.md). No safety
 migration milestone is marked complete. [Tracker #1](https://github.com/JLuethe/rless/issues/1)
 links all six planned phases and milestones.
 

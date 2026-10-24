@@ -44,3 +44,14 @@ The source checkout is `rless`; the sibling `rless-env` holds toolchains, refere
 [GitHub tracker #1](https://github.com/JLuethe/rless/issues/1) links phase issues
 [#2](https://github.com/JLuethe/rless/issues/2) through [#7](https://github.com/JLuethe/rless/issues/7)
 and the six open milestones. Continue with [M0](https://github.com/JLuethe/rless/issues/2).
+
+## Closure foundations update
+
+The [M0 closure specification](../spec/safety/m0-closure-m1.md) is published and
+implementation has started. The real allocation hook and source-bound review/coverage
+gates are implemented. The unprivileged glibc 2.41 native baseline now passes all
+809 cases across debug/release/reference/install/source rebuild plus integrations,
+helpers, stress and job control. Its safety profiles remain unverified. There are
+690 review entries (688 pending) and 500 exact acceptance-profile rows (one partial,
+zero complete). See [the latest progress report](safety/closure-progress.md). M0
+remains open; M1 runtime changes remain gated on its closure and feasibility proof.

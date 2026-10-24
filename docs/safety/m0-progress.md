@@ -5,6 +5,11 @@ is **in progress / not-verified**. No application safety migration phase is comp
 The first tested infrastructure source is commit `610bb4f`; the native baseline
 was reproduced separately from committed `53f5aa9`.
 
+The later [closure foundations report](closure-progress.md) supersedes the initial
+missing reference-environment gap: the native glibc 2.41 baseline is now reproduced.
+It also records real allocation hooks and review/coverage gates; broader safety
+evidence remains incomplete. The initial results below retain their original scope.
+
 ## Work completed in this slice
 
 | Packet | Implemented and exercised | Gate still open |
