@@ -52,6 +52,7 @@ def main():
        for name,command in [('rustc',['rustc','-vV']),('cargo',['cargo','-V']),
         ('cc',['cc','--version']),('linker',['ld','--version'])]}
     (REPORT/'environment.json').write_text(json.dumps(dict(runtime=runtime,header_probe=probe,
+        identity=dict(uid=os.getuid(),euid=os.geteuid(),gid=os.getgid()),
         versions=versions,python_dependencies=python_dependencies,
         packages=Path('/opt/rless-abi/packages.tsv').read_text()),indent=2)+'\n')
     run('native-baseline',['python3','tools/check.py','--reference','/reference/less','--stress-rounds','100','--install-check'])
@@ -86,6 +87,7 @@ def main():
         libraries[name]=dict(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),ldd=text,libraries_sha256=hashes)
     (REPORT/'result.json').write_text(json.dumps(dict(status='passed',runtime_safety_verified=False,
         scope='Actual glibc 2.41 native baseline; no full safety campaign claim.',runtime=runtime,
+        identity=dict(uid=os.getuid(),euid=os.geteuid(),gid=os.getgid()),
         header_probe=probe,libraries=libraries,native_summary=summary,source_acceptance=source_cases,
         packages=package,allocation_hook_profile='NATIVE allocation hook controls passed; remaining sites unimplemented',
         safety_profile_status='ASan/LSan/Miri not-run here; native baseline/hooks do not establish full safety campaigns'),indent=2)+'\n')

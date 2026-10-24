@@ -9,7 +9,7 @@
       "id": "C0-OWN-1",
       "title": "Ownership review inputs and coverage ledger",
       "parent_packet": "M0.2",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [],
       "requirement_ids": [
@@ -29,7 +29,7 @@
       "id": "C0-OWN-2",
       "title": "Review owner graphs and escaping aliases",
       "parent_packet": "M0.2",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "C0-OWN-1"
@@ -55,7 +55,7 @@
       "id": "C0-HOOK-1",
       "title": "Compile-gated production allocation hooks",
       "parent_packet": "M0.4",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "C0-OWN-1"
@@ -104,7 +104,7 @@
       "id": "C0-COVER-1",
       "title": "Acceptance binding and coverage gates",
       "parent_packet": "M0.4",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "C0-HOOK-1"
@@ -155,7 +155,7 @@
       "id": "C0-ABI-1",
       "title": "Pin and build the glibc 2.41 environment",
       "parent_packet": "M0.1",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [],
       "requirement_ids": [
@@ -177,7 +177,7 @@
       "id": "C0-ABI-2",
       "title": "Reproduce baseline on actual glibc 2.41",
       "parent_packet": "M0.1",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "C0-ABI-1"

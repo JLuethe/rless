@@ -22,7 +22,8 @@ python tools/safety/glibc241/run.py \
 Pull the exact base digest from the Containerfile if it is absent locally; a moving
 tag is not the build input. Image setup needs network access. The test container
 uses the inspected image ID, no network, a read-only rootfs and explicit input,
-toolchain and public registry-cache mounts. It gets its own `/proc`/PTYs. No host
+toolchain and public registry-cache mounts. Tests run with the invoking user's
+UID/GID and dropped container capabilities, with their own `/proc`/PTYs. No host
 include/library tree, credential directory, Docker socket or host PID namespace
 is mounted. Committed source is archived; uncommitted code is excluded explicitly.
 
