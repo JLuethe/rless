@@ -493,29 +493,39 @@ pub unsafe extern "C" fn flush() {
         return;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
-    #[cfg(feature = "safety-injection")]
-    let injected_failure = crate::fault::hit(crate::fault::Site::Write);
-    #[cfg(not(feature = "safety-injection"))]
-    let injected_failure = false;
-    #[cfg(feature = "safety-injection")]
-    let write_len = if crate::fault::hit(crate::fault::Site::WriteShort) {
-        n / 2
-    } else {
-        n
-    };
-    #[cfg(not(feature = "safety-injection"))]
-    let write_len = n;
-    if (if injected_failure {
-        -1
-    } else {
-        write(
-            outfd,
-            &raw mut obuf as *mut ::core::ffi::c_char as *const ::core::ffi::c_void,
-            write_len,
-        )
-    }) != n as ssize_t
-    {
-        screen_trashed();
+    let mut written = 0;
+    while written < n {
+        #[cfg(feature = "safety-injection")]
+        let injected_failure = crate::fault::hit(crate::fault::Site::Write);
+        #[cfg(not(feature = "safety-injection"))]
+        let injected_failure = false;
+        #[cfg(feature = "safety-injection")]
+        let write_len = if crate::fault::hit(crate::fault::Site::WriteShort) {
+            ((n - written) / 2).max(1)
+        } else {
+            n - written
+        };
+        #[cfg(not(feature = "safety-injection"))]
+        let write_len = n - written;
+        let result = if injected_failure {
+            -1
+        } else {
+            write(
+                outfd,
+                (&raw const obuf).cast::<u8>().add(written).cast(),
+                write_len,
+            )
+        };
+        if result > 0 {
+            written += result as usize;
+        } else if result < 0 && *libc::__errno_location() == libc::EINTR {
+            continue;
+        } else {
+            // A permanent error still needs the legacy screen recovery path.
+            // Short successful writes must not discard the unconsumed suffix.
+            screen_trashed();
+            break;
+        }
     }
 }
 #[no_mangle]

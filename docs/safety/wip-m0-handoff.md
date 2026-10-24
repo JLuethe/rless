@@ -1,3 +1,119 @@
+# Current resumed M0 checkpoint — 2026-10-24
+
+Resume in `/home/john/Code/rless`, branch
+`implement/m0-review-faults-verification`. The original handoff was `d513f97`.
+The current implementation is the commit adding this section; later documentation
+checkpoints identify the exact implementation tested by the ABI run. No merge or
+release is authorized. **M0 is open, M1 is gated, and independent approval is
+pending.** The historical handoff below is retained verbatim as evidence and does
+not override this current section.
+
+Read the [compact resumed record](../verification/resume-m0-checkpoint.json),
+[boundary inspection](resume-boundary-review.md),
+[fresh inventory](resume-inventory.json),
+[fresh review ledger](resume-ownership-review.json) and
+[current matrix](resume-acceptance-matrix.json), then
+[the closure gates](../../spec/safety/m0-closure-m1.md).
+The original `wip-m0-checkpoint.json` and earlier closure evidence are historical;
+do not refresh their hashes or transfer their results to newer source.
+
+## Implementation and evidence
+
+- Candidate GNU regex / saved `--cmd` fixes now have two ownership unit tests
+  (2,048 GNU matches; self/interior/empty-suffix command replacement), 24 reached
+  startup allocation-fault ordinals and eight real PTY leak regressions. These
+  pass with the pinned host ASan/LSan profile; no final sanitizer report remains.
+- Cleanup site 11 is wired **before terminal restore `tcsetattr`**, returns EINTR,
+  and retries the same modes. Only successful native mode changes update
+  `in_raw_mode`. Feature and native-interposer counterparts each pass 100 PTY
+  repetitions per native/ASan profile. SIGTERM retains status 15 and exact modes.
+- `flush` now retries EINTR and resumes the exact unwritten suffix after a real
+  partial write. Both the feature hook and a separately compiled native write
+  interposer preserve the full bytes. Permanent EIO is still an open finding.
+- The full ASan replay exposed a separate 16-byte parser-variable leak,
+  M0-LEAK-003. `lesskey_text` now releases the parser's variable xbuffer after
+  expansion copies into published storage. It does not free borrowed static
+  defaults or command/edit buffers that are retained directly. The original
+  808/809 failure, diagnostic and reproducer are retained. The corrected full
+  ASan replay passes **809/809** without reports.
+- The real fault-path suite passes 19 tests per native/ASan profile, with actual
+  hits for all 16 IDs, normal-build absence, unreached ordinals, cleanup oracle
+  mutations, regex recovery, filter before/after state, parser recovery, reserve
+  OOM, post-close behavior and shell recovery/trace close-on-exec. Its aggregate
+  intentionally exits 1 / not-verified: diagnostic findings and incomplete
+  required oracles do not become safety acceptance.
+- The complete host native debug/release/reference/install lane passes 809/809
+  on each binary, 2,832 stress comparisons, integrations/helpers and real
+  foreground stop/resume. Nine normal Rust tests and eleven feature tests pass;
+  allocation controls (7), infrastructure (18) and closure controls (13) pass.
+  Pinned detector controls pass. Actual runtime Miri tests pass seeds 0/1/712/
+  20261023, with native constructor/whole-core exclusions explicitly retained.
+
+The new PTY cases use the **documented rebuilt reference** hash
+`1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771`
+from `glibc241-baseline.json`. This differs from the original capture binary in
+`compat/reference.json`. The guard rejected the first capture attempt correctly.
+No frozen observer, case or expectation was modified. An invalid empty-`--cmd`
+PTY fixture was corrected after the reference consumed its next argument; its
+failed runs remain local. Empty strings remain covered by the alias unit test.
+
+## Open gates and blockers
+
+- Fresh 690-entry ledger: **4 author-reviewed hazard records, 686 incomplete**.
+  Only the hook module/cycle, saved-command object and `tcsetattr` boundary have
+  completed bounded author records. Whole regex/output/parser cycles remain
+  incomplete. No independent approval is supplied by these records.
+- All **500 whole variant/profile rows remain unverified**. Existing historical
+  partial bindings are not promoted or silently rebound to the current source.
+- M0-IO-001/002: permanent read/write EIO silently loses data with status 0 and
+  no diagnostic. Tests named `diagnostic_*` reproduce those findings; they do not
+  accept the behavior. GNU/system-library internals remain uninstrumented.
+- Callback sentinel propagation, parser partial commits, history replacement,
+  all per-site ordinal/native-failure counterparts, and repeated in-process
+  FD/child/live-byte conservation remain incomplete. A hit is not an oracle.
+- The pinned glibc 2.41 image exists, but its native baseline is not yet rerun
+  against this committed implementation at this checkpoint. Instrumented ABI
+  lanes need their own evidence and the exact pinned tools. The read-only,
+  network-closed image probe found no llvm-symbolizer/cargo/Miri in the image;
+  do not bypass tool pins or substitute the host libc/libraries.
+- Independent unsafe-boundary approval remains unavailable/pending a reviewer.
+  The user was asked to identify that reviewer while implementation continued.
+  This requirement and incomplete infrastructure prevent C0-GATE/M1 entry.
+
+## Resume commands
+
+Inspect git state and active work first; preserve newer changes. All run
+directories below must be new. Source `../rless-env/activate.sh`; use pinned Rust
+1.90 for ordinary builds and `tools/safety/profiles.json` for safety builds.
+
+```sh
+python tools/safety/leaks.py --profile asan --reference "$RLESS_REFERENCE" \
+  --tool-home ../rless-env/safety --output compat/.runs/leaks-next
+python tools/safety/fault_paths.py --profile asan --repetitions 100 \
+  --tool-home ../rless-env/safety --output compat/.runs/faults-next
+python tools/safety/ownership.py check \
+  --inventory docs/safety/resume-inventory.json \
+  --review docs/safety/resume-ownership-review.json
+python tools/safety/coverage.py --require-complete \
+  --output compat/.runs/matrix-next.json
+python tools/safety/glibc241/run.py \
+  --reference-dir ../rless-env/less-reference \
+  --rust-toolchain ../rless-env/rust-1.90.0 \
+  --registry-cache ../rless-env/cargo-home/registry \
+  --commit HEAD --output compat/.runs/resume-glibc241-next
+```
+
+Full review/coverage commands currently reject incomplete gates by design. The
+ABI runner archives committed source only. Preserve exact commands, original
+statuses, logs, tool identities and source/artifact hashes; no compatibility
+result substitutes for memory-safety or independent review. Continue the open
+owner/native/fault slices before evaluating C0-GATE. No background work is
+scheduled once this session ends.
+
+---
+
+# Historical handoff at d513f97 (superseded above)
+
 # Resumable M0 WIP checkpoint
 
 Recorded 2026-10-24 on branch `implement/m0-review-faults-verification`, based on
