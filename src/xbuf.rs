@@ -46,6 +46,11 @@ pub unsafe extern "C" fn xbuf_reset(mut xbuf: *mut xbuffer) {
 #[no_mangle]
 pub unsafe extern "C" fn xbuf_add_byte(mut xbuf: *mut xbuffer, mut b: ::core::ffi::c_uchar) {
     if (*xbuf).end >= (*xbuf).size {
+        #[cfg(feature = "safety-injection")]
+        if crate::fault::hit(crate::fault::Site::Reserve) {
+            out_of_memory();
+            return;
+        }
         let mut data: *mut ::core::ffi::c_uchar = ::core::ptr::null_mut::<::core::ffi::c_uchar>();
         let (c2rust_result, c2rust_overflowed) =
             (*xbuf).size.overflowing_add(if (*xbuf).size != 0 {

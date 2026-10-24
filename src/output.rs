@@ -493,11 +493,27 @@ pub unsafe extern "C" fn flush() {
         return;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
-    if write(
-        outfd,
-        &raw mut obuf as *mut ::core::ffi::c_char as *const ::core::ffi::c_void,
-        n,
-    ) != n as ssize_t
+    #[cfg(feature = "safety-injection")]
+    let injected_failure = crate::fault::hit(crate::fault::Site::Write);
+    #[cfg(not(feature = "safety-injection"))]
+    let injected_failure = false;
+    #[cfg(feature = "safety-injection")]
+    let write_len = if crate::fault::hit(crate::fault::Site::WriteShort) {
+        n / 2
+    } else {
+        n
+    };
+    #[cfg(not(feature = "safety-injection"))]
+    let write_len = n;
+    if (if injected_failure {
+        -1
+    } else {
+        write(
+            outfd,
+            &raw mut obuf as *mut ::core::ffi::c_char as *const ::core::ffi::c_void,
+            write_len,
+        )
+    }) != n as ssize_t
     {
         screen_trashed();
     }

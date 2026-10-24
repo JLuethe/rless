@@ -1750,7 +1750,11 @@ pub unsafe extern "C" fn opt_first_cmd_at_prompt(
 ) {
     match r#type {
         0 | 2 => {
-            first_cmd_at_prompt = save(s);
+            // Reserve/copy before releasing the old value: s may borrow it and
+            // an allocation failure must not publish a dangling replacement.
+            let replacement = save(s);
+            free(first_cmd_at_prompt.cast());
+            first_cmd_at_prompt = replacement;
         }
         1 | _ => {}
     };

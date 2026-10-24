@@ -537,7 +537,13 @@ pub unsafe extern "C" fn lsystem(
             p = save(cmd);
         }
     }
-    system(p);
+    #[cfg(feature = "safety-injection")]
+    let injected_failure = crate::fault::hit(crate::fault::Site::Handoff);
+    #[cfg(not(feature = "safety-injection"))]
+    let injected_failure = false;
+    if !injected_failure {
+        system(p);
+    }
     free(p as *mut ::core::ffi::c_void);
     close(0 as ::core::ffi::c_int);
     dup(inp);

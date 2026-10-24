@@ -952,6 +952,10 @@ unsafe extern "C" fn ltgoto(
 }
 static mut costcount: ::core::ffi::c_int = 0;
 unsafe extern "C" fn inc_costcount(mut c: ::core::ffi::c_int) -> ::core::ffi::c_int {
+    #[cfg(feature = "safety-injection")]
+    if crate::fault::hit(crate::fault::Site::Callback) {
+        return -1;
+    }
     costcount += 1;
     return c;
 }

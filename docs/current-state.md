@@ -2,6 +2,12 @@
 
 Updated **2026-10-24**. Native implementation baseline: [`dd6ef28`](https://github.com/JLuethe/rless/commit/dd6ef28f0c136109611f3c225457c9000a9aca47).
 
+Latest work is an intentionally unfinished checkpoint on
+`implement/m0-review-faults-verification`: candidate leak fixes and expanded fault
+hooks, with cleanup unwired and new-site acceptance tests outstanding. Read the
+[resumption handoff](safety/wip-m0-handoff.md) for current test scope, stale evidence
+and next commands. M0 remains open; the baseline results below are historical.
+
 ## Implemented and verified
 
 - Native Rust `rless` pager and `lessecho`, translated from pinned less 712 commit `7f46e9ff46216f3e560cd1f41ddf3b36b11eec0e`; no installed C pager is invoked to implement paging.

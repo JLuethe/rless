@@ -276,6 +276,10 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
             }
             psignals();
         }
+        #[cfg(feature = "safety-injection")]
+        if crate::fault::hit(crate::fault::Site::Open) {
+            return -1;
+        }
         let result = open(filename, flags);
         if result < 0 && *__errno_location() == libc::EINTR {
             continue;

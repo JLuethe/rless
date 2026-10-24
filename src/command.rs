@@ -1411,6 +1411,9 @@ unsafe extern "C" fn prompt() {
     if !first_cmd_at_prompt.is_null() {
         ungetsc(first_cmd_at_prompt);
         ungetcc_end_command();
+        // ungetsc copies bytes into owned queue nodes; it does not retain the
+        // saved startup string. Release that owner before clearing its pointer.
+        free(first_cmd_at_prompt.cast());
         first_cmd_at_prompt = ::core::ptr::null_mut::<::core::ffi::c_char>();
         return;
     }

@@ -549,7 +549,11 @@ unsafe extern "C" fn compile_pattern2(
                 << 1 as ::core::ffi::c_int)
                 << 1 as ::core::ffi::c_int,
     );
-    if !re_compile_pattern(pattern, strlen(pattern), comp).is_null() {
+    #[cfg(feature = "safety-injection")]
+    let injected_failure = crate::fault::hit(crate::fault::Site::Regex);
+    #[cfg(not(feature = "safety-injection"))]
+    let injected_failure = false;
+    if injected_failure || !re_compile_pattern(pattern, strlen(pattern), comp).is_null() {
         free(comp as *mut ::core::ffi::c_void);
         if show_error != 0 {
             error(
@@ -680,13 +684,21 @@ unsafe extern "C" fn match_pattern1(
             nsp,
         );
     } else {
+        // Only the complete match is consumed below. Keep its registers in
+        // caller-owned storage (GNU REGS_FIXED), rather than requesting native
+        // arrays on every search. GNU may free a half-allocated register pair on
+        // failure without clearing its pointer, so blindly freeing returned raw
+        // arrays is not a sound cleanup strategy. re_search does not retain this
+        // storage; offsets are copied into line-relative results before return.
+        let mut starts = [0 as regoff_t; 1];
+        let mut ends = [0 as regoff_t; 1];
         let mut search_regs: re_registers = re_registers {
-            num_regs: 0,
-            start: ::core::ptr::null_mut::<regoff_t>(),
-            end: ::core::ptr::null_mut::<regoff_t>(),
+            num_regs: 1,
+            start: starts.as_mut_ptr(),
+            end: ends.as_mut_ptr(),
         };
         (*pattern).set_not_bol(notbol as ::core::ffi::c_uint as ::core::ffi::c_uint);
-        (*pattern).set_regs_allocated(0 as ::core::ffi::c_uint as ::core::ffi::c_uint);
+        (*pattern).set_regs_allocated(2 as ::core::ffi::c_uint);
         matched = (re_search(
             pattern,
             line,

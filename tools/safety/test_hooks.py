@@ -81,7 +81,7 @@ class ActualAllocationHooks(unittest.TestCase):
             with self.assertRaises(ValueError):require_fault(wrong,marker,1)
 
     def test_invalid_plan_and_blocking_channel_fail_before_pager(self):
-        for plan in ('alloc:0','alloc:-1','read:1','alloc:999999999999999999999999999999'):
+        for plan in ('alloc:0','alloc:-1','unknown:1','alloc:999999999999999999999999999999'):
             result, marker = execute(INJECTED,plan)
             self.assertEqual(result.returncode,2)
             self.assertIn(b'rless safety injection:',result.stderr)
