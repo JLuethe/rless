@@ -1,0 +1,23 @@
+[package]
+name = "rless-safety-detectors"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[[bin]]
+name = "safe"
+path = "safe.rs"
+
+[[bin]]
+name = "asan-uaf"
+path = "asan_uaf.rs"
+
+[[bin]]
+name = "lsan-leak"
+path = "lsan_leak.rs"
+
+[[bin]]
+name = "miri-alias"
+path = "miri_alias.rs"

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "M0 infrastructure evidence, separate from final safety acceptance",
+  "type": "object",
+  "required": ["schema_version", "scope", "source_commit", "dirty_state", "input_fingerprints", "status", "records", "findings"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"enum": ["not-verified", "passed"]},
+    "runtime_safety_verified": {"const": false},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "input_fingerprints": {"type": "object", "required": ["sha256", "files"]},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "profile", "status", "requirement_ids"],
+        "properties": {
+          "status": {"enum": ["passed", "failed", "unsupported", "blocked", "not-run"]},
+          "profile": {"enum": ["NATIVE", "ASAN", "LSAN", "MIRI", "FUZZ", "ABI", "STATIC", "AUDIT"]},
+          "requirement_ids": {"type": "array", "items": {"type": "string"}}
+        },
+        "allOf": [{"if": {"properties": {"status": {"enum": ["passed", "failed"]}}}, "then": {"required": ["command", "original_exit_status", "variant", "log", "log_sha256", "cpu_seconds", "wall_seconds", "artifact_hashes"]}}]
+      }
+    },
+    "findings": {"type": "array"}
+  }
+}

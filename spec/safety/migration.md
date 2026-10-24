@@ -1,13 +1,13 @@
 # Implementation order and phase gates
 
-This is an execution contract for the five safety workstreams. Implementation
-has not started under this specification. No phase is complete merely because a
+This is an execution contract for the five safety workstreams. M0 infrastructure implementation has started;
+application safety migration has not yet started. No phase is complete merely because a
 new wrapper or test file exists. Requirements are tracked in the separate safety
 ledger so the original 544 behavioral requirements retain their meanings.
 
 The detailed [execution plan](execution-plan.md) and [campaign plan](campaign-plan.md)
 expand these gates into delivery packets, target budgets and evidence requirements.
-All packets and campaigns are planned/not-verified.
+M0 packets are in progress/not-verified; later phases and full campaigns remain planned/not-verified.
 
 ## Phase sequence
 
