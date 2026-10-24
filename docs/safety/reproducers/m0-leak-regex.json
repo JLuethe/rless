@@ -1,0 +1,28 @@
+[
+  {
+    "id": "M0-LEAK-REGEX",
+    "mode": "pty",
+    "argv": [
+      "-px",
+      "-PsREADY",
+      "-PmREADY",
+      "-PMREADY",
+      "i"
+    ],
+    "files": {
+      "i": {
+        "text": "x\n"
+      }
+    },
+    "events": [
+      {
+        "await": [
+          "READY"
+        ]
+      },
+      {
+        "send": "q"
+      }
+    ]
+  }
+]

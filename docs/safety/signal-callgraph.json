@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "scope": "Initial syntactic signal entry edges; native link aliases, indirect targets and transitive async-safety review remain open.",
+  "status": "not-verified",
+  "roots": {
+    "src/signal.rs::u_interrupt": [
+      {
+        "symbol": "lbell",
+        "line": 45,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/screen.rs::lbell"
+        ]
+      },
+      {
+        "symbol": "signal",
+        "line": 46,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "Some",
+        "line": 48,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "set_filter_pattern",
+        "line": 51,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/search.rs::set_filter_pattern"
+        ]
+      },
+      {
+        "symbol": ":: core :: ptr :: null :: < :: core :: ffi :: c_char >",
+        "line": 52,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "polling_ok",
+        "line": 55,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/os.rs::polling_ok"
+        ]
+      },
+      {
+        "symbol": "intio",
+        "line": 56,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/os.rs::intio"
+        ]
+      }
+    ],
+    "src/signal.rs::stop": [
+      {
+        "symbol": "signal",
+        "line": 59,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "Some",
+        "line": 61,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "intio",
+        "line": 64,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/os.rs::intio"
+        ]
+      }
+    ],
+    "src/signal.rs::sigalarm": [
+      {
+        "symbol": "signal",
+        "line": 67,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "Some",
+        "line": 69,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "intio",
+        "line": 72,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/os.rs::intio"
+        ]
+      }
+    ],
+    "src/signal.rs::lwinch": [
+      {
+        "symbol": "signal",
+        "line": 76,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "Some",
+        "line": 78,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "intio",
+        "line": 81,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/os.rs::intio"
+        ]
+      }
+    ],
+    "src/signal.rs::terminate": [
+      {
+        "symbol": "quit",
+        "line": 84,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/pager.rs::quit"
+        ]
+      }
+    ],
+    "src/signal.rs::sigusr": [
+      {
+        "symbol": "lgetenv",
+        "line": 87,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/decode.rs::lgetenv"
+        ]
+      },
+      {
+        "symbol": "isnullenv",
+        "line": 88,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/decode.rs::isnullenv"
+        ]
+      },
+      {
+        "symbol": "ungetsc",
+        "line": 91,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/command.rs::ungetsc"
+        ]
+      },
+      {
+        "symbol": "intio",
+        "line": 92,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/os.rs::intio"
+        ]
+      }
+    ],
+    "src/signal.rs::sigusr1": [
+      {
+        "symbol": "signal",
+        "line": 95,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "Some",
+        "line": 97,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": []
+      },
+      {
+        "symbol": "sigusr",
+        "line": 99,
+        "resolution": "syntactic candidate only",
+        "candidate_definitions": [
+          "src/signal.rs::sigusr"
+        ]
+      }
+    ]
+  },
+  "known_hazard_paths": [
+    [
+      "u_interrupt",
+      "set_filter_pattern",
+      "clear_pattern/free"
+    ],
+    [
+      "sigusr1",
+      "sigusr",
+      "ungetsc",
+      "ungetcc_back",
+      "ungetcc_back1",
+      "ecalloc"
+    ],
+    [
+      "terminate",
+      "quit",
+      "pager resource/terminal cleanup"
+    ]
+  ],
+  "native_signal_alias": "src/signal.rs::signal links to src/runtime.rs::rless_signal; registration/sentinel invariants remain M1.2."
+}

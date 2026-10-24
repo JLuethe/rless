@@ -3,8 +3,8 @@
   "specification_version": "0.2.0",
   "recorded_date": "2026-10-24",
   "repository": "https://github.com/JLuethe/rless",
-  "scope": "Planning references at publication; GitHub issue states are live tracking, not safety evidence.",
-  "status": "planned",
+  "scope": "Live planning references, not safety evidence. M0 infrastructure has started; all phases remain unverified.",
+  "status": "in-progress",
   "evidence_status": "not-verified",
   "parent_issue": {
     "number": 1,
@@ -17,7 +17,8 @@
       "url": "https://github.com/JLuethe/rless/issues/2",
       "title": "M0: Baseline and safety infrastructure",
       "state": "open",
-      "milestone": 1
+      "milestone": 1,
+      "status": "in-progress"
     },
     {
       "phase": "M1",
@@ -25,7 +26,8 @@
       "url": "https://github.com/JLuethe/rless/issues/3",
       "title": "M1: Signal boundary and cancellable operations",
       "state": "open",
-      "milestone": 2
+      "milestone": 2,
+      "status": "planned"
     },
     {
       "phase": "M2",
@@ -33,7 +35,8 @@
       "url": "https://github.com/JLuethe/rless/issues/4",
       "title": "M2: Owned primitives and parser foundations",
       "state": "open",
-      "milestone": 3
+      "milestone": 3,
+      "status": "planned"
     },
     {
       "phase": "M3",
@@ -41,7 +44,8 @@
       "url": "https://github.com/JLuethe/rless/issues/5",
       "title": "M3: Owned application state and lifecycle",
       "state": "open",
-      "milestone": 4
+      "milestone": 4,
+      "status": "planned"
     },
     {
       "phase": "M4",
@@ -49,7 +53,8 @@
       "url": "https://github.com/JLuethe/rless/issues/6",
       "title": "M4: Audited native boundary consolidation",
       "state": "open",
-      "milestone": 5
+      "milestone": 5,
+      "status": "planned"
     },
     {
       "phase": "M5",
@@ -57,7 +62,8 @@
       "url": "https://github.com/JLuethe/rless/issues/7",
       "title": "M5: Full safety campaigns and scoped completion",
       "state": "open",
-      "milestone": 6
+      "milestone": 6,
+      "status": "planned"
     }
   ]
 }

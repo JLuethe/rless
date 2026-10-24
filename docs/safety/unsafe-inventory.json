@@ -1,0 +1,5856 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-24T17:18:20.469506+00:00",
+  "status": "partial",
+  "evidence_status": "not-verified",
+  "scope": "AST and compiler-expanded syntax inventory; not a complete ownership/alias or indirect-call proof.",
+  "files": {
+    "src/bin/lessecho.rs": {
+      "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+      "counts": {
+        "extern_static_declaration": 1,
+        "raw_pointer_type": 88,
+        "extern_function_declaration": 9,
+        "mutable_static_definition": 9,
+        "method_call": 65,
+        "direct_call": 47,
+        "function_definition": 8,
+        "unsafe_function": 7,
+        "abi_function_definition": 6,
+        "unsafe_block": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/bin/rless.rs": {
+      "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+      "counts": {
+        "function_definition": 1,
+        "direct_call": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/brac.rs": {
+      "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+      "counts": {
+        "extern_function_declaration": 8,
+        "raw_pointer_type": 9,
+        "direct_call": 367,
+        "function_definition": 1,
+        "unsafe_function": 1,
+        "abi_function_definition": 1,
+        "exported_symbol": 1,
+        "function_pointer_type": 4,
+        "indirect_call": 1,
+        "method_call": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/ch.rs": {
+      "sha256": "4334fb3bd0f7fa991135834cb66b00d782094b215b6ad6ed4f61f668cdfbc055",
+      "counts": {
+        "extern_function_declaration": 25,
+        "raw_pointer_type": 106,
+        "extern_static_declaration": 9,
+        "direct_call": 439,
+        "mutable_static_definition": 7,
+        "function_definition": 25,
+        "unsafe_function": 25,
+        "abi_function_definition": 25,
+        "method_call": 34,
+        "exported_symbol": 19
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/charset.rs": {
+      "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+      "counts": {
+        "extern_function_declaration": 15,
+        "raw_pointer_type": 392,
+        "extern_static_declaration": 1,
+        "direct_call": 551,
+        "mutable_static_definition": 30,
+        "unsafe_block": 1,
+        "method_call": 243,
+        "function_definition": 29,
+        "unsafe_function": 29,
+        "abi_function_definition": 29,
+        "exported_symbol": 18,
+        "function_pointer_type": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/cmdbuf.rs": {
+      "sha256": "a78d8d8fd859f46e004fde4a07678d391d24fe20ef70b0fedf42bde0db356df0",
+      "counts": {
+        "extern_function_declaration": 54,
+        "raw_pointer_type": 348,
+        "extern_static_declaration": 5,
+        "direct_call": 660,
+        "mutable_static_definition": 29,
+        "unsafe_block": 6,
+        "function_definition": 58,
+        "unsafe_function": 58,
+        "abi_function_definition": 58,
+        "exported_symbol": 18,
+        "method_call": 146,
+        "function_pointer_type": 4,
+        "indirect_call": 3
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/command.rs": {
+      "sha256": "14066354f489fc8bbf57adfd64508586f0ee5c3660925600ffcbcb0eb113fe2d",
+      "counts": {
+        "extern_function_declaration": 120,
+        "raw_pointer_type": 185,
+        "extern_static_declaration": 45,
+        "direct_call": 974,
+        "function_pointer_type": 1,
+        "mutable_static_definition": 28,
+        "function_definition": 45,
+        "unsafe_function": 45,
+        "abi_function_definition": 45,
+        "exported_symbol": 18,
+        "method_call": 111
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/cvt.rs": {
+      "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+      "counts": {
+        "extern_function_declaration": 10,
+        "raw_pointer_type": 25,
+        "extern_static_declaration": 1,
+        "direct_call": 34,
+        "function_definition": 3,
+        "unsafe_function": 3,
+        "abi_function_definition": 3,
+        "exported_symbol": 3,
+        "method_call": 21
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/decode.rs": {
+      "sha256": "c1521c60349aba72b0e96fd07b76278600632756fa8071a107093bfc3776fbfe",
+      "counts": {
+        "extern_function_declaration": 31,
+        "raw_pointer_type": 205,
+        "extern_static_declaration": 9,
+        "direct_call": 569,
+        "mutable_static_definition": 13,
+        "unsafe_block": 1,
+        "function_definition": 48,
+        "unsafe_function": 48,
+        "abi_function_definition": 48,
+        "method_call": 102,
+        "exported_symbol": 12,
+        "function_pointer_type": 9,
+        "indirect_call": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/edit.rs": {
+      "sha256": "e918db9a0b69ff556ccb93b2788204f231353381bf23abfa6f5ffa3e1f474cbc",
+      "counts": {
+        "extern_function_declaration": 68,
+        "raw_pointer_type": 212,
+        "extern_static_declaration": 20,
+        "direct_call": 589,
+        "function_pointer_type": 3,
+        "mutable_static_definition": 4,
+        "function_definition": 31,
+        "unsafe_function": 31,
+        "abi_function_definition": 31,
+        "exported_symbol": 20,
+        "method_call": 68,
+        "indirect_call": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/evar.rs": {
+      "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+      "counts": {
+        "extern_function_declaration": 5,
+        "raw_pointer_type": 39,
+        "direct_call": 24,
+        "function_definition": 7,
+        "unsafe_function": 7,
+        "abi_function_definition": 7,
+        "method_call": 55,
+        "exported_symbol": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/filename.rs": {
+      "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+      "counts": {
+        "extern_function_declaration": 42,
+        "raw_pointer_type": 255,
+        "extern_static_declaration": 10,
+        "direct_call": 607,
+        "function_definition": 30,
+        "unsafe_function": 30,
+        "abi_function_definition": 30,
+        "exported_symbol": 21,
+        "method_call": 120,
+        "mutable_static_definition": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/forwback.rs": {
+      "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+      "counts": {
+        "extern_function_declaration": 33,
+        "raw_pointer_type": 10,
+        "extern_static_declaration": 19,
+        "direct_call": 446,
+        "mutable_static_definition": 7,
+        "function_definition": 13,
+        "unsafe_function": 13,
+        "abi_function_definition": 13,
+        "exported_symbol": 11,
+        "method_call": 3
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/help.rs": {
+      "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+      "counts": {
+        "mutable_static_definition": 2,
+        "function_definition": 1,
+        "unsafe_function": 1,
+        "abi_function_definition": 1,
+        "method_call": 1,
+        "direct_call": 1,
+        "function_pointer_type": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/ifile.rs": {
+      "sha256": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+      "counts": {
+        "extern_function_declaration": 8,
+        "raw_pointer_type": 125,
+        "extern_static_declaration": 2,
+        "direct_call": 56,
+        "mutable_static_definition": 2,
+        "unsafe_block": 1,
+        "function_definition": 26,
+        "unsafe_function": 26,
+        "abi_function_definition": 26,
+        "method_call": 5,
+        "exported_symbol": 21
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/input.rs": {
+      "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+      "counts": {
+        "extern_function_declaration": 23,
+        "raw_pointer_type": 9,
+        "extern_static_declaration": 12,
+        "direct_call": 108,
+        "function_definition": 5,
+        "unsafe_function": 5,
+        "abi_function_definition": 5,
+        "exported_symbol": 4,
+        "method_call": 8
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/jump.rs": {
+      "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+      "counts": {
+        "extern_function_declaration": 33,
+        "raw_pointer_type": 17,
+        "extern_static_declaration": 10,
+        "direct_call": 436,
+        "function_definition": 9,
+        "unsafe_function": 9,
+        "abi_function_definition": 9,
+        "exported_symbol": 8,
+        "mutable_static_definition": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/lesskey_parse.rs": {
+      "sha256": "a6cc839cbd24bdbd550c56490a60224c3739fb713a1ddf818438d28a8cf541a7",
+      "counts": {
+        "extern_static_declaration": 2,
+        "raw_pointer_type": 262,
+        "extern_function_declaration": 19,
+        "direct_call": 465,
+        "mutable_static_definition": 8,
+        "method_call": 188,
+        "function_definition": 20,
+        "unsafe_function": 20,
+        "abi_function_definition": 20,
+        "exported_symbol": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/line.rs": {
+      "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+      "counts": {
+        "extern_function_declaration": 45,
+        "raw_pointer_type": 154,
+        "extern_static_declaration": 30,
+        "direct_call": 384,
+        "mutable_static_definition": 41,
+        "unsafe_block": 1,
+        "function_definition": 73,
+        "unsafe_function": 73,
+        "abi_function_definition": 73,
+        "exported_symbol": 40,
+        "method_call": 144
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/linenum.rs": {
+      "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+      "counts": {
+        "extern_function_declaration": 11,
+        "raw_pointer_type": 40,
+        "extern_static_declaration": 7,
+        "direct_call": 424,
+        "mutable_static_definition": 5,
+        "function_definition": 11,
+        "unsafe_function": 11,
+        "abi_function_definition": 11,
+        "exported_symbol": 7,
+        "method_call": 7
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/lmsg.rs": {
+      "sha256": "34bec4c61b308b5e699e043a282a57175e993424c19afdf22efcc6df3efa3c0a",
+      "counts": {
+        "extern_function_declaration": 16,
+        "raw_pointer_type": 1115,
+        "extern_static_declaration": 2,
+        "direct_call": 393,
+        "mutable_static_definition": 4,
+        "method_call": 706,
+        "function_definition": 7,
+        "unsafe_function": 7,
+        "abi_function_definition": 7,
+        "exported_symbol": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/lsystem.rs": {
+      "sha256": "20710ec5e6d72df6634bf01c4380bef2cd403c73d063a11039333bec512c28d9",
+      "counts": {
+        "extern_function_declaration": 35,
+        "raw_pointer_type": 73,
+        "extern_static_declaration": 1,
+        "direct_call": 431,
+        "function_pointer_type": 1,
+        "function_definition": 4,
+        "unsafe_function": 4,
+        "abi_function_definition": 4,
+        "method_call": 20,
+        "exported_symbol": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/mark.rs": {
+      "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+      "counts": {
+        "extern_function_declaration": 26,
+        "raw_pointer_type": 116,
+        "extern_static_declaration": 6,
+        "direct_call": 467,
+        "mutable_static_definition": 4,
+        "function_definition": 23,
+        "unsafe_function": 23,
+        "abi_function_definition": 23,
+        "method_call": 31,
+        "exported_symbol": 12
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/optfunc.rs": {
+      "sha256": "295ac094091579eadd3d8558975e012c6d564f1f22fb5c4b78ffe5b395532ab7",
+      "counts": {
+        "extern_function_declaration": 62,
+        "raw_pointer_type": 264,
+        "extern_static_declaration": 57,
+        "direct_call": 637,
+        "mutable_static_definition": 2,
+        "function_definition": 51,
+        "unsafe_function": 51,
+        "abi_function_definition": 51,
+        "exported_symbol": 45,
+        "method_call": 142,
+        "function_pointer_type": 4,
+        "indirect_call": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/option.rs": {
+      "sha256": "0f7c72fc3a85a02af62064ea13c5bb9c981cbde0c035f797c23f08108b41e327",
+      "counts": {
+        "extern_function_declaration": 21,
+        "raw_pointer_type": 104,
+        "extern_static_declaration": 5,
+        "direct_call": 467,
+        "function_pointer_type": 1,
+        "mutable_static_definition": 4,
+        "function_definition": 18,
+        "unsafe_function": 18,
+        "abi_function_definition": 18,
+        "method_call": 75,
+        "exported_symbol": 13,
+        "indirect_call": 4
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/opttbl.rs": {
+      "sha256": "020c15b3233ac77bde699dc75ade24c6199448d956d5998fa3d6569d981c5a2d",
+      "counts": {
+        "extern_function_declaration": 46,
+        "raw_pointer_type": 354,
+        "direct_call": 788,
+        "function_pointer_type": 39,
+        "mutable_static_definition": 166,
+        "method_call": 105,
+        "unsafe_block": 3,
+        "function_definition": 5,
+        "unsafe_function": 5,
+        "abi_function_definition": 5,
+        "exported_symbol": 4,
+        "indirect_call": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/os.rs": {
+      "sha256": "0ddafbf288b132c4c88bdcd533f010db900fab7768d2a393f0f40fc0974d6796",
+      "counts": {
+        "extern_function_declaration": 20,
+        "raw_pointer_type": 38,
+        "extern_static_declaration": 11,
+        "direct_call": 48,
+        "mutable_static_definition": 7,
+        "function_definition": 16,
+        "unsafe_function": 16,
+        "abi_function_definition": 16,
+        "exported_symbol": 15,
+        "method_call": 24
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/output.rs": {
+      "sha256": "ce8b7ff6c503042f497849fb17db68162d978aa21273326ff7e5bb1474fa32cd",
+      "counts": {
+        "extern_function_declaration": 27,
+        "raw_pointer_type": 86,
+        "extern_static_declaration": 9,
+        "direct_call": 449,
+        "mutable_static_definition": 6,
+        "function_definition": 25,
+        "unsafe_function": 25,
+        "abi_function_definition": 25,
+        "exported_symbol": 22,
+        "method_call": 49,
+        "unsafe_block": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/pager.rs": {
+      "sha256": "c5459e29029be397d7cc51f4b1b07a801c0b5ff4b0ebdba33a884ebbaa6d7db4",
+      "counts": {
+        "extern_function_declaration": 62,
+        "raw_pointer_type": 117,
+        "extern_static_declaration": 12,
+        "direct_call": 486,
+        "mutable_static_definition": 24,
+        "function_definition": 12,
+        "unsafe_function": 11,
+        "abi_function_definition": 10,
+        "method_call": 72,
+        "exported_symbol": 9,
+        "unsafe_block": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/pattern.rs": {
+      "sha256": "eda1e86cc14808ec0c6c29c97b21d8f61f5f11256afc93b42dab7607b9f645f9",
+      "counts": {
+        "extern_function_declaration": 11,
+        "raw_pointer_type": 74,
+        "extern_static_declaration": 1,
+        "direct_call": 379,
+        "function_definition": 9,
+        "unsafe_function": 9,
+        "abi_function_definition": 9,
+        "method_call": 29,
+        "exported_symbol": 5
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/position.rs": {
+      "sha256": "86eedbe6b76173ca3efd8754438df93698dba841b0c3b778ccc1e473a6d15a63",
+      "counts": {
+        "extern_function_declaration": 11,
+        "raw_pointer_type": 19,
+        "extern_static_declaration": 3,
+        "direct_call": 29,
+        "mutable_static_definition": 2,
+        "function_definition": 15,
+        "unsafe_function": 15,
+        "abi_function_definition": 15,
+        "exported_symbol": 13,
+        "method_call": 18
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/process.rs": {
+      "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+      "counts": {
+        "direct_call": 5,
+        "function_definition": 2,
+        "unsafe_function": 1,
+        "abi_function_definition": 1,
+        "method_call": 2,
+        "function_pointer_type": 1,
+        "unsafe_block": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/prompt.rs": {
+      "sha256": "f2d2c149b8686f0c4374958333158bc31ad420c34952cc16b48d54a7f75b075d",
+      "counts": {
+        "extern_function_declaration": 30,
+        "raw_pointer_type": 90,
+        "extern_static_declaration": 13,
+        "direct_call": 179,
+        "mutable_static_definition": 15,
+        "unsafe_block": 10,
+        "function_definition": 19,
+        "unsafe_function": 19,
+        "abi_function_definition": 19,
+        "exported_symbol": 6,
+        "method_call": 32
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/runtime.rs": {
+      "sha256": "6c8a9be8fdfe80375adc64edf5735f2415e33006d73f6436dea0a520d2dbb0ee",
+      "counts": {
+        "direct_call": 27,
+        "function_definition": 7,
+        "method_call": 10,
+        "unsafe_function": 2,
+        "abi_function_definition": 1,
+        "exported_symbol": 1,
+        "function_pointer_type": 2,
+        "raw_pointer_type": 1,
+        "unsafe_block": 1,
+        "macro_invocation": 4
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/screen.rs": {
+      "sha256": "edfe2aad92080feb8e5860b0549318821bf944be5d79bdad4d8a57bac52f10f5",
+      "counts": {
+        "extern_function_declaration": 35,
+        "raw_pointer_type": 366,
+        "function_pointer_type": 40,
+        "extern_static_declaration": 18,
+        "direct_call": 420,
+        "mutable_static_definition": 69,
+        "function_definition": 59,
+        "unsafe_function": 59,
+        "abi_function_definition": 59,
+        "exported_symbol": 33,
+        "method_call": 278
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/search.rs": {
+      "sha256": "8808b413f2750b458dbc29e5d66754981949cb964cbc2f783b76d10b41d7c796",
+      "counts": {
+        "extern_function_declaration": 65,
+        "raw_pointer_type": 281,
+        "extern_static_declaration": 28,
+        "direct_call": 777,
+        "mutable_static_definition": 26,
+        "function_definition": 55,
+        "unsafe_function": 55,
+        "abi_function_definition": 55,
+        "method_call": 178,
+        "exported_symbol": 25
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "counts": {
+        "extern_function_declaration": 21,
+        "raw_pointer_type": 8,
+        "native_link_name": 1,
+        "extern_static_declaration": 3,
+        "direct_call": 73,
+        "function_pointer_type": 14,
+        "mutable_static_definition": 1,
+        "function_definition": 9,
+        "unsafe_function": 9,
+        "abi_function_definition": 9,
+        "exported_symbol": 3,
+        "method_call": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/tags.rs": {
+      "sha256": "5f757a969fce4634665063e9a8d129a97e52c49c72f3a59a3c6c9e36b9283726",
+      "counts": {
+        "extern_static_declaration": 4,
+        "raw_pointer_type": 189,
+        "extern_function_declaration": 33,
+        "direct_call": 503,
+        "mutable_static_definition": 7,
+        "unsafe_block": 3,
+        "function_definition": 18,
+        "unsafe_function": 18,
+        "abi_function_definition": 18,
+        "exported_symbol": 8,
+        "method_call": 64
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/ttyin.rs": {
+      "sha256": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599",
+      "counts": {
+        "extern_function_declaration": 6,
+        "raw_pointer_type": 6,
+        "extern_static_declaration": 1,
+        "mutable_static_definition": 1,
+        "function_definition": 7,
+        "unsafe_function": 7,
+        "abi_function_definition": 7,
+        "direct_call": 13,
+        "exported_symbol": 6,
+        "method_call": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/version.rs": {
+      "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+      "counts": {
+        "mutable_static_definition": 1,
+        "unsafe_block": 1,
+        "direct_call": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "src/xbuf.rs": {
+      "sha256": "1125bd2ae3b097581d2e6f6755cae96c82a2f77999252c0f3e0b746dd61011b1",
+      "counts": {
+        "extern_function_declaration": 4,
+        "raw_pointer_type": 29,
+        "function_definition": 10,
+        "unsafe_function": 10,
+        "abi_function_definition": 10,
+        "exported_symbol": 10,
+        "direct_call": 14,
+        "method_call": 9
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "vendor/c2rust-bitfields-derive/src/lib.rs": {
+      "sha256": "a90f105f9c466b8a6b372d7d8f65024ceb5b34114b996fa12984508a878a55fa",
+      "counts": {
+        "macro_invocation": 8,
+        "function_definition": 6,
+        "method_call": 79,
+        "direct_call": 38,
+        "indirect_call": 1
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "vendor/c2rust-bitfields/c2rust-tests/test_structs.rs": {
+      "sha256": "a7cbfb22bacb354101e8bceb8506f98dd7e11a2d6ec81ad8bb663e2c1e008502",
+      "counts": {
+        "extern_function_declaration": 8,
+        "raw_pointer_type": 8,
+        "function_definition": 12,
+        "macro_invocation": 121,
+        "method_call": 65,
+        "unsafe_block": 30,
+        "direct_call": 22
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "vendor/c2rust-bitfields/src/lib.rs": {
+      "sha256": "1c62567dc4a541ae6de8bc840f2eb322c014e7af26956c8d46b1e7e57a6134b0",
+      "counts": {
+        "direct_call": 4,
+        "function_definition": 4,
+        "method_call": 2,
+        "macro_invocation": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    },
+    "build.rs": {
+      "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+      "counts": {
+        "function_definition": 1,
+        "method_call": 1,
+        "direct_call": 1,
+        "macro_invocation": 2
+      },
+      "classification": "manual ownership/indirect-call review pending"
+    }
+  },
+  "counts": {
+    "extern_static_declaration": 357,
+    "raw_pointer_type": 5819,
+    "extern_function_declaration": 1098,
+    "mutable_static_definition": 526,
+    "method_call": 3317,
+    "direct_call": 13834,
+    "function_definition": 838,
+    "unsafe_function": 806,
+    "abi_function_definition": 803,
+    "unsafe_block": 62,
+    "exported_symbol": 458,
+    "function_pointer_type": 125,
+    "indirect_call": 14,
+    "macro_invocation": 137,
+    "native_link_name": 1
+  },
+  "expanded_counts": {
+    "lib": {
+      "extern_function_declaration": 1081,
+      "raw_pointer_type": 6046,
+      "function_definition": 1193,
+      "direct_call": 13740,
+      "unsafe_function": 799,
+      "abi_function_definition": 797,
+      "exported_symbol": 458,
+      "function_pointer_type": 129,
+      "indirect_call": 13,
+      "method_call": 3127,
+      "extern_static_declaration": 356,
+      "mutable_static_definition": 517,
+      "unsafe_block": 31,
+      "native_link_name": 1
+    },
+    "lessecho": {
+      "direct_call": 53,
+      "function_definition": 13,
+      "unsafe_function": 8,
+      "abi_function_definition": 7,
+      "method_call": 68,
+      "function_pointer_type": 1,
+      "unsafe_block": 2,
+      "extern_static_declaration": 1,
+      "raw_pointer_type": 108,
+      "extern_function_declaration": 9,
+      "mutable_static_definition": 9
+    }
+  },
+  "candidate_external_symbols": [
+    "__ctype_b_loc",
+    "__errno_location",
+    "abs",
+    "assign_compact_date_day",
+    "assign_signed_bitfields",
+    "assign_three_byte_date",
+    "atoi",
+    "calloc",
+    "check_compact_date",
+    "check_overlapping_byte_date",
+    "check_signed_bitfields",
+    "check_three_byte_date",
+    "check_unnamed_bitfield",
+    "close",
+    "creat",
+    "dup",
+    "exit",
+    "fchmod",
+    "fclose",
+    "fgetc",
+    "fgets",
+    "fileno",
+    "fopen",
+    "fprintf",
+    "free",
+    "fstat",
+    "fsync",
+    "getc",
+    "getenv",
+    "getpid",
+    "ioctl",
+    "isatty",
+    "kill",
+    "lseek",
+    "malloc",
+    "memcpy",
+    "nanosleep",
+    "open",
+    "pclose",
+    "poll",
+    "popen",
+    "printf",
+    "putc",
+    "re_compile_pattern",
+    "re_search",
+    "re_set_syntax",
+    "read",
+    "realpath",
+    "regfree",
+    "rename",
+    "setitimer",
+    "setlocale",
+    "setupterm",
+    "signal",
+    "snprintf",
+    "sprintf",
+    "stat",
+    "strcat",
+    "strchr",
+    "strcmp",
+    "strcpy",
+    "strdup",
+    "strerror",
+    "strlen",
+    "strncmp",
+    "strncpy",
+    "strsignal",
+    "strstr",
+    "system",
+    "tcgetattr",
+    "tcsetattr",
+    "tigetflag",
+    "tigetnum",
+    "tigetstr",
+    "time",
+    "tolower",
+    "tparm",
+    "tputs",
+    "ttyname",
+    "write"
+  ],
+  "application_c_abi_symbols": [
+    "abort_delayed_msg",
+    "add_attr_normal",
+    "add_back_pos",
+    "add_cmd_char",
+    "add_cmd_str",
+    "add_cmd_table",
+    "add_content_table",
+    "add_ecmd_table",
+    "add_evar",
+    "add_fcmd_table",
+    "add_forw_pos",
+    "add_hilite",
+    "add_hometable",
+    "add_line",
+    "add_linebuf",
+    "add_lnum",
+    "add_metachar",
+    "add_pfx",
+    "add_sysvar_table",
+    "add_uvar_table",
+    "add_var_table",
+    "addenv_cache",
+    "addhist_init",
+    "addstr_linebuf",
+    "after_header_message",
+    "after_header_pos",
+    "ansi_done",
+    "ansi_osc8_state",
+    "ansi_start",
+    "ansi_step",
+    "ansi_step2",
+    "ap_char",
+    "ap_estr",
+    "ap_int",
+    "ap_linenum",
+    "ap_pos",
+    "ap_quest",
+    "ap_str",
+    "apply_at_specials",
+    "assert_interactive",
+    "at_enter",
+    "at_exit",
+    "at_switch",
+    "attr_ewidth",
+    "attr_swidth",
+    "autosave_action",
+    "back",
+    "back_line",
+    "back_raw_line",
+    "back_textlist",
+    "backc",
+    "backward",
+    "bad_file",
+    "badmark",
+    "beginning_of_line",
+    "bin_file",
+    "binary_char",
+    "buffered",
+    "c2rust_run_static_initializers",
+    "calc_jump_sline",
+    "calc_match_shift",
+    "calc_shift_count",
+    "calcgap",
+    "cat_file",
+    "ch_addbuf",
+    "ch_back_get",
+    "ch_beg_seek",
+    "ch_close",
+    "ch_delbufs",
+    "ch_end_buffer_seek",
+    "ch_end_seek",
+    "ch_flush",
+    "ch_forw_get",
+    "ch_get",
+    "ch_getflags",
+    "ch_init",
+    "ch_length",
+    "ch_position",
+    "ch_resize",
+    "ch_seek",
+    "ch_set_eof",
+    "ch_setbufspace",
+    "ch_tell",
+    "ch_ungetchar",
+    "char_string",
+    "cheaper",
+    "check_altpipe_error",
+    "check_modeline",
+    "check_modelines",
+    "check_poll",
+    "check_winch",
+    "chg_caseless",
+    "chg_hilite",
+    "chop_line",
+    "clean_line",
+    "cleantags",
+    "clear_attn",
+    "clear_bot",
+    "clear_bot_if_needed",
+    "clear_buffers",
+    "clear_cmd",
+    "clear_eol",
+    "clear_eol_bot",
+    "clear_mca",
+    "clear_pattern",
+    "close_altfile",
+    "close_altpipe",
+    "close_file",
+    "close_getchr",
+    "close_pipe",
+    "clr_filter",
+    "clr_hilite",
+    "clr_hlist",
+    "clr_linenum",
+    "clrmark",
+    "cmark",
+    "cmarkf",
+    "cmd_accept",
+    "cmd_addhist",
+    "cmd_char",
+    "cmd_char2",
+    "cmd_complete",
+    "cmd_decode",
+    "cmd_delete",
+    "cmd_edit",
+    "cmd_erase",
+    "cmd_exec",
+    "cmd_home",
+    "cmd_ichar",
+    "cmd_int",
+    "cmd_istr",
+    "cmd_kill",
+    "cmd_lastpattern",
+    "cmd_left",
+    "cmd_lshift",
+    "cmd_match",
+    "cmd_next_entry",
+    "cmd_putstr",
+    "cmd_repaint",
+    "cmd_repaint_curr",
+    "cmd_reset",
+    "cmd_right",
+    "cmd_rshift",
+    "cmd_setstring",
+    "cmd_step_common",
+    "cmd_step_left",
+    "cmd_step_right",
+    "cmd_uchar",
+    "cmd_updown",
+    "cmd_wdelete",
+    "cmd_werase",
+    "cmdbuf_empty",
+    "col_from_pos",
+    "col_vs_pos",
+    "color_from_namechar",
+    "color_index",
+    "commands",
+    "compile_pattern",
+    "compile_pattern2",
+    "cond",
+    "control_char",
+    "control_line",
+    "copy_hist",
+    "cost",
+    "create_hilites",
+    "csl_bitmap_bit",
+    "csl_bitmap_error",
+    "csl_bitmap_set",
+    "ctagsearch",
+    "curr_byte",
+    "curr_ifile_changed",
+    "curr_tag",
+    "currline",
+    "curtag_match",
+    "cvt_alloc_chpos",
+    "cvt_length",
+    "cvt_text",
+    "default_wheel_lines",
+    "deinit_bracketed_paste",
+    "deinit_mouse",
+    "del_ifile",
+    "delayed_msg",
+    "delimit_word",
+    "dirfile",
+    "dispversion",
+    "do_append",
+    "do_nosearch_headers",
+    "do_tputs",
+    "draw_target_attn",
+    "ecalloc",
+    "ecmd_decode",
+    "edit",
+    "edit_error",
+    "edit_first",
+    "edit_ifile",
+    "edit_index",
+    "edit_inext",
+    "edit_iprev",
+    "edit_istep",
+    "edit_last",
+    "edit_list",
+    "edit_next",
+    "edit_prev",
+    "edit_stdin",
+    "edit_tagfile",
+    "editchar",
+    "empty_lines",
+    "empty_screen",
+    "end_logfile",
+    "end_pr_string",
+    "entire_file_displayed",
+    "eof_bell",
+    "eof_displayed",
+    "eq_message",
+    "erase_cmd_char",
+    "errno_message",
+    "error",
+    "evar_match",
+    "exec_mca",
+    "expand_cmd_table",
+    "expand_cmd_tables",
+    "expand_evars",
+    "expand_linebuf",
+    "expand_special_keys",
+    "fcmd_decode",
+    "fcomplete",
+    "fexpand",
+    "fexpand_copy",
+    "filesize",
+    "find_ifile",
+    "find_linenum",
+    "find_pos",
+    "find_replace",
+    "find_stop_table",
+    "findaction",
+    "findctag",
+    "findgtag",
+    "findopt",
+    "findopt_name",
+    "findopts_name",
+    "findtag",
+    "fits_on_screen",
+    "flip_triple",
+    "flush",
+    "flush_mbc_buf",
+    "forw",
+    "forw_line",
+    "forw_line_pfx",
+    "forw_line_seg",
+    "forw_loop",
+    "forw_raw_line",
+    "forw_raw_line_len",
+    "forw_textlist",
+    "forward",
+    "free_replaces",
+    "get_altfilename",
+    "get_altpipe",
+    "get_back_scroll",
+    "get_cmdbuf",
+    "get_color_map",
+    "get_cvt_ops",
+    "get_filename",
+    "get_filestate",
+    "get_ifile",
+    "get_index",
+    "get_lastlinepos",
+    "get_meta_escape",
+    "get_one_screen",
+    "get_pipe_pos",
+    "get_pos",
+    "get_quit_at_eof",
+    "get_real_filename",
+    "get_return",
+    "get_scrpos",
+    "get_scrpos_pos",
+    "get_swindow",
+    "get_term",
+    "get_term_info",
+    "get_time",
+    "get_ungot",
+    "get_wchar",
+    "get_where_mark",
+    "getcc",
+    "getcc_clear",
+    "getcc_end_command",
+    "getcc_int",
+    "getcc_repl",
+    "getccu",
+    "getchr",
+    "getchr_timeout",
+    "getentry",
+    "getenv_cache",
+    "getfraction",
+    "getmark",
+    "getnum",
+    "getnumc",
+    "getoff_ifile",
+    "gettagtype",
+    "getumark",
+    "gline",
+    "gomark",
+    "goto_line",
+    "gtagsearch",
+    "held_ifile",
+    "hilite_line",
+    "hilite_screen",
+    "hilited_range_attr",
+    "hist_pattern",
+    "histfile_find",
+    "histfile_modified",
+    "histfile_name",
+    "hlist_find",
+    "hlist_getnode",
+    "hlist_getstorage",
+    "hlist_rotate_left",
+    "hlist_rotate_right",
+    "hold_ifile",
+    "home",
+    "homefile",
+    "ichardef",
+    "ichardef_utf",
+    "icharset",
+    "ierror",
+    "ierror_suffix",
+    "ignore_env",
+    "ilocale",
+    "in_mca",
+    "inc_costcount",
+    "inc_end_column",
+    "incr_index",
+    "increment_pointer",
+    "init_bracketed_paste",
+    "init_charset",
+    "init_cmdhist",
+    "init_cmds",
+    "init_file_compl",
+    "init_hashtbl",
+    "init_line",
+    "init_mark",
+    "init_mouse",
+    "init_opt_compl",
+    "init_option",
+    "init_pattern",
+    "init_poll",
+    "init_prompt",
+    "init_search",
+    "init_secure",
+    "init_signals",
+    "init_status_col",
+    "init_tables",
+    "init_textlist",
+    "init_unsupport",
+    "interactive",
+    "intio",
+    "inttoa",
+    "iopen",
+    "iprint_int",
+    "iprint_linenum",
+    "iread",
+    "is_ansi_end",
+    "is_ansi_middle",
+    "is_ascii_char",
+    "is_at_equiv",
+    "is_attr_char",
+    "is_combining_char",
+    "is_composing_char",
+    "is_dir",
+    "is_erase_char",
+    "is_fake_pathname",
+    "is_filtered",
+    "is_filtering",
+    "is_hilited_attr",
+    "is_ignoring_input",
+    "is_in_table",
+    "is_line_contig_pos",
+    "is_metachar",
+    "is_newline_char",
+    "is_null_pattern",
+    "is_omit_char",
+    "is_optchar",
+    "is_screen_trashed",
+    "is_ubin_char",
+    "is_ucase",
+    "is_utf8_well_formed",
+    "is_wide_char",
+    "isnullenv",
+    "isoptpending",
+    "issp",
+    "ixerror",
+    "jump_back",
+    "jump_forw",
+    "jump_forw_buffered",
+    "jump_line_loc",
+    "jump_loc",
+    "jump_percent",
+    "jump_search_incr_pos",
+    "last_component",
+    "lastmark",
+    "lbeep",
+    "lbell",
+    "lclear",
+    "len_cmdbuf",
+    "less_printf",
+    "lesskey_content",
+    "lesskey_parse_error",
+    "lesskey_src",
+    "lesskey_text",
+    "lgetenv",
+    "lgetenv_ext",
+    "lglob",
+    "line_is_ff",
+    "line_left",
+    "line_pfx_width",
+    "line_position",
+    "linenumtoa",
+    "link_ifile",
+    "lmsg",
+    "lmsg_char",
+    "lmsg_error",
+    "lmsg_id",
+    "lmsg_init",
+    "lmsg_line",
+    "load_line",
+    "loadc",
+    "longest_line_width",
+    "lookup_color_index",
+    "lower_left",
+    "lrealpath",
+    "lstrtoi",
+    "lstrtoic",
+    "lstrtol",
+    "lstrtopos",
+    "lstrtoposc",
+    "lstrtoul",
+    "lstrtoulc",
+    "lsystem",
+    "ltget_env",
+    "ltgetflag",
+    "ltgetnum",
+    "ltgetstr",
+    "ltgoto",
+    "ltputs",
+    "lwinch",
+    "make_display",
+    "make_file_private",
+    "make_replaces",
+    "make_tempname",
+    "maketagent",
+    "mark_check_ifile",
+    "mark_clear",
+    "mark_get_ifile",
+    "mark_index",
+    "mark_is_set",
+    "mark_letter",
+    "mark_set_ifile",
+    "markpos",
+    "match_brac",
+    "match_pattern",
+    "match_pattern1",
+    "match_version",
+    "matches_filters",
+    "mca_char",
+    "mca_opt_char",
+    "mca_opt_first_char",
+    "mca_opt_nonfirst_char",
+    "mca_opt_toggle",
+    "mca_search",
+    "mca_search1",
+    "mca_search_char",
+    "metachar",
+    "metachars",
+    "ml_link",
+    "ml_unlink",
+    "mlist_size",
+    "modeline_option",
+    "modeline_option_len",
+    "modeline_options",
+    "mouse_button_left",
+    "mouse_button_right",
+    "mouse_wheel_down",
+    "mouse_wheel_left",
+    "mouse_wheel_right",
+    "mouse_wheel_up",
+    "multi_search",
+    "must_quote",
+    "new_ifile",
+    "next_cnum",
+    "next_compl",
+    "next_ifile",
+    "next_unfiltered",
+    "nextgtag",
+    "nexttag",
+    "nifile",
+    "nopendopt",
+    "norm_search_type",
+    "nostring",
+    "not_user_defined",
+    "ntags",
+    "null_line",
+    "num_error",
+    "num_pct_s",
+    "numeric_char",
+    "onscreen",
+    "open_altfile",
+    "open_getchr",
+    "open_tty",
+    "open_tty_device",
+    "opened",
+    "opt_D",
+    "opt__O",
+    "opt__P",
+    "opt__S",
+    "opt__T",
+    "opt__V",
+    "opt_autosave",
+    "opt_b",
+    "opt_desc",
+    "opt_emouse",
+    "opt_end_prompt",
+    "opt_filesize",
+    "opt_first_cmd_at_prompt",
+    "opt_has_param",
+    "opt_header",
+    "opt_hilite_target",
+    "opt_i",
+    "opt_intr",
+    "opt_j",
+    "opt_k",
+    "opt_kc",
+    "opt_ks",
+    "opt_linenum_width",
+    "opt_match_shift",
+    "opt_mouse",
+    "opt_no_paste",
+    "opt_nosearch_header_cols",
+    "opt_nosearch_header_lines",
+    "opt_nosearch_headers",
+    "opt_o",
+    "opt_p",
+    "opt_prompt",
+    "opt_query",
+    "opt_quote",
+    "opt_rscroll",
+    "opt_search_type",
+    "opt_shift",
+    "opt_status_col_width",
+    "opt_t",
+    "opt_toggle_disallowed",
+    "opt_wheel_lines",
+    "opt_x",
+    "optstring",
+    "osc8_click",
+    "osc8_empty_uri",
+    "osc8_jump",
+    "osc8_open",
+    "osc8_param_match",
+    "osc8_parse",
+    "osc8_read_selected",
+    "osc8_search",
+    "osc8_search_line",
+    "osc8_search_line1",
+    "osc8_shift_visible",
+    "osc_return",
+    "out_of_memory",
+    "overlay_header",
+    "pappend",
+    "pappend_b",
+    "pappstr",
+    "parse_cmdline",
+    "parse_color",
+    "parse_color4",
+    "parse_color6",
+    "parse_csl",
+    "parse_csl_bitmap",
+    "parse_error",
+    "parse_header",
+    "parse_lesskey",
+    "parse_lesskey_content",
+    "parse_line",
+    "parse_varline",
+    "pattern_lib_name",
+    "pdone",
+    "peekcc",
+    "percent_pos",
+    "percentage",
+    "pflushmbc",
+    "pipe_data",
+    "pipe_pos",
+    "plinestart",
+    "polling_ok",
+    "pop_cmd_table",
+    "pos_clear",
+    "pos_from_col",
+    "pos_in_header",
+    "pos_init",
+    "pos_rehead",
+    "pos_shift",
+    "position",
+    "posmark",
+    "postoa",
+    "pr_error",
+    "pr_expand",
+    "pr_longest_line",
+    "pr_string",
+    "pr_usage",
+    "pr_version",
+    "prchar",
+    "prep_hilite",
+    "prev_ifile",
+    "prev_pattern",
+    "prev_pattern_text",
+    "prevgtag",
+    "prevtag",
+    "prewind",
+    "print_done_msg",
+    "prompt",
+    "prompt_message",
+    "propt",
+    "protochar",
+    "prutfchar",
+    "pshift",
+    "pshift_all",
+    "psignals",
+    "put_line",
+    "put_line_hilite",
+    "put_wchar",
+    "putbs",
+    "putchr",
+    "putstr",
+    "pwidth",
+    "query",
+    "query_fraction",
+    "quit",
+    "r#match",
+    "raw_mode",
+    "read_cmdhist",
+    "read_cmdhist2",
+    "readfd",
+    "reedit_ifile",
+    "reget_term_info",
+    "remember_sigpipe",
+    "remove_ansi",
+    "reopen_curr_ifile",
+    "repaint",
+    "repaint_hilite",
+    "resend_last_ansi",
+    "restore_mark",
+    "restore_updown_match",
+    "resume_screen",
+    "rless_signal",
+    "rrshift",
+    "save",
+    "save_cmdhist",
+    "save_curr_ifile",
+    "save_marks",
+    "save_updown_match",
+    "savec",
+    "saven",
+    "scan_eof",
+    "scan_option",
+    "scheme_length",
+    "screen_size_changed",
+    "screen_trashed",
+    "screen_trashed_num",
+    "scrsize",
+    "search",
+    "search_pos",
+    "search_range",
+    "secure_allow",
+    "seek_filesize",
+    "seekable",
+    "set_altfilename",
+    "set_altpipe",
+    "set_attnpos",
+    "set_attr_header",
+    "set_attr_line",
+    "set_charset",
+    "set_color_map",
+    "set_filestate",
+    "set_filter_pattern",
+    "set_header",
+    "set_line_contig_pos",
+    "set_linebuf",
+    "set_mca",
+    "set_mlist",
+    "set_mstimer",
+    "set_open",
+    "set_output",
+    "set_pattern",
+    "set_pfx",
+    "set_status_col",
+    "set_tabs",
+    "set_termio_flags",
+    "set_tk_original",
+    "setfmt",
+    "setmark",
+    "sgr_color",
+    "shell_coption",
+    "shell_quote",
+    "shell_quoten",
+    "shell_unquote",
+    "shellcmd",
+    "shift_visible",
+    "should_clear_after_line",
+    "sigalarm",
+    "signal_message",
+    "sigusr",
+    "sigusr1",
+    "sindex_from_sline",
+    "sindex_from_sline_clipped",
+    "skip_ansi",
+    "skip_columns",
+    "skip_to_null",
+    "skip_uprefix",
+    "skipcond",
+    "skipnsp",
+    "skipsl",
+    "skipsp",
+    "skipspc",
+    "sleep_ms",
+    "special_key_str",
+    "sprefix",
+    "squish_check",
+    "start_delayed_msg",
+    "start_ignoring_input",
+    "start_mca",
+    "step_char",
+    "step_charc",
+    "stop",
+    "stop_ignoring_input",
+    "store_ansi",
+    "store_bs",
+    "store_char",
+    "store_control_char",
+    "store_pos",
+    "store_prchar",
+    "store_string",
+    "store_tab",
+    "subsearch_ok",
+    "supports_ctrl_x",
+    "suspend_screen",
+    "sync_logfile",
+    "tab_spaces",
+    "table_has_stop",
+    "tagsearch",
+    "term_deinit",
+    "term_init",
+    "terminate",
+    "tmodes",
+    "toggle_fraction",
+    "toggle_option",
+    "tput_char_cattr",
+    "tput_color",
+    "tput_fmt",
+    "tput_inmode",
+    "tput_outmode",
+    "tstr",
+    "ttyin_ready",
+    "u_interrupt",
+    "umuldiv",
+    "uncompile_pattern",
+    "undo_osc8",
+    "undo_search",
+    "ungetcc",
+    "ungetcc_back",
+    "ungetcc_back1",
+    "ungetcc_end_command",
+    "ungetsc",
+    "unlink_ifile",
+    "unmark",
+    "unsave_ifile",
+    "update_term",
+    "use_logfile",
+    "utf_len",
+    "utf_skip_to_lead",
+    "valid_osc_intro",
+    "valid_osc_type",
+    "vbell",
+    "version_line",
+    "vlinenum",
+    "wait_message",
+    "wchar_range_get",
+    "wchar_range_table_set",
+    "wherechar",
+    "word_no_match",
+    "write_mlist",
+    "write_mlist_header",
+    "x116mouse_action",
+    "x11mouse_action",
+    "x11mouse_button",
+    "xbuf_add_byte",
+    "xbuf_add_char",
+    "xbuf_add_data",
+    "xbuf_char_data",
+    "xbuf_deinit",
+    "xbuf_init",
+    "xbuf_init_size",
+    "xbuf_pop",
+    "xbuf_reset",
+    "xbuf_set",
+    "xcpy_char",
+    "xcpy_filename"
+  ],
+  "mutable_static_definitions": [
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 87,
+      "column": 1,
+      "context": "",
+      "symbol": "version"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 89,
+      "column": 1,
+      "context": "",
+      "symbol": "quote_all"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 90,
+      "column": 1,
+      "context": "",
+      "symbol": "openquote"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 91,
+      "column": 1,
+      "context": "",
+      "symbol": "closequote"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 92,
+      "column": 1,
+      "context": "",
+      "symbol": "meta_escape"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 94,
+      "column": 1,
+      "context": "",
+      "symbol": "meta_escape_buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 95,
+      "column": 1,
+      "context": "",
+      "symbol": "metachars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 96,
+      "column": 1,
+      "context": "",
+      "symbol": "num_metachars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/bin/lessecho.rs",
+      "line": 97,
+      "column": 1,
+      "context": "",
+      "symbol": "size_metachars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 482,
+      "column": 1,
+      "context": "",
+      "symbol": "ignore_eoi"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 484,
+      "column": 1,
+      "context": "",
+      "symbol": "read_error"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 486,
+      "column": 1,
+      "context": "",
+      "symbol": "thisfile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 487,
+      "column": 1,
+      "context": "",
+      "symbol": "ch_ungotchar"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 488,
+      "column": 1,
+      "context": "",
+      "symbol": "ch_have_ungotchar"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 489,
+      "column": 1,
+      "context": "",
+      "symbol": "maxbufs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ch.rs",
+      "line": 736,
+      "column": 5,
+      "context": "end_logfile",
+      "symbol": "tried"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 462,
+      "column": 1,
+      "context": "",
+      "symbol": "utf_mode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 464,
+      "column": 1,
+      "context": "",
+      "symbol": "charsets"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 599,
+      "column": 1,
+      "context": "",
+      "symbol": "cs_aliases"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 775,
+      "column": 1,
+      "context": "",
+      "symbol": "chardef"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 776,
+      "column": 1,
+      "context": "",
+      "symbol": "binfmt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 777,
+      "column": 1,
+      "context": "",
+      "symbol": "utfbinfmt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 778,
+      "column": 1,
+      "context": "",
+      "symbol": "binattr"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 781,
+      "column": 1,
+      "context": "",
+      "symbol": "user_wide_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 787,
+      "column": 1,
+      "context": "",
+      "symbol": "user_ubin_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 793,
+      "column": 1,
+      "context": "",
+      "symbol": "user_compose_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 799,
+      "column": 1,
+      "context": "",
+      "symbol": "user_prt_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 805,
+      "column": 1,
+      "context": "",
+      "symbol": "user_omit_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 811,
+      "column": 1,
+      "context": "",
+      "symbol": "user_wide_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 815,
+      "column": 1,
+      "context": "",
+      "symbol": "user_ubin_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 819,
+      "column": 1,
+      "context": "",
+      "symbol": "user_compose_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 823,
+      "column": 1,
+      "context": "",
+      "symbol": "user_prt_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 827,
+      "column": 1,
+      "context": "",
+      "symbol": "user_omit_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 1225,
+      "column": 5,
+      "context": "prchar",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 1258,
+      "column": 5,
+      "context": "prutfchar",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 1537,
+      "column": 1,
+      "context": "",
+      "symbol": "compose_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3023,
+      "column": 1,
+      "context": "",
+      "symbol": "compose_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3028,
+      "column": 1,
+      "context": "",
+      "symbol": "ubin_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3070,
+      "column": 1,
+      "context": "",
+      "symbol": "ubin_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3075,
+      "column": 1,
+      "context": "",
+      "symbol": "wide_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3585,
+      "column": 1,
+      "context": "",
+      "symbol": "wide_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3590,
+      "column": 1,
+      "context": "",
+      "symbol": "fmt_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3676,
+      "column": 1,
+      "context": "",
+      "symbol": "fmt_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3681,
+      "column": 1,
+      "context": "",
+      "symbol": "omit_array"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3707,
+      "column": 1,
+      "context": "",
+      "symbol": "omit_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/charset.rs",
+      "line": 3712,
+      "column": 1,
+      "context": "",
+      "symbol": "comb_table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 579,
+      "column": 1,
+      "context": "",
+      "symbol": "pasting"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 581,
+      "column": 1,
+      "context": "",
+      "symbol": "cmdbuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 582,
+      "column": 1,
+      "context": "",
+      "symbol": "cmd_col"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 583,
+      "column": 1,
+      "context": "",
+      "symbol": "prompt_col"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 584,
+      "column": 1,
+      "context": "",
+      "symbol": "cp"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 585,
+      "column": 1,
+      "context": "",
+      "symbol": "cmd_offset"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 586,
+      "column": 1,
+      "context": "",
+      "symbol": "literal"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 587,
+      "column": 1,
+      "context": "",
+      "symbol": "updown_match"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 588,
+      "column": 1,
+      "context": "",
+      "symbol": "have_updown_match"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 589,
+      "column": 1,
+      "context": "",
+      "symbol": "insert_mode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 590,
+      "column": 1,
+      "context": "",
+      "symbol": "in_completion"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 591,
+      "column": 1,
+      "context": "",
+      "symbol": "tk_text"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 592,
+      "column": 1,
+      "context": "",
+      "symbol": "tk_original"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 593,
+      "column": 1,
+      "context": "",
+      "symbol": "tk_ipoint"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 594,
+      "column": 1,
+      "context": "",
+      "symbol": "tk_trial"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 595,
+      "column": 1,
+      "context": "",
+      "symbol": "tk_tlist"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 599,
+      "column": 1,
+      "context": "",
+      "symbol": "openquote"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 601,
+      "column": 1,
+      "context": "",
+      "symbol": "closequote"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 603,
+      "column": 1,
+      "context": "",
+      "symbol": "mlist_search"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 613,
+      "column": 1,
+      "context": "",
+      "symbol": "ml_search"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 616,
+      "column": 1,
+      "context": "",
+      "symbol": "mlist_examine"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 626,
+      "column": 1,
+      "context": "",
+      "symbol": "ml_examine"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 629,
+      "column": 1,
+      "context": "",
+      "symbol": "mlist_shell"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 639,
+      "column": 1,
+      "context": "",
+      "symbol": "ml_shell"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 642,
+      "column": 1,
+      "context": "",
+      "symbol": "curr_mlist"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 643,
+      "column": 1,
+      "context": "",
+      "symbol": "curr_cmdflags"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 644,
+      "column": 1,
+      "context": "",
+      "symbol": "cmd_mbc_buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 645,
+      "column": 1,
+      "context": "",
+      "symbol": "cmd_mbc_buf_len"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/cmdbuf.rs",
+      "line": 646,
+      "column": 1,
+      "context": "",
+      "symbol": "cmd_mbc_buf_index"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 616,
+      "column": 1,
+      "context": "",
+      "symbol": "shellcmd"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 617,
+      "column": 1,
+      "context": "",
+      "symbol": "mca"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 618,
+      "column": 1,
+      "context": "",
+      "symbol": "search_type"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 619,
+      "column": 1,
+      "context": "",
+      "symbol": "last_search_type"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 620,
+      "column": 1,
+      "context": "",
+      "symbol": "number"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 621,
+      "column": 1,
+      "context": "",
+      "symbol": "fraction"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 622,
+      "column": 1,
+      "context": "",
+      "symbol": "curropt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 623,
+      "column": 1,
+      "context": "",
+      "symbol": "opt_lower"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 624,
+      "column": 1,
+      "context": "",
+      "symbol": "optflag"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 625,
+      "column": 1,
+      "context": "",
+      "symbol": "optgetname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 626,
+      "column": 1,
+      "context": "",
+      "symbol": "toppos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 627,
+      "column": 1,
+      "context": "",
+      "symbol": "bottompos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 628,
+      "column": 1,
+      "context": "",
+      "symbol": "save_hshift"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 629,
+      "column": 1,
+      "context": "",
+      "symbol": "save_bs_mode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 630,
+      "column": 1,
+      "context": "",
+      "symbol": "save_proc_backspace"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 631,
+      "column": 1,
+      "context": "",
+      "symbol": "screen_trashed_value"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 632,
+      "column": 1,
+      "context": "",
+      "symbol": "literal_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 633,
+      "column": 1,
+      "context": "",
+      "symbol": "ignoring_input"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 634,
+      "column": 1,
+      "context": "",
+      "symbol": "search_incr_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 638,
+      "column": 1,
+      "context": "",
+      "symbol": "search_incr_hshift"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 639,
+      "column": 1,
+      "context": "",
+      "symbol": "ignoring_input_time"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 640,
+      "column": 1,
+      "context": "",
+      "symbol": "pipe_pos1"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 641,
+      "column": 1,
+      "context": "",
+      "symbol": "pipe_pos2"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 642,
+      "column": 1,
+      "context": "",
+      "symbol": "ungot"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 707,
+      "column": 13,
+      "context": "mca_search1",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 709,
+      "column": 13,
+      "context": "mca_search1",
+      "symbol": "buflen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 1127,
+      "column": 13,
+      "context": "mca_search_char",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/command.rs",
+      "line": 1129,
+      "column": 13,
+      "context": "mca_search_char",
+      "symbol": "buflen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 487,
+      "column": 1,
+      "context": "",
+      "symbol": "cmdtable"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 1404,
+      "column": 1,
+      "context": "",
+      "symbol": "edittable"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 1932,
+      "column": 1,
+      "context": "",
+      "symbol": "dflt_vartable"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 1937,
+      "column": 1,
+      "context": "",
+      "symbol": "list_fcmd_tables"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 1938,
+      "column": 1,
+      "context": "",
+      "symbol": "list_ecmd_tables"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 1939,
+      "column": 1,
+      "context": "",
+      "symbol": "list_var_tables"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 1940,
+      "column": 1,
+      "context": "",
+      "symbol": "list_sysvar_tables"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 2215,
+      "column": 5,
+      "context": "mouse_button_left",
+      "symbol": "last_drag_x"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 2216,
+      "column": 5,
+      "context": "mouse_button_left",
+      "symbol": "last_drag_y"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 2217,
+      "column": 5,
+      "context": "mouse_button_left",
+      "symbol": "last_click_y"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 2333,
+      "column": 5,
+      "context": "x11mouse_action",
+      "symbol": "prev_b"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 2766,
+      "column": 1,
+      "context": "",
+      "symbol": "env_cache_list"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/decode.rs",
+      "line": 2873,
+      "column": 5,
+      "context": "lesskey_text",
+      "symbol": "tables"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/edit.rs",
+      "line": 589,
+      "column": 1,
+      "context": "",
+      "symbol": "fd0"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/edit.rs",
+      "line": 591,
+      "column": 1,
+      "context": "",
+      "symbol": "curr_dev"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/edit.rs",
+      "line": 593,
+      "column": 1,
+      "context": "",
+      "symbol": "curr_ino"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/edit.rs",
+      "line": 749,
+      "column": 5,
+      "context": "check_modeline",
+      "symbol": "pgms"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/filename.rs",
+      "line": 619,
+      "column": 5,
+      "context": "metachars",
+      "symbol": "mchars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 428,
+      "column": 1,
+      "context": "",
+      "symbol": "squished"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 430,
+      "column": 1,
+      "context": "",
+      "symbol": "no_back_scroll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 432,
+      "column": 1,
+      "context": "",
+      "symbol": "forw_prompt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 434,
+      "column": 1,
+      "context": "",
+      "symbol": "first_time"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 436,
+      "column": 1,
+      "context": "",
+      "symbol": "shell_lines"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 438,
+      "column": 1,
+      "context": "",
+      "symbol": "soft_eof"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/forwback.rs",
+      "line": 442,
+      "column": 5,
+      "context": "eof_bell",
+      "symbol": "last_eof_bell"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/help.rs",
+      "line": 5,
+      "column": 1,
+      "context": "",
+      "symbol": "helpdata"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/help.rs",
+      "line": 17595,
+      "column": 1,
+      "context": "",
+      "symbol": "size_helpdata"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ifile.rs",
+      "line": 95,
+      "column": 1,
+      "context": "",
+      "symbol": "anchor"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ifile.rs",
+      "line": 113,
+      "column": 1,
+      "context": "",
+      "symbol": "ifiles"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/jump.rs",
+      "line": 580,
+      "column": 5,
+      "context": "after_header_message",
+      "symbol": "last_msg"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 475,
+      "column": 1,
+      "context": "",
+      "symbol": "linenum"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 476,
+      "column": 1,
+      "context": "",
+      "symbol": "errors"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 477,
+      "column": 1,
+      "context": "",
+      "symbol": "less_version"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 478,
+      "column": 1,
+      "context": "",
+      "symbol": "lesskey_file"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 479,
+      "column": 1,
+      "context": "",
+      "symbol": "cmdnames"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 793,
+      "column": 1,
+      "context": "",
+      "symbol": "editnames"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 967,
+      "column": 5,
+      "context": "tstr",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lesskey_parse.rs",
+      "line": 968,
+      "column": 5,
+      "context": "tstr",
+      "symbol": "tstr_control_k"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 207,
+      "column": 1,
+      "context": "",
+      "symbol": "linebuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 217,
+      "column": 1,
+      "context": "",
+      "symbol": "shifted_ansi"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 223,
+      "column": 1,
+      "context": "",
+      "symbol": "last_ansi"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 229,
+      "column": 1,
+      "context": "",
+      "symbol": "last_ansis"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 235,
+      "column": 1,
+      "context": "",
+      "symbol": "curr_last_ansi"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 236,
+      "column": 1,
+      "context": "",
+      "symbol": "size_linebuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 237,
+      "column": 1,
+      "context": "",
+      "symbol": "line_ansi"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 238,
+      "column": 1,
+      "context": "",
+      "symbol": "ansi_in_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 239,
+      "column": 1,
+      "context": "",
+      "symbol": "ff_starts_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 240,
+      "column": 1,
+      "context": "",
+      "symbol": "line_mark_attr"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 241,
+      "column": 1,
+      "context": "",
+      "symbol": "cshift"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 242,
+      "column": 1,
+      "context": "",
+      "symbol": "hshift"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 244,
+      "column": 1,
+      "context": "",
+      "symbol": "tabstops"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 246,
+      "column": 1,
+      "context": "",
+      "symbol": "ntabstops"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 248,
+      "column": 1,
+      "context": "",
+      "symbol": "tabdefault"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 250,
+      "column": 1,
+      "context": "",
+      "symbol": "highest_hilite"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 252,
+      "column": 1,
+      "context": "",
+      "symbol": "line_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 253,
+      "column": 1,
+      "context": "",
+      "symbol": "line_contig_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 254,
+      "column": 1,
+      "context": "",
+      "symbol": "end_column"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 255,
+      "column": 1,
+      "context": "",
+      "symbol": "right_curr"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 256,
+      "column": 1,
+      "context": "",
+      "symbol": "right_column"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 257,
+      "column": 1,
+      "context": "",
+      "symbol": "overstrike"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 258,
+      "column": 1,
+      "context": "",
+      "symbol": "last_overstrike"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 259,
+      "column": 1,
+      "context": "",
+      "symbol": "is_null_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 260,
+      "column": 1,
+      "context": "",
+      "symbol": "pendc"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 261,
+      "column": 1,
+      "context": "",
+      "symbol": "pendpos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 262,
+      "column": 1,
+      "context": "",
+      "symbol": "end_ansi_chars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 263,
+      "column": 1,
+      "context": "",
+      "symbol": "mid_ansi_chars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 264,
+      "column": 1,
+      "context": "",
+      "symbol": "osc_ansi_chars"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 265,
+      "column": 1,
+      "context": "",
+      "symbol": "osc_ansi_allow_count"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 266,
+      "column": 1,
+      "context": "",
+      "symbol": "osc_ansi_allow"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 268,
+      "column": 1,
+      "context": "",
+      "symbol": "in_osc8_link"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 269,
+      "column": 1,
+      "context": "",
+      "symbol": "in_hilite"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 270,
+      "column": 1,
+      "context": "",
+      "symbol": "clear_after_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 271,
+      "column": 1,
+      "context": "",
+      "symbol": "mbc_buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 272,
+      "column": 1,
+      "context": "",
+      "symbol": "mbc_buf_len"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 273,
+      "column": 1,
+      "context": "",
+      "symbol": "mbc_buf_index"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 274,
+      "column": 1,
+      "context": "",
+      "symbol": "mbc_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 275,
+      "column": 1,
+      "context": "",
+      "symbol": "saved_line_end"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 276,
+      "column": 1,
+      "context": "",
+      "symbol": "saved_end_column"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/line.rs",
+      "line": 277,
+      "column": 1,
+      "context": "",
+      "symbol": "color_map"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/linenum.rs",
+      "line": 427,
+      "column": 1,
+      "context": "",
+      "symbol": "anchor"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/linenum.rs",
+      "line": 434,
+      "column": 1,
+      "context": "",
+      "symbol": "freelist"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/linenum.rs",
+      "line": 435,
+      "column": 1,
+      "context": "",
+      "symbol": "pool"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/linenum.rs",
+      "line": 442,
+      "column": 1,
+      "context": "",
+      "symbol": "spare"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/linenum.rs",
+      "line": 443,
+      "column": 1,
+      "context": "",
+      "symbol": "scanning_eof"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lmsg.rs",
+      "line": 466,
+      "column": 1,
+      "context": "",
+      "symbol": "lmsgs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lmsg.rs",
+      "line": 989,
+      "column": 1,
+      "context": "",
+      "symbol": "lmsg_syms"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lmsg.rs",
+      "line": 2370,
+      "column": 1,
+      "context": "",
+      "symbol": "help_data"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/lmsg.rs",
+      "line": 2372,
+      "column": 1,
+      "context": "",
+      "symbol": "size_help_data"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/mark.rs",
+      "line": 479,
+      "column": 1,
+      "context": "",
+      "symbol": "marks"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/mark.rs",
+      "line": 484,
+      "column": 1,
+      "context": "",
+      "symbol": "marks_modified"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/mark.rs",
+      "line": 486,
+      "column": 1,
+      "context": "",
+      "symbol": "file_marks"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/mark.rs",
+      "line": 612,
+      "column": 5,
+      "context": "getmark",
+      "symbol": "sm"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/optfunc.rs",
+      "line": 555,
+      "column": 1,
+      "context": "",
+      "symbol": "tagoption"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/optfunc.rs",
+      "line": 1472,
+      "column": 5,
+      "context": "opt_emouse",
+      "symbol": "emouse_defs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/option.rs",
+      "line": 444,
+      "column": 1,
+      "context": "",
+      "symbol": "pendopt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/option.rs",
+      "line": 445,
+      "column": 1,
+      "context": "",
+      "symbol": "plusoption"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/option.rs",
+      "line": 448,
+      "column": 5,
+      "context": "opt_desc",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/option.rs",
+      "line": 469,
+      "column": 5,
+      "context": "propt",
+      "symbol": "buf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 438,
+      "column": 1,
+      "context": "",
+      "symbol": "quiet"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 440,
+      "column": 1,
+      "context": "",
+      "symbol": "no_vbell"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 442,
+      "column": 1,
+      "context": "",
+      "symbol": "how_search"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 444,
+      "column": 1,
+      "context": "",
+      "symbol": "top_scroll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 446,
+      "column": 1,
+      "context": "",
+      "symbol": "pr_type"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 448,
+      "column": 1,
+      "context": "",
+      "symbol": "bs_mode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 450,
+      "column": 1,
+      "context": "",
+      "symbol": "know_dumb"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 452,
+      "column": 1,
+      "context": "",
+      "symbol": "quit_at_eof"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 454,
+      "column": 1,
+      "context": "",
+      "symbol": "quit_if_one_screen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 456,
+      "column": 1,
+      "context": "",
+      "symbol": "squeeze"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 458,
+      "column": 1,
+      "context": "",
+      "symbol": "tabstop"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 460,
+      "column": 1,
+      "context": "",
+      "symbol": "back_scroll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 462,
+      "column": 1,
+      "context": "",
+      "symbol": "forw_scroll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 464,
+      "column": 1,
+      "context": "",
+      "symbol": "caseless"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 466,
+      "column": 1,
+      "context": "",
+      "symbol": "linenums"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 468,
+      "column": 1,
+      "context": "",
+      "symbol": "autobuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 470,
+      "column": 1,
+      "context": "",
+      "symbol": "bufspace"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 472,
+      "column": 1,
+      "context": "",
+      "symbol": "ctldisp"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 474,
+      "column": 1,
+      "context": "",
+      "symbol": "force_open"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 476,
+      "column": 1,
+      "context": "",
+      "symbol": "swindow"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 478,
+      "column": 1,
+      "context": "",
+      "symbol": "jump_sline"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 480,
+      "column": 1,
+      "context": "",
+      "symbol": "jump_sline_arg"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 482,
+      "column": 1,
+      "context": "",
+      "symbol": "jump_sline_fraction"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 484,
+      "column": 1,
+      "context": "",
+      "symbol": "shift_count"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 486,
+      "column": 1,
+      "context": "",
+      "symbol": "shift_count_fraction"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 488,
+      "column": 1,
+      "context": "",
+      "symbol": "chopline"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 490,
+      "column": 1,
+      "context": "",
+      "symbol": "wordwrap"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 492,
+      "column": 1,
+      "context": "",
+      "symbol": "no_init"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 494,
+      "column": 1,
+      "context": "",
+      "symbol": "no_keypad"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 496,
+      "column": 1,
+      "context": "",
+      "symbol": "twiddle"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 498,
+      "column": 1,
+      "context": "",
+      "symbol": "show_attn"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 500,
+      "column": 1,
+      "context": "",
+      "symbol": "hilite_target"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 502,
+      "column": 1,
+      "context": "",
+      "symbol": "status_col"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 504,
+      "column": 1,
+      "context": "",
+      "symbol": "use_lessopen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 506,
+      "column": 1,
+      "context": "",
+      "symbol": "quit_on_intr"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 508,
+      "column": 1,
+      "context": "",
+      "symbol": "follow_mode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 510,
+      "column": 1,
+      "context": "",
+      "symbol": "oldbot"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 512,
+      "column": 1,
+      "context": "",
+      "symbol": "opt_use_backslash"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 514,
+      "column": 1,
+      "context": "",
+      "symbol": "rscroll_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 516,
+      "column": 1,
+      "context": "",
+      "symbol": "rscroll_attr"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 518,
+      "column": 1,
+      "context": "",
+      "symbol": "no_hist_dups"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 520,
+      "column": 1,
+      "context": "",
+      "symbol": "emouse"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 522,
+      "column": 1,
+      "context": "",
+      "symbol": "mouse_reverse"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 524,
+      "column": 1,
+      "context": "",
+      "symbol": "xmouse"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 526,
+      "column": 1,
+      "context": "",
+      "symbol": "wheel_lines"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 528,
+      "column": 1,
+      "context": "",
+      "symbol": "perma_marks"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 530,
+      "column": 1,
+      "context": "",
+      "symbol": "linenum_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 532,
+      "column": 1,
+      "context": "",
+      "symbol": "status_col_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 534,
+      "column": 1,
+      "context": "",
+      "symbol": "incr_search"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 536,
+      "column": 1,
+      "context": "",
+      "symbol": "use_color"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 538,
+      "column": 1,
+      "context": "",
+      "symbol": "want_filesize"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 540,
+      "column": 1,
+      "context": "",
+      "symbol": "time_want_filesize"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 542,
+      "column": 1,
+      "context": "",
+      "symbol": "status_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 544,
+      "column": 1,
+      "context": "",
+      "symbol": "header_lines"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 546,
+      "column": 1,
+      "context": "",
+      "symbol": "header_cols"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 548,
+      "column": 1,
+      "context": "",
+      "symbol": "nonum_headers"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 550,
+      "column": 1,
+      "context": "",
+      "symbol": "nosearch_header_lines"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 552,
+      "column": 1,
+      "context": "",
+      "symbol": "nosearch_header_cols"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 554,
+      "column": 1,
+      "context": "",
+      "symbol": "redraw_on_quit"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 556,
+      "column": 1,
+      "context": "",
+      "symbol": "def_search_type"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 558,
+      "column": 1,
+      "context": "",
+      "symbol": "exit_F_on_close"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 560,
+      "column": 1,
+      "context": "",
+      "symbol": "modelines"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 562,
+      "column": 1,
+      "context": "",
+      "symbol": "show_preproc_error"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 564,
+      "column": 1,
+      "context": "",
+      "symbol": "proc_backspace"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 566,
+      "column": 1,
+      "context": "",
+      "symbol": "proc_tab"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 568,
+      "column": 1,
+      "context": "",
+      "symbol": "proc_return"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 570,
+      "column": 1,
+      "context": "",
+      "symbol": "match_shift"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 572,
+      "column": 1,
+      "context": "",
+      "symbol": "no_paste"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 574,
+      "column": 1,
+      "context": "",
+      "symbol": "no_edit_warn"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 576,
+      "column": 1,
+      "context": "",
+      "symbol": "stop_on_form_feed"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 578,
+      "column": 1,
+      "context": "",
+      "symbol": "past_eof"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 580,
+      "column": 1,
+      "context": "",
+      "symbol": "match_shift_fraction"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 583,
+      "column": 1,
+      "context": "",
+      "symbol": "intr_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 586,
+      "column": 1,
+      "context": "",
+      "symbol": "first_cmd_at_prompt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 589,
+      "column": 1,
+      "context": "",
+      "symbol": "autosave"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 591,
+      "column": 1,
+      "context": "",
+      "symbol": "end_prompt"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 594,
+      "column": 1,
+      "context": "",
+      "symbol": "hilite_search"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 596,
+      "column": 1,
+      "context": "",
+      "symbol": "less_is_more"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 598,
+      "column": 1,
+      "context": "",
+      "symbol": "a_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 602,
+      "column": 1,
+      "context": "",
+      "symbol": "b_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 606,
+      "column": 1,
+      "context": "",
+      "symbol": "B__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 610,
+      "column": 1,
+      "context": "",
+      "symbol": "c_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 614,
+      "column": 1,
+      "context": "",
+      "symbol": "d_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 618,
+      "column": 1,
+      "context": "",
+      "symbol": "D__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 622,
+      "column": 1,
+      "context": "",
+      "symbol": "e_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 626,
+      "column": 1,
+      "context": "",
+      "symbol": "f_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 630,
+      "column": 1,
+      "context": "",
+      "symbol": "F__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 634,
+      "column": 1,
+      "context": "",
+      "symbol": "g_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 638,
+      "column": 1,
+      "context": "",
+      "symbol": "h_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 642,
+      "column": 1,
+      "context": "",
+      "symbol": "i_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 646,
+      "column": 1,
+      "context": "",
+      "symbol": "j_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 650,
+      "column": 1,
+      "context": "",
+      "symbol": "J__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 654,
+      "column": 1,
+      "context": "",
+      "symbol": "k_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 658,
+      "column": 1,
+      "context": "",
+      "symbol": "ks_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 662,
+      "column": 1,
+      "context": "",
+      "symbol": "kc_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 666,
+      "column": 1,
+      "context": "",
+      "symbol": "K__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 670,
+      "column": 1,
+      "context": "",
+      "symbol": "L__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 674,
+      "column": 1,
+      "context": "",
+      "symbol": "m_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 678,
+      "column": 1,
+      "context": "",
+      "symbol": "n_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 682,
+      "column": 1,
+      "context": "",
+      "symbol": "o_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 686,
+      "column": 1,
+      "context": "",
+      "symbol": "O__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 690,
+      "column": 1,
+      "context": "",
+      "symbol": "p_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 694,
+      "column": 1,
+      "context": "",
+      "symbol": "P__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 698,
+      "column": 1,
+      "context": "",
+      "symbol": "q2_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 702,
+      "column": 1,
+      "context": "",
+      "symbol": "q_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 708,
+      "column": 1,
+      "context": "",
+      "symbol": "r_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 712,
+      "column": 1,
+      "context": "",
+      "symbol": "s_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 716,
+      "column": 1,
+      "context": "",
+      "symbol": "S__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 720,
+      "column": 1,
+      "context": "",
+      "symbol": "t_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 724,
+      "column": 1,
+      "context": "",
+      "symbol": "T__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 728,
+      "column": 1,
+      "context": "",
+      "symbol": "u_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 732,
+      "column": 1,
+      "context": "",
+      "symbol": "V__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 736,
+      "column": 1,
+      "context": "",
+      "symbol": "w_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 740,
+      "column": 1,
+      "context": "",
+      "symbol": "x_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 744,
+      "column": 1,
+      "context": "",
+      "symbol": "X__optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 748,
+      "column": 1,
+      "context": "",
+      "symbol": "y_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 752,
+      "column": 1,
+      "context": "",
+      "symbol": "z_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 756,
+      "column": 1,
+      "context": "",
+      "symbol": "quote_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 760,
+      "column": 1,
+      "context": "",
+      "symbol": "tilde_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 764,
+      "column": 1,
+      "context": "",
+      "symbol": "query_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 768,
+      "column": 1,
+      "context": "",
+      "symbol": "pound_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 772,
+      "column": 1,
+      "context": "",
+      "symbol": "keypad_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 776,
+      "column": 1,
+      "context": "",
+      "symbol": "oldbot_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 780,
+      "column": 1,
+      "context": "",
+      "symbol": "follow_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 784,
+      "column": 1,
+      "context": "",
+      "symbol": "use_backslash_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 788,
+      "column": 1,
+      "context": "",
+      "symbol": "rscroll_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 792,
+      "column": 1,
+      "context": "",
+      "symbol": "nohistdups_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 796,
+      "column": 1,
+      "context": "",
+      "symbol": "mouse_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 800,
+      "column": 1,
+      "context": "",
+      "symbol": "emouse_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 804,
+      "column": 1,
+      "context": "",
+      "symbol": "mouse_reverse_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 808,
+      "column": 1,
+      "context": "",
+      "symbol": "wheel_lines_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 812,
+      "column": 1,
+      "context": "",
+      "symbol": "perma_marks_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 816,
+      "column": 1,
+      "context": "",
+      "symbol": "linenum_width_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 820,
+      "column": 1,
+      "context": "",
+      "symbol": "status_col_width_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 824,
+      "column": 1,
+      "context": "",
+      "symbol": "incr_search_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 828,
+      "column": 1,
+      "context": "",
+      "symbol": "use_color_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 832,
+      "column": 1,
+      "context": "",
+      "symbol": "want_filesize_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 836,
+      "column": 1,
+      "context": "",
+      "symbol": "time_want_filesize_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 840,
+      "column": 1,
+      "context": "",
+      "symbol": "status_line_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 844,
+      "column": 1,
+      "context": "",
+      "symbol": "header_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 848,
+      "column": 1,
+      "context": "",
+      "symbol": "no_paste_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 852,
+      "column": 1,
+      "context": "",
+      "symbol": "form_feed_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 856,
+      "column": 1,
+      "context": "",
+      "symbol": "past_eof_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 860,
+      "column": 1,
+      "context": "",
+      "symbol": "no_edit_warn_optname2"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 864,
+      "column": 1,
+      "context": "",
+      "symbol": "no_edit_warn_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 870,
+      "column": 1,
+      "context": "",
+      "symbol": "nonum_headers_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 874,
+      "column": 1,
+      "context": "",
+      "symbol": "nosearch_headers_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 878,
+      "column": 1,
+      "context": "",
+      "symbol": "nosearch_header_lines_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 882,
+      "column": 1,
+      "context": "",
+      "symbol": "nosearch_header_cols_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 886,
+      "column": 1,
+      "context": "",
+      "symbol": "redraw_on_quit_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 890,
+      "column": 1,
+      "context": "",
+      "symbol": "search_type_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 894,
+      "column": 1,
+      "context": "",
+      "symbol": "exit_F_on_close_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 898,
+      "column": 1,
+      "context": "",
+      "symbol": "modelines_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 902,
+      "column": 1,
+      "context": "",
+      "symbol": "no_vbell_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 906,
+      "column": 1,
+      "context": "",
+      "symbol": "intr_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 910,
+      "column": 1,
+      "context": "",
+      "symbol": "wordwrap_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 914,
+      "column": 1,
+      "context": "",
+      "symbol": "show_preproc_error_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 918,
+      "column": 1,
+      "context": "",
+      "symbol": "proc_backspace_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 922,
+      "column": 1,
+      "context": "",
+      "symbol": "proc_tab_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 926,
+      "column": 1,
+      "context": "",
+      "symbol": "proc_return_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 930,
+      "column": 1,
+      "context": "",
+      "symbol": "match_shift_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 934,
+      "column": 1,
+      "context": "",
+      "symbol": "first_cmd_at_prompt_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 938,
+      "column": 1,
+      "context": "",
+      "symbol": "autosave_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 942,
+      "column": 1,
+      "context": "",
+      "symbol": "hilite_target_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 946,
+      "column": 1,
+      "context": "",
+      "symbol": "end_prompt_optname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/opttbl.rs",
+      "line": 950,
+      "column": 1,
+      "context": "",
+      "symbol": "option"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 117,
+      "column": 1,
+      "context": "",
+      "symbol": "use_poll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 118,
+      "column": 1,
+      "context": "",
+      "symbol": "any_data"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 119,
+      "column": 1,
+      "context": "",
+      "symbol": "waiting_for_data"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 121,
+      "column": 1,
+      "context": "",
+      "symbol": "getting_one_screen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 123,
+      "column": 1,
+      "context": "",
+      "symbol": "waiting_for_data_delay"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 124,
+      "column": 1,
+      "context": "",
+      "symbol": "screenfill_ms"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/os.rs",
+      "line": 325,
+      "column": 5,
+      "context": "signal_message",
+      "symbol": "sigbuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/output.rs",
+      "line": 420,
+      "column": 1,
+      "context": "",
+      "symbol": "errmsgs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/output.rs",
+      "line": 422,
+      "column": 1,
+      "context": "",
+      "symbol": "prompting"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/output.rs",
+      "line": 424,
+      "column": 1,
+      "context": "",
+      "symbol": "need_clr"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/output.rs",
+      "line": 485,
+      "column": 1,
+      "context": "",
+      "symbol": "obuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/output.rs",
+      "line": 486,
+      "column": 1,
+      "context": "",
+      "symbol": "ob"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/output.rs",
+      "line": 487,
+      "column": 1,
+      "context": "",
+      "symbol": "outfd"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 496,
+      "column": 1,
+      "context": "",
+      "symbol": "every_first_cmd"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 499,
+      "column": 1,
+      "context": "",
+      "symbol": "new_file"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 501,
+      "column": 1,
+      "context": "",
+      "symbol": "is_tty"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 503,
+      "column": 1,
+      "context": "",
+      "symbol": "curr_ifile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 506,
+      "column": 1,
+      "context": "",
+      "symbol": "old_ifile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 508,
+      "column": 1,
+      "context": "",
+      "symbol": "initial_scrpos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 510,
+      "column": 1,
+      "context": "",
+      "symbol": "start_attnpos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 512,
+      "column": 1,
+      "context": "",
+      "symbol": "end_attnpos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 514,
+      "column": 1,
+      "context": "",
+      "symbol": "wscroll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 516,
+      "column": 1,
+      "context": "",
+      "symbol": "progname"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 517,
+      "column": 1,
+      "context": "",
+      "symbol": "quitting"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 519,
+      "column": 1,
+      "context": "",
+      "symbol": "dohelp"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 521,
+      "column": 1,
+      "context": "",
+      "symbol": "init_header"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 524,
+      "column": 1,
+      "context": "",
+      "symbol": "no_config"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 526,
+      "column": 1,
+      "context": "",
+      "symbol": "secure_allow_features"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 527,
+      "column": 1,
+      "context": "",
+      "symbol": "logfile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 529,
+      "column": 1,
+      "context": "",
+      "symbol": "force_logfile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 531,
+      "column": 1,
+      "context": "",
+      "symbol": "namelogfile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 534,
+      "column": 1,
+      "context": "",
+      "symbol": "editor"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 536,
+      "column": 1,
+      "context": "",
+      "symbol": "editproto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 538,
+      "column": 1,
+      "context": "",
+      "symbol": "less_start_time"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 540,
+      "column": 1,
+      "context": "",
+      "symbol": "one_screen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 543,
+      "column": 5,
+      "context": "init_secure",
+      "symbol": "security_features"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/pager.rs",
+      "line": 924,
+      "column": 5,
+      "context": "quit",
+      "symbol": "save_status"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/position.rs",
+      "line": 50,
+      "column": 1,
+      "context": "",
+      "symbol": "table"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/position.rs",
+      "line": 51,
+      "column": 1,
+      "context": "",
+      "symbol": "table_size"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 74,
+      "column": 1,
+      "context": "",
+      "symbol": "s_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 79,
+      "column": 1,
+      "context": "",
+      "symbol": "m_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 84,
+      "column": 1,
+      "context": "",
+      "symbol": "M_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 92,
+      "column": 1,
+      "context": "",
+      "symbol": "e_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 100,
+      "column": 1,
+      "context": "",
+      "symbol": "h_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 105,
+      "column": 1,
+      "context": "",
+      "symbol": "w_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 108,
+      "column": 1,
+      "context": "",
+      "symbol": "more_proto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 113,
+      "column": 1,
+      "context": "",
+      "symbol": "prproto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 116,
+      "column": 1,
+      "context": "",
+      "symbol": "eprproto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 119,
+      "column": 1,
+      "context": "",
+      "symbol": "eqproto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 122,
+      "column": 1,
+      "context": "",
+      "symbol": "hproto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 125,
+      "column": 1,
+      "context": "",
+      "symbol": "wproto"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 128,
+      "column": 1,
+      "context": "",
+      "symbol": "message"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 129,
+      "column": 1,
+      "context": "",
+      "symbol": "mp"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/prompt.rs",
+      "line": 130,
+      "column": 1,
+      "context": "",
+      "symbol": "longest_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 178,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_visual_bell"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 179,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_eol_clear"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 180,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_deinit"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 181,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_init"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 182,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_resume"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 183,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_suspend"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 184,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_e_bracketed_paste"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 186,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_s_bracketed_paste"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 188,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_e_mousecap"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 189,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_s_mousecap"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 190,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_e_keypad"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 191,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_s_keypad"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 192,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_s_in"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 193,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_bl_out"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 194,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_bl_in"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 195,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_b_out"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 196,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_b_in"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 197,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_u_out"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 198,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_lower_left"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 199,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_move"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 200,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_u_in"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 201,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_clear"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 202,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_ll"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 203,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_eos_clear"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 204,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_addline"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 205,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_return"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 206,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_home"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 207,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_backspace"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 208,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_s_out"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 209,
+      "column": 1,
+      "context": "",
+      "symbol": "attrbits"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 210,
+      "column": 1,
+      "context": "",
+      "symbol": "attrcolor"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 211,
+      "column": 1,
+      "context": "",
+      "symbol": "termcap_debug"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 212,
+      "column": 1,
+      "context": "",
+      "symbol": "no_alt_screen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 213,
+      "column": 1,
+      "context": "",
+      "symbol": "above_mem"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 214,
+      "column": 1,
+      "context": "",
+      "symbol": "below_mem"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 215,
+      "column": 1,
+      "context": "",
+      "symbol": "term_init_done"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 216,
+      "column": 1,
+      "context": "",
+      "symbol": "term_init_ever"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 218,
+      "column": 1,
+      "context": "",
+      "symbol": "in_raw_mode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 220,
+      "column": 1,
+      "context": "",
+      "symbol": "auto_wrap"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 222,
+      "column": 1,
+      "context": "",
+      "symbol": "defer_wrap"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 224,
+      "column": 1,
+      "context": "",
+      "symbol": "erase_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 226,
+      "column": 1,
+      "context": "",
+      "symbol": "erase2_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 228,
+      "column": 1,
+      "context": "",
+      "symbol": "kill_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 230,
+      "column": 1,
+      "context": "",
+      "symbol": "werase_char"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 232,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_height"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 234,
+      "column": 1,
+      "context": "",
+      "symbol": "sc_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 236,
+      "column": 1,
+      "context": "",
+      "symbol": "bo_e_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 238,
+      "column": 1,
+      "context": "",
+      "symbol": "bo_s_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 240,
+      "column": 1,
+      "context": "",
+      "symbol": "ul_s_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 242,
+      "column": 1,
+      "context": "",
+      "symbol": "ul_e_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 244,
+      "column": 1,
+      "context": "",
+      "symbol": "so_s_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 246,
+      "column": 1,
+      "context": "",
+      "symbol": "so_e_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 248,
+      "column": 1,
+      "context": "",
+      "symbol": "bl_e_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 250,
+      "column": 1,
+      "context": "",
+      "symbol": "bl_s_width"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 252,
+      "column": 1,
+      "context": "",
+      "symbol": "can_goto_line"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 254,
+      "column": 1,
+      "context": "",
+      "symbol": "missing_cap"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 256,
+      "column": 1,
+      "context": "",
+      "symbol": "kent"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 258,
+      "column": 1,
+      "context": "",
+      "symbol": "kent_mapped"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 260,
+      "column": 1,
+      "context": "",
+      "symbol": "term_addrs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 262,
+      "column": 1,
+      "context": "",
+      "symbol": "full_screen"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 264,
+      "column": 1,
+      "context": "",
+      "symbol": "attrmode"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 299,
+      "column": 5,
+      "context": "raw_mode",
+      "symbol": "save_term"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 309,
+      "column": 5,
+      "context": "raw_mode",
+      "symbol": "saved_term"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 338,
+      "column": 1,
+      "context": "",
+      "symbol": "hardcopy"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 348,
+      "column": 9,
+      "context": "ltget_env",
+      "symbol": "envs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 572,
+      "column": 5,
+      "context": "special_key_str",
+      "symbol": "tbuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 953,
+      "column": 1,
+      "context": "",
+      "symbol": "costcount"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 1024,
+      "column": 5,
+      "context": "get_term_info",
+      "symbol": "sbuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/screen.rs",
+      "line": 1346,
+      "column": 5,
+      "context": "reget_term_info",
+      "symbol": "sbuf"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 681,
+      "column": 1,
+      "context": "",
+      "symbol": "hide_hilite"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 682,
+      "column": 1,
+      "context": "",
+      "symbol": "prep_startpos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 683,
+      "column": 1,
+      "context": "",
+      "symbol": "prep_endpos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 684,
+      "column": 1,
+      "context": "",
+      "symbol": "last_search_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 686,
+      "column": 1,
+      "context": "",
+      "symbol": "last_search_ifile"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 689,
+      "column": 1,
+      "context": "",
+      "symbol": "header_start_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 691,
+      "column": 1,
+      "context": "",
+      "symbol": "header_end_pos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 692,
+      "column": 1,
+      "context": "",
+      "symbol": "search_wrapped"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 694,
+      "column": 1,
+      "context": "",
+      "symbol": "search_incr_start"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 696,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_linepos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 698,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_match_start"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 699,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_match_end"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 700,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_params_start"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 701,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_params_end"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 702,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_uri_start"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 703,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_uri_end"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 704,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_text_start"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 705,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_text_end"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 706,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_uri"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 708,
+      "column": 1,
+      "context": "",
+      "symbol": "osc8_search_param"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 711,
+      "column": 1,
+      "context": "",
+      "symbol": "hilite_anchor"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 717,
+      "column": 1,
+      "context": "",
+      "symbol": "filter_anchor"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 723,
+      "column": 1,
+      "context": "",
+      "symbol": "filter_infos"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 724,
+      "column": 1,
+      "context": "",
+      "symbol": "search_info"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 731,
+      "column": 1,
+      "context": "",
+      "symbol": "is_caseless"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/search.rs",
+      "line": 2416,
+      "column": 5,
+      "context": "osc8_open",
+      "symbol": "env_name_pfx"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/signal.rs",
+      "line": 42,
+      "column": 1,
+      "context": "",
+      "symbol": "sigs"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 551,
+      "column": 1,
+      "context": "",
+      "symbol": "ztags"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 554,
+      "column": 1,
+      "context": "",
+      "symbol": "tags"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 557,
+      "column": 1,
+      "context": "",
+      "symbol": "total"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 558,
+      "column": 1,
+      "context": "",
+      "symbol": "curseq"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 559,
+      "column": 1,
+      "context": "",
+      "symbol": "taglist"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 565,
+      "column": 1,
+      "context": "",
+      "symbol": "curtag"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/tags.rs",
+      "line": 1042,
+      "column": 1,
+      "context": "",
+      "symbol": "circular"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/ttyin.rs",
+      "line": 20,
+      "column": 1,
+      "context": "",
+      "symbol": "tty"
+    },
+    {
+      "kind": "mutable_static_definition",
+      "file": "src/version.rs",
+      "line": 5,
+      "column": 1,
+      "context": "",
+      "symbol": "version"
+    }
+  ],
+  "raw_inventory": {
+    "path": "/home/john/Code/rless/compat/.runs/m0-inventory-2/syntax-inventory.json",
+    "sha256": "13c32fe2d29ba831a9cf66da4afa9e3eea338996c5569e969f27ebea7003c64a"
+  },
+  "source_fingerprint": "efcc4720122540efc852963d80a14571cf2d931db2aa409f697b6ce8b438fc3f",
+  "manual_register": "docs/safety/ownership-register.json"
+}

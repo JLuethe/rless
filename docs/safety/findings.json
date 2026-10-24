@@ -139,6 +139,49 @@
       "fix_commit": null,
       "regression": null,
       "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-001",
+      "title": "GNU regex match-register allocations are not released",
+      "status": "open",
+      "classification": "reproduced LeakSanitizer finding",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.2",
+      "requirement_ids": [
+        "SAFE-FFI-003",
+        "SAFE-MEM-005"
+      ],
+      "github_issue": "https://github.com/JLuethe/rless/issues/9",
+      "reproducer": "docs/safety/reproducers/m0-leak-regex.json",
+      "diagnostic": "docs/safety/reproducers/m0-leak-regex.log",
+      "diagnostic_sha256": "e3cff5f867bb2b47cca134dac7c7f591c4966b97e1e59f9d321eb211f1fcdfec",
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-002",
+      "title": "Startup --cmd saved string loses ownership after queueing",
+      "status": "open",
+      "classification": "reproduced LeakSanitizer finding",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-STATE-001",
+        "SAFE-STATE-005",
+        "SAFE-MEM-005"
+      ],
+      "github_issue": "https://github.com/JLuethe/rless/issues/10",
+      "reproducer": "docs/safety/reproducers/m0-leak-command.json",
+      "diagnostic": "docs/safety/reproducers/m0-leak-command.log",
+      "diagnostic_sha256": "fcfe1a9d0e15089029d25a5ee61bc6201995f68812a8fc7742afda049b8c31b7",
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
     }
   ]
 }

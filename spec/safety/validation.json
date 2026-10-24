@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "specification_version": "0.2.0",
-  "recorded_at_utc": "2026-10-24T17:13:02.160177+00:00",
+  "recorded_at_utc": "2026-10-24T17:51:36.481410+00:00",
   "scope": "Specification structure and traceability only; no safety implementation or runtime test result is asserted.",
   "specification_checks_passed": true,
   "runtime_safety_verified": false,
@@ -24,7 +24,7 @@
   ],
   "planned_in_process_fuzz_targets": 15,
   "planned_native_event_scenario_groups": 12,
-  "checked_local_links": 76,
+  "checked_local_links": 79,
   "dependency_graph": "acyclic (requirements and delivery packets)",
   "packet_requirement_coverage": "43 of 43",
   "original_frozen_corpus": "hashes unchanged",
@@ -40,7 +40,7 @@
     "spec/safety/campaign-plan.md": "cb581a7a78656e2bf1f8beebc2a95a24db7e694a01dd871dccde7b7caaff8ef1",
     "spec/safety/campaigns.json": "f87c209e8ac6861461e4a8ccf2a231c2d71dc5effadb353a65ee5121c63c94bf",
     "spec/safety/execution-plan.md": "b1cfb13ea7f0d662bf9d0ad8dbbca8429cef6317310b1b59818bae6948927f50",
-    "spec/safety/github-tracking.json": "4f7c584e64853c633b8f68d9234b7816dcf8afea45773762b51e8d5ff89db694",
+    "spec/safety/github-tracking.json": "e30d9d3fcda83a341dacd43346dcf76a345f96271e04f4e1dcb7e7a509f68afd",
     "spec/safety/migration.md": "45605de5534e57a9c2992f18d2c01788b09babedf1387999a66ddd5e74ef444b",
     "spec/safety/requirements.json": "a7747557d63bbc71c91247b1d7dc4787ec960950f8f10b9245fed05c39f91e87",
     "spec/safety/work-packages.json": "edf66a6dd111f526f80faffc2001d5cc3dca7442eeb2ab5a16dc51afff770da8"
