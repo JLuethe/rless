@@ -40,7 +40,7 @@ def main():
         references={p.name:sha(p) for p in reference.iterdir()},runtime_safety_verified=False)
     # Extract package payload/version/signed-metadata manifests from the exact image
     # ID. Every rebuild can compare these, even if image creation timestamps differ.
-    for name in ('packages.tsv','packages.sha256','apt-metadata.sha256','runtime.txt'):
+    for name in ('packages.tsv','packages.sha256','apt-metadata.sha256','runtime.txt','python-wheels.sha256','python-packages.txt'):
         value=subprocess.check_output(['podman','run','--rm','--network=none',image_id,'cat','/opt/rless-abi/'+name])
         (out/name).write_bytes(value)
     record['environment_manifests']={p.name:sha(p) for p in out.iterdir() if p.is_file()}
@@ -49,7 +49,7 @@ def main():
         '-v',str(inputs)+':/input:ro','-v',str(work)+':/work:rw','-v',str(reference)+':/reference:ro',
         '-v',str(args.rust_toolchain.resolve())+':/opt/rust:ro',
         '-v',str(args.registry_cache.resolve())+':/cache/registry:ro',
-        '--env','PATH=/opt/rust/bin:/usr/bin:/bin','--env','CARGO_HOME=/work/cargo',
+        '--env','PATH=/opt/rless-python/bin:/opt/rust/bin:/usr/bin:/bin','--env','CARGO_HOME=/work/cargo',
         '--env','CARGO_NET_OFFLINE=true','--env','HOME=/work/home',image_id,
         'python3','-c',"import tarfile; t=tarfile.open('/input/source.tar'); s=t.extractfile('tools/safety/glibc241/inside.py').read(); exec(compile(s,'inside.py','exec'), {'__name__':'__main__'})"]
     record['command']=command

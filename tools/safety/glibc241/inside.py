@@ -27,6 +27,19 @@ def main():
     (WORK / 'cargo/registry').symlink_to('/cache/registry')
     with tarfile.open('/input/source.tar') as archive:
         archive.extractall(SOURCE, filter='data')
+    import importlib.metadata
+    import pyte
+    python_dependencies={}
+    for line in (SOURCE/'tools/compat/requirements.txt').read_text().splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):
+            continue
+        name,expected=line.strip().split('==')
+        actual=importlib.metadata.version(name)
+        if actual!=expected:
+            raise ValueError('observer dependency mismatch: '+name+' '+actual+' != '+expected)
+        python_dependencies[name]=actual
+    if 'blink' not in pyte.screens.Char._fields:
+        raise ValueError('terminal observer schema differs from the frozen profile')
     runtime = subprocess.check_output(['getconf','GNU_LIBC_VERSION'],text=True).strip()
     if runtime != 'glibc 2.41':
         raise ValueError('wrong runtime: ' + runtime)
@@ -39,7 +52,8 @@ def main():
        for name,command in [('rustc',['rustc','-vV']),('cargo',['cargo','-V']),
         ('cc',['cc','--version']),('linker',['ld','--version'])]}
     (REPORT/'environment.json').write_text(json.dumps(dict(runtime=runtime,header_probe=probe,
-        versions=versions,packages=Path('/opt/rless-abi/packages.tsv').read_text()),indent=2)+'\n')
+        versions=versions,python_dependencies=python_dependencies,
+        packages=Path('/opt/rless-abi/packages.tsv').read_text()),indent=2)+'\n')
     run('native-baseline',['python3','tools/check.py','--reference','/reference/less','--stress-rounds','100','--install-check'])
     summaries=list((SOURCE/'compat/.runs').glob('verification-*/summary.json'))
     if len(summaries)!=1:

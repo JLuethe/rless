@@ -5,6 +5,9 @@ loader, compiler/linker, GNU regex and terminfo. It never replaces the host libc
 The Containerfile pins the base OCI digest and signed Debian/security snapshot
 `20261020T213255Z`. It retains package versions, downloaded payload checksums and
 apt metadata checksums inside `/opt/rless-abi/`.
+The observer uses the repository's exact Python versions in a separate venv,
+with SHA-256-verified wheel payloads. Debian's older pyte has a different terminal
+schema; it must not be substituted or worked around by dropping recorded fields.
 
 ```sh
 podman build --pull=never -t localhost/rless-glibc241:20261020 \
