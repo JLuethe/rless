@@ -1,0 +1,32 @@
+diff --git i/c2rust-transpile/src/c_ast/iterators.rs w/c2rust-transpile/src/c_ast/iterators.rs
+index 123c377..f0aea13 100644
+--- i/c2rust-transpile/src/c_ast/iterators.rs
++++ w/c2rust-transpile/src/c_ast/iterators.rs
+@@ -405,6 +405,7 @@ pub fn immediate_children_all_types(context: &TypedAstContext, s_or_e: SomeId) -
+ pub struct DFExpr<'context> {
+     context: &'context TypedAstContext,
+     stack: Vec<SomeId>,
++    visited: HashSet<SomeId>,
+ }
+ 
+ impl<'context> DFExpr<'context> {
+@@ -412,6 +413,7 @@ pub fn new(context: &'context TypedAstContext, start: SomeId) -> Self {
+         DFExpr {
+             context,
+             stack: vec![start],
++            visited: HashSet::new(),
+         }
+     }
+     pub fn prune(&mut self, n: usize) {
+@@ -423,7 +425,10 @@ pub fn prune(&mut self, n: usize) {
+ impl<'context> Iterator for DFExpr<'context> {
+     type Item = SomeId;
+     fn next(&mut self) -> Option<Self::Item> {
+-        let result = self.stack.pop();
++        let result = loop {
++            let id = self.stack.pop()?;
++            if self.visited.insert(id) { break Some(id); }
++        };
+ 
+         if let Some(i) = result {
+             // Compute list of immediate children

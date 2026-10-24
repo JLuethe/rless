@@ -1,0 +1,916 @@
+{
+  "schema_version": 1,
+  "specification_version": "0.1.0",
+  "scope": "Planned acceptance families with named variants; no tests or runtime results are asserted by this file.",
+  "profiles": {
+    "NATIVE": "Pinned normal Linux x86_64/glibc debug/release process, component and actual PTY/event tests.",
+    "ASAN": "Pinned instrumented Rust/native-shim profile with AddressSanitizer and symbolized reports.",
+    "LSAN": "Leak-detection profile plus explicit live-resource cycle accounting; may share an ASan job if both configurations and detectors are verified.",
+    "MIRI": "Pinned interpreter profile for supported pure Rust components; native exclusions require separate evidence.",
+    "FUZZ": "Coverage-guided bounded in-process targets and declared state/fault models; native system tests are reported separately.",
+    "ABI": "Native/Rust layout, constants, ownership and callback probes for the supported host headers/libraries.",
+    "STATIC": "Compiler, lint/AST/generated-code and type/visibility enforcement checks.",
+    "AUDIT": "Recorded invariant/trust/evidence review; independent review is required for final unsafe sign-off."
+  },
+  "scenarios": [
+    {
+      "id": "SAFECASE-BASE-001",
+      "requirement_ids": [
+        "SAFE-BASE-001"
+      ],
+      "status": "planned",
+      "variants": [
+        "all 809 cases on debug and release",
+        "clean install and packaged-source rebuild",
+        "negative comparator mutation"
+      ],
+      "oracle": "Exact existing observations, statuses and effects remain valid; a wrong observation is rejected.",
+      "required_profiles": [
+        "NATIVE"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-BASE-002",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "planned",
+      "variants": [
+        "arbitrary byte/filename inputs",
+        "malformed configuration and key packets",
+        "short I/O and native failure",
+        "resource exhaustion with cleanup available"
+      ],
+      "oracle": "No memory-safety violation; documented recovery/exit and terminal state, with explicit native/kernel trust limits.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "LSAN",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-BASE-003",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "planned",
+      "variants": [
+        "reproduce source snapshot fingerprint",
+        "inventory macro-expanded unsafe and duplicate declarations",
+        "change one build/test input"
+      ],
+      "oracle": "Snapshot and inventory are reproducible; changed or incomplete evidence cannot retain a passing label.",
+      "required_profiles": [
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-001",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "planned",
+      "variants": [
+        "safe API inspection",
+        "attempt direct core native import",
+        "raw handle escape attempt",
+        "inventory symbol categories"
+      ],
+      "oracle": "Only the allowlisted private boundary calls native code; no pager logic or old C pager supplies application behavior.",
+      "required_profiles": [
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-002",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "planned",
+      "variants": [
+        "C/Rust size/alignment/offset probes",
+        "native constant and signedness probes",
+        "opaque object lifecycle",
+        "unsupported target build"
+      ],
+      "oracle": "Canonical ABI identities match the tested host; generated/binding provenance is recorded and unsupported ABIs are rejected.",
+      "required_profiles": [
+        "ABI",
+        "ASAN",
+        "STATIC"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-003",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "planned",
+      "variants": [
+        "backreferences and leftmost-longest/submatches",
+        "empty/zero-length/invalid patterns",
+        "large native length conversion",
+        "compile failure/drop and repeated replacement",
+        "native global syntax restoration"
+      ],
+      "oracle": "GNU semantics and source byte mappings match; ranges are validated and native regex ownership/global settings are sound.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "LSAN",
+        "ABI",
+        "FUZZ"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-004",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "planned",
+      "variants": [
+        "null/-1 capability results",
+        "scratch string overwritten by next native call",
+        "terminal reinitialization",
+        "partial native read and callback output failure"
+      ],
+      "oracle": "No stale capability/view/context survives; only initialized bytes are exposed and geometry/error handling stays valid.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "ABI"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-005",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "planned",
+      "variants": [
+        "all sentinel representations",
+        "callback retains/finishes context",
+        "reentrant callback rejection",
+        "native failure followed by cleanup failure"
+      ],
+      "oracle": "Native values are checked before constructing Rust types; callback lifetime, aliasing, errno and primary errors have documented behavior.",
+      "required_profiles": [
+        "ASAN",
+        "MIRI",
+        "ABI",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-006",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "planned",
+      "variants": [
+        "unsafe block/item inventory",
+        "macro-expanded compile checks",
+        "missing safety proof negative fixture",
+        "independent invariant review"
+      ],
+      "oracle": "Each remaining unsafe operation has a verified allowlist entry and caller proof; blanket attributes or module moves cannot satisfy the gate.",
+      "required_profiles": [
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-FFI-007",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "planned",
+      "variants": [
+        "locked dependency and header inventory",
+        "loaded native library identity",
+        "vendored patch/advisory review",
+        "bitfield dependency retirement or explicit boundary review"
+      ],
+      "oracle": "Trusted dependency scope is reproducible and explicit; unresolved relevant findings and unreviewed native assumptions block completion.",
+      "required_profiles": [
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-001",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "planned",
+      "variants": [
+        "empty buffer and reset/pop",
+        "growth and reuse",
+        "self-copy and overlap semantics",
+        "NUL/invalid UTF-8/CRLF/no-final-newline"
+      ],
+      "oracle": "One owner releases storage; byte content and public behavior are preserved with no unsafe operations in the converted module.",
+      "required_profiles": [
+        "NATIVE",
+        "MIRI",
+        "FUZZ",
+        "STATIC"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-002",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "planned",
+      "variants": [
+        "zero and near-usize size arithmetic",
+        "negative/unknown positions",
+        "native length narrowing",
+        "real sparse seek beyond 4 GiB"
+      ],
+      "oracle": "Invalid sizes/conversions fail before mutation; valid large offsets retain their distinct domain and never become unchecked indexes.",
+      "required_profiles": [
+        "NATIVE",
+        "MIRI",
+        "FUZZ"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-003",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "planned",
+      "variants": [
+        "grow while locations are retained",
+        "replace filter/history storage",
+        "truncate/evict retained input",
+        "compile-fail borrow invalidation with a valid counterpart"
+      ],
+      "oracle": "No stale borrow crosses mutation; valid code reacquires checked locations and the compiler rejects invalid aliasing for the intended reason.",
+      "required_profiles": [
+        "MIRI",
+        "ASAN",
+        "STATIC"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-004",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "planned",
+      "variants": [
+        "truncated/incomplete grammar productions",
+        "invalid/partial UTF and terminal packets",
+        "nested and malformed prompt/config syntax",
+        "zero-length transformations",
+        "lessecho numeric/quote/metachar options with byte-valued arguments"
+      ],
+      "oracle": "Parsing progresses, requests more bytes or returns the specified error; mappings and output remain correct without panic or out-of-range access.",
+      "required_profiles": [
+        "NATIVE",
+        "MIRI",
+        "FUZZ"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-005",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "planned",
+      "variants": [
+        "native initialization succeeds/fails partially",
+        "ownership transfer and copying",
+        "repeated close/drop",
+        "native error string/capability replacement"
+      ],
+      "oracle": "Every allocation/resource has one matching release authority; no allocator mismatch, dangling native view or double release.",
+      "required_profiles": [
+        "ASAN",
+        "LSAN",
+        "ABI",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-006",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "planned",
+      "variants": [
+        "first page before pipe EOF",
+        "finite retention and unavailable backward data",
+        "append/incomplete final line",
+        "truncate/rotation/flush repaint"
+      ],
+      "oracle": "Source offsets, retained ranges, views and highlights remain valid; ordinary paging is incremental and explicit scans retain their required blocking behavior.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "FUZZ"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-007",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "planned",
+      "variants": [
+        "fail each logical reserve/create boundary",
+        "failure before and after commit staging",
+        "format/native allocation failure",
+        "failure during cleanup"
+      ],
+      "oracle": "Previous state remains valid or a controlled cleanup/exit occurs; no partial filter/history mutation, raw terminal leak or double release.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "LSAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-MEM-008",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "planned",
+      "variants": [
+        "compile every converted memory/parser module",
+        "attempt forbidden unsafe/FFI escape",
+        "audit legacy aliases after caller migration"
+      ],
+      "oracle": "Core compiler restrictions hold and no raw ownership/legacy alias remains outside the reviewed boundary.",
+      "required_profiles": [
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-001",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "planned",
+      "variants": [
+        "SIGINT during filter replacement/allocation",
+        "SIGUSR1 during command queue growth",
+        "SIGTERM during active allocation or output"
+      ],
+      "oracle": "The asynchronous path only notifies; allocations, freeing, display, configuration lookup and cleanup occur in main-loop context after borrows end.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-002",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "planned",
+      "variants": [
+        "notification before wait registration",
+        "notification between readiness check and blocking syscall",
+        "notification during and after read",
+        "nested terminal/file reads",
+        "immediate command after resize"
+      ],
+      "oracle": "No lost wakeup or consumed future key; correct operation cancellation, errno and mask restoration.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-003",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "planned",
+      "variants": [
+        "SIGINT and -K",
+        "SIGTERM and SIGHUP",
+        "SIGQUIT",
+        "SIGUSR1 repeated delivered actions",
+        "timer cancel/rearm and stale expiry",
+        "simultaneous defined event orders"
+      ],
+      "oracle": "Reference transitions, command bytes, bells and statuses (including 2 and 15) match; no extra application event loss or stale timer action.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-004",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "planned",
+      "variants": [
+        "foreground stop and continuation",
+        "secure-disabled stop",
+        "signal during editor/shell/URI handoff",
+        "child exec failure",
+        "orphan-group negative control"
+      ],
+      "oracle": "An actual stop is observed with restored terminal state; resume/handoff restores correct modes and ownership exactly once.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-005",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "planned",
+      "variants": [
+        "inherited default SIGPIPE",
+        "inherited ignored SIGPIPE",
+        "setup failure at each registration stage",
+        "reinitialization and child exec"
+      ],
+      "oracle": "Inherited behavior and setup ordering match; no descriptor, mask or pending-event leak reaches unrelated operations/children.",
+      "required_profiles": [
+        "NATIVE",
+        "LSAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-006",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "planned",
+      "variants": [
+        "notification channel saturation",
+        "nested delivery",
+        "counter/generation limit",
+        "notification during drain/rearm"
+      ],
+      "oracle": "Handler never blocks or touches pager state; required events are retained or a reviewed controlled resource failure is reported without silent loss.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-007",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "planned",
+      "variants": [
+        "Default/Ignore/Handler dispositions",
+        "sigaction and mask failures",
+        "timer registration failure",
+        "callback error"
+      ],
+      "oracle": "No sentinel is treated as a callable Rust pointer; partial registration rolls back, errors propagate and C callbacks do not unwind.",
+      "required_profiles": [
+        "NATIVE",
+        "ABI",
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-SIG-008",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "planned",
+      "variants": [
+        "FIFO open with no writer",
+        "signal immediately before entering open",
+        "writer connects without writing then closes",
+        "repeated cancel/open cycles",
+        "initial pipe read with writer held open"
+      ],
+      "oracle": "Cancellation reaches the event owner without a later key/write; native failure/status and file-effect ordering match and no abandoned resources accumulate.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "LSAN",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-001",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "planned",
+      "variants": [
+        "cross-subsystem command actions",
+        "search/filter with configuration changes",
+        "nested effects during redraw",
+        "audit all former mutable state owners"
+      ],
+      "oracle": "One owner and bounded borrows determine mutation; no hidden singleton or overlapping mutable callback access remains.",
+      "required_profiles": [
+        "MIRI",
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-002",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "planned",
+      "variants": [
+        "delete/recreate a file handle",
+        "evict and reuse buffer slots",
+        "replace pattern/mark targets",
+        "generation overflow and unknown positions"
+      ],
+      "oracle": "Stale handles never become valid again; domain conversions and reference invalidation behavior remain correct.",
+      "required_profiles": [
+        "NATIVE",
+        "MIRI",
+        "FUZZ"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-003",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "planned",
+      "variants": [
+        "normal/error/catchable-signal exit",
+        "partial terminal initialization",
+        "suspend/resume and child return",
+        "unwind with a live terminal guard",
+        "repeated shutdown and cleanup error"
+      ],
+      "oracle": "Required termios and escape modes restore independently; explicit shutdown attempts cleanup once and Drop fallback never panics.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-004",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "planned",
+      "variants": [
+        "file/preprocessor/log switching",
+        "repeated child failures/cancels",
+        "history/marks save failure",
+        "borrowed versus owned standard descriptors"
+      ],
+      "oracle": "Correct contexts release once; child/FD counts remain bounded and persistence/secure/overwrite effects match the contract.",
+      "required_profiles": [
+        "NATIVE",
+        "LSAN",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-005",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "planned",
+      "variants": [
+        "system/local/process/argv precedence",
+        "unset and empty configuration",
+        "startup/runtime option transitions",
+        "signal action and per-file command lookup timing"
+      ],
+      "oracle": "Lookup and state transition order match less 712; immutable option metadata does not point at mutable globals.",
+      "required_profiles": [
+        "NATIVE",
+        "MIRI",
+        "FUZZ"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-006",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "planned",
+      "variants": [
+        "malformed external input",
+        "injected internal unwind",
+        "native callback error and contained panic",
+        "secondary error during terminal cleanup"
+      ],
+      "oracle": "External errors do not panic; no unwind crosses C, errors remain observable and fallback terminal cleanup is effective.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-STATE-007",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "planned",
+      "variants": [
+        "worker late result after cancel",
+        "concurrent notification during shutdown",
+        "repeat worker create/cancel",
+        "forbidden Send/Sync or static-reference escape"
+      ],
+      "oracle": "Workers transfer owned data/results; no shared mutable pager state, stale result adoption or abandoned resources.",
+      "required_profiles": [
+        "NATIVE",
+        "MIRI",
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-001",
+      "requirement_ids": [
+        "SAFE-VER-001"
+      ],
+      "status": "planned",
+      "variants": [
+        "all native regression profiles",
+        "changed expected observation negative control",
+        "clean install and source archive"
+      ],
+      "oracle": "All applicable baseline fields match and artifacts are bound to actual passing source; frozen observations remain immutable.",
+      "required_profiles": [
+        "NATIVE"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-002",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "planned",
+      "variants": [
+        "instrumented component tests",
+        "instrumented real PTY/event/fault cases",
+        "expected-nonzero case with injected sanitizer finding",
+        "symbolizer/native instrumentation manifest"
+      ],
+      "oracle": "Instrumentation runs rather than silently falling back, preserves reports/status, and detects findings despite application error exits.",
+      "required_profiles": [
+        "ASAN",
+        "LSAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-003",
+      "requirement_ids": [
+        "SAFE-VER-003"
+      ],
+      "status": "planned",
+      "variants": [
+        "converted pure components under several seeds",
+        "unsupported native operation",
+        "invalid alias/provenance probe",
+        "safe normal counterpart"
+      ],
+      "oracle": "Miri checks are enabled; required core coverage passes, unsupported native work is labeled and has separate evidence rather than a false pass.",
+      "required_profiles": [
+        "MIRI"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-004",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "planned",
+      "variants": [
+        "all independent fuzz families",
+        "seed/mutation coverage accounting",
+        "minimized crash/hang/behavior differences",
+        "controlled helper/network boundaries"
+      ],
+      "oracle": "Each family has real engine coverage, reproducible seeds/results and valid oracles; subprocess-only execution is not mislabeled as core coverage guidance.",
+      "required_profiles": [
+        "FUZZ",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-005",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "planned",
+      "variants": [
+        "all declared fault injection hooks",
+        "signal at each transaction/wait edge",
+        "callback and cleanup errors",
+        "test backend versus actual syscall comparison"
+      ],
+      "oracle": "Every hook has a deterministic trigger and rollback/cleanup oracle; test-only behavior is absent from shipped builds.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "MIRI"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-006",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "planned",
+      "variants": [
+        "all real recovery sequences",
+        "100 repeated races/cancel cycles at release",
+        "FD/worker/child/live allocation accounting",
+        "large sparse input and pipe retention"
+      ],
+      "oracle": "No deadlocks, stale state or unbounded live resources; exact native behavior and actual stop/terminal recovery are observed.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "LSAN"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-007",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "planned",
+      "variants": [
+        "missing/empty/unsupported lane",
+        "stale binary/source fingerprint",
+        "minimized finding and rerun record",
+        "tool/version/corpus/coverage provenance"
+      ],
+      "oracle": "Evidence states and fingerprints are complete and truthful; skipped/missing checks and stale payloads cannot be passing evidence.",
+      "required_profiles": [
+        "STATIC",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-008",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "planned",
+      "variants": [
+        "per-change budgets",
+        "scheduled integration budgets",
+        "final release fuzz/event floors",
+        "real-clock and declared controlled-clock runs"
+      ],
+      "oracle": "Recorded counts and CPU durations meet the specified floors on the final relevant inputs; stalls/timeouts and coverage limits remain visible.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "MIRI",
+        "FUZZ",
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-009",
+      "requirement_ids": [
+        "SAFE-VER-009"
+      ],
+      "status": "planned",
+      "variants": [
+        "all requirements have current evidence",
+        "safe core and reviewed remaining boundary",
+        "clean artifact hash matching",
+        "independent review and scope statement"
+      ],
+      "oracle": "No unresolved application safety finding or required evidence gap; completion claim states native trust and supported profile without implying universal proof.",
+      "required_profiles": [
+        "AUDIT"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    },
+    {
+      "id": "SAFECASE-VER-010",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "planned",
+      "variants": [
+        "known ASan/LSan defect probes",
+        "known Miri ownership violation",
+        "forbidden unsafe compile error with valid counterpart",
+        "wrong screen/mode/status/bell/effect/helper output"
+      ],
+      "oracle": "Each detector rejects its intended defect for the intended reason; missing tools and unrelated build failures cannot satisfy a negative control.",
+      "required_profiles": [
+        "NATIVE",
+        "ASAN",
+        "LSAN",
+        "MIRI",
+        "STATIC"
+      ],
+      "evidence_status": "not-verified",
+      "implementation_path": null
+    }
+  ]
+}

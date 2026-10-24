@@ -1,0 +1,288 @@
+{
+  "schema_version": 2,
+  "reason": "Command-ready checkpoints wait until input is consumed and the child blocks; the URI helper checkpoint now observes its completed RETURN prompt instead of an intermediate blank prompt row.",
+  "reference": {
+    "commit": "7f46e9ff46216f3e560cd1f41ddf3b36b11eec0e",
+    "binary_sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+    "repetitions": 10
+  },
+  "candidate_repetitions": 10,
+  "checkpoints": {
+    "uri-handler": {
+      "previous_sha256": "6feb1908db4bcc2a09e97a755c1f2972b64b3ff68a402b798530671f54573637",
+      "expected": {
+        "status": 0,
+        "checkpoints": [
+          {
+            "rows": [
+              "preface                                                                         ",
+              "LINK                                                                            ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "Link: file:///tmp/fixture  (press RETURN)                                       "
+            ],
+            "styles": [
+              [
+                1,
+                0,
+                4,
+                {
+                  "fg": "default",
+                  "bg": "default",
+                  "bold": false,
+                  "italics": false,
+                  "underscore": true,
+                  "strikethrough": false,
+                  "reverse": true,
+                  "blink": false
+                }
+              ],
+              [
+                23,
+                0,
+                41,
+                {
+                  "fg": "default",
+                  "bg": "default",
+                  "bold": false,
+                  "italics": false,
+                  "underscore": false,
+                  "strikethrough": false,
+                  "reverse": true,
+                  "blink": false
+                }
+              ]
+            ],
+            "cursor": [
+              23,
+              41,
+              false
+            ],
+            "private_modes": [
+              2004
+            ],
+            "modes": [
+              224,
+              800,
+              64128
+            ],
+            "bells": 0,
+            "osc": [
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7",
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7",
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7",
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7"
+            ],
+            "hyperlinks": [
+              [
+                1,
+                0,
+                4,
+                "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ=="
+              ]
+            ]
+          },
+          {
+            "rows": [
+              "LINK                                                                            ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "ordinary                                                                        ",
+              "!{ROOT}/handler file:///tmp/fixture                           ",
+              "link done  (press RETURN)                                                       "
+            ],
+            "styles": [
+              [
+                0,
+                0,
+                4,
+                {
+                  "fg": "default",
+                  "bg": "default",
+                  "bold": false,
+                  "italics": false,
+                  "underscore": true,
+                  "strikethrough": false,
+                  "reverse": true,
+                  "blink": false
+                }
+              ]
+            ],
+            "cursor": [
+              23,
+              25,
+              false
+            ],
+            "private_modes": [],
+            "modes": [
+              224,
+              800
+            ],
+            "bells": 0,
+            "osc": [
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7",
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7",
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7",
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+              "ODs7"
+            ],
+            "hyperlinks": [
+              [
+                0,
+                0,
+                4,
+                "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ=="
+              ]
+            ]
+          }
+        ],
+        "final_terminal": {
+          "rows": [
+            "preface                                                                         ",
+            "LINK                                                                            ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "ordinary                                                                        ",
+            "                                                                                "
+          ],
+          "styles": [
+            [
+              1,
+              0,
+              4,
+              {
+                "fg": "default",
+                "bg": "default",
+                "bold": false,
+                "italics": false,
+                "underscore": true,
+                "strikethrough": false,
+                "reverse": true,
+                "blink": false
+              }
+            ]
+          ],
+          "cursor": [
+            23,
+            0,
+            false
+          ],
+          "private_modes": [],
+          "modes": [
+            224,
+            800
+          ],
+          "bells": 0,
+          "osc": [
+            "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+            "ODs7",
+            "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+            "ODs7",
+            "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+            "ODs7",
+            "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+            "ODs7"
+          ],
+          "hyperlinks": [
+            [
+              1,
+              0,
+              4,
+              "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ=="
+            ]
+          ]
+        },
+        "termios_restored": true,
+        "files": {
+          "handler": {
+            "sha256": "325a80f43f681b4a597c14901c7e423e040ac11c3c272831f0774043a4602b40",
+            "mode": 448,
+            "bytes": 42
+          },
+          "helper.log": {
+            "sha256": "f6d5faabb27795b28ce6fe32a5290f12f0b066319a34abfcbe1d3357e1dac13e",
+            "mode": 384,
+            "bytes": 20
+          },
+          "input.txt": {
+            "sha256": "5cffe2647ffbafedab7c66b67727db717a5f9852bff6c8fb212157fe1421b799",
+            "mode": 384,
+            "bytes": 946
+          },
+          "second.txt": {
+            "sha256": "9b298e5828c0ba33425b78c16db8fa1d341021883041d4f98473f44c678e490a",
+            "mode": 384,
+            "bytes": 5292
+          },
+          "tags": {
+            "sha256": "13342a3d7134fc3539e6aba8a74b2e1e5a24338dd4b541aaae8e23dd1e6740e1",
+            "mode": 384,
+            "bytes": 18
+          }
+        }
+      }
+    }
+  }
+}

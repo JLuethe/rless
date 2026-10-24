@@ -1,0 +1,1255 @@
+{
+  "schema_version": 1,
+  "specification_version": "0.1.0",
+  "scope": "Safety migration specification; statuses describe design, not implementation conformance.",
+  "milestone_semantics": "Owning delivery phase; recurring checks remain required through M5. M2 leaf progress does not close whole-core M3/M5 requirements.",
+  "requirements": [
+    {
+      "id": "SAFE-BASE-001",
+      "title": "Compatibility and scope",
+      "workstream": 0,
+      "contract": "spec/safety/README.md",
+      "anchor": "safe-base-001-compatibility-and-scope",
+      "milestone": "M0",
+      "depends_on": [],
+      "compatibility_parents": [
+        "CLI-01",
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "IO-04",
+        "NAV-01",
+        "NAV-02",
+        "NAV-03",
+        "FILE-01",
+        "FILE-02",
+        "SEARCH-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "DISPLAY-04",
+        "PROMPT-01",
+        "EDIT-01",
+        "CONFIG-01",
+        "CONFIG-02",
+        "CONFIG-03",
+        "CONFIG-04",
+        "FOLLOW-01",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "SEC-01",
+        "SEC-02",
+        "MORE-01",
+        "EXIT-01",
+        "LEGACY-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-BASE-001"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-BASE-002",
+      "title": "Failure and trust model",
+      "workstream": 0,
+      "contract": "spec/safety/README.md",
+      "anchor": "safe-base-002-failure-and-trust-model",
+      "milestone": "M0",
+      "depends_on": [
+        "SAFE-BASE-001"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-01",
+        "IO-03",
+        "TERM-02",
+        "SEARCH-02"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-BASE-002"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-BASE-003",
+      "title": "Inventory and evidence",
+      "workstream": 0,
+      "contract": "spec/safety/README.md",
+      "anchor": "safe-base-003-inventory-and-evidence",
+      "milestone": "M0",
+      "depends_on": [
+        "SAFE-BASE-001",
+        "SAFE-BASE-002"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-01",
+        "IO-03",
+        "TERM-02",
+        "SEARCH-02"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-BASE-003"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-001",
+      "title": "Boundary allowlist",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-001-boundary-allowlist",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-BASE-003",
+        "SAFE-STATE-001"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-001"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-002",
+      "title": "Canonical ABI definitions",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-002-canonical-abi-definitions",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-FFI-001"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-002"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-003",
+      "title": "GNU regex ownership and semantics",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-003-gnu-regex-ownership-and-semantics",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-FFI-002",
+        "SAFE-MEM-005"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-003"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-004",
+      "title": "Terminal and capability lifetimes",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-004-terminal-and-capability-lifetimes",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-FFI-002",
+        "SAFE-STATE-003"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-004"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-005",
+      "title": "Sentinels callbacks and errors",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-005-sentinels-callbacks-and-errors",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-FFI-002",
+        "SAFE-SIG-007"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-005"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-006",
+      "title": "Unsafe proof records and compiler enforcement",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-006-unsafe-proof-records-and-compiler-enforcement",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-FFI-005"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-006"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-FFI-007",
+      "title": "Native and vendored trust inventory",
+      "workstream": 4,
+      "contract": "spec/safety/04-ffi.md",
+      "anchor": "safe-ffi-007-native-and-vendored-trust-inventory",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-FFI-002"
+      ],
+      "compatibility_parents": [
+        "SEARCH-02",
+        "TERM-01",
+        "TERM-02",
+        "TERM-03",
+        "IO-01",
+        "IO-03",
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-007"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-001",
+      "title": "Owned byte storage",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-001-owned-byte-storage",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-002"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-001"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-002",
+      "title": "Size arithmetic and coordinate domains",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-002-size-arithmetic-and-coordinate-domains",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-BASE-002"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-002"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-003",
+      "title": "Borrow lifetimes and growth",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-003-borrow-lifetimes-and-growth",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-001"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-003"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-004",
+      "title": "Safe parsers and text transformations",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-004-safe-parsers-and-text-transformations",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-001"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-004"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-005",
+      "title": "Matching allocator ownership",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-005-matching-allocator-ownership",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-005"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-006",
+      "title": "Streaming retention and stable views",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-006-streaming-retention-and-stable-views",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-003",
+        "SAFE-STATE-002"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-006"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-007",
+      "title": "Allocation failure and transaction boundaries",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-007-allocation-failure-and-transaction-boundaries",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-001"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-007"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-MEM-008",
+      "title": "Enforced safe application memory code",
+      "workstream": 2,
+      "contract": "spec/safety/02-memory.md",
+      "anchor": "safe-mem-008-enforced-safe-application-memory-code",
+      "milestone": "M5",
+      "depends_on": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-FFI-006"
+      ],
+      "compatibility_parents": [
+        "IO-01",
+        "IO-02",
+        "IO-03",
+        "DISPLAY-01",
+        "DISPLAY-02",
+        "DISPLAY-03",
+        "EDIT-01",
+        "SEARCH-02",
+        "SEARCH-03",
+        "CONFIG-01",
+        "NAV-02",
+        "PROMPT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-008"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-001",
+      "title": "Minimal signal bridge",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-001-minimal-signal-bridge",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-007"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-001"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-002",
+      "title": "No lost wakeups or consumed future input",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-002-no-lost-wakeups-or-consumed-future-input",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-008"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-002"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-003",
+      "title": "Signal transitions and event accounting",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-003-signal-transitions-and-event-accounting",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-001"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-003"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-004",
+      "title": "Suspension and terminal handoff",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-004-suspension-and-terminal-handoff",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-002",
+        "SAFE-SIG-003"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-004"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-005",
+      "title": "Startup and inherited dispositions",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-005-startup-and-inherited-dispositions",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-007"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-005"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-006",
+      "title": "Reentrancy and notification exhaustion",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-006-reentrancy-and-notification-exhaustion",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-001"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-006"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-007",
+      "title": "Typed dispositions and registration failures",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-007-typed-dispositions-and-registration-failures",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-007"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-SIG-008",
+      "title": "Blocking open and backend feasibility",
+      "workstream": 1,
+      "contract": "spec/safety/01-signals.md",
+      "anchor": "safe-sig-008-blocking-open-and-backend-feasibility",
+      "milestone": "M1",
+      "depends_on": [
+        "SAFE-SIG-001"
+      ],
+      "compatibility_parents": [
+        "TERM-01",
+        "TERM-02",
+        "IO-03",
+        "FOLLOW-01",
+        "EDIT-01",
+        "CONFIG-04",
+        "EXIT-01",
+        "SEC-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-008"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-001",
+      "title": "One application state owner",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-001-one-application-state-owner",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-001",
+        "SAFE-SIG-001"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-001"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-002",
+      "title": "Typed positions and resource identifiers",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-002-typed-positions-and-resource-identifiers",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-MEM-002"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-002"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-003",
+      "title": "Terminal session owner",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-003-terminal-session-owner",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-STATE-001",
+        "SAFE-SIG-004"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-003"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-004",
+      "title": "Files children and persistence ownership",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-004-files-children-and-persistence-ownership",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-STATE-001",
+        "SAFE-MEM-005"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-004"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-005",
+      "title": "Configuration and command state",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-005-configuration-and-command-state",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-STATE-001",
+        "SAFE-MEM-004"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-005"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-006",
+      "title": "Panics errors and callbacks",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-006-panics-errors-and-callbacks",
+      "milestone": "M4",
+      "depends_on": [
+        "SAFE-STATE-003",
+        "SAFE-FFI-005"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-006"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-STATE-007",
+      "title": "Thread and reentrancy policy",
+      "workstream": 3,
+      "contract": "spec/safety/03-state.md",
+      "anchor": "safe-state-007-thread-and-reentrancy-policy",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-STATE-001",
+        "SAFE-SIG-008"
+      ],
+      "compatibility_parents": [
+        "CLI-02",
+        "CLI-03",
+        "CLI-04",
+        "FILE-01",
+        "NAV-03",
+        "SEARCH-03",
+        "CONFIG-02",
+        "CONFIG-03",
+        "TERM-02",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-STATE-007"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-001",
+      "title": "Behavioral regression lane",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-001-behavioral-regression-lane",
+      "milestone": "M0",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-001"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-002",
+      "title": "Instrumented native profiles",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-002-instrumented-native-profiles",
+      "milestone": "M0",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-002"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-003",
+      "title": "Miri component lane",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-003-miri-component-lane",
+      "milestone": "M2",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-003"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-004",
+      "title": "Coverage guided fuzzing",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-004-coverage-guided-fuzzing",
+      "milestone": "M2",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-004"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-005",
+      "title": "Deterministic fault and event injection",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-005-deterministic-fault-and-event-injection",
+      "milestone": "M2",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-005"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-006",
+      "title": "Native recovery and resource conservation",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-006-native-recovery-and-resource-conservation",
+      "milestone": "M3",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-006"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-007",
+      "title": "Evidence format and tool pins",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-007-evidence-format-and-tool-pins",
+      "milestone": "M0",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-007"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-008",
+      "title": "Continuous and release campaigns",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-008-continuous-and-release-campaigns",
+      "milestone": "M5",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-008"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-009",
+      "title": "Release decision",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-009-release-decision",
+      "milestone": "M5",
+      "depends_on": [
+        "SAFE-BASE-001",
+        "SAFE-BASE-002",
+        "SAFE-BASE-003",
+        "SAFE-FFI-001",
+        "SAFE-FFI-002",
+        "SAFE-FFI-003",
+        "SAFE-FFI-004",
+        "SAFE-FFI-005",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007",
+        "SAFE-MEM-001",
+        "SAFE-MEM-002",
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-MEM-005",
+        "SAFE-MEM-006",
+        "SAFE-MEM-007",
+        "SAFE-MEM-008",
+        "SAFE-SIG-001",
+        "SAFE-SIG-002",
+        "SAFE-SIG-003",
+        "SAFE-SIG-004",
+        "SAFE-SIG-005",
+        "SAFE-SIG-006",
+        "SAFE-SIG-007",
+        "SAFE-SIG-008",
+        "SAFE-STATE-001",
+        "SAFE-STATE-002",
+        "SAFE-STATE-003",
+        "SAFE-STATE-004",
+        "SAFE-STATE-005",
+        "SAFE-STATE-006",
+        "SAFE-STATE-007",
+        "SAFE-VER-001",
+        "SAFE-VER-002",
+        "SAFE-VER-003",
+        "SAFE-VER-004",
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-007",
+        "SAFE-VER-008",
+        "SAFE-VER-010"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-009"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    },
+    {
+      "id": "SAFE-VER-010",
+      "title": "Test detector and oracle negative controls",
+      "workstream": 5,
+      "contract": "spec/safety/05-verification.md",
+      "anchor": "safe-ver-010-test-detector-and-oracle-negative-controls",
+      "milestone": "M0",
+      "depends_on": [
+        "SAFE-BASE-003"
+      ],
+      "compatibility_parents": [
+        "CLI-01",
+        "IO-03",
+        "DISPLAY-02",
+        "SEARCH-02",
+        "TERM-02",
+        "SEC-01",
+        "EXIT-01"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-010"
+      ],
+      "status": "specified",
+      "evidence_status": "not-verified"
+    }
+  ]
+}

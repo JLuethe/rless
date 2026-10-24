@@ -1,0 +1,456 @@
+{
+  "recorded_at_utc": "2026-10-24T07:26:25.267053+00:00",
+  "result": "All native build, clean-install, packaged-source and expanded test checks passed.",
+  "scope": "Linux x86_64/glibc unsafe translated baseline; no universal equivalence or memory-safety claim.",
+  "source_head": "f9346eee9624d3614fdaa5296dfa886f6f81f913",
+  "source_state": "Uncommitted changes on implement/less-712-rust; no push/publication performed.",
+  "verification_summary": {
+    "started_at_utc": "2026-10-24T07:20:43.258788+00:00",
+    "passed": true,
+    "steps": [
+      {
+        "name": "format",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "rust-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "rust-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "observer",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "corpus",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "negative-candidate",
+        "returncode": 1,
+        "expected_returncode": 1,
+        "passed": true
+      },
+      {
+        "name": "acceptance-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "acceptance-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "reference",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "integrations-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "job-control-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "helpers-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-debug-712",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-debug-20261023",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "integrations-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "job-control-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "helpers-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-release-712",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-release-20261023",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "clean-install",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "acceptance-installed",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      }
+    ],
+    "binaries": {
+      "debug": {
+        "path": "/home/john/Code/rless/target/debug/rless",
+        "sha256": "f306b47d835b99f9560d32226984cdf5d88ee1c9ed946a1981454b8d5793cd4e",
+        "companion_sha256": "0e8963bfd3e3ae9d7faeae7ca7d06d3cfc08ccf0d1716649ec1baf14a41645b1"
+      },
+      "release": {
+        "path": "/home/john/Code/rless/target/release/rless",
+        "sha256": "8188fe99befa448f79d224fb25ce41e2e22410573a2954b3f3b5941fc907dca0",
+        "companion_sha256": "407f9eb7b465dc3ae74a926e902e66aea96457962f1fef1bb9d0d471f5762aab"
+      }
+    },
+    "build_and_test_inputs_sha256": "ec8d75ab7342e76b4bf90c60ab0644cf3231959c73833bae5408084729b19961",
+    "helpers": {
+      "osc8_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+    },
+    "finished_at_utc": "2026-10-24T07:23:13.546252+00:00"
+  },
+  "acceptance": {
+    "acceptance-debug": {
+      "binary": "/home/john/Code/rless/target/debug/rless",
+      "sha256": "f306b47d835b99f9560d32226984cdf5d88ee1c9ed946a1981454b8d5793cd4e",
+      "executed": 809,
+      "passed": 809,
+      "failed": 0,
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    },
+    "acceptance-release": {
+      "binary": "/home/john/Code/rless/target/release/rless",
+      "sha256": "8188fe99befa448f79d224fb25ce41e2e22410573a2954b3f3b5941fc907dca0",
+      "executed": 809,
+      "passed": 809,
+      "failed": 0,
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    },
+    "reference": {
+      "binary": "/home/john/Code/rless-env/less-reference/less",
+      "sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+      "executed": 809,
+      "passed": 809,
+      "failed": 0,
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    },
+    "acceptance-installed": {
+      "binary": "/home/john/Code/rless/compat/.runs/verification-oftza30h/installed/bin/rless",
+      "sha256": "8188fe99befa448f79d224fb25ce41e2e22410573a2954b3f3b5941fc907dca0",
+      "executed": 809,
+      "passed": 809,
+      "failed": 0,
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    }
+  },
+  "packaged_source_acceptance": {
+    "sha256": "b4ec2f0b9a4ff559b6d2b139e1afa7ed5d1e80faa4f7f7555e0bac9aa3753ab9",
+    "executed": 809,
+    "passed": 809,
+    "failed": 0,
+    "families": {
+      "options": {
+        "executed": 230,
+        "passed": 230,
+        "failed": 0,
+        "errors": []
+      },
+      "behavior": {
+        "executed": 467,
+        "passed": 467,
+        "failed": 0,
+        "errors": []
+      },
+      "interactions": {
+        "executed": 108,
+        "passed": 108,
+        "failed": 0,
+        "errors": []
+      },
+      "integration": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "errors": []
+      }
+    }
+  },
+  "packaged_source_inputs": {
+    "passed": true,
+    "sha256": "ec8d75ab7342e76b4bf90c60ab0644cf3231959c73833bae5408084729b19961"
+  },
+  "rust_tests": {
+    "debug": 7,
+    "release": 7,
+    "extracted_source_release": 7
+  },
+  "observer_tests": 6,
+  "stress": {
+    "total_comparisons": 2832,
+    "per_run": {
+      "debug-712": {
+        "seed": 712,
+        "rounds": 100,
+        "executed": 708,
+        "passed": 708,
+        "failed": 0,
+        "binary_sha256": "f306b47d835b99f9560d32226984cdf5d88ee1c9ed946a1981454b8d5793cd4e",
+        "reference_sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+        "clock": {
+          "unix_seconds": 1700000000,
+          "library": "/home/john/Code/rless/compat/.runs/verification-oftza30h/fixed-clock-3k2pbo4m/clock.so",
+          "source_sha256": "27f68d792a64b1582682641482956b3d79980dec48a80f59ce379edbc12d95f5",
+          "scope": "time() only; monotonic clocks and signal timers remain real"
+        }
+      },
+      "debug-20261023": {
+        "seed": 20261023,
+        "rounds": 100,
+        "executed": 708,
+        "passed": 708,
+        "failed": 0,
+        "binary_sha256": "f306b47d835b99f9560d32226984cdf5d88ee1c9ed946a1981454b8d5793cd4e",
+        "reference_sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+        "clock": {
+          "unix_seconds": 1700000000,
+          "library": "/home/john/Code/rless/compat/.runs/verification-oftza30h/fixed-clock-paw1vqgt/clock.so",
+          "source_sha256": "27f68d792a64b1582682641482956b3d79980dec48a80f59ce379edbc12d95f5",
+          "scope": "time() only; monotonic clocks and signal timers remain real"
+        }
+      },
+      "release-712": {
+        "seed": 712,
+        "rounds": 100,
+        "executed": 708,
+        "passed": 708,
+        "failed": 0,
+        "binary_sha256": "8188fe99befa448f79d224fb25ce41e2e22410573a2954b3f3b5941fc907dca0",
+        "reference_sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+        "clock": {
+          "unix_seconds": 1700000000,
+          "library": "/home/john/Code/rless/compat/.runs/verification-oftza30h/fixed-clock-4530r018/clock.so",
+          "source_sha256": "27f68d792a64b1582682641482956b3d79980dec48a80f59ce379edbc12d95f5",
+          "scope": "time() only; monotonic clocks and signal timers remain real"
+        }
+      },
+      "release-20261023": {
+        "seed": 20261023,
+        "rounds": 100,
+        "executed": 708,
+        "passed": 708,
+        "failed": 0,
+        "binary_sha256": "8188fe99befa448f79d224fb25ce41e2e22410573a2954b3f3b5941fc907dca0",
+        "reference_sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+        "clock": {
+          "unix_seconds": 1700000000,
+          "library": "/home/john/Code/rless/compat/.runs/verification-oftza30h/fixed-clock-zwgafxry/clock.so",
+          "source_sha256": "27f68d792a64b1582682641482956b3d79980dec48a80f59ce379edbc12d95f5",
+          "scope": "time() only; monotonic clocks and signal timers remain real"
+        }
+      }
+    }
+  },
+  "resolved_observation_issues": [
+    "EOF bells are rate-limited once per wall-clock second in both reference and translation. A test-only time() shim now controls that environment for stress probes; monotonic clocks/timers remain real and all bell fields are compared.",
+    "Linux TIOCSWINSZ already sends SIGWINCH on geometry change. Version 2 observer no longer sends a duplicate explicit signal; regression checks changed/unchanged geometry and immediate key movement after resize. Original failed packaged-source replay is retained for diagnosis."
+  ],
+  "integrations": {
+    "debug": {
+      "git-diff": true,
+      "man-local": true,
+      "stream-without-eof": true,
+      "terminate-restores-terminal": true,
+      "repeated-resize": true,
+      "follow-append": true,
+      "follow-rotate": true,
+      "truncate-recovery": true,
+      "follow-live-pipe": true,
+      "sparse-byte-position": true
+    },
+    "release": {
+      "git-diff": true,
+      "man-local": true,
+      "stream-without-eof": true,
+      "terminate-restores-terminal": true,
+      "repeated-resize": true,
+      "follow-append": true,
+      "follow-rotate": true,
+      "truncate-recovery": true,
+      "follow-live-pipe": true,
+      "sparse-byte-position": true
+    }
+  },
+  "real_job_control": {
+    "debug": true,
+    "release": true
+  },
+  "helper_contracts": {
+    "debug": {
+      "passed": 10,
+      "helper_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+    },
+    "release": {
+      "passed": 10,
+      "helper_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+    }
+  },
+  "package": {
+    "archive": "/home/john/Code/rless/dist/rless-0.1.0-linux-x86_64.tar.gz",
+    "sha256": "ae4e174a08a1b475ff9e2983bd8bb3095dc780f6887c313ff75150a459ff4cb9",
+    "source_archive": "/home/john/Code/rless/dist/rless-0.1.0-source.tar.gz",
+    "source_sha256": "c46ae3ac176abeda9aac5e2ffa3899ba1d3fd1b9724b7c4c4ac98e69deace948",
+    "extracted_smoke_tests": "passed"
+  },
+  "archive_activation": {
+    "archive_sha256": "ae4e174a08a1b475ff9e2983bd8bb3095dc780f6887c313ff75150a459ff4cb9",
+    "activation_with_spaces_and_apostrophe": "passed",
+    "preserves_explicit_helper_overrides": "passed",
+    "native_companion_globbing": "passed"
+  },
+  "original_frozen_case_inputs_expectations_and_v1_observer": "Unchanged; corpus hash validation passed.",
+  "full_reports": "compat/.runs/verification-oftza30h"
+}

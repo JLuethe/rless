@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-24T15:26:32.912684+00:00",
+  "scope": "Specification structure and traceability only; no safety implementation or runtime test result is asserted.",
+  "specification_checks_passed": true,
+  "runtime_safety_verified": false,
+  "implementation_tests_executed": 0,
+  "requirements": 43,
+  "planned_acceptance_families": 43,
+  "named_variants": 175,
+  "workstreams": {
+    "0": 3,
+    "1": 8,
+    "2": 8,
+    "3": 7,
+    "4": 7,
+    "5": 10
+  },
+  "checked_local_links": 41,
+  "dependency_graph": "acyclic",
+  "original_frozen_corpus": "hashes unchanged",
+  "inputs_sha256": {
+    "spec/safety/01-signals.md": "9b591fdddd530168977ab198e76eda7f4c6c85a4081b41b36f95d4c68cec55c5",
+    "spec/safety/02-memory.md": "461c1199858e1ebd84b0128687caee128eaf0d13b6bd50934b0e60cebbbafc7a",
+    "spec/safety/03-state.md": "5b898e4e91329368623b5f4a8eb07d4d02f2d67bfef34ef53ea971947e1d9b24",
+    "spec/safety/04-ffi.md": "69344ad1585d4fac1a874f7cffc625100abe3bef65a919cacbb5009595b4330f",
+    "spec/safety/05-verification.md": "c7e809400d5e37756eff55f60a9e7c357af44511a1c96edb4c664f78acbaac8b",
+    "spec/safety/README.md": "0d02f5ae1ba72392f83cef950a6f71b26493047f3bf0bd87572355b46aa2c403",
+    "spec/safety/acceptance.json": "74b2f04c0cc2034861af1c2c6da010a44336abe5145e7d64ad08b6ffb39b7088",
+    "spec/safety/migration.md": "f82a5e00898f5c370620a3d8a1f14b4ab5ababc696702036aaa5bfc7be03546c",
+    "spec/safety/requirements.json": "d61aeb0192a5106de7b3f1b2f4f646eab54a66d516eebd5705cbaaca9fa7e348"
+  }
+}
