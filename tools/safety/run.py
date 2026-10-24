@@ -157,6 +157,12 @@ def inventory(args, evidence):
     write_json(args.output / 'callgraph.json', dict(scope='Syntactic direct-call candidates; indirect/alias/link-name resolution requires manual review.', calls=calls))
     definitions = {r['symbol'] for r in records if r['kind'] == 'abi_function_definition'}
     externs = {r['symbol'] for r in records if r['kind'] == 'extern_function_declaration'}
+    # Canonical libc calls do not have a local extern declaration. Keep their
+    # qualified identities until review resolves linkage; do not silently omit
+    # them or conflate a declaration with an actual native object.
+    qualified_native = [r for r in records if r['kind']=='direct_call' and
+                        r['symbol'].replace(' ','').lstrip(':').startswith('libc::')]
+    native_candidates = (externs - definitions) | {r['symbol'].replace(' ','').lstrip(':') for r in qualified_native}
     files = {}
     for file in sources:
         rows = [r for r in records if r['file'] == file]
@@ -172,7 +178,8 @@ def inventory(args, evidence):
     summary = dict(schema_version=1, recorded_at_utc=utc(), status='partial', evidence_status='not-verified',
                    scope='AST and compiler-expanded syntax inventory; not a complete ownership/alias or indirect-call proof.',
                    files=files, counts=dict(Counter(r['kind'] for r in records)),
-                   expanded_counts=expanded_counts, candidate_external_symbols=sorted(externs - definitions),
+                   expanded_counts=expanded_counts, candidate_external_symbols=sorted(native_candidates),
+                   qualified_native_calls=qualified_native,
                    application_c_abi_symbols=sorted(definitions),
                    mutable_static_definitions=[r for r in records if r['kind'] == 'mutable_static_definition'],
                    raw_inventory=dict(path=str(raw_path), sha256=sha(raw_path)),
