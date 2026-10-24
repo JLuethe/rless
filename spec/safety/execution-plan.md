@@ -456,3 +456,9 @@ All phase issues and milestones are open/planned; issue creation is not implemen
 | M5 | [#7](https://github.com/JLuethe/rless/issues/7) | [M5](https://github.com/JLuethe/rless/milestone/6) |
 
 The [tracking registry](github-tracking.json) binds phase references to the packet ledger.
+
+## M0 closure refinement
+
+After the first diagnostic slice, use [Finish M0 and enter M1](m0-closure-m1.md)
+and [closure-plan.json](closure-plan.json) for the remaining review, real hooks,
+variant coverage, reference ABI and signal handoff gates. No phase closes from this plan alone.

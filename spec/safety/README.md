@@ -147,3 +147,8 @@ does not establish that a detector or safety campaign passed.
 [GitHub migration tracker #1](https://github.com/JLuethe/rless/issues/1) links the
 six open phase issues and milestones. Their publication snapshot is in
 [github-tracking.json](github-tracking.json); implementation/evidence states remain planned/not-verified.
+
+The [M0 closure and M1 handoff specification](m0-closure-m1.md) refines remaining
+ownership review, production fault hooks, exact acceptance coverage and glibc 2.41
+reproduction. Its [delivery ledger](closure-plan.json) preserves the existing contracts
+and gates runtime M1 changes on explicit M0/prototype evidence.
