@@ -67,6 +67,8 @@ def bind(rows, bindings, root=ROOT):
         for field in ('scenario_id', 'variant', 'profile'):
             if executed[field] != row[field]:
                 raise ValueError('executed oracle does not match row')
+        if item['coverage_scope']=='complete' and executed.get('coverage_scope')!='complete':
+            raise ValueError('partial or undeclared executed coverage cannot be promoted by a binding')
         result[key].update(status='passed' if item['coverage_scope'] == 'complete' else 'not-verified',
                            implementation_path=item['implementation_path'], evidence=item)
     return result

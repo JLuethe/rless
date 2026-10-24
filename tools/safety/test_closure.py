@@ -109,6 +109,8 @@ class AcceptanceControls(unittest.TestCase):
         result=bind(self.rows,[self.binding],self.root)
         self.assertEqual(result[self.binding['row_id']]['status'],'not-verified')
         self.assertEqual(sum(x['status']=='not-run' for x in result.values()),3)
+        with self.assertRaises(ValueError):
+            bind(self.rows,[{**self.binding,'coverage_scope':'complete'}],self.root)
 
     def test_unknown_duplicate_and_wrong_variant_rejects(self):
         for binding in [{**self.binding,'row_id':'unknown'}, {**self.binding,'variant':'similar but wrong variant'}]:

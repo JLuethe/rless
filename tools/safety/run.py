@@ -326,7 +326,7 @@ def hooks(args, evidence):
                  '--normal', args.normal_binary, '--injected', args.injected_binary],
                  profile='NATIVE', requirement_ids=['SAFE-MEM-007','SAFE-VER-005','SAFE-VER-010'],
                  scenario_id='SAFECASE-MEM-007', variant='fail each logical reserve/create boundary',
-                 artifacts=[args.normal_binary,args.injected_binary])
+                 artifacts=[args.normal_binary,args.injected_binary],coverage_scope='partial')
 
 
 def main():

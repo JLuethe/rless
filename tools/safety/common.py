@@ -95,7 +95,9 @@ class Evidence:
 
     def run(self, name, command, *, env=None, cwd=None, timeout=300, expected=0,
             diagnostic=None, requirement_ids=(), scenario_id=None, variant=None,
-            profile='NATIVE', artifacts=()):
+            profile='NATIVE', artifacts=(), coverage_scope=None):
+        if coverage_scope not in (None,'partial','complete'):
+            raise ValueError('unknown executed coverage scope')
         if not command:
             raise ValueError('empty command selection')
         if not re.fullmatch(r'[A-Za-z0-9_.-]+', name):
@@ -133,6 +135,7 @@ class Evidence:
             passed = False
         record = dict(name=name, requirement_ids=list(requirement_ids), scenario_id=scenario_id,
                       variant=variant or name, profile=profile,
+                      coverage_scope=coverage_scope,
                       status='passed' if passed else 'failed', command=[str(x) for x in command],
                       original_exit_status=status, expected_exit_status=expected,
                       expected_diagnostic=diagnostic, diagnostic_found=has_finding,
