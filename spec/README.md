@@ -37,4 +37,11 @@ whichever behavior is convenient. The case suite is evidence for the prose;
 passing a subset of cases never removes an untested normative requirement.
 
 [Readiness](readiness.md) records actual coverage and outstanding questions.
-No Rust pager implementation is part of this package.
+The [implementation notes](../docs/implementation.md) describe the translated Rust
+baseline. The separate [safety migration specification](safety/README.md) defines
+signal, ownership, state, FFI and verification requirements; its planned scenarios
+do not change the behavioral requirements or count as implemented safety evidence.
+
+The [current project state](../docs/current-state.md), [M0–M4 delivery plan](safety/execution-plan.md)
+and [full safety campaign plan](safety/campaign-plan.md) distinguish the tested
+compatibility baseline from pending safety implementation and verification.

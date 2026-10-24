@@ -1,0 +1,982 @@
+{
+  "schema_version": 1,
+  "specification_version": "0.2.0",
+  "baseline_implementation_commit": "dd6ef28f0c136109611f3c225457c9000a9aca47",
+  "scope": "Execution specification only. These packets have not been implemented or verified.",
+  "phases": [
+    {
+      "id": "M0",
+      "title": "Baseline and safety infrastructure",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2",
+      "github_milestone": "https://github.com/JLuethe/rless/milestone/1"
+    },
+    {
+      "id": "M1",
+      "title": "Signal boundary and cancellable operations",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3",
+      "github_milestone": "https://github.com/JLuethe/rless/milestone/2"
+    },
+    {
+      "id": "M2",
+      "title": "Owned primitives and parser foundations",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "github_issue": "https://github.com/JLuethe/rless/issues/4",
+      "github_milestone": "https://github.com/JLuethe/rless/milestone/3"
+    },
+    {
+      "id": "M3",
+      "title": "Owned application state and lifecycle",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "github_issue": "https://github.com/JLuethe/rless/issues/5",
+      "github_milestone": "https://github.com/JLuethe/rless/milestone/4"
+    },
+    {
+      "id": "M4",
+      "title": "Audited native boundary consolidation",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "github_issue": "https://github.com/JLuethe/rless/issues/6",
+      "github_milestone": "https://github.com/JLuethe/rless/milestone/5"
+    },
+    {
+      "id": "M5",
+      "title": "Full safety campaigns and scoped completion",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "github_issue": "https://github.com/JLuethe/rless/issues/7",
+      "github_milestone": "https://github.com/JLuethe/rless/milestone/6"
+    }
+  ],
+  "work_packages": [
+    {
+      "id": "M0.1",
+      "phase": "M0",
+      "title": "Freeze the reproducible baseline",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [],
+      "requirement_ids": [
+        "SAFE-BASE-001",
+        "SAFE-BASE-002",
+        "SAFE-BASE-003",
+        "SAFE-VER-001"
+      ],
+      "current_paths": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "docs/verification/overnight.json",
+        "compat/corpus.json"
+      ],
+      "implementation_steps": [
+        "Capture the committed source plus a source/build/test fingerprint and immutable reference/observer identities.",
+        "Record compiler, linker, libc, headers, terminfo, lockfile and actual loaded libraries; distinguish glibc 2.41 from the observed 2.44 builder.",
+        "Reproduce debug/release, clean install and source rebuild behavior without regenerating expectations."
+      ],
+      "deliverables": [
+        "Baseline manifest and reproducible setup instructions",
+        "809-case results and current native integration evidence"
+      ],
+      "exit_gate": "A clean environment reproduces the baseline and verifies source/artifact hashes; inherited experimental safety status is explicit.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2"
+    },
+    {
+      "id": "M0.2",
+      "phase": "M0",
+      "title": "Inventory unsafe code and ownership",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M0.1"
+      ],
+      "requirement_ids": [
+        "SAFE-BASE-003",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007"
+      ],
+      "current_paths": [
+        "src",
+        "vendor",
+        "build.rs"
+      ],
+      "implementation_steps": [
+        "Enumerate application and vendored unsafe operations, raw owners, mutable statics, exported C symbols and callback paths using compiler/expanded-code evidence.",
+        "Separate repeated extern declarations from actual mutable objects; map owners, aliases, lifetime assumptions and release APIs.",
+        "Give each boundary/finding an ID, affected requirements, responsible delivery packet and closure evidence."
+      ],
+      "deliverables": [
+        "Machine-readable unsafe/ownership inventory",
+        "Signal call graph and native trust inventory"
+      ],
+      "exit_gate": "Every application unsafe/native boundary is classified; known hazards are open findings rather than passing safety claims.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2"
+    },
+    {
+      "id": "M0.3",
+      "phase": "M0",
+      "title": "Pin and prove safety tool profiles",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M0.1"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-002",
+        "SAFE-VER-003",
+        "SAFE-VER-007",
+        "SAFE-VER-010"
+      ],
+      "current_paths": [
+        "Cargo.toml",
+        "build.rs",
+        "tools/check.py",
+        "tools/compat/probes"
+      ],
+      "implementation_steps": [
+        "Choose exact mutually supported nightly/rust-src/Miri/sanitizer/runtime versions while preserving the pinned normal build.",
+        "Implement ASan and leak profiles plus isolated Miri support, native shim instrumentation and symbolizer setup.",
+        "Run deliberate memory/leak/aliasing/compiler-negative controls and retain the intended diagnostics."
+      ],
+      "deliverables": [
+        "Pinned safety toolchain manifest and setup/runner commands",
+        "Detector self-test reports and supported/excluded boundary matrix"
+      ],
+      "exit_gate": "Each detector demonstrably runs and rejects its intended defect; missing tools and unrelated failures cannot satisfy the gate.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2"
+    },
+    {
+      "id": "M0.4",
+      "phase": "M0",
+      "title": "Implement the evidence and campaign runner",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M0.2",
+        "M0.3"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-004",
+        "SAFE-VER-005",
+        "SAFE-VER-007",
+        "SAFE-VER-010"
+      ],
+      "current_paths": [
+        "tools/check.py",
+        "tools/compat/run_v2.py",
+        "spec/safety/acceptance.json"
+      ],
+      "implementation_steps": [
+        "Implement the planned runner contract and per-variant/profile evidence records described in campaign-plan.md.",
+        "Add logical fault/event barriers, controlled child fixtures, finding minimization and coverage/corpus retention.",
+        "Reject stale fingerprints, empty selections, unsupported required lanes and sanitizer findings hidden by expected nonzero exits."
+      ],
+      "deliverables": [
+        "Safety runner and evidence schema",
+        "Test-only injection interface and oracle negative controls"
+      ],
+      "exit_gate": "The runner reports planned/not-run/failed/blocked honestly and can reproduce a minimized injected finding without changing frozen data.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2"
+    },
+    {
+      "id": "M0.5",
+      "phase": "M0",
+      "title": "Run the initial diagnostic campaign",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M0.2",
+        "M0.3",
+        "M0.4"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-001",
+        "SAFE-VER-002",
+        "SAFE-VER-007",
+        "SAFE-VER-010"
+      ],
+      "current_paths": [
+        "docs/verification",
+        "tools/check.py"
+      ],
+      "implementation_steps": [
+        "Run baseline native, instrumented and supported component probes; store every initial finding.",
+        "Classify application defects, ABI/dependency limits and test/tool defects separately.",
+        "Open remediation records with packet ownership; keep all unclosed safety findings blocking M5."
+      ],
+      "deliverables": [
+        "Initial safety assessment and known-findings ledger",
+        "M0 completion report with exact supported profiles"
+      ],
+      "exit_gate": "Tools and baseline are reproducible and findings are assigned. Zero legacy findings is not required to finish infrastructure; they remain release blockers.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2"
+    },
+    {
+      "id": "M1.1",
+      "phase": "M1",
+      "title": "Prove the signal and blocking-I/O strategy",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M0.5"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-SIG-002",
+        "SAFE-SIG-006",
+        "SAFE-SIG-008"
+      ],
+      "current_paths": [
+        "src/signal.rs",
+        "src/runtime.rs",
+        "src/os.rs"
+      ],
+      "implementation_steps": [
+        "Write ADR-SIGNAL-BACKEND covering notification, masks, ordering/coalescing, exhaustion and main-loop dispatch.",
+        "Prototype FIFO open without a writer, initial pipe reads and a signal immediately before blocking; do not rely on a flag check alone.",
+        "If workers are needed, prove bounded cancellation, late-result disposal, signal ownership and shutdown before adopting them."
+      ],
+      "deliverables": [
+        "Reviewed backend decision record",
+        "Deterministic blocking-open/read and exhaustion prototype tests"
+      ],
+      "exit_gate": "No lost wakeup, future-key consumption or abandoned-resource accumulation; unresolved backend feasibility blocks M1.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3"
+    },
+    {
+      "id": "M1.2",
+      "phase": "M1",
+      "title": "Replace unsafe registration and notifications",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M1.1"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-SIG-005",
+        "SAFE-SIG-006",
+        "SAFE-SIG-007"
+      ],
+      "current_paths": [
+        "src/runtime.rs",
+        "src/process.rs",
+        "src/signal.rs"
+      ],
+      "implementation_steps": [
+        "Represent default/ignore/handler dispositions as checked native values rather than fabricated Rust function pointers.",
+        "Remove allocation, freeing, configuration lookup, display and cleanup from handlers.",
+        "Preserve inherited SIGPIPE, errno, masks, close-on-exec behavior and partial-setup rollback."
+      ],
+      "deliverables": [
+        "Minimal audited signal/native bridge",
+        "Registration, inheritance, exhaustion and rollback tests"
+      ],
+      "exit_gate": "The async call graph contains only verified notification operations; each failed setup restores owned process state.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3"
+    },
+    {
+      "id": "M1.3",
+      "phase": "M1",
+      "title": "Dispatch events and cancellation in the main loop",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M1.2"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-002",
+        "SAFE-SIG-003",
+        "SAFE-SIG-006",
+        "SAFE-SIG-008"
+      ],
+      "current_paths": [
+        "src/command.rs",
+        "src/os.rs",
+        "src/search.rs",
+        "src/ttyin.rs"
+      ],
+      "implementation_steps": [
+        "Move filter clearing, bells, SIGUSR1 expansion and cleanup onto safe main-loop boundaries.",
+        "Define delivered-action accounting, timer generations and existing event precedence.",
+        "Integrate all wait paths, including nested reads and blocked opens, while preserving bytes and reference error/status behavior."
+      ],
+      "deliverables": [
+        "Main-loop event/cancellation implementation",
+        "Signal-during-mutation and wait-boundary regressions"
+      ],
+      "exit_gate": "Signals do not reenter pager mutation, lose required delivered actions, cancel a later timer generation or consume a later command.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3"
+    },
+    {
+      "id": "M1.4",
+      "phase": "M1",
+      "title": "Verify real job control and handoff",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M1.3"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-003",
+        "SAFE-SIG-004",
+        "SAFE-SIG-005",
+        "SAFE-VER-006"
+      ],
+      "current_paths": [
+        "src/signal.rs",
+        "src/lsystem.rs",
+        "tools/compat/test_suspend.py",
+        "tools/compat/test_integrations.py"
+      ],
+      "implementation_steps": [
+        "Exercise actual foreground SIGTSTP/SIGCONT with a supervisor in the same session.",
+        "Test shell/editor/range-pipe/URI handoff and failure with pending signals and secure restrictions.",
+        "Repeat interrupt, resize-followed-by-input, timer rearm and cancellation/resource cycles under instrumentation."
+      ],
+      "deliverables": [
+        "All eight signal acceptance families with variant evidence",
+        "M1 review and behavioral regression results"
+      ],
+      "exit_gate": "Required termios/modes restore while stopped, after child return and at exit; native behavior matches and resources remain bounded.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3"
+    },
+    {
+      "id": "M2.1",
+      "phase": "M2",
+      "title": "Introduce fallible byte ownership",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M1.4"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-001",
+        "SAFE-MEM-003",
+        "SAFE-MEM-007"
+      ],
+      "current_paths": [
+        "src/xbuf.rs",
+        "src/cmdbuf.rs",
+        "src/line.rs"
+      ],
+      "implementation_steps": [
+        "Define ByteBuf operations for empty/reset/pop/growth/self-copy and explicit C-string conversion.",
+        "Use fallible reservation before commit and identify hidden formatting/conversion allocations.",
+        "Migrate one complete caller/alias slice at a time; keep temporary adapters private with retirement conditions."
+      ],
+      "deliverables": [
+        "Owned byte buffer API and migrated leaf callers",
+        "Miri/property/allocation-failure tests"
+      ],
+      "exit_gate": "Converted leaves forbid unsafe code and have no untracked aliases; unfinished core callers remain explicitly open.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/4"
+    },
+    {
+      "id": "M2.2",
+      "phase": "M2",
+      "title": "Introduce checked coordinates and stable IDs",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M2.1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-STATE-002"
+      ],
+      "current_paths": [
+        "src/position.rs",
+        "src/ifile.rs",
+        "src/mark.rs",
+        "src/linenum.rs"
+      ],
+      "implementation_steps": [
+        "Separate byte position, retained index, logical line and display coordinates.",
+        "Represent unknown/unavailable positions and stale file/pattern handles explicitly.",
+        "Check arithmetic, native narrowing and generation exhaustion; retain real sparse-file support beyond 4 GiB."
+      ],
+      "deliverables": [
+        "Typed positions/IDs and invalidation rules",
+        "Boundary, stale-handle and compile-fail tests"
+      ],
+      "exit_gate": "Invalid values cannot become indexes or revived handles; valid wide offsets preserve existing semantics.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/4"
+    },
+    {
+      "id": "M2.3",
+      "phase": "M2",
+      "title": "Convert byte parsers and companion state",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M2.1",
+        "M2.2"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-005"
+      ],
+      "current_paths": [
+        "src/option.rs",
+        "src/lesskey_parse.rs",
+        "src/prompt.rs",
+        "src/lmsg.rs",
+        "src/decode.rs",
+        "src/charset.rs",
+        "src/bin/lessecho.rs"
+      ],
+      "implementation_steps": [
+        "Migrate bounded byte parsing for options, lesskey, prompts/messages/history, keys/mouse/paste, UTF/ANSI/OSC and lessecho.",
+        "Keep incomplete-input progress and source mappings explicit; preserve invalid UTF-8 and existing configuration precedence.",
+        "Seed independent fuzz modes from valid, malformed and boundary reference inputs."
+      ],
+      "deliverables": [
+        "Safe parser APIs and owned parser results",
+        "Family-specific corpus, Miri and reference comparisons"
+      ],
+      "exit_gate": "Malformed input returns defined outcomes without panic or unchecked access; no UTF-8-only or dialect substitution is introduced.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/4"
+    },
+    {
+      "id": "M2.4",
+      "phase": "M2",
+      "title": "Prove leaf safety and integration seams",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M2.1",
+        "M2.2",
+        "M2.3"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-007",
+        "SAFE-MEM-008",
+        "SAFE-VER-003",
+        "SAFE-VER-004",
+        "SAFE-VER-005"
+      ],
+      "current_paths": [
+        "src/lib.rs",
+        "tests",
+        "tools/compat/stress.py"
+      ],
+      "implementation_steps": [
+        "Enable compiler restrictions on converted leaves and inventory all remaining adapter aliases.",
+        "Run Miri, sanitizer and fault tests with valid counterparts for negative fixtures.",
+        "Meet per-change fuzz floors and retain exact behavioral regression results."
+      ],
+      "deliverables": [
+        "M2 component evidence and adapter retirement list",
+        "Coverage/fault reports linked to requirement variants"
+      ],
+      "exit_gate": "No leaf is labeled safe solely because pointers moved into a wrapper; whole-core M3/M5 requirements remain open where applicable.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/4"
+    },
+    {
+      "id": "M3.1",
+      "phase": "M3",
+      "title": "Own configuration and command state",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M2.4"
+      ],
+      "requirement_ids": [
+        "SAFE-STATE-001",
+        "SAFE-STATE-005"
+      ],
+      "current_paths": [
+        "src/pager.rs",
+        "src/opttbl.rs",
+        "src/option.rs",
+        "src/command.rs",
+        "src/cmdbuf.rs"
+      ],
+      "implementation_steps": [
+        "Introduce the PagerState owner and immutable option metadata with typed accessors.",
+        "Replace mutable-global lookup and raw addresses with bounded subsystem borrows and typed effects.",
+        "Preserve startup, runtime, per-file and deferred signal-action lookup timing."
+      ],
+      "deliverables": [
+        "Owned configuration/editing/command state",
+        "Source-precedence and transition regressions"
+      ],
+      "exit_gate": "One authoritative owner drives mutation; no global backdoor or duplicate state remains for converted subsystems.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/5"
+    },
+    {
+      "id": "M3.2",
+      "phase": "M3",
+      "title": "Own retained input and navigation",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M3.1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-MEM-003",
+        "SAFE-MEM-006",
+        "SAFE-STATE-002",
+        "SAFE-STATE-004"
+      ],
+      "current_paths": [
+        "src/ch.rs",
+        "src/input.rs",
+        "src/ifile.rs",
+        "src/position.rs",
+        "src/jump.rs",
+        "src/mark.rs"
+      ],
+      "implementation_steps": [
+        "Own per-file bytes, retention/indexes and saved positions using validated handles.",
+        "Preserve incremental paging, finite pipe retention, explicit scans and unavailable backward data.",
+        "Apply invalidation through append, truncate, rotation, deletion and flush repaint."
+      ],
+      "deliverables": [
+        "Owned file/input/navigation model",
+        "Streaming, stale-view and sparse-position evidence"
+      ],
+      "exit_gate": "Storage reuse cannot revive a view or mark; ordinary paging does not wait for EOF or silently buffer every stream.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/5"
+    },
+    {
+      "id": "M3.3",
+      "phase": "M3",
+      "title": "Own layout search and filters",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M3.2"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-MEM-006",
+        "SAFE-MEM-007",
+        "SAFE-STATE-001",
+        "SAFE-STATE-002"
+      ],
+      "current_paths": [
+        "src/line.rs",
+        "src/cvt.rs",
+        "src/search.rs",
+        "src/forwback.rs",
+        "src/screen.rs"
+      ],
+      "implementation_steps": [
+        "Migrate layout/search control and transformed-to-source mappings into owned state.",
+        "Use staged commits for filter/pattern replacement and highlighting so cancellation releases borrows before mutation.",
+        "Preserve wrapping, offsets, zero-length search progress, marks and pinned Unicode behavior."
+      ],
+      "deliverables": [
+        "Safe layout/search/filter state and mapping APIs",
+        "Signal/allocation-failure rollback and reference cases"
+      ],
+      "exit_gate": "No cross-module pointer persists into replaced storage; rendering/search behavior and cancellation positions remain compatible.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/5"
+    },
+    {
+      "id": "M3.4",
+      "phase": "M3",
+      "title": "Own terminal children and persistence",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M3.1",
+        "M3.2",
+        "M3.3"
+      ],
+      "requirement_ids": [
+        "SAFE-STATE-003",
+        "SAFE-STATE-004",
+        "SAFE-STATE-006",
+        "SAFE-STATE-007",
+        "SAFE-MEM-005"
+      ],
+      "current_paths": [
+        "src/screen.rs",
+        "src/ttyin.rs",
+        "src/lsystem.rs",
+        "src/edit.rs",
+        "src/filename.rs",
+        "src/mark.rs"
+      ],
+      "implementation_steps": [
+        "Introduce explicit terminal-session states and an idempotent fallible shutdown with a non-panicking Drop fallback.",
+        "Tie file hooks, child pipes, wait/reap, logs/history and descriptor ownership to their creating operation.",
+        "Translate callback errors without cross-C unwinding and keep workers isolated from mutable pager state."
+      ],
+      "deliverables": [
+        "Resource/session owners and cleanup protocol",
+        "Failure, handoff, persistence and resource-cycle reports"
+      ],
+      "exit_gate": "Normal/error/catchable-signal paths attempt all required cleanup once; no repeated cancellation or failure leaks children, FDs or ownership.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/5"
+    },
+    {
+      "id": "M3.5",
+      "phase": "M3",
+      "title": "Close the safe-core migration slices",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M3.4"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-001",
+        "SAFE-MEM-002",
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-MEM-005",
+        "SAFE-MEM-006",
+        "SAFE-MEM-007",
+        "SAFE-MEM-008",
+        "SAFE-STATE-001",
+        "SAFE-STATE-002",
+        "SAFE-STATE-003",
+        "SAFE-STATE-004",
+        "SAFE-STATE-005",
+        "SAFE-STATE-007",
+        "SAFE-VER-006"
+      ],
+      "current_paths": [
+        "src/lib.rs",
+        "src/bin",
+        "tests"
+      ],
+      "implementation_steps": [
+        "Remove remaining mutable application statics, raw ownership and legacy inter-module aliases from the core.",
+        "Enforce safe-core compiler/AST policy and retain narrowly tracked native adapters for M4.",
+        "Run component, native, fault and reference evidence against the integrated ownership graph."
+      ],
+      "deliverables": [
+        "Core ownership closure and residual boundary inventory",
+        "M3 integration report"
+      ],
+      "exit_gate": "No unfinished core is hidden in an unsafe adapter. Final native proofs and overall safety sign-off remain M4/M5 gates.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/5"
+    },
+    {
+      "id": "M4.1",
+      "phase": "M4",
+      "title": "Select and probe canonical native ABIs",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M3.5"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-001",
+        "SAFE-FFI-002",
+        "SAFE-FFI-007"
+      ],
+      "current_paths": [
+        "src/pattern.rs",
+        "src/screen.rs",
+        "src/runtime.rs",
+        "src/process.rs",
+        "build.rs"
+      ],
+      "implementation_steps": [
+        "Complete ADR-NATIVE-ABI: maintained canonical bindings or small opaque layout shims with no pager logic.",
+        "Remove copied glibc layouts and record header/generator provenance and supported ABI matrix.",
+        "Probe constants, width/signedness, size/alignment, layouts and ownership on each claimed host."
+      ],
+      "deliverables": [
+        "Canonical/opaque ABI layer and native probes",
+        "Native/header dependency manifest"
+      ],
+      "exit_gate": "Unsupported ABIs fail clearly; a current-host build does not certify the original glibc 2.41 profile.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/6"
+    },
+    {
+      "id": "M4.2",
+      "phase": "M4",
+      "title": "Finalize owning GNU regex interfaces",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M4.1"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-003",
+        "SAFE-MEM-005",
+        "SAFE-MEM-002"
+      ],
+      "current_paths": [
+        "src/pattern.rs",
+        "src/search.rs"
+      ],
+      "implementation_steps": [
+        "Own native pattern storage and compile-error lifetimes with exactly matched release.",
+        "Validate lengths/ranges and scope native global syntax settings without changing GNU semantics.",
+        "Verify backreferences, submatches, leftmost-longest behavior, zero-length progress and mapping to source bytes."
+      ],
+      "deliverables": [
+        "Safe regex interface and proof record",
+        "ABI/sanitizer/lifecycle/semantic evidence"
+      ],
+      "exit_gate": "Native ranges and lifetimes are valid; no different regex dialect or uninstrumented-native safety claim is substituted.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/6"
+    },
+    {
+      "id": "M4.3",
+      "phase": "M4",
+      "title": "Finalize terminal signal and callback interfaces",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M4.1"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-004",
+        "SAFE-FFI-005",
+        "SAFE-SIG-007",
+        "SAFE-STATE-006"
+      ],
+      "current_paths": [
+        "src/screen.rs",
+        "src/output.rs",
+        "src/runtime.rs",
+        "src/process.rs",
+        "src/ttyin.rs"
+      ],
+      "implementation_steps": [
+        "Scope capability/scratch-buffer lifetimes and typed sentinel interpretation.",
+        "Keep only initialized read bytes visible and document callback context/reentrancy/errno handling.",
+        "Prove no Rust panic crosses C and shutdown retains the primary error when cleanup also fails."
+      ],
+      "deliverables": [
+        "Reviewed terminal/process/signal wrappers",
+        "Callback, sentinel and partial-I/O proof tests"
+      ],
+      "exit_gate": "Safe APIs establish every raw precondition; callback/context storage cannot dangle or alias a live mutable borrow.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/6"
+    },
+    {
+      "id": "M4.4",
+      "phase": "M4",
+      "title": "Retire legacy boundaries and review dependencies",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M4.2",
+        "M4.3"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-001",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007",
+        "SAFE-MEM-008"
+      ],
+      "current_paths": [
+        "src/lib.rs",
+        "Cargo.toml",
+        "Cargo.lock",
+        "vendor"
+      ],
+      "implementation_steps": [
+        "Remove old C symbol plumbing, raw public modules and duplicated generated native types.",
+        "Remove bitfield support when no longer needed or restrict it to a justified audited ABI boundary.",
+        "Review remaining unsafe application/vendor code, native dependency assumptions and advisories."
+      ],
+      "deliverables": [
+        "Final unsafe allowlist and dependency/trust report",
+        "Compiler-enforced core policy"
+      ],
+      "exit_gate": "No undocumented unsafe path or hidden pager logic remains outside the allowlist; counts alone do not establish soundness.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/6"
+    },
+    {
+      "id": "M4.5",
+      "phase": "M4",
+      "title": "Complete independent boundary review",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M4.4"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-001",
+        "SAFE-FFI-002",
+        "SAFE-FFI-003",
+        "SAFE-FFI-004",
+        "SAFE-FFI-005",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007",
+        "SAFE-STATE-006"
+      ],
+      "current_paths": [
+        "spec/safety/requirements.json",
+        "spec/safety/acceptance.json"
+      ],
+      "implementation_steps": [
+        "Obtain review of each remaining unsafe invariant by someone other than its author.",
+        "Bind reviewed source, callers, native identities and tests to the proof inventory.",
+        "Close relevant findings or keep the phase blocked; carry explicit trust limits into the campaign report."
+      ],
+      "deliverables": [
+        "Independent review records and M4 closure",
+        "Campaign-ready source/native fingerprints"
+      ],
+      "exit_gate": "Every remaining unsafe/native item has current reviewed evidence; full release campaigns and artifacts still must pass.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/6"
+    },
+    {
+      "id": "M5.1",
+      "phase": "M5",
+      "title": "Establish campaign readiness",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M0.5"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-007",
+        "SAFE-VER-010"
+      ],
+      "current_paths": [
+        "spec/safety/campaigns.json"
+      ],
+      "implementation_steps": [
+        "Verify tools, detector negatives, scenario applicability and corpus/reference identities.",
+        "Bind exact source/profile/ABI inputs and ensure controlled child/network fixtures.",
+        "Keep missing/unsupported lanes blocked; this readiness is revisited before the final run."
+      ],
+      "deliverables": [
+        "Campaign run manifest and applicability decisions"
+      ],
+      "exit_gate": "No required detector is silently unavailable and no stale input can be reported as passing.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/7"
+    },
+    {
+      "id": "M5.2",
+      "phase": "M5",
+      "title": "Run regression Miri and instrumented campaigns",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M4.5",
+        "M5.1"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-001",
+        "SAFE-VER-002",
+        "SAFE-VER-003",
+        "SAFE-VER-005"
+      ],
+      "current_paths": [
+        "tools/check.py",
+        "spec/safety/acceptance.json"
+      ],
+      "implementation_steps": [
+        "Execute every required component/native profile and variant, including exact behavior and fault oracles.",
+        "Exercise all supported ABIs and actual job-control/handoff paths.",
+        "Retain minimized failures and rerun affected lanes after fixes."
+      ],
+      "deliverables": [
+        "Per-variant/profile evidence and finding dispositions"
+      ],
+      "exit_gate": "All applicable normal, Miri, ABI and instrumented evidence is current; skipped required checks cannot pass.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/7"
+    },
+    {
+      "id": "M5.3",
+      "phase": "M5",
+      "title": "Complete coverage and real event budgets",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M5.2"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-004",
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ],
+      "current_paths": [
+        "spec/safety/campaigns.json"
+      ],
+      "implementation_steps": [
+        "Meet release fuzz floors for every concrete target, preserving coverage and minimized corpora.",
+        "Run at least 10,000 bounded native fault/event traces with 100 repeats per required race/recovery scenario.",
+        "Check real clocks, precise notifications, descriptors/children/workers and live allocations."
+      ],
+      "deliverables": [
+        "Coverage/CPU/execution metrics and native resource reports"
+      ],
+      "exit_gate": "Every target/scenario meets its own floor; aggregate counts, sleeps, build time and untriaged hangs do not substitute.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/7"
+    },
+    {
+      "id": "M5.4",
+      "phase": "M5",
+      "title": "Verify exact clean artifacts",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M5.3"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-001",
+        "SAFE-VER-007",
+        "SAFE-VER-008",
+        "SAFE-VER-009"
+      ],
+      "current_paths": [
+        "tools/package.py",
+        "tools/check.py"
+      ],
+      "implementation_steps": [
+        "Rebuild in clean installation and extracted-source environments and replay all required cases.",
+        "Bind executable/helper/source hashes to the final safety manifest.",
+        "Verify package activation, permissions, helper argument handling and documented runtime/native dependencies."
+      ],
+      "deliverables": [
+        "Clean source/binary archives, checksums and verification manifest"
+      ],
+      "exit_gate": "The distributed bytes match the tested/reviewed payload and the source archive rebuilds without the C pager.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/7"
+    },
+    {
+      "id": "M5.5",
+      "phase": "M5",
+      "title": "Make the scoped safety completion decision",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "M5.4"
+      ],
+      "requirement_ids": [
+        "SAFE-BASE-001",
+        "SAFE-BASE-002",
+        "SAFE-BASE-003",
+        "SAFE-MEM-008",
+        "SAFE-VER-007",
+        "SAFE-VER-008",
+        "SAFE-VER-009"
+      ],
+      "current_paths": [
+        "spec/safety/requirements.json"
+      ],
+      "implementation_steps": [
+        "Check every requirement and applicable variant/profile has evidence and independent review.",
+        "Require zero unresolved application memory-safety findings and no unexplained detector failures.",
+        "Publish the precise safe-core/native-trust claim only after the gate passes; release publication remains a separate decision."
+      ],
+      "deliverables": [
+        "Final requirement coverage and scoped sign-off report"
+      ],
+      "exit_gate": "SAFE-VER-009 is met. A partial migration, tool failure or clean behavioral suite alone cannot close M5.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/7"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+[package]
+name = "c2rust-bitfields-derive"
+version = "0.22.1"
+authors = ["The C2Rust Project Developers"]
+edition = "2021"
+rust-version = "1.85"
+description = "C-compatible struct bitfield derive implementation used in the C2Rust project"
+readme = "README.md"
+license = "BSD-3-Clause"
+
+[dependencies]
+# nightly-2023-04-15 (1.70) requires these exact versions.
+proc-macro2 = "=1.0.103"
+syn = { version = "=2.0.106", features = ["full"] }
+quote = "=1.0.40"
+# There are not directly depended on, but are transitive dependencies that we need to pin.
+# This should be an exhaustive list of transitive dependencies.
+unicode-ident = "=1.0.22"
+
+[lib]
+proc-macro = true

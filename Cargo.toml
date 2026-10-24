@@ -1,0 +1,25 @@
+[package]
+name = "rless"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+license = "GPL-3.0-or-later"
+description = "A native Rust port of the less 712 terminal pager"
+autobins = false
+default-run = "rless"
+
+[[bin]]
+name = "rless"
+path = "src/bin/rless.rs"
+
+[[bin]]
+name = "lessecho"
+path = "src/bin/lessecho.rs"
+
+[dependencies]
+c2rust-bitfields = { path = "vendor/c2rust-bitfields" }
+libc = "=0.2.174"
+
+[profile.release]
+debug = 1
+

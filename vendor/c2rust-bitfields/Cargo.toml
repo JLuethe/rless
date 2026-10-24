@@ -1,0 +1,15 @@
+[package]
+name = "c2rust-bitfields"
+version = "0.22.1"
+authors = ["The C2Rust Project Developers"]
+edition = "2021"
+rust-version = "1.85"
+description = "C-compatible struct bitfield implementation used in the C2Rust project"
+readme = "README.md"
+license = "BSD-3-Clause"
+
+[dependencies]
+c2rust-bitfields-derive = { path = "../c2rust-bitfields-derive", version = "0.22.1" }
+
+[features]
+no_std = []
