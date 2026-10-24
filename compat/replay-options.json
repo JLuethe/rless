@@ -1,0 +1,928 @@
+{
+  "executed": 230,
+  "passed": 230,
+  "failed": 0,
+  "errors": [],
+  "cases": {
+    "option-search-skip-screen-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-search-skip-screen-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-search-skip-screen-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-search-skip-screen-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-search-skip-screen": {
+      "passed": true,
+      "actual": null
+    },
+    "option-buffers-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-buffers-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-buffers": {
+      "passed": true,
+      "actual": null
+    },
+    "option-auto-buffers-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-auto-buffers-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-auto-buffers": {
+      "passed": true,
+      "actual": null
+    },
+    "option-clear-screen-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-clear-screen-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-clear-screen-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-clear-screen-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-clear-screen": {
+      "passed": true,
+      "actual": null
+    },
+    "option-dumb-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-dumb-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-dumb": {
+      "passed": true,
+      "actual": null
+    },
+    "option-color-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-color-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-at-eof-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-at-eof-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-at-eof-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-at-eof-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-quit-at-eof": {
+      "passed": true,
+      "actual": null
+    },
+    "option-force-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-force-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-force": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-if-one-screen-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-if-one-screen-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-quit-if-one-screen": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-search-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-search-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-search-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-search-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-hilite-search": {
+      "passed": true,
+      "actual": null
+    },
+    "option-max-back-scroll-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-max-back-scroll-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-max-back-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "option-ignore-case-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-ignore-case-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-ignore-case-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-ignore-case-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-ignore-case": {
+      "passed": true,
+      "actual": null
+    },
+    "option-jump-target-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-jump-target-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-jump-target": {
+      "passed": true,
+      "actual": null
+    },
+    "option-status-column-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-status-column-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-status-column": {
+      "passed": true,
+      "actual": null
+    },
+    "option-lesskey-file-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-lesskey-file-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-lesskey-content-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-lesskey-src-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-on-intr-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quit-on-intr-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-quit-on-intr": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-lessopen-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-lessopen-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-lessopen": {
+      "passed": true,
+      "actual": null
+    },
+    "option-long-prompt-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-long-prompt-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-long-prompt-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-long-prompt-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-long-prompt": {
+      "passed": true,
+      "actual": null
+    },
+    "option-line-numbers-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-line-numbers-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-line-numbers-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-line-numbers-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-line-numbers": {
+      "passed": true,
+      "actual": null
+    },
+    "option-log-file-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-log-file-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-log-file": {
+      "passed": true,
+      "actual": null
+    },
+    "option-LOG-FILE-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-LOG-FILE-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-LOG-FILE": {
+      "passed": true,
+      "actual": null
+    },
+    "option-pattern-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-pattern-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-prompt-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-prompt-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-prompt": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quiet-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quiet-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quiet-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quiet-3": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quiet-4": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quiet-5": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-quiet": {
+      "passed": true,
+      "actual": null
+    },
+    "option-raw-control-chars-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-raw-control-chars-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-raw-control-chars-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-raw-control-chars-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-raw-control-chars": {
+      "passed": true,
+      "actual": null
+    },
+    "option-squeeze-blank-lines-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-squeeze-blank-lines-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-squeeze-blank-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "option-chop-long-lines-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-chop-long-lines-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-chop-long-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tag-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tag-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tag-file-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tag-file-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-tag-file": {
+      "passed": true,
+      "actual": null
+    },
+    "option-underline-special-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-underline-special-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-underline-special-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-underline-special-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-underline-special": {
+      "passed": true,
+      "actual": null
+    },
+    "option-version-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-version-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-target-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-hilite-target": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-unread-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-unread-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-unread-2": {
+      "passed": true,
+      "actual": null
+    },
+    "option-hilite-unread-3": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-hilite-unread": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tabs-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tabs-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-tabs": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-init-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-init-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-init": {
+      "passed": true,
+      "actual": null
+    },
+    "option-max-forw-scroll-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-max-forw-scroll-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-max-forw-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "option-window-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-window-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-window": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quotes-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-quotes-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-quotes": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tilde-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-tilde-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-tilde": {
+      "passed": true,
+      "actual": null
+    },
+    "option-help-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-help-1": {
+      "passed": true,
+      "actual": null
+    },
+    "option-shift-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-shift-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-shift": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-keypad-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-keypad": {
+      "passed": true,
+      "actual": null
+    },
+    "option-old-bot-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-old-bot": {
+      "passed": true,
+      "actual": null
+    },
+    "option-follow-name-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-follow-name": {
+      "passed": true,
+      "actual": null
+    },
+    "option-use-backslash-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-use-backslash": {
+      "passed": true,
+      "actual": null
+    },
+    "option-rscroll-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-rscroll": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-histdups-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-histdups": {
+      "passed": true,
+      "actual": null
+    },
+    "option-mouse-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-mouse-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-mouse": {
+      "passed": true,
+      "actual": null
+    },
+    "option-emouse-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-emouse": {
+      "passed": true,
+      "actual": null
+    },
+    "option-rmouse-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-rmouse": {
+      "passed": true,
+      "actual": null
+    },
+    "option-wheel-lines-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-wheel-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "option-save-marks-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-save-marks": {
+      "passed": true,
+      "actual": null
+    },
+    "option-line-num-width-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-line-num-width": {
+      "passed": true,
+      "actual": null
+    },
+    "option-status-col-width-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-status-col-width": {
+      "passed": true,
+      "actual": null
+    },
+    "option-incsearch-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-incsearch": {
+      "passed": true,
+      "actual": null
+    },
+    "option-use-color-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-use-color": {
+      "passed": true,
+      "actual": null
+    },
+    "option-file-size-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-file-size": {
+      "passed": true,
+      "actual": null
+    },
+    "option-time-file-size-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-time-file-size": {
+      "passed": true,
+      "actual": null
+    },
+    "option-status-line-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-status-line": {
+      "passed": true,
+      "actual": null
+    },
+    "option-header-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-header": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-paste-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-paste": {
+      "passed": true,
+      "actual": null
+    },
+    "option-form-feed-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-form-feed": {
+      "passed": true,
+      "actual": null
+    },
+    "option-past-eof-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-past-eof": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-edit-warn-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-edit-warn-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-edit-warn": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-number-headers-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-number-headers": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-search-headers-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-search-headers": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-search-header-lines-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-search-header-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-search-header-columns-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-search-header-columns": {
+      "passed": true,
+      "actual": null
+    },
+    "option-redraw-on-quit-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-redraw-on-quit": {
+      "passed": true,
+      "actual": null
+    },
+    "option-search-options-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-search-options": {
+      "passed": true,
+      "actual": null
+    },
+    "option-exit-follow-on-close-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-exit-follow-on-close": {
+      "passed": true,
+      "actual": null
+    },
+    "option-no-vbell-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-no-vbell": {
+      "passed": true,
+      "actual": null
+    },
+    "option-modelines-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-modelines": {
+      "passed": true,
+      "actual": null
+    },
+    "option-intr-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-intr": {
+      "passed": true,
+      "actual": null
+    },
+    "option-wordwrap-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-wordwrap": {
+      "passed": true,
+      "actual": null
+    },
+    "option-show-preproc-errors-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-show-preproc-errors": {
+      "passed": true,
+      "actual": null
+    },
+    "option-proc-backspace-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-proc-backspace-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-proc-backspace": {
+      "passed": true,
+      "actual": null
+    },
+    "option-proc-tab-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-proc-tab-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-proc-tab": {
+      "passed": true,
+      "actual": null
+    },
+    "option-proc-return-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-proc-return-1": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-proc-return": {
+      "passed": true,
+      "actual": null
+    },
+    "option-cmd-0": {
+      "passed": true,
+      "actual": null
+    },
+    "option-match-shift-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-match-shift": {
+      "passed": true,
+      "actual": null
+    },
+    "option-autosave-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-autosave": {
+      "passed": true,
+      "actual": null
+    },
+    "option-end-prompt-0": {
+      "passed": true,
+      "actual": null
+    },
+    "query-default-end-prompt": {
+      "passed": true,
+      "actual": null
+    }
+  }
+}

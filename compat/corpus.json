@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "specification_version": "1.0.0",
+  "files": {
+    "compat/cases/behavior.json": "ba9d188d96f4154bd4284d2aa547d02fd30e06afeeb1d58fce89e56ce0b6b71e",
+    "compat/cases/integration.json": "a0debe50f5c67260bf75ae03f38dfd5ce3eee133d031162c11f5b50c9a8bbd8e",
+    "compat/cases/interactions.json": "900cfe8c0a56fa71eb5f120011b39294e85a659283cceb12c62197b0d78cf161",
+    "compat/cases/options.json": "962004b2bf2cd485cf453d03e40c198ce6500503bbd3b4df3bf5071fabe33e10",
+    "compat/expected-behavior.json": "da773283e9c54deb46dbb294d94acf0a508cba54ff2cf17018c60d059fd6d8c9",
+    "compat/expected-integration.json": "30852f992a0cb40115b0c0d14352b3f3644b966d69f423baec8619890f9e61c6",
+    "compat/expected-interactions.json": "29aaecaa19053d57b35d7da3581eab319e1fefebf8c96c3cdd78f6e7035b9404",
+    "compat/expected-options.json": "347573e25848a33b817381135cfadd0e223ef5fb089ce8314624bc6fa2f08e2d",
+    "compat/fixtures/pager.json": "20365c670cd4532c8a300ac7cd4e3c7739421407f536f344efec296d9c09aabb",
+    "tools/compat/run.py": "a84d8d0e7538740acbb4e7fbbab9aec7a9a7d9386e106382d848b5b6e20e29e3"
+  },
+  "meaning": "Inputs, observer and expectations frozen after successful reference and independent rebuild replay."
+}

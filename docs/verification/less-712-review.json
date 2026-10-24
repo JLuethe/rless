@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "reviewed_rless_commit": "f6837e960e374fb1f4d24aa75cbb6374fba038a0",
+  "reference_profile": {
+    "upstream_repository": "https://github.com/gwsw/less",
+    "commit": "7f46e9ff46216f3e560cd1f41ddf3b36b11eec0e",
+    "version_output": "less 712 (GNU regular expressions)\nCopyright (C) 1984-2026  Mark Nudelman\n\nless comes with NO WARRANTY, to the extent permitted by law.\nFor information about the terms of redistribution,\nsee the file named README in the less distribution.\nHome page: https://greenwoodsoftware.com/less\n",
+    "binary_sha256": "ef678d11642a2f359dafeccb814d3dff7cb02e7c20b6963e6064e057686a958b",
+    "defines_h_sha256": "0d0cbeefd72cef362462827c9b27005c570f8720c26c772679fb7945d347eb52",
+    "defined_configure_macros": {
+      "SECURE": "         SECURE_COMPILE",
+      "SHELL_ESCAPE": "   (!SECURE)",
+      "EXAMINE": "        (!SECURE)",
+      "TAB_COMPLETE_FILENAME": "(!SECURE)",
+      "CMD_HISTORY": "    1",
+      "HILITE_SEARCH": "  1",
+      "EDITOR": "         (!SECURE)",
+      "TAGS": "           (!SECURE)",
+      "USERFILE": "       (!SECURE)",
+      "GLOB": "           (!SECURE)",
+      "PIPEC": "          (!SECURE && HAVE_POPEN)",
+      "LOGFILE": "        (!SECURE)",
+      "OSC8_LINK": "      1",
+      "GNU_OPTIONS": "    1",
+      "ONLY_RETURN": "    0",
+      "LESSKEYFILE": "            \".less\"",
+      "LESSKEYFILE_SYS": "        SYSDIR \"/sysless\"",
+      "DEF_LESSKEYINFILE": "      \".lesskey\"",
+      "LESSKEYINFILE_SYS": "      SYSDIR \"/syslesskey\"",
+      "LESSHISTFILE": "           \".lesshst\"",
+      "MSDOS_COMPILER": " 0",
+      "PATHNAME_SEP": "   \"/\"",
+      "OS2": "1",
+      "TGETENT_OK": " 1",
+      "HAVE_SYS_TYPES_H": "1",
+      "HAVE_PERROR": "    1",
+      "HAVE_TIME": "      1",
+      "HAVE_SHELL": "     1",
+      "DEF_METACHARS": "  \"; *?\\t\\n'\\\"()<>[]|&^`#\\\\$%=~{},\"",
+      "DEF_METAESCAPE": " \"\\\\\"",
+      "HAVE_DUP": "       1",
+      "HAVE_MEMCPY": "1",
+      "HAVE_STRCHR": "1",
+      "HAVE_STRSTR": "1",
+      "HAVE_LESSKEYSRC": "1",
+      "CMDBUF_SIZE": "    2048    /* Buffer for multichar commands */",
+      "UNGOT_SIZE": "     200     /* Max chars to unget() */",
+      "LINEBUF_SIZE": "   1024    /* Initial max size of line in input file */",
+      "OUTBUF_SIZE": "    1024    /* Output buffer */",
+      "PROMPT_SIZE": "    2048    /* Max size of prompt string */",
+      "TERMBUF_SIZE": "   2048    /* Termcap buffer for tgetent */",
+      "TERMSBUF_SIZE": "  1024    /* Buffer to hold termcap strings */",
+      "TAGLINE_SIZE": "   1024    /* Max size of line in tags file */",
+      "TABSTOP_MAX": "    128     /* Max number of custom tab stops */",
+      "LINENUM_POOL": "   1024    /* Size of line number pool */",
+      "RETSIGTYPE": "void",
+      "EDIT_PGM": "\"vi\"",
+      "HAVE_CONST": "1",
+      "HAVE_CTYPE_H": "1",
+      "HAVE_ERRNO": "1",
+      "HAVE_ERRNO_H": "1",
+      "HAVE_FCHMOD": "1",
+      "HAVE_FCNTL_H": "1",
+      "HAVE_FILENO": "1",
+      "HAVE_FSYNC": "1",
+      "HAVE_GNU_REGEX": "1",
+      "HAVE_INTTYPES_H": "1",
+      "HAVE_LIMITS_H": "1",
+      "HAVE_LOCALE": "1",
+      "HAVE_NANOSLEEP": "1",
+      "HAVE_NCURSESW_TERMCAP_H": "1",
+      "HAVE_OSPEED": "1",
+      "HAVE_POLL": "1",
+      "HAVE_POPEN": "1",
+      "HAVE_REALPATH": "1",
+      "HAVE_SETITIMER": "1",
+      "HAVE_SETTABLE_ERRNO": "1",
+      "HAVE_SIGEMPTYSET": "1",
+      "HAVE_SIGPROCMASK": "1",
+      "HAVE_SIGSETJMP": "1",
+      "HAVE_SIGSETMASK": "1",
+      "HAVE_SIGSET_T": "1",
+      "HAVE_SNPRINTF": "1",
+      "HAVE_STAT": "1",
+      "HAVE_STAT_INO": "1",
+      "HAVE_STDCKDINT_H": "1",
+      "HAVE_STDINT_H": "1",
+      "HAVE_STDIO_H": "1",
+      "HAVE_STDLIB_H": "1",
+      "HAVE_STRERROR": "1",
+      "HAVE_STRINGS_H": "1",
+      "HAVE_STRING_H": "1",
+      "HAVE_STRSIGNAL": "1",
+      "HAVE_SYSTEM": "1",
+      "HAVE_SYS_ERRLIST": "1",
+      "HAVE_SYS_IOCTL_H": "1",
+      "HAVE_SYS_STAT_H": "1",
+      "HAVE_SYS_TIME_H": "1",
+      "HAVE_SYS_WAIT_H": "1",
+      "HAVE_TERMCAP_H": "1",
+      "HAVE_TERMINFO": "1",
+      "HAVE_TERMIOS_FUNCS": "1",
+      "HAVE_TERMIOS_H": "1",
+      "HAVE_TERMIO_H": "1",
+      "HAVE_TIME_H": "1",
+      "HAVE_TIME_T": "1",
+      "HAVE_TPARM2": "1",
+      "HAVE_TPARM8": "1",
+      "HAVE_TPARM9": "1",
+      "HAVE_TTYNAME": "1",
+      "HAVE_UNISTD_H": "1",
+      "HAVE_UPPER_LOWER": "1",
+      "HAVE_USLEEP": "1",
+      "HAVE_VALUES_H": "1",
+      "HAVE__SETJMP": "1",
+      "PACKAGE_BUGREPORT": "\"\"",
+      "PACKAGE_NAME": "\"less\"",
+      "PACKAGE_STRING": "\"less 1\"",
+      "PACKAGE_TARNAME": "\"less\"",
+      "PACKAGE_URL": "\"\"",
+      "PACKAGE_VERSION": "\"1\"",
+      "SECURE_COMPILE": "0",
+      "STDC_HEADERS": "1"
+    },
+    "platform": "Linux x86_64",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "libc": "glibc 2.41",
+    "configure_arguments": [
+      "--with-regex=gnu",
+      "CPPFLAGS=-I/tmp/rless-review-tools/usr/include",
+      "LDFLAGS=-L/tmp/rless-review-tools/usr/lib/x86_64-linux-gnu"
+    ],
+    "test_command": "make check CFLAGS='-g -O2 -I/tmp/rless-review-tools/usr/include' LDFLAGS=-L/tmp/rless-review-tools/usr/lib/x86_64-linux-gnu",
+    "upstream_tests": {
+      "executed": 21,
+      "errors": 0,
+      "runner_summary": "RAN  21 tests with 0 errors",
+      "runner_exit_status": 0
+    },
+    "readme_copy_comparison": "passed",
+    "review_locale": "C",
+    "review_term": "xterm-256color",
+    "pty_dimensions": {
+      "rows": 24,
+      "columns": 80
+    },
+    "unverified_profiles": [
+      "macOS/BSD",
+      "Windows",
+      "vt100 review probes",
+      "dumb review probes",
+      "UTF-8 locale review probes"
+    ]
+  },
+  "fixture": {
+    "normalization_token": "<FIXTURE_ROOT>",
+    "input_file": "input.txt",
+    "generation": "b''.join(f'{n:03d} alpha beta\\n'.encode('ascii') for n in range(1, 101))",
+    "bytes": 1500
+  },
+  "isolation": {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "<FIXTURE_ROOT>",
+    "TERM": "xterm-256color",
+    "LC_ALL": "C",
+    "LESSHISTFILE": "-"
+  },
+  "pty_invocation": {
+    "common_flags": [
+      "-X",
+      "--no-keypad",
+      "--no-paste"
+    ],
+    "file_for_option_queries": "<FIXTURE_ROOT>/input.txt",
+    "stream_input": "same 100 lines, pipe writer closed after early-display observation"
+  },
+  "limitations": [
+    "Observational review, not a complete conformance test suite.",
+    "No rless implementation was executed.",
+    "PTY probes checked selected textual output, not full terminal emulator state.",
+    "This records an observed build, not a hermetic or remotely restored environment."
+  ],
+  "probe_count": 17,
+  "observations": [
+    {
+      "id": "unknown-long",
+      "options_or_argv": [
+        "--definitely-invalid",
+        "<FIXTURE_ROOT>/input.txt"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "beta\n090 alpha beta\n091 alpha beta\n092 alpha beta\n093 alpha beta\n094 alpha beta\n095 alpha beta\n096 alpha beta\n097 alpha beta\n098 alpha beta\n099 alpha beta\n100 alpha beta\n",
+      "normalized_stderr": "There is no --definitely-invalid option (\"less --help\" for help)\n",
+      "normalized_stdout_sha256": "5da40fd2ed897ad38e2b84e60470fefec28c56167dbe05ef1e55347b507b6ec6",
+      "stdout_bytes_before_path_normalization": 1500
+    },
+    {
+      "id": "missing-prompt-argument",
+      "options_or_argv": [
+        "-P"
+      ],
+      "environment_overrides": {},
+      "status": 1,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "",
+      "normalized_stderr": "Value is required after -P (--prompt)\n",
+      "normalized_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes_before_path_normalization": 0
+    },
+    {
+      "id": "legacy-lesskey",
+      "options_or_argv": [
+        "-k",
+        "<FIXTURE_ROOT>/obsolete",
+        "<FIXTURE_ROOT>/input.txt"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "beta\n090 alpha beta\n091 alpha beta\n092 alpha beta\n093 alpha beta\n094 alpha beta\n095 alpha beta\n096 alpha beta\n097 alpha beta\n098 alpha beta\n099 alpha beta\n100 alpha beta\n",
+      "normalized_stderr": "Ignoring -k option: the binary lesskey file format is no longer supported\n",
+      "normalized_stdout_sha256": "5da40fd2ed897ad38e2b84e60470fefec28c56167dbe05ef1e55347b507b6ec6",
+      "stdout_bytes_before_path_normalization": 1500
+    },
+    {
+      "id": "missing-file",
+      "options_or_argv": [
+        "--",
+        "<FIXTURE_ROOT>/missing"
+      ],
+      "environment_overrides": {},
+      "status": 1,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "",
+      "normalized_stderr": "<FIXTURE_ROOT>/missing: No such file or directory\n",
+      "normalized_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes_before_path_normalization": 0
+    },
+    {
+      "id": "valid-then-missing-file",
+      "options_or_argv": [
+        "<FIXTURE_ROOT>/input.txt",
+        "<FIXTURE_ROOT>/missing"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "093 alpha beta\n094 alpha beta\n095 alpha beta\n096 alpha beta\n097 alpha beta\n098 alpha beta\n099 alpha beta\n100 alpha beta\n<FIXTURE_ROOT>/missing: No such file or directory\n",
+      "normalized_stderr": "",
+      "normalized_stdout_sha256": "0d1b2c771f3f8ff0c622476f7d06d124fda1f448799f01431f5d01a5e9432dbc",
+      "stdout_bytes_before_path_normalization": 1567
+    },
+    {
+      "id": "missing-then-valid-file",
+      "options_or_argv": [
+        "<FIXTURE_ROOT>/missing",
+        "<FIXTURE_ROOT>/input.txt"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "beta\n090 alpha beta\n091 alpha beta\n092 alpha beta\n093 alpha beta\n094 alpha beta\n095 alpha beta\n096 alpha beta\n097 alpha beta\n098 alpha beta\n099 alpha beta\n100 alpha beta\n",
+      "normalized_stderr": "<FIXTURE_ROOT>/missing: No such file or directory\n",
+      "normalized_stdout_sha256": "5da40fd2ed897ad38e2b84e60470fefec28c56167dbe05ef1e55347b507b6ec6",
+      "stdout_bytes_before_path_normalization": 1500
+    },
+    {
+      "id": "options-after-operand",
+      "options_or_argv": [
+        "<FIXTURE_ROOT>/input.txt",
+        "-N"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "beta\n090 alpha beta\n091 alpha beta\n092 alpha beta\n093 alpha beta\n094 alpha beta\n095 alpha beta\n096 alpha beta\n097 alpha beta\n098 alpha beta\n099 alpha beta\n100 alpha beta\n",
+      "normalized_stderr": "",
+      "normalized_stdout_sha256": "5da40fd2ed897ad38e2b84e60470fefec28c56167dbe05ef1e55347b507b6ec6",
+      "stdout_bytes_before_path_normalization": 1500
+    },
+    {
+      "id": "posix-options-after-operand",
+      "options_or_argv": [
+        "<FIXTURE_ROOT>/input.txt",
+        "-N"
+      ],
+      "environment_overrides": {
+        "POSIXLY_CORRECT": ""
+      },
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "beta\n092 alpha beta\n093 alpha beta\n094 alpha beta\n095 alpha beta\n096 alpha beta\n097 alpha beta\n098 alpha beta\n099 alpha beta\n100 alpha beta\n-N: No such file or directory\n",
+      "normalized_stderr": "",
+      "normalized_stdout_sha256": "dc2bf14d0c25356aa6d1c3478614c7672ee662c8814e36601c08dda8cb812681",
+      "stdout_bytes_before_path_normalization": 1530
+    },
+    {
+      "id": "raw-default",
+      "options_or_argv": [],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "PTY option query",
+      "query": "_r",
+      "observed_query_message": "Display ANSI sequences directly, other control characters as ^X"
+    },
+    {
+      "id": "raw-argv-lower",
+      "options_or_argv": [
+        "-r"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "PTY option query",
+      "query": "_r",
+      "observed_query_message": "Display control characters directly (not recommended)"
+    },
+    {
+      "id": "raw-environment-lower",
+      "options_or_argv": [],
+      "environment_overrides": {
+        "LESS": "-r"
+      },
+      "status": 0,
+      "mode": "PTY option query",
+      "query": "_r",
+      "observed_query_message": "Display ANSI sequences directly, other control characters as ^X"
+    },
+    {
+      "id": "raw-reset-upper",
+      "options_or_argv": [
+        "-+R"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "PTY option query",
+      "query": "_r",
+      "observed_query_message": "Display control characters as ^X"
+    },
+    {
+      "id": "raw-repeated-argv",
+      "options_or_argv": [
+        "-r",
+        "-r"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "PTY option query",
+      "query": "_r",
+      "observed_query_message": "Display control characters directly (not recommended)"
+    },
+    {
+      "id": "secure-empty-tags",
+      "options_or_argv": [
+        "-t",
+        "anything"
+      ],
+      "environment_overrides": {
+        "LESSSECURE": ""
+      },
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "",
+      "normalized_stderr": "",
+      "normalized_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes_before_path_normalization": 0
+    },
+    {
+      "id": "secure-zero-tags",
+      "options_or_argv": [
+        "-t",
+        "anything"
+      ],
+      "environment_overrides": {
+        "LESSSECURE": "0"
+      },
+      "status": 0,
+      "mode": "non-TTY stdout/stderr",
+      "normalized_stdout_tail": "",
+      "normalized_stderr": "tags support is not available\n",
+      "normalized_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes_before_path_normalization": 0
+    },
+    {
+      "id": "stream-default",
+      "options_or_argv": [],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "pipe stdin with PTY stdout and controlling terminal",
+      "first_page_before_pipe_close": true,
+      "observation_window_seconds": 1
+    },
+    {
+      "id": "stream-file-size",
+      "options_or_argv": [
+        "--file-size"
+      ],
+      "environment_overrides": {},
+      "status": 0,
+      "mode": "pipe stdin with PTY stdout and controlling terminal",
+      "first_page_before_pipe_close": false,
+      "observation_window_seconds": 1
+    }
+  ]
+}

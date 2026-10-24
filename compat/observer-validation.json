@@ -1,0 +1,12 @@
+{
+  "negative_candidate": "/bin/cat",
+  "case_filter": "option-version",
+  "executed": 2,
+  "mismatches_detected": 2,
+  "runner_exit_status": 1,
+  "gnu_regex_rust_probe": {
+    "assertions": 4,
+    "passed": 4
+  },
+  "terminal_observer": "pyte 0.8.2 + wcwidth 0.2.13, DEC alternate/mode, per-cell OSC 8 and bell extensions"
+}

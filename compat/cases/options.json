@@ -1,0 +1,7502 @@
+[
+  {
+    "id": "option-search-skip-screen-0",
+    "capability_ids": [
+      "option:search-skip-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-a",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-search-skip-screen-1",
+    "capability_ids": [
+      "option:search-skip-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-A",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-search-skip-screen-2",
+    "capability_ids": [
+      "option:search-skip-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--search-skip-screen",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-search-skip-screen-3",
+    "capability_ids": [
+      "option:search-skip-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--SEARCH-SKIP-SCREEN",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-search-skip-screen",
+    "capability_ids": [
+      "option:search-skip-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__search-skip-screen\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-buffers-0",
+    "capability_ids": [
+      "option:buffers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-b128",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-buffers-1",
+    "capability_ids": [
+      "option:buffers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--buffers=128",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-buffers",
+    "capability_ids": [
+      "option:buffers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__buffers\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-auto-buffers-0",
+    "capability_ids": [
+      "option:auto-buffers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-B",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-auto-buffers-1",
+    "capability_ids": [
+      "option:auto-buffers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--auto-buffers",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-auto-buffers",
+    "capability_ids": [
+      "option:auto-buffers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__auto-buffers\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-clear-screen-0",
+    "capability_ids": [
+      "option:clear-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-c",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-clear-screen-1",
+    "capability_ids": [
+      "option:clear-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-C",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-clear-screen-2",
+    "capability_ids": [
+      "option:clear-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--clear-screen",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-clear-screen-3",
+    "capability_ids": [
+      "option:clear-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--CLEAR-SCREEN",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-clear-screen",
+    "capability_ids": [
+      "option:clear-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__clear-screen\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-dumb-0",
+    "capability_ids": [
+      "option:dumb"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-d",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-dumb-1",
+    "capability_ids": [
+      "option:dumb"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--dumb",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-dumb",
+    "capability_ids": [
+      "option:dumb"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__dumb\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-color-0",
+    "capability_ids": [
+      "option:color"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--use-color",
+      "-DM+r",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-color-1",
+    "capability_ids": [
+      "option:color"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--use-color",
+      "--color=M+r",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-at-eof-0",
+    "capability_ids": [
+      "option:quit-at-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-e",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-at-eof-1",
+    "capability_ids": [
+      "option:quit-at-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-E",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-at-eof-2",
+    "capability_ids": [
+      "option:quit-at-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--quit-at-eof",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-at-eof-3",
+    "capability_ids": [
+      "option:quit-at-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--QUIT-AT-EOF",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-quit-at-eof",
+    "capability_ids": [
+      "option:quit-at-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__quit-at-eof\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-force-0",
+    "capability_ids": [
+      "option:force"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-f",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-force-1",
+    "capability_ids": [
+      "option:force"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--force",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-force",
+    "capability_ids": [
+      "option:force"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__force\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-if-one-screen-0",
+    "capability_ids": [
+      "option:quit-if-one-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-F",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-if-one-screen-1",
+    "capability_ids": [
+      "option:quit-if-one-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--quit-if-one-screen",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-quit-if-one-screen",
+    "capability_ids": [
+      "option:quit-if-one-screen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__quit-if-one-screen\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-search-0",
+    "capability_ids": [
+      "option:hilite-search"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-g",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-search-1",
+    "capability_ids": [
+      "option:hilite-search"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-G",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-search-2",
+    "capability_ids": [
+      "option:hilite-search"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--hilite-search",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-search-3",
+    "capability_ids": [
+      "option:hilite-search"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--HILITE-SEARCH",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-hilite-search",
+    "capability_ids": [
+      "option:hilite-search"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__hilite-search\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-max-back-scroll-0",
+    "capability_ids": [
+      "option:max-back-scroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-h3",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-max-back-scroll-1",
+    "capability_ids": [
+      "option:max-back-scroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--max-back-scroll=3",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-max-back-scroll",
+    "capability_ids": [
+      "option:max-back-scroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__max-back-scroll\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-ignore-case-0",
+    "capability_ids": [
+      "option:ignore-case"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-i",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-ignore-case-1",
+    "capability_ids": [
+      "option:ignore-case"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-I",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-ignore-case-2",
+    "capability_ids": [
+      "option:ignore-case"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--ignore-case",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-ignore-case-3",
+    "capability_ids": [
+      "option:ignore-case"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--IGNORE-CASE",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-ignore-case",
+    "capability_ids": [
+      "option:ignore-case"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__ignore-case\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-jump-target-0",
+    "capability_ids": [
+      "option:jump-target"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-j.5",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-jump-target-1",
+    "capability_ids": [
+      "option:jump-target"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--jump-target=.5",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-jump-target",
+    "capability_ids": [
+      "option:jump-target"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__jump-target\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-status-column-0",
+    "capability_ids": [
+      "option:status-column"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-J",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-status-column-1",
+    "capability_ids": [
+      "option:status-column"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--status-column",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-status-column",
+    "capability_ids": [
+      "option:status-column"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__status-column\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-lesskey-file-0",
+    "capability_ids": [
+      "option:lesskey-file"
+    ],
+    "mode": "pipe",
+    "argv": [
+      "-kobsolete",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-lesskey-file-1",
+    "capability_ids": [
+      "option:lesskey-file"
+    ],
+    "mode": "pipe",
+    "argv": [
+      "--lesskey-file=obsolete",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-lesskey-content-0",
+    "capability_ids": [
+      "option:lesskey-content"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--lesskey-content=#env;LESS=-N",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-lesskey-src-0",
+    "capability_ids": [
+      "option:lesskey-src"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--lesskey-src=keys",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {
+      "keys": {
+        "text": "#env\nLESS = -N\n"
+      }
+    },
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-on-intr-0",
+    "capability_ids": [
+      "option:quit-on-intr"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-K",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quit-on-intr-1",
+    "capability_ids": [
+      "option:quit-on-intr"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--quit-on-intr",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-quit-on-intr",
+    "capability_ids": [
+      "option:quit-on-intr"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__quit-on-intr\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-lessopen-0",
+    "capability_ids": [
+      "option:no-lessopen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-L",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-lessopen-1",
+    "capability_ids": [
+      "option:no-lessopen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-lessopen",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-lessopen",
+    "capability_ids": [
+      "option:no-lessopen"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-lessopen\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-long-prompt-0",
+    "capability_ids": [
+      "option:long-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-m",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-long-prompt-1",
+    "capability_ids": [
+      "option:long-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-M",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-long-prompt-2",
+    "capability_ids": [
+      "option:long-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--long-prompt",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-long-prompt-3",
+    "capability_ids": [
+      "option:long-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--LONG-PROMPT",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-long-prompt",
+    "capability_ids": [
+      "option:long-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__long-prompt\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-line-numbers-0",
+    "capability_ids": [
+      "option:line-numbers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-n",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-line-numbers-1",
+    "capability_ids": [
+      "option:line-numbers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-N",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-line-numbers-2",
+    "capability_ids": [
+      "option:line-numbers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--line-numbers",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-line-numbers-3",
+    "capability_ids": [
+      "option:line-numbers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--LINE-NUMBERS",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-line-numbers",
+    "capability_ids": [
+      "option:line-numbers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__line-numbers\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-log-file-0",
+    "capability_ids": [
+      "option:log-file"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-olog",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-log-file-1",
+    "capability_ids": [
+      "option:log-file"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--log-file=log",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-log-file",
+    "capability_ids": [
+      "option:log-file"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__log-file\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-LOG-FILE-0",
+    "capability_ids": [
+      "option:LOG-FILE"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-Olog",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-LOG-FILE-1",
+    "capability_ids": [
+      "option:LOG-FILE"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--LOG-FILE=log",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-LOG-FILE",
+    "capability_ids": [
+      "option:LOG-FILE"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__LOG-FILE\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-pattern-0",
+    "capability_ids": [
+      "option:pattern"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-pneedle",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-pattern-1",
+    "capability_ids": [
+      "option:pattern"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--pattern=needle",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-prompt-0",
+    "capability_ids": [
+      "option:prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "-PCUSTOM",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "CUSTOM"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-prompt-1",
+    "capability_ids": [
+      "option:prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--prompt=CUSTOM",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "CUSTOM"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-prompt",
+    "capability_ids": [
+      "option:prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__prompt\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quiet-0",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-q",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quiet-1",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-Q",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quiet-2",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--quiet",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quiet-3",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--silent",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quiet-4",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--QUIET",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quiet-5",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--SILENT",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-quiet",
+    "capability_ids": [
+      "option:quiet"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__quiet\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-raw-control-chars-0",
+    "capability_ids": [
+      "option:raw-control-chars"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-r",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-raw-control-chars-1",
+    "capability_ids": [
+      "option:raw-control-chars"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-R",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-raw-control-chars-2",
+    "capability_ids": [
+      "option:raw-control-chars"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--raw-control-chars",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-raw-control-chars-3",
+    "capability_ids": [
+      "option:raw-control-chars"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--RAW-CONTROL-CHARS",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-raw-control-chars",
+    "capability_ids": [
+      "option:raw-control-chars"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__raw-control-chars\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-squeeze-blank-lines-0",
+    "capability_ids": [
+      "option:squeeze-blank-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-s",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-squeeze-blank-lines-1",
+    "capability_ids": [
+      "option:squeeze-blank-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--squeeze-blank-lines",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-squeeze-blank-lines",
+    "capability_ids": [
+      "option:squeeze-blank-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__squeeze-blank-lines\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-chop-long-lines-0",
+    "capability_ids": [
+      "option:chop-long-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-S",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-chop-long-lines-1",
+    "capability_ids": [
+      "option:chop-long-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--chop-long-lines",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-chop-long-lines",
+    "capability_ids": [
+      "option:chop-long-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__chop-long-lines\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tag-0",
+    "capability_ids": [
+      "option:tag"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-tentry",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tag-1",
+    "capability_ids": [
+      "option:tag"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--tag=entry",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tag-file-0",
+    "capability_ids": [
+      "option:tag-file"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-Ttags",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tag-file-1",
+    "capability_ids": [
+      "option:tag-file"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--tag-file=tags",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-tag-file",
+    "capability_ids": [
+      "option:tag-file"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__tag-file\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-underline-special-0",
+    "capability_ids": [
+      "option:underline-special"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-u",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-underline-special-1",
+    "capability_ids": [
+      "option:underline-special"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-U",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-underline-special-2",
+    "capability_ids": [
+      "option:underline-special"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--underline-special",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-underline-special-3",
+    "capability_ids": [
+      "option:underline-special"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--UNDERLINE-SPECIAL",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-underline-special",
+    "capability_ids": [
+      "option:underline-special"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__underline-special\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-version-0",
+    "capability_ids": [
+      "option:version"
+    ],
+    "mode": "pipe",
+    "argv": [
+      "-V",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-version-1",
+    "capability_ids": [
+      "option:version"
+    ],
+    "mode": "pipe",
+    "argv": [
+      "--version",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-target-0",
+    "capability_ids": [
+      "option:hilite-target"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--hilite-target",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-hilite-target",
+    "capability_ids": [
+      "option:hilite-target"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__hilite-target\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-unread-0",
+    "capability_ids": [
+      "option:hilite-unread"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-w",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-unread-1",
+    "capability_ids": [
+      "option:hilite-unread"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-W",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-unread-2",
+    "capability_ids": [
+      "option:hilite-unread"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--hilite-unread",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-hilite-unread-3",
+    "capability_ids": [
+      "option:hilite-unread"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--HILITE-UNREAD",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-hilite-unread",
+    "capability_ids": [
+      "option:hilite-unread"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__hilite-unread\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tabs-0",
+    "capability_ids": [
+      "option:tabs"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-x4,8",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tabs-1",
+    "capability_ids": [
+      "option:tabs"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--tabs=4,8",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-tabs",
+    "capability_ids": [
+      "option:tabs"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__tabs\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-init-0",
+    "capability_ids": [
+      "option:no-init"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-init-1",
+    "capability_ids": [
+      "option:no-init"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-init",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-init",
+    "capability_ids": [
+      "option:no-init"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-init\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-max-forw-scroll-0",
+    "capability_ids": [
+      "option:max-forw-scroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-y3",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-max-forw-scroll-1",
+    "capability_ids": [
+      "option:max-forw-scroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--max-forw-scroll=3",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-max-forw-scroll",
+    "capability_ids": [
+      "option:max-forw-scroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__max-forw-scroll\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-window-0",
+    "capability_ids": [
+      "option:window"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-z10",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-window-1",
+    "capability_ids": [
+      "option:window"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--window=10",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-window",
+    "capability_ids": [
+      "option:window"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__window\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quotes-0",
+    "capability_ids": [
+      "option:quotes"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-\"\"\"",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-quotes-1",
+    "capability_ids": [
+      "option:quotes"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--quotes=\"\"",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-quotes",
+    "capability_ids": [
+      "option:quotes"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__quotes\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tilde-0",
+    "capability_ids": [
+      "option:tilde"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-~",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-tilde-1",
+    "capability_ids": [
+      "option:tilde"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--tilde",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-tilde",
+    "capability_ids": [
+      "option:tilde"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__tilde\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-help-0",
+    "capability_ids": [
+      "option:help"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-?",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "HELP --"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-help-1",
+    "capability_ids": [
+      "option:help"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--help",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "HELP --"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-shift-0",
+    "capability_ids": [
+      "option:shift"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-#.25",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-shift-1",
+    "capability_ids": [
+      "option:shift"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--shift=.25",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-shift",
+    "capability_ids": [
+      "option:shift"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__shift\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-keypad-0",
+    "capability_ids": [
+      "option:no-keypad"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-keypad",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-keypad",
+    "capability_ids": [
+      "option:no-keypad"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-keypad\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-old-bot-0",
+    "capability_ids": [
+      "option:old-bot"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--old-bot",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-old-bot",
+    "capability_ids": [
+      "option:old-bot"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__old-bot\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-follow-name-0",
+    "capability_ids": [
+      "option:follow-name"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--follow-name",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-follow-name",
+    "capability_ids": [
+      "option:follow-name"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__follow-name\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-use-backslash-0",
+    "capability_ids": [
+      "option:use-backslash"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--use-backslash",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-use-backslash",
+    "capability_ids": [
+      "option:use-backslash"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__use-backslash\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-rscroll-0",
+    "capability_ids": [
+      "option:rscroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--rscroll=>",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-rscroll",
+    "capability_ids": [
+      "option:rscroll"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__rscroll\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-histdups-0",
+    "capability_ids": [
+      "option:no-histdups"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-histdups",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-histdups",
+    "capability_ids": [
+      "option:no-histdups"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-histdups\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-mouse-0",
+    "capability_ids": [
+      "option:mouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--mouse",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-mouse-1",
+    "capability_ids": [
+      "option:mouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--MOUSE",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-mouse",
+    "capability_ids": [
+      "option:mouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__mouse\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-emouse-0",
+    "capability_ids": [
+      "option:emouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--emouse=vmove,click",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-emouse",
+    "capability_ids": [
+      "option:emouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__emouse\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-rmouse-0",
+    "capability_ids": [
+      "option:rmouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--rmouse",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-rmouse",
+    "capability_ids": [
+      "option:rmouse"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__rmouse\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-wheel-lines-0",
+    "capability_ids": [
+      "option:wheel-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--wheel-lines=4",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-wheel-lines",
+    "capability_ids": [
+      "option:wheel-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__wheel-lines\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-save-marks-0",
+    "capability_ids": [
+      "option:save-marks"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--save-marks",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-save-marks",
+    "capability_ids": [
+      "option:save-marks"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__save-marks\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-line-num-width-0",
+    "capability_ids": [
+      "option:line-num-width"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--line-num-width=5",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-line-num-width",
+    "capability_ids": [
+      "option:line-num-width"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__line-num-width\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-status-col-width-0",
+    "capability_ids": [
+      "option:status-col-width"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--status-col-width=2",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-status-col-width",
+    "capability_ids": [
+      "option:status-col-width"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__status-col-width\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-incsearch-0",
+    "capability_ids": [
+      "option:incsearch"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--incsearch",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-incsearch",
+    "capability_ids": [
+      "option:incsearch"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__incsearch\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-use-color-0",
+    "capability_ids": [
+      "option:use-color"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--use-color",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-use-color",
+    "capability_ids": [
+      "option:use-color"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__use-color\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-file-size-0",
+    "capability_ids": [
+      "option:file-size"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--file-size",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-file-size",
+    "capability_ids": [
+      "option:file-size"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__file-size\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-time-file-size-0",
+    "capability_ids": [
+      "option:time-file-size"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--time-file-size=20",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-time-file-size",
+    "capability_ids": [
+      "option:time-file-size"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__time-file-size\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-status-line-0",
+    "capability_ids": [
+      "option:status-line"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--status-line",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-status-line",
+    "capability_ids": [
+      "option:status-line"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__status-line\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-header-0",
+    "capability_ids": [
+      "option:header"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--header=1,2,1",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-header",
+    "capability_ids": [
+      "option:header"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__header\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-paste-0",
+    "capability_ids": [
+      "option:no-paste"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-paste",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-paste",
+    "capability_ids": [
+      "option:no-paste"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-paste\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-form-feed-0",
+    "capability_ids": [
+      "option:form-feed"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--form-feed",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-form-feed",
+    "capability_ids": [
+      "option:form-feed"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__form-feed\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-past-eof-0",
+    "capability_ids": [
+      "option:past-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--past-eof",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-past-eof",
+    "capability_ids": [
+      "option:past-eof"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__past-eof\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-edit-warn-0",
+    "capability_ids": [
+      "option:no-edit-warn"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-edit-warn",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-edit-warn-1",
+    "capability_ids": [
+      "option:no-edit-warn"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-warn-edit",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-edit-warn",
+    "capability_ids": [
+      "option:no-edit-warn"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-edit-warn\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-number-headers-0",
+    "capability_ids": [
+      "option:no-number-headers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-number-headers",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-number-headers",
+    "capability_ids": [
+      "option:no-number-headers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-number-headers\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-search-headers-0",
+    "capability_ids": [
+      "option:no-search-headers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-search-headers",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-search-headers",
+    "capability_ids": [
+      "option:no-search-headers"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-search-headers\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-search-header-lines-0",
+    "capability_ids": [
+      "option:no-search-header-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-search-header-lines",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-search-header-lines",
+    "capability_ids": [
+      "option:no-search-header-lines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-search-header-lines\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-search-header-columns-0",
+    "capability_ids": [
+      "option:no-search-header-columns"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-search-header-columns",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-search-header-columns",
+    "capability_ids": [
+      "option:no-search-header-columns"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-search-header-columns\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-redraw-on-quit-0",
+    "capability_ids": [
+      "option:redraw-on-quit"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--redraw-on-quit",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-redraw-on-quit",
+    "capability_ids": [
+      "option:redraw-on-quit"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__redraw-on-quit\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-search-options-0",
+    "capability_ids": [
+      "option:search-options"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--search-options=W",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-search-options",
+    "capability_ids": [
+      "option:search-options"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__search-options\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-exit-follow-on-close-0",
+    "capability_ids": [
+      "option:exit-follow-on-close"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--exit-follow-on-close",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-exit-follow-on-close",
+    "capability_ids": [
+      "option:exit-follow-on-close"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__exit-follow-on-close\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-no-vbell-0",
+    "capability_ids": [
+      "option:no-vbell"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--no-vbell",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-no-vbell",
+    "capability_ids": [
+      "option:no-vbell"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__no-vbell\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-modelines-0",
+    "capability_ids": [
+      "option:modelines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--modelines=2",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-modelines",
+    "capability_ids": [
+      "option:modelines"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__modelines\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-intr-0",
+    "capability_ids": [
+      "option:intr"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--intr=x",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-intr",
+    "capability_ids": [
+      "option:intr"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__intr\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-wordwrap-0",
+    "capability_ids": [
+      "option:wordwrap"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--wordwrap",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-wordwrap",
+    "capability_ids": [
+      "option:wordwrap"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__wordwrap\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-show-preproc-errors-0",
+    "capability_ids": [
+      "option:show-preproc-errors"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--show-preproc-errors",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-show-preproc-errors",
+    "capability_ids": [
+      "option:show-preproc-errors"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__show-preproc-errors\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-proc-backspace-0",
+    "capability_ids": [
+      "option:proc-backspace"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--proc-backspace",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-proc-backspace-1",
+    "capability_ids": [
+      "option:proc-backspace"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--PROC-BACKSPACE",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-proc-backspace",
+    "capability_ids": [
+      "option:proc-backspace"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__proc-backspace\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-proc-tab-0",
+    "capability_ids": [
+      "option:proc-tab"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--proc-tab",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-proc-tab-1",
+    "capability_ids": [
+      "option:proc-tab"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--PROC-TAB",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-proc-tab",
+    "capability_ids": [
+      "option:proc-tab"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__proc-tab\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-proc-return-0",
+    "capability_ids": [
+      "option:proc-return"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--proc-return",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-proc-return-1",
+    "capability_ids": [
+      "option:proc-return"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--PROC-RETURN",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-proc-return",
+    "capability_ids": [
+      "option:proc-return"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__proc-return\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-cmd-0",
+    "capability_ids": [
+      "option:cmd"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--cmd=g",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-match-shift-0",
+    "capability_ids": [
+      "option:match-shift"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--match-shift=.25",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-match-shift",
+    "capability_ids": [
+      "option:match-shift"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__match-shift\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-autosave-0",
+    "capability_ids": [
+      "option:autosave"
+    ],
+    "mode": "pty",
+    "argv": [
+      "--autosave=m/!",
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-autosave",
+    "capability_ids": [
+      "option:autosave"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__autosave\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "option-end-prompt-0",
+    "capability_ids": [
+      "option:end-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "--end-prompt=END",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  },
+  {
+    "id": "query-default-end-prompt",
+    "capability_ids": [
+      "option:end-prompt"
+    ],
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {},
+    "env": {},
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "__end-prompt\n",
+        "await": [
+          "(press RETURN)",
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ],
+    "fixture_set": "pager"
+  }
+]

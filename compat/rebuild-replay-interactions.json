@@ -1,0 +1,440 @@
+{
+  "executed": 108,
+  "passed": 108,
+  "failed": 0,
+  "errors": [],
+  "cases": {
+    "missing-value-option:buffers": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:buffers": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:buffers": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:buffers": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:color": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:max-back-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:max-back-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:max-back-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:max-back-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:jump-target": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:lesskey-content": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:lesskey-src": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:log-file": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:LOG-FILE": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:pattern": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:prompt": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:tag": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:tag-file": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:tabs": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:max-forw-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:max-forw-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:max-forw-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:max-forw-scroll": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:window": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:window": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:window": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:window": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:quotes": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:shift": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:rscroll": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:emouse": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:wheel-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:wheel-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:wheel-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:wheel-lines": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:line-num-width": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:line-num-width": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:line-num-width": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:line-num-width": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:status-col-width": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:status-col-width": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:status-col-width": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:status-col-width": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:time-file-size": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:time-file-size": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:time-file-size": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:time-file-size": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:header": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:search-options": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:modelines": {
+      "passed": true,
+      "actual": null
+    },
+    "zero-option:modelines": {
+      "passed": true,
+      "actual": null
+    },
+    "negative-option:modelines": {
+      "passed": true,
+      "actual": null
+    },
+    "overflow-option:modelines": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:intr": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:cmd": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:match-shift": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:autosave": {
+      "passed": true,
+      "actual": null
+    },
+    "missing-value-option:end-prompt": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-number-chop-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-number-chop-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-number-chop-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-number-chop-11": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-header-number-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-header-number-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-header-number-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-header-number-11": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-chop-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-chop-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-chop-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-chop-11": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-header-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-header-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-header-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-search-header-11": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-raw-proc-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-raw-proc-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-raw-proc-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-raw-proc-11": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-size-time-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-size-time-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-size-time-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-size-time-11": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-quiet-status-00": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-quiet-status-01": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-quiet-status-10": {
+      "passed": true,
+      "actual": null
+    },
+    "pair-quiet-status-11": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--X-00": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--X-01": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--X-10": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--X-11": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--E-00": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--E-01": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--E-10": {
+      "passed": true,
+      "actual": null
+    },
+    "onescreen--E-11": {
+      "passed": true,
+      "actual": null
+    },
+    "config-local-over-env": {
+      "passed": true,
+      "actual": null
+    },
+    "config-system-under-env": {
+      "passed": true,
+      "actual": null
+    },
+    "config-inline-over-file": {
+      "passed": true,
+      "actual": null
+    },
+    "config-version-gate": {
+      "passed": true,
+      "actual": null
+    },
+    "config-append-expand": {
+      "passed": true,
+      "actual": null
+    },
+    "config-noconfig": {
+      "passed": true,
+      "actual": null
+    },
+    "raw-env": {
+      "passed": true,
+      "actual": null
+    },
+    "raw-argv": {
+      "passed": true,
+      "actual": null
+    },
+    "raw-reset": {
+      "passed": true,
+      "actual": null
+    },
+    "raw-repeat": {
+      "passed": true,
+      "actual": null
+    },
+    "empty-preproc-1-0": {
+      "passed": true,
+      "actual": null
+    },
+    "empty-preproc-1-1": {
+      "passed": true,
+      "actual": null
+    },
+    "empty-preproc-2-0": {
+      "passed": true,
+      "actual": null
+    },
+    "empty-preproc-2-1": {
+      "passed": true,
+      "actual": null
+    }
+  }
+}

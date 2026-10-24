@@ -1,0 +1,31 @@
+{
+  "source_commit": "7f46e9ff46216f3e560cd1f41ddf3b36b11eec0e",
+  "binary_sha256": "1ed34f4901c7d50ad381bb937f4a18764037cd4ea3c6f8b9e9244cfa994613e4",
+  "upstream_tests": {
+    "executed": 21,
+    "failed": 0
+  },
+  "groups": {
+    "options": {
+      "executed": 230,
+      "passed": 230,
+      "failed": 0
+    },
+    "behavior": {
+      "executed": 467,
+      "passed": 467,
+      "failed": 0
+    },
+    "interactions": {
+      "executed": 108,
+      "passed": 108,
+      "failed": 0
+    },
+    "integration": {
+      "executed": 4,
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "reference_cases_replayed": 809
+}

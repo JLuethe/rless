@@ -1,0 +1,1363 @@
+{
+  "uri-handler": {
+    "status": 0,
+    "checkpoints": [
+      {
+        "rows": [
+          "preface                                                                         ",
+          "LINK                                                                            ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "Link: file:///tmp/fixture  (press RETURN)                                       "
+        ],
+        "styles": [
+          [
+            1,
+            0,
+            4,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": true,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            23,
+            0,
+            41,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ]
+        ],
+        "cursor": [
+          23,
+          41,
+          false
+        ],
+        "private_modes": [
+          2004
+        ],
+        "modes": [
+          224,
+          800,
+          64128
+        ],
+        "bells": 0,
+        "osc": [
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7",
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7",
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7",
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7"
+        ],
+        "hyperlinks": [
+          [
+            1,
+            0,
+            4,
+            "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ=="
+          ]
+        ]
+      },
+      {
+        "rows": [
+          "LINK                                                                            ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "ordinary                                                                        ",
+          "!{ROOT}/handler file:///tmp/fixture                           ",
+          "                                                                                "
+        ],
+        "styles": [
+          [
+            0,
+            0,
+            4,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": true,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ]
+        ],
+        "cursor": [
+          23,
+          0,
+          false
+        ],
+        "private_modes": [],
+        "modes": [
+          224,
+          800
+        ],
+        "bells": 0,
+        "osc": [
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7",
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7",
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7",
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+          "ODs7"
+        ],
+        "hyperlinks": [
+          [
+            0,
+            0,
+            4,
+            "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ=="
+          ]
+        ]
+      }
+    ],
+    "final_terminal": {
+      "rows": [
+        "preface                                                                         ",
+        "LINK                                                                            ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "ordinary                                                                        ",
+        "                                                                                "
+      ],
+      "styles": [
+        [
+          1,
+          0,
+          4,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": true,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ]
+      ],
+      "cursor": [
+        23,
+        0,
+        false
+      ],
+      "private_modes": [],
+      "modes": [
+        224,
+        800
+      ],
+      "bells": 0,
+      "osc": [
+        "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+        "ODs7",
+        "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+        "ODs7",
+        "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+        "ODs7",
+        "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ==",
+        "ODs7"
+      ],
+      "hyperlinks": [
+        [
+          1,
+          0,
+          4,
+          "ODs7ZmlsZTovLy90bXAvZml4dHVyZQ=="
+        ]
+      ]
+    },
+    "termios_restored": true,
+    "files": {
+      "handler": {
+        "sha256": "325a80f43f681b4a597c14901c7e423e040ac11c3c272831f0774043a4602b40",
+        "mode": 448,
+        "bytes": 42
+      },
+      "helper.log": {
+        "sha256": "f6d5faabb27795b28ce6fe32a5290f12f0b066319a34abfcbe1d3357e1dac13e",
+        "mode": 384,
+        "bytes": 20
+      },
+      "input.txt": {
+        "sha256": "5cffe2647ffbafedab7c66b67727db717a5f9852bff6c8fb212157fe1421b799",
+        "mode": 384,
+        "bytes": 946
+      },
+      "second.txt": {
+        "sha256": "9b298e5828c0ba33425b78c16db8fa1d341021883041d4f98473f44c678e490a",
+        "mode": 384,
+        "bytes": 5292
+      },
+      "tags": {
+        "sha256": "13342a3d7134fc3539e6aba8a74b2e1e5a24338dd4b541aaae8e23dd1e6740e1",
+        "mode": 384,
+        "bytes": 18
+      }
+    }
+  },
+  "editor-argv": {
+    "status": 0,
+    "checkpoints": [
+      {
+        "rows": [
+          "001 alpha beta needle 1                                                         ",
+          "002 alpha beta needle 2                                                         ",
+          "003 alpha beta needle 3                                                         ",
+          "004 alpha beta needle 4                                                         ",
+          "005 alpha beta needle 5                                                         ",
+          "006 alpha beta needle 6                                                         ",
+          "007 alpha beta needle 7                                                         ",
+          "008 alpha beta needle 8                                                         ",
+          "009 alpha beta needle 9                                                         ",
+          "010 alpha beta needle 10                                                        ",
+          "011 alpha beta needle 11                                                        ",
+          "012 alpha beta needle 12                                                        ",
+          "013 alpha beta needle 13                                                        ",
+          "014 alpha beta needle 14                                                        ",
+          "015 alpha beta needle 15                                                        ",
+          "016 alpha beta needle 16                                                        ",
+          "017 alpha beta needle 17                                                        ",
+          "018 alpha beta needle 18                                                        ",
+          "019 alpha beta needle 19                                                        ",
+          "020 alpha beta needle 20                                                        ",
+          "021 alpha beta needle 21                                                        ",
+          "022 alpha beta needle 22                                                        ",
+          "023 alpha beta needle 23                                                        ",
+          "@@READY@@                                                                       "
+        ],
+        "styles": [
+          [
+            23,
+            0,
+            9,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ]
+        ],
+        "cursor": [
+          23,
+          9,
+          false
+        ],
+        "private_modes": [
+          2004
+        ],
+        "modes": [
+          224,
+          800,
+          64128
+        ],
+        "bells": 0,
+        "osc": []
+      }
+    ],
+    "final_terminal": {
+      "rows": [
+        "001 alpha beta needle 1                                                         ",
+        "002 alpha beta needle 2                                                         ",
+        "003 alpha beta needle 3                                                         ",
+        "004 alpha beta needle 4                                                         ",
+        "005 alpha beta needle 5                                                         ",
+        "006 alpha beta needle 6                                                         ",
+        "007 alpha beta needle 7                                                         ",
+        "008 alpha beta needle 8                                                         ",
+        "009 alpha beta needle 9                                                         ",
+        "010 alpha beta needle 10                                                        ",
+        "011 alpha beta needle 11                                                        ",
+        "012 alpha beta needle 12                                                        ",
+        "013 alpha beta needle 13                                                        ",
+        "014 alpha beta needle 14                                                        ",
+        "015 alpha beta needle 15                                                        ",
+        "016 alpha beta needle 16                                                        ",
+        "017 alpha beta needle 17                                                        ",
+        "018 alpha beta needle 18                                                        ",
+        "019 alpha beta needle 19                                                        ",
+        "020 alpha beta needle 20                                                        ",
+        "021 alpha beta needle 21                                                        ",
+        "022 alpha beta needle 22                                                        ",
+        "023 alpha beta needle 23                                                        ",
+        "                                                                                "
+      ],
+      "styles": [],
+      "cursor": [
+        23,
+        0,
+        false
+      ],
+      "private_modes": [],
+      "modes": [
+        224,
+        800
+      ],
+      "bells": 0,
+      "osc": []
+    },
+    "termios_restored": true,
+    "files": {
+      "handler": {
+        "sha256": "325a80f43f681b4a597c14901c7e423e040ac11c3c272831f0774043a4602b40",
+        "mode": 448,
+        "bytes": 42
+      },
+      "helper.log": {
+        "sha256": "6365e599255807d5f78fcfd16747657fb40063ba286e7c28089e15e92a1052da",
+        "mode": 384,
+        "bytes": 13
+      },
+      "input.txt": {
+        "sha256": "73e8461fa54fe10bd1f912276baab454c3bf0f607779c1b6ac18da7252197c53",
+        "mode": 384,
+        "bytes": 5092
+      },
+      "second.txt": {
+        "sha256": "9b298e5828c0ba33425b78c16db8fa1d341021883041d4f98473f44c678e490a",
+        "mode": 384,
+        "bytes": 5292
+      },
+      "tags": {
+        "sha256": "13342a3d7134fc3539e6aba8a74b2e1e5a24338dd4b541aaae8e23dd1e6740e1",
+        "mode": 384,
+        "bytes": 18
+      }
+    }
+  },
+  "global-provider": {
+    "status": 0,
+    "checkpoints": [
+      {
+        "rows": [
+          "012 alpha beta needle 12                                                        ",
+          "013 alpha beta needle 13                                                        ",
+          "014 alpha beta needle 14                                                        ",
+          "015 alpha beta needle 15                                                        ",
+          "016 alpha beta needle 16                                                        ",
+          "017 alpha beta needle 17                                                        ",
+          "018 alpha beta needle 18                                                        ",
+          "019 alpha beta needle 19                                                        ",
+          "020 alpha beta needle 20                                                        ",
+          "021 alpha beta needle 21                                                        ",
+          "022 alpha beta needle 22                                                        ",
+          "023 alpha beta needle 23                                                        ",
+          "024 alpha beta needle 24                                                        ",
+          "025 alpha beta needle 25                                                        ",
+          "026 alpha beta needle 26                                                        ",
+          "027 alpha beta needle 27                                                        ",
+          "028 alpha beta needle 28                                                        ",
+          "029 alpha beta needle 29                                                        ",
+          "030 alpha beta needle 30                                                        ",
+          "031 alpha beta needle 31                                                        ",
+          "032 alpha beta needle 32                                                        ",
+          "033 alpha beta needle 33                                                        ",
+          "034 alpha beta needle 34                                                        ",
+          "@@READY@@                                                                       "
+        ],
+        "styles": [
+          [
+            23,
+            0,
+            9,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ]
+        ],
+        "cursor": [
+          23,
+          9,
+          false
+        ],
+        "private_modes": [
+          2004
+        ],
+        "modes": [
+          224,
+          800,
+          64128
+        ],
+        "bells": 0,
+        "osc": []
+      }
+    ],
+    "final_terminal": {
+      "rows": [
+        "012 alpha beta needle 12                                                        ",
+        "013 alpha beta needle 13                                                        ",
+        "014 alpha beta needle 14                                                        ",
+        "015 alpha beta needle 15                                                        ",
+        "016 alpha beta needle 16                                                        ",
+        "017 alpha beta needle 17                                                        ",
+        "018 alpha beta needle 18                                                        ",
+        "019 alpha beta needle 19                                                        ",
+        "020 alpha beta needle 20                                                        ",
+        "021 alpha beta needle 21                                                        ",
+        "022 alpha beta needle 22                                                        ",
+        "023 alpha beta needle 23                                                        ",
+        "024 alpha beta needle 24                                                        ",
+        "025 alpha beta needle 25                                                        ",
+        "026 alpha beta needle 26                                                        ",
+        "027 alpha beta needle 27                                                        ",
+        "028 alpha beta needle 28                                                        ",
+        "029 alpha beta needle 29                                                        ",
+        "030 alpha beta needle 30                                                        ",
+        "031 alpha beta needle 31                                                        ",
+        "032 alpha beta needle 32                                                        ",
+        "033 alpha beta needle 33                                                        ",
+        "034 alpha beta needle 34                                                        ",
+        "                                                                                "
+      ],
+      "styles": [],
+      "cursor": [
+        23,
+        0,
+        false
+      ],
+      "private_modes": [],
+      "modes": [
+        224,
+        800
+      ],
+      "bells": 0,
+      "osc": []
+    },
+    "termios_restored": true,
+    "files": {
+      "input.txt": {
+        "sha256": "73e8461fa54fe10bd1f912276baab454c3bf0f607779c1b6ac18da7252197c53",
+        "mode": 384,
+        "bytes": 5092
+      },
+      "provider": {
+        "sha256": "945d42a344defc8fcb6e24080ad45cb2c73ac604aa7f6ffb3ef15eb65b02c88e",
+        "mode": 448,
+        "bytes": 80
+      },
+      "provider.log": {
+        "sha256": "458f26879fc76a7a712b669c41f83551ee3717b87a4a87bdaba9622433e98b91",
+        "mode": 384,
+        "bytes": 9
+      },
+      "second.txt": {
+        "sha256": "9b298e5828c0ba33425b78c16db8fa1d341021883041d4f98473f44c678e490a",
+        "mode": 384,
+        "bytes": 5292
+      },
+      "tags": {
+        "sha256": "13342a3d7134fc3539e6aba8a74b2e1e5a24338dd4b541aaae8e23dd1e6740e1",
+        "mode": 384,
+        "bytes": 18
+      }
+    }
+  },
+  "history-load": {
+    "status": 0,
+    "checkpoints": [
+      {
+        "rows": [
+          "001 alpha beta needle 1                                                         ",
+          "002 alpha beta needle 2                                                         ",
+          "003 alpha beta needle 3                                                         ",
+          "004 alpha beta needle 4                                                         ",
+          "005 alpha beta needle 5                                                         ",
+          "006 alpha beta needle 6                                                         ",
+          "007 alpha beta needle 7                                                         ",
+          "008 alpha beta needle 8                                                         ",
+          "009 alpha beta needle 9                                                         ",
+          "010 alpha beta needle 10                                                        ",
+          "011 alpha beta needle 11                                                        ",
+          "012 alpha beta needle 12                                                        ",
+          "013 alpha beta needle 13                                                        ",
+          "014 alpha beta needle 14                                                        ",
+          "015 alpha beta needle 15                                                        ",
+          "016 alpha beta needle 16                                                        ",
+          "017 alpha beta needle 17                                                        ",
+          "018 alpha beta needle 18                                                        ",
+          "019 alpha beta needle 19                                                        ",
+          "020 alpha beta needle 20                                                        ",
+          "021 alpha beta needle 21                                                        ",
+          "022 alpha beta needle 22                                                        ",
+          "023 alpha beta needle 23                                                        ",
+          "@@READY@@                                                                       "
+        ],
+        "styles": [
+          [
+            0,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            1,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            2,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            3,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            4,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            5,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            6,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            7,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            8,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            9,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            10,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            11,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            12,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            13,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            14,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            15,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            16,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            17,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            18,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            19,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            20,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            21,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            22,
+            15,
+            21,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ],
+          [
+            23,
+            0,
+            9,
+            {
+              "fg": "default",
+              "bg": "default",
+              "bold": false,
+              "italics": false,
+              "underscore": false,
+              "strikethrough": false,
+              "reverse": true,
+              "blink": false
+            }
+          ]
+        ],
+        "cursor": [
+          23,
+          9,
+          false
+        ],
+        "private_modes": [
+          2004
+        ],
+        "modes": [
+          224,
+          800,
+          64128
+        ],
+        "bells": 0,
+        "osc": []
+      }
+    ],
+    "final_terminal": {
+      "rows": [
+        "001 alpha beta needle 1                                                         ",
+        "002 alpha beta needle 2                                                         ",
+        "003 alpha beta needle 3                                                         ",
+        "004 alpha beta needle 4                                                         ",
+        "005 alpha beta needle 5                                                         ",
+        "006 alpha beta needle 6                                                         ",
+        "007 alpha beta needle 7                                                         ",
+        "008 alpha beta needle 8                                                         ",
+        "009 alpha beta needle 9                                                         ",
+        "010 alpha beta needle 10                                                        ",
+        "011 alpha beta needle 11                                                        ",
+        "012 alpha beta needle 12                                                        ",
+        "013 alpha beta needle 13                                                        ",
+        "014 alpha beta needle 14                                                        ",
+        "015 alpha beta needle 15                                                        ",
+        "016 alpha beta needle 16                                                        ",
+        "017 alpha beta needle 17                                                        ",
+        "018 alpha beta needle 18                                                        ",
+        "019 alpha beta needle 19                                                        ",
+        "020 alpha beta needle 20                                                        ",
+        "021 alpha beta needle 21                                                        ",
+        "022 alpha beta needle 22                                                        ",
+        "023 alpha beta needle 23                                                        ",
+        "                                                                                "
+      ],
+      "styles": [
+        [
+          0,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          1,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          2,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          3,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          4,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          5,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          6,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          7,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          8,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          9,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          10,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          11,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          12,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          13,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          14,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          15,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          16,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          17,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          18,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          19,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          20,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          21,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ],
+        [
+          22,
+          15,
+          21,
+          {
+            "fg": "default",
+            "bg": "default",
+            "bold": false,
+            "italics": false,
+            "underscore": false,
+            "strikethrough": false,
+            "reverse": true,
+            "blink": false
+          }
+        ]
+      ],
+      "cursor": [
+        23,
+        0,
+        false
+      ],
+      "private_modes": [],
+      "modes": [
+        224,
+        800
+      ],
+      "bells": 0,
+      "osc": []
+    },
+    "termios_restored": true,
+    "files": {
+      "history": {
+        "sha256": "3db65f1689b82c50a1eb52386153e63fed0f50d81173c4f60179aebbc50bee48",
+        "mode": 384,
+        "bytes": 68
+      },
+      "input.txt": {
+        "sha256": "73e8461fa54fe10bd1f912276baab454c3bf0f607779c1b6ac18da7252197c53",
+        "mode": 384,
+        "bytes": 5092
+      },
+      "second.txt": {
+        "sha256": "9b298e5828c0ba33425b78c16db8fa1d341021883041d4f98473f44c678e490a",
+        "mode": 384,
+        "bytes": 5292
+      },
+      "tags": {
+        "sha256": "13342a3d7134fc3539e6aba8a74b2e1e5a24338dd4b541aaae8e23dd1e6740e1",
+        "mode": 384,
+        "bytes": 18
+      }
+    }
+  }
+}

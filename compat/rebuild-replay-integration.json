@@ -1,0 +1,24 @@
+{
+  "executed": 4,
+  "passed": 4,
+  "failed": 0,
+  "errors": [],
+  "cases": {
+    "uri-handler": {
+      "passed": true,
+      "actual": null
+    },
+    "editor-argv": {
+      "passed": true,
+      "actual": null
+    },
+    "global-provider": {
+      "passed": true,
+      "actual": null
+    },
+    "history-load": {
+      "passed": true,
+      "actual": null
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "parent", "capability_ids", "contract", "clause", "case_ids", "evidence", "status", "related_parents"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^[A-Z]+-[0-9]+\\.[0-9]+$"},
+    "parent": {"type": "string"},
+    "capability_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "contract": {"type": "string"},
+    "clause": {"type": "string"},
+    "case_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "evidence": {"enum": ["source-backed", "reference-observed", "unresolved"]},
+    "status": {"enum": ["specified", "unresolved"]},
+    "related_parents": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  }
+}

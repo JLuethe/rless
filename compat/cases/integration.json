@@ -1,0 +1,183 @@
+[
+  {
+    "id": "uri-handler",
+    "capability_ids": [
+      "surface:osc8"
+    ],
+    "fixture_set": "pager",
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {
+      "handler": {
+        "text": "#!/bin/sh\nprintf \"%s\\n\" \"$@\" > helper.log\n",
+        "mode": 448
+      },
+      "input.txt": {
+        "text": "preface\n\u001b]8;;file:///tmp/fixture\u001b\\LINK\u001b]8;;\u001b\\\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\nordinary\n"
+      }
+    },
+    "env": {
+      "LESS_OSC8_OPEN_file": "{ROOT}/handler"
+    },
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "\u000fn",
+        "await": [
+          "@@READY@@",
+          "(press RETURN)"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\u000fo",
+        "await": [
+          "@@READY@@",
+          "(press RETURN)"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "\nq"
+      }
+    ]
+  },
+  {
+    "id": "editor-argv",
+    "capability_ids": [
+      "surface:shell-editor"
+    ],
+    "fixture_set": "pager",
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {
+      "handler": {
+        "text": "#!/bin/sh\nprintf \"%s\\n\" \"$@\" > helper.log\n",
+        "mode": 448
+      }
+    },
+    "env": {
+      "VISUAL": "{ROOT}/handler",
+      "LESSEDIT": "%E %f %lm"
+    },
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "v",
+        "await": [
+          "@@READY@@",
+          "(press RETURN)"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ]
+  },
+  {
+    "id": "global-provider",
+    "capability_ids": [
+      "surface:tags"
+    ],
+    "fixture_set": "pager",
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "-TGTAGS",
+      "-tentry"
+    ],
+    "files": {
+      "provider": {
+        "text": "#!/bin/sh\nprintf \"%s\\n\" \"$@\" > provider.log\nprintf \"entry 12 input.txt alpha\\n\"\n",
+        "mode": 448
+      }
+    },
+    "env": {
+      "LESSGLOBALTAGS": "{ROOT}/provider"
+    },
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ]
+  },
+  {
+    "id": "history-load",
+    "capability_ids": [
+      "surface:history-format"
+    ],
+    "fixture_set": "pager",
+    "mode": "pty",
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "files": {
+      "history": {
+        "text": ".less-history-file:\n.search\n\"needle\n.shell\n.mark\nm a 1 0 input.txt\n"
+      }
+    },
+    "env": {
+      "LESSHISTFILE": "{ROOT}/history"
+    },
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ]
+      },
+      {
+        "send": "/\u001bk\n",
+        "await": [
+          "@@READY@@",
+          "(press RETURN)"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ]
+  }
+]

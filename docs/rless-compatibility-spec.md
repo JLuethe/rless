@@ -1,8 +1,15 @@
 # rless compatibility specification
 
-Status: source-grounded draft, ready to guide behavioral analysis. Requirements
-below are intended obligations; none imply that rless is implemented or that
-reference runtime checks have already passed.
+Status: parent requirement catalogue for the
+[version 1 specification package](../spec/README.md). The detailed package supplies
+behavior chapters, full grammar/interface annexes, classified capabilities and
+reference-backed acceptance cases. rless implementation and conformance remain
+unverified.
+
+The initial [readiness review](less-spec-review.md) identified the gaps addressed
+by that package. Its [execution and coverage record](../spec/readiness.md)
+supersedes the initial readiness assessment for the declared Linux/GNU baseline.
+The original 39 parent IDs below remain stable.
 
 ## 1. Target and meaning of equivalence
 
@@ -58,8 +65,9 @@ actions, and documented environment variables. Every entry must receive a test
 mapping; family summaries do not authorize omitting uncommon entries.
 
 Evidence states: **source-backed**, **reference-observed**, **implemented**,
-**conformant**, or **unresolved**. Current requirements are source-backed with
-runtime details pending. A source table default is not necessarily an effective
+**conformant**, or **unresolved**. Detailed requirements have source-backed contracts and linked reference cases
+in the version 1 package. Observation applies to the recorded cases, not an
+assertion that every possible behavioral path has been exercised. A source table default is not necessarily an effective
 startup default; handlers, locale, platform, and initialization must be checked.
 If sources disagree, reproduce the case on the pinned executable and record the
 result. Undocumented externally reachable behavior is investigated too.
@@ -67,7 +75,7 @@ result. Undocumented externally reachable behavior is investigated too.
 ## 3. Functional requirements
 
 All rows are MUST requirements for each profile in which the upstream feature is
-enabled. Tests in the last column are planned scenario families from section 4.
+enabled. The last column names scenario families from section 4; concrete case mappings are in `spec/requirements.json`.
 
 | ID | Required behavior | Evidence | Acceptance |
 | --- | --- | --- | --- |
@@ -77,7 +85,7 @@ enabled. Tests in the last column are planned scenario families from section 4.
 | CLI-04 | Support runtime option toggle, set/reset and query commands with the same allowed values, toggle order, repaint effects, and rejection of startup-only options. Accepting an option without its effect is nonconformant. | S3, S5 | T-CLI |
 | IO-01 | Support one/multiple files, implicit stdin, explicit `-`, empty input, missing/unreadable files, binary-file prompts, nonregular input and `-f`. Preserve argv ordering, filename bytes, quoting and platform-specific globbing. | S2, S4, S6 | T-IO, T-FILES |
 | IO-02 | When stdout is not a TTY, copy inputs as upstream does without pager decoration. Preserve arbitrary bytes, NULs, line endings and no-final-newline input; match open errors and stdout/stderr handling. | S4, S6 | T-IO |
-| IO-03 | Read streams incrementally and support backward navigation to retained bytes; match `-b`/`-B` buffering, seekability, interruption, incomplete last lines, and pipe EOF behavior. Do not eagerly load a complete large file or wait for stream EOF to show its first page. | S6 | T-IO, T-FOLLOW, T-PERF |
+| IO-03 | In ordinary paging, read streams incrementally and show available pages without requiring stream EOF; support backward navigation to retained bytes and match `-b`/`-B` buffering, seekability, interruption and incomplete last lines. Preserve explicit whole-input operations: `--file-size` scans on opening and can wait for pipe EOF; `--time-file-size=0` gives that scan no time limit. Match scan cancellation, timeout and restored position. | S2, S6, S9 | T-IO, T-FOLLOW, T-PERF |
 | IO-04 | Preserve logging/saving semantics of `-o`, `-O`, and `s`, overwrite confirmation, byte ranges, failures and secure-mode restrictions. | S2, S3, S6, S10 | T-INTEGRATION, T-SECURE |
 | NAV-01 | Implement every movement alias and numeric-prefix rule: screen/file lines, pages, variable windows, half-windows, forced movement past endpoints, horizontal movement and right-limit scrolling. Preserve remembered counts and endpoint behavior. | S2, S5, S7 | T-NAV |
 | NAV-02 | Match first/last/buffered-end jumps, numeric line and byte positions, percentage jumps, target-line placement, bracket matching and arbitrary bracket-pair commands. Preserve positions across wrapped lines and incomplete streams. | S5, S7 | T-NAV |
@@ -113,13 +121,14 @@ enabled. Tests in the last column are planned scenario families from section 4.
 
 ## 4. Acceptance scenarios
 
-These are required case families, not a claim that a handful of smoke tests proves
-equivalence. Expand each family into stable IDs in the future test ledger.
+These are parent scenario families. The version 1 package expands them into
+stable case IDs, concrete fixtures and reference expectations; interface coverage
+is distinct from exhaustive path/sequence coverage.
 
 | Family | Concrete fixtures and checks |
 | --- | --- |
 | T-CLI | Every inventory option/alias and accepted capitalization; each unambiguous/ambiguous prefix; numeric zero/negative/overflow, missing/empty strings; repeated options; `--`; mixed operands; `LESS=-N` with `-+N`; `+25`, `+/needle`, `++/needle`, `--cmd`; runtime queries and resets. |
-| T-IO | Empty file; all byte values; CRLF; missing final newline; multiple operands; `-`; unreadable/missing path; directory/FIFO; redirected stdout under `-N -S -R`; read errors, closed output pipe and slow input with writer still open. Compare raw bytes/status/streams. |
+| T-IO | Empty file; all byte values; CRLF; missing final newline; multiple operands; `-`; unreadable/missing path; directory/FIFO; redirected stdout under `-N -S -R`; read errors, closed output pipe and slow input with writer still open. Compare raw bytes/status/streams. Compare default live-pipe first-page behavior with `--file-size`, zero/positive `--time-file-size`, cancellation and EOF. |
 | T-NAV | Numbered lines plus wrapped lines in a 24×80 PTY; every alias with and without counts; boundary counts; `g/G/%`, byte positions, target row, horizontal limits, bracket pairs, user/built-in marks and return position. |
 | T-DISPLAY | Tabs at boundaries, long lines, empty lines, CR/backspace overstrikes, invalid/split UTF-8, CJK/combining characters, binary bytes, SGR and OSC 8 across wraps, malformed escapes; combine line numbers/headers/chopping and resize. |
 | T-SEARCH | Forward/backward/repeat/wrap/multi-file/invert/literal/keep/submatch filters; case modes; empty/bad patterns; zero-width matches, backreferences and dialect-specific constructs; highlighted matches near wrapping and hidden headers. |
@@ -185,14 +194,14 @@ command transitions independently testable while keeping the terminal lifecycle
 under one guard. External commands must share terminal handoff and secure-mode
 checks. Avoid an architecture that reads everything into memory before paging.
 
-The pager implementation will be Rust. A narrow system-library or regex FFI
-adapter remains an investigation option; this is not authorization to wrap or
+The pager implementation will be Rust. A narrow GNU-regex FFI adapter has a passing Rust ABI feasibility probe in the
+version 1 package; this is not authorization to wrap or
 ship the C less executable as the implementation. Choose regex, terminal and
 Unicode dependencies after compatibility spikes, rather than assuming a familiar
 CLI/TUI/regex crate reproduces less semantics.
 
-Still to measure: effective defaults for every build-dependent entry, exact
-diagnostics and exit paths, terminal timing/partial-key behavior, regex edge
-cases, Unicode-width differences, history/message formats, and platform support
-beyond the first profile. These are phase B–D deliverables, not implied exclusions
-from functionality equivalence.
+The version 1 package supplies the behavior contracts, observed defaults, error
+outcomes and format annexes needed by this parent catalogue. Candidate conformance,
+expanded malformed-input/sequence coverage, physical-terminal verification, numerical
+performance claims and additional OS profiles remain implementation/release work;
+see `spec/open-questions.md` for the exact boundaries.

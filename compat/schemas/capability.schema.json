@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "kind", "disposition", "source", "parent_requirement", "contract", "reference_clause", "requirement_id", "case_ids"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["option", "pager-binding", "editing-binding", "lesskey-action", "environment", "dynamic-surface"]},
+    "disposition": {"enum": ["production", "rejected-legacy", "inactive-terminal-capability", "other-platform", "test-only", "not-built-companion"]},
+    "source": {"type": "object", "required": ["file", "url"]},
+    "case_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "parent_requirement": {"type": "string"},
+    "contract": {"type": "string"},
+    "reference_clause": {"type": "string"},
+    "requirement_id": {"type": "string"}
+  }
+}

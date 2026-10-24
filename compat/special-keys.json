@@ -1,0 +1,202 @@
+{
+  "SK_BACKSPACE": {
+    "terminfo_name": "kbs",
+    "bytes_b64": "fw=="
+  },
+  "SK_BACKTAB": {
+    "terminfo_name": "kcbt",
+    "bytes_b64": "G1ta"
+  },
+  "SK_CONTROL_K": {
+    "terminfo_name": null,
+    "bytes_b64": "Cw=="
+  },
+  "SK_CTL_DELETE": {
+    "terminfo_name": "kDC5",
+    "bytes_b64": "G1szOzV+"
+  },
+  "SK_CTL_DOWN_ARROW": {
+    "terminfo_name": "kDN5",
+    "bytes_b64": "G1sxOzVC"
+  },
+  "SK_CTL_END": {
+    "terminfo_name": "kEND5",
+    "bytes_b64": "G1sxOzVG"
+  },
+  "SK_CTL_HOME": {
+    "terminfo_name": "kHOM5",
+    "bytes_b64": "G1sxOzVI"
+  },
+  "SK_CTL_INSERT": {
+    "terminfo_name": "kIC5",
+    "bytes_b64": "G1syOzV+"
+  },
+  "SK_CTL_LEFT_ARROW": {
+    "terminfo_name": "kLFT5",
+    "bytes_b64": "G1sxOzVE"
+  },
+  "SK_CTL_PAGE_DOWN": {
+    "terminfo_name": "kNXT5",
+    "bytes_b64": "G1s2OzV+"
+  },
+  "SK_CTL_PAGE_UP": {
+    "terminfo_name": "kPRV5",
+    "bytes_b64": "G1s1OzV+"
+  },
+  "SK_CTL_RIGHT_ARROW": {
+    "terminfo_name": "kRIT5",
+    "bytes_b64": "G1sxOzVD"
+  },
+  "SK_CTL_UP_ARROW": {
+    "terminfo_name": "kUP5",
+    "bytes_b64": "G1sxOzVB"
+  },
+  "SK_DELETE": {
+    "terminfo_name": "kdch1",
+    "bytes_b64": "G1szfg=="
+  },
+  "SK_DOWN_ARROW": {
+    "terminfo_name": "kcud1",
+    "bytes_b64": "G09C"
+  },
+  "SK_END": {
+    "terminfo_name": "kend",
+    "bytes_b64": "G09G"
+  },
+  "SK_F1": {
+    "terminfo_name": "kf1",
+    "bytes_b64": "G09Q"
+  },
+  "SK_HOME": {
+    "terminfo_name": "khome",
+    "bytes_b64": "G09I"
+  },
+  "SK_INSERT": {
+    "terminfo_name": "kich1",
+    "bytes_b64": "G1syfg=="
+  },
+  "SK_LEFT_ARROW": {
+    "terminfo_name": "kcub1",
+    "bytes_b64": "G09E"
+  },
+  "SK_PAD_CENTER": {
+    "terminfo_name": "kb2",
+    "bytes_b64": "G091"
+  },
+  "SK_PAD_COMMA": {
+    "terminfo_name": "kpCMA",
+    "bytes_b64": "G09s"
+  },
+  "SK_PAD_D": {
+    "terminfo_name": "kc2",
+    "bytes_b64": "G09y"
+  },
+  "SK_PAD_DASH": {
+    "terminfo_name": "kpSUB",
+    "bytes_b64": "G09t"
+  },
+  "SK_PAD_DL": {
+    "terminfo_name": "kc1",
+    "bytes_b64": "G09x"
+  },
+  "SK_PAD_DOT": {
+    "terminfo_name": "kpDOT",
+    "bytes_b64": "G09u"
+  },
+  "SK_PAD_DR": {
+    "terminfo_name": "kc3",
+    "bytes_b64": "G09z"
+  },
+  "SK_PAD_L": {
+    "terminfo_name": "kb1",
+    "bytes_b64": "G090"
+  },
+  "SK_PAD_PLUS": {
+    "terminfo_name": "kpADD",
+    "bytes_b64": "G09r"
+  },
+  "SK_PAD_R": {
+    "terminfo_name": "kb3",
+    "bytes_b64": "G092"
+  },
+  "SK_PAD_SLASH": {
+    "terminfo_name": "kpDIV",
+    "bytes_b64": "G09v"
+  },
+  "SK_PAD_STAR": {
+    "terminfo_name": "kpMUL",
+    "bytes_b64": "G09q"
+  },
+  "SK_PAD_U": {
+    "terminfo_name": "ka2",
+    "bytes_b64": "G094"
+  },
+  "SK_PAD_UL": {
+    "terminfo_name": "ka1",
+    "bytes_b64": "G093"
+  },
+  "SK_PAD_UR": {
+    "terminfo_name": "ka3",
+    "bytes_b64": "G095"
+  },
+  "SK_PAD_ZERO": {
+    "terminfo_name": "kpZRO",
+    "bytes_b64": "G09w"
+  },
+  "SK_PAGE_DOWN": {
+    "terminfo_name": "knp",
+    "bytes_b64": "G1s2fg=="
+  },
+  "SK_PAGE_UP": {
+    "terminfo_name": "kpp",
+    "bytes_b64": "G1s1fg=="
+  },
+  "SK_RIGHT_ARROW": {
+    "terminfo_name": "kcuf1",
+    "bytes_b64": "G09D"
+  },
+  "SK_SHIFT_DELETE": {
+    "terminfo_name": "kDC",
+    "bytes_b64": "G1szOzJ+"
+  },
+  "SK_SHIFT_DOWN_ARROW": {
+    "terminfo_name": "kDN",
+    "bytes_b64": "G1sxOzJC"
+  },
+  "SK_SHIFT_END": {
+    "terminfo_name": "kEND",
+    "bytes_b64": "G1sxOzJG"
+  },
+  "SK_SHIFT_HOME": {
+    "terminfo_name": "kHOM",
+    "bytes_b64": "G1sxOzJI"
+  },
+  "SK_SHIFT_INSERT": {
+    "terminfo_name": "kIC",
+    "bytes_b64": "G1syOzJ+"
+  },
+  "SK_SHIFT_LEFT_ARROW": {
+    "terminfo_name": "kLFT",
+    "bytes_b64": "G1sxOzJE"
+  },
+  "SK_SHIFT_PAGE_DOWN": {
+    "terminfo_name": "kNXT",
+    "bytes_b64": "G1s2OzJ+"
+  },
+  "SK_SHIFT_PAGE_UP": {
+    "terminfo_name": "kPRV",
+    "bytes_b64": "G1s1OzJ+"
+  },
+  "SK_SHIFT_RIGHT_ARROW": {
+    "terminfo_name": "kRIT",
+    "bytes_b64": "G1sxOzJD"
+  },
+  "SK_SHIFT_UP_ARROW": {
+    "terminfo_name": "kUP",
+    "bytes_b64": "G1sxOzJB"
+  },
+  "SK_UP_ARROW": {
+    "terminfo_name": "kcuu1",
+    "bytes_b64": "G09B"
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rless reference case",
+  "type": "object",
+  "required": [
+    "id",
+    "capability_ids",
+    "mode",
+    "argv",
+    "files",
+    "env"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "mode": {
+      "enum": [
+        "pipe",
+        "pty"
+      ]
+    },
+    "argv": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "base64": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "integer"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "text"
+            ]
+          },
+          {
+            "required": [
+              "base64"
+            ]
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "send": {
+            "type": "string"
+          },
+          "send_b64": {
+            "type": "string"
+          },
+          "signal": {
+            "enum": [
+              "SIGINT",
+              "SIGTERM",
+              "SIGHUP",
+              "SIGWINCH",
+              "SIGUSR1"
+            ]
+          },
+          "resize": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "close_stream": {
+            "type": "boolean"
+          },
+          "await": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "snapshot": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "term": {
+      "enum": [
+        "xterm-256color",
+        "vt100",
+        "dumb"
+      ]
+    },
+    "locale": {
+      "enum": [
+        "C",
+        "C.UTF-8"
+      ]
+    },
+    "size": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "timeout": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "stdin_b64": {
+      "type": "string"
+    },
+    "stream_b64": {
+      "type": "string"
+    },
+    "executable": {
+      "enum": [
+        "lessecho"
+      ]
+    },
+    "fixture_set": {
+      "enum": [
+        "pager"
+      ]
+    }
+  }
+}

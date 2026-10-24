@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "capabilities": 544,
+  "detailed_requirements": 544,
+  "parent_requirements": 39,
+  "dispositions": {
+    "production": 535,
+    "rejected-legacy": 1,
+    "test-only": 1,
+    "inactive-terminal-capability": 2,
+    "other-platform": 4,
+    "not-built-companion": 1
+  },
+  "kinds": {
+    "option": 86,
+    "pager-binding": 182,
+    "editing-binding": 74,
+    "lesskey-action": 100,
+    "environment": 71,
+    "dynamic-surface": 31
+  },
+  "acceptance_cases": 809,
+  "reference_expectations": 809,
+  "replayed": 809,
+  "replay_passed": 809,
+  "required_interfaces_with_cases": 536,
+  "required_interfaces": 536,
+  "interpretation": "Interface-to-case coverage, not a proof of all behavioral paths or rless conformance."
+}

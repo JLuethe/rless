@@ -1,0 +1,173 @@
+[
+  {
+    "id": "number-chop",
+    "dimensions": [
+      [
+        null,
+        "-N"
+      ],
+      [
+        null,
+        "-S"
+      ]
+    ],
+    "case_ids": [
+      "pair-number-chop-00",
+      "pair-number-chop-01",
+      "pair-number-chop-10",
+      "pair-number-chop-11"
+    ]
+  },
+  {
+    "id": "header-number",
+    "dimensions": [
+      [
+        null,
+        "--header=1,2,1"
+      ],
+      [
+        null,
+        "-N"
+      ]
+    ],
+    "case_ids": [
+      "pair-header-number-00",
+      "pair-header-number-01",
+      "pair-header-number-10",
+      "pair-header-number-11"
+    ]
+  },
+  {
+    "id": "search-chop",
+    "dimensions": [
+      [
+        null,
+        "-i"
+      ],
+      [
+        null,
+        "-S"
+      ]
+    ],
+    "case_ids": [
+      "pair-search-chop-00",
+      "pair-search-chop-01",
+      "pair-search-chop-10",
+      "pair-search-chop-11"
+    ]
+  },
+  {
+    "id": "search-header",
+    "dimensions": [
+      [
+        null,
+        "--header=1,0,1"
+      ],
+      [
+        null,
+        "--no-search-headers"
+      ]
+    ],
+    "case_ids": [
+      "pair-search-header-00",
+      "pair-search-header-01",
+      "pair-search-header-10",
+      "pair-search-header-11"
+    ]
+  },
+  {
+    "id": "raw-proc",
+    "dimensions": [
+      [
+        null,
+        "-R"
+      ],
+      [
+        null,
+        "--proc-backspace"
+      ]
+    ],
+    "case_ids": [
+      "pair-raw-proc-00",
+      "pair-raw-proc-01",
+      "pair-raw-proc-10",
+      "pair-raw-proc-11"
+    ]
+  },
+  {
+    "id": "size-time",
+    "dimensions": [
+      [
+        null,
+        "--file-size"
+      ],
+      [
+        null,
+        "--time-file-size=20"
+      ]
+    ],
+    "case_ids": [
+      "pair-size-time-00",
+      "pair-size-time-01",
+      "pair-size-time-10",
+      "pair-size-time-11"
+    ]
+  },
+  {
+    "id": "quiet-status",
+    "dimensions": [
+      [
+        null,
+        "-Q"
+      ],
+      [
+        null,
+        "-J"
+      ]
+    ],
+    "case_ids": [
+      "pair-quiet-status-00",
+      "pair-quiet-status-01",
+      "pair-quiet-status-10",
+      "pair-quiet-status-11"
+    ]
+  },
+  {
+    "id": "one-screen-F-X",
+    "dimensions": [
+      [
+        null,
+        "-F"
+      ],
+      [
+        null,
+        "-X"
+      ]
+    ],
+    "case_ids": [
+      "onescreen--X-00",
+      "onescreen--X-01",
+      "onescreen--X-10",
+      "onescreen--X-11"
+    ]
+  },
+  {
+    "id": "one-screen-F-E",
+    "dimensions": [
+      [
+        null,
+        "-F"
+      ],
+      [
+        null,
+        "-E"
+      ]
+    ],
+    "case_ids": [
+      "onescreen--E-00",
+      "onescreen--E-01",
+      "onescreen--E-10",
+      "onescreen--E-11"
+    ]
+  }
+]

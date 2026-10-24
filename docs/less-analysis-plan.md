@@ -1,5 +1,10 @@
 # Plan: analyze less and specify rless
 
+For the next specification-refinement stage, use the
+[specification completion plan](spec-completion-plan.md). It defines how to turn
+the current draft into explicit behavior contracts and reference-backed
+acceptance cases before pager implementation.
+
 ## Outcome and baseline
 
 Build a Rust pager named `rless` that can replace `less` in existing commands,
@@ -15,6 +20,12 @@ Initial source inspection and inventory extraction are complete. Building the
 pinned reference, observing its runtime behavior, and implementing rless are
 future work. The specification is a source-grounded draft; its test cases are
 planned, not passing tests.
+
+Follow-up status: the [readiness review](less-spec-review.md) has now built the
+pinned reference, passed 21 upstream tests and captured 17 focused observations.
+The broad behavior extraction, executable compatibility harness and full case
+ledger remain outstanding. The historical procedure below describes the original
+plan; the review evidence records what has since been executed.
 
 ## Work sequence and completion gates
 

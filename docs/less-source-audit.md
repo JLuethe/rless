@@ -1,5 +1,9 @@
 # less 712 source audit
 
+This document records the initial static analysis. The subsequent
+[specification review](less-spec-review.md) adds a verified reference build,
+upstream test results, observed behavior and implementation-readiness findings.
+
 ## Baseline and work performed
 
 - Project checkout: `JLuethe/rless`, initial commit `f04c2fa`, originally only
