@@ -120,6 +120,11 @@ class AcceptanceControls(unittest.TestCase):
         (self.root/'src/check.py').write_text('changed')
         with self.assertRaises(ValueError):bind(self.rows,[self.binding],self.root)
 
+    def test_unfingerprinted_implementation_cannot_borrow_another_tests_result(self):
+        (self.root/'untracked-notes.md').write_text('not the tested implementation')
+        with self.assertRaises(ValueError):
+            bind(self.rows,[{**self.binding,'implementation_path':'untracked-notes.md'}],self.root)
+
     def test_duplicate_variants_and_unknown_profiles_rejects(self):
         self.catalogue['scenarios'][0]['variants'].append('fault before commit')
         with self.assertRaises(ValueError):matrix(self.catalogue)

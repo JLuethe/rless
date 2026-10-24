@@ -57,6 +57,9 @@ def bind(rows, bindings, root=ROOT):
         if item['coverage_scope'] not in ('partial', 'complete') or not item.get('scope_notes'):
             raise ValueError('missing implementation scope')
         report = validate_report(item['report'], root)
+        relative = str(path.relative_to(root.resolve()))
+        if report['input_fingerprints']['files'].get(relative) != sha(path):
+            raise ValueError('implementation is not bound to the executed source fingerprint')
         matches = [x for x in report['records'] if x['name'] == item['record_name']]
         if len(matches) != 1:
             raise ValueError('missing or duplicate evidence selector')
