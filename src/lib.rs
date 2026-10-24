@@ -15,6 +15,9 @@
 extern crate c2rust_bitfields;
 extern crate libc;
 
+#[cfg(feature = "safety-injection")]
+mod fault;
+
 pub mod brac;
 pub mod ch;
 pub mod charset;

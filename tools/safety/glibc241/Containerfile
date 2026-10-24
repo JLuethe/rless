@@ -1,0 +1,19 @@
+FROM docker.io/library/debian@sha256:4876fdea29cac1a33a3195f1eb1952feb1fca7dd6dd00be3e2f1879cf20d34d2
+
+# Keep signed snapshot metadata and installation payloads for exact provenance.
+# This modifies only the isolated image, never the host libc or package manager.
+RUN sed -i 's|http://deb.debian.org/debian-security|http://snapshot.debian.org/archive/debian-security/20261020T213255Z|; s|http://deb.debian.org/debian|http://snapshot.debian.org/archive/debian/20261020T213255Z|' /etc/apt/sources.list.d/debian.sources \
+    && rm -f /etc/apt/apt.conf.d/docker-clean \
+    && apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+       build-essential binutils libncurses-dev ncurses-term python3 python3-pyte \
+       git man-db locales procps ca-certificates \
+    && mkdir -p /opt/rless-abi \
+    && dpkg-query -W -f='${binary:Package}\t${Version}\n' > /opt/rless-abi/packages.tsv \
+    && sha256sum /var/cache/apt/archives/*.deb > /opt/rless-abi/packages.sha256 \
+    && find /var/lib/apt/lists -type f -exec sha256sum {} + > /opt/rless-abi/apt-metadata.sha256 \
+    && getconf GNU_LIBC_VERSION > /opt/rless-abi/runtime.txt \
+    && grep -qx 'glibc 2.41' /opt/rless-abi/runtime.txt
+
+ENV CARGO_BUILD_JOBS=2 LANG=C.UTF-8 LC_ALL=C.UTF-8
+WORKDIR /work
