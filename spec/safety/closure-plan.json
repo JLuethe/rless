@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "plan_version": "1.0.0",
+  "safety_specification_version": "0.2.0",
+  "scope": "Execution refinement of existing 43 safety requirements / 175 variants; no compatibility waiver or implemented claim.",
+  "baseline_commit": "bdf517e2245be47ea37c96276172d7399c767c5c",
+  "packets": [
+    {
+      "id": "C0-OWN-1",
+      "title": "Ownership review inputs and coverage ledger",
+      "parent_packet": "M0.2",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [],
+      "requirement_ids": [
+        "SAFE-BASE-003",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-BASE-003",
+        "SAFECASE-FFI-006",
+        "SAFECASE-FFI-007"
+      ],
+      "deliverable_and_exit_gate": "Pin source/expanded AST and native-symbol inventories; seed stable review entries for every application/vendor file, ownership cycle, mutable definition, native boundary and indirect call. Reject omitted or stale entries.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/12"
+    },
+    {
+      "id": "C0-OWN-2",
+      "title": "Review owner graphs and escaping aliases",
+      "parent_packet": "M0.2",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-OWN-1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-005",
+        "SAFE-STATE-001",
+        "SAFE-STATE-002",
+        "SAFE-FFI-005"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-003",
+        "SAFECASE-MEM-005",
+        "SAFECASE-STATE-001",
+        "SAFECASE-STATE-002",
+        "SAFECASE-FFI-005"
+      ],
+      "deliverable_and_exit_gate": "Review every covered entry, caller/alias cycle and callback; record source-bound evidence, possible targets, release pairs, invalidation and error/signal paths. A recorded hazard needs a concrete finding and remediation packet. No automatic safe label.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/12"
+    },
+    {
+      "id": "C0-HOOK-1",
+      "title": "Compile-gated production allocation hooks",
+      "parent_packet": "M0.4",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-OWN-1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-007",
+        "SAFE-VER-005",
+        "SAFE-VER-010"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-007",
+        "SAFECASE-VER-005",
+        "SAFECASE-VER-010"
+      ],
+      "deliverable_and_exit_gate": "Add an off-by-default safety-injection Cargo feature. Begin at actual pager allocation before allocator/commit. Configure before application startup; fixed-size allocation-free hook hit evidence; deterministic site/ordinal; invalid plans fail closed. Prove normal executables ignore injection configuration and contain no hook entry points.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/13"
+    },
+    {
+      "id": "C0-HOOK-2",
+      "title": "I/O transaction callback and cleanup hooks",
+      "parent_packet": "M0.4",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-OWN-2",
+        "C0-HOOK-1"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-002",
+        "SAFE-STATE-003",
+        "SAFE-STATE-004",
+        "SAFE-STATE-006",
+        "SAFE-VER-005"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-002",
+        "SAFECASE-STATE-003",
+        "SAFECASE-STATE-004",
+        "SAFECASE-STATE-006",
+        "SAFECASE-VER-005"
+      ],
+      "deliverable_and_exit_gate": "Expand the declared site inventory to file/pipe operations, before/after commits, filter replacement, native callbacks, helper handoff and cleanup. Use actual-error oracles, readiness barriers and conservation checks; retain primary errors and do not add handler allocations.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/13"
+    },
+    {
+      "id": "C0-COVER-1",
+      "title": "Acceptance binding and coverage gates",
+      "parent_packet": "M0.4",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-HOOK-1"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-001",
+        "SAFE-VER-007",
+        "SAFE-VER-010"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-VER-001",
+        "SAFECASE-VER-007",
+        "SAFECASE-VER-010"
+      ],
+      "deliverable_and_exit_gate": "Resolve all 175 exact named variants across required profiles into explicit rows; bind implemented row selections to exact source/hook/tests/results. Empty, unknown, duplicate, stale, unsupported and missing required rows cannot pass. M0 scaffolding is never full catalogue closure.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/13"
+    },
+    {
+      "id": "C0-COVER-2",
+      "title": "Run fault profile and oracle controls",
+      "parent_packet": "M0.5",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-HOOK-2",
+        "C0-COVER-1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-007",
+        "SAFE-VER-002",
+        "SAFE-VER-003",
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-010"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-MEM-007",
+        "SAFECASE-VER-002",
+        "SAFECASE-VER-003",
+        "SAFECASE-VER-005",
+        "SAFECASE-VER-006",
+        "SAFECASE-VER-010"
+      ],
+      "deliverable_and_exit_gate": "Exercise every declared reachable fault site and all required normal/native-instrumented/component profiles. Prove screen/mode/status/bell/effect/helper negative controls. Retain findings #9/#10 and unsupported boundary alternatives without suppressing application defects.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/13"
+    },
+    {
+      "id": "C0-ABI-1",
+      "title": "Pin and build the glibc 2.41 environment",
+      "parent_packet": "M0.1",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [],
+      "requirement_ids": [
+        "SAFE-FFI-002",
+        "SAFE-FFI-007",
+        "SAFE-VER-007",
+        "SAFE-VER-008"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-FFI-002",
+        "SAFECASE-FFI-007",
+        "SAFECASE-VER-007",
+        "SAFECASE-VER-008"
+      ],
+      "deliverable_and_exit_gate": "Resolve a Linux amd64 Debian trixie base to an immutable OCI digest; pin package versions/checksums and dated apt metadata. Match libc6/libc6-dev/headers/loader, native regex and terminfo. Record image/tool/header/library identities. Build without host include/library contamination.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/14"
+    },
+    {
+      "id": "C0-ABI-2",
+      "title": "Reproduce baseline on actual glibc 2.41",
+      "parent_packet": "M0.1",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-ABI-1"
+      ],
+      "requirement_ids": [
+        "SAFE-BASE-001",
+        "SAFE-FFI-002",
+        "SAFE-VER-001",
+        "SAFE-VER-002",
+        "SAFE-VER-008"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-BASE-001",
+        "SAFECASE-FFI-002",
+        "SAFECASE-VER-001",
+        "SAFECASE-VER-002",
+        "SAFECASE-VER-008"
+      ],
+      "deliverable_and_exit_gate": "Build and run inside the pinned rootfs; execute ABI probes, debug/release and reference 809 cases, helpers/integrations/real job control, clean install and source rebuild. Prove detector availability or retain blocked safety rows. Keep glibc 2.44 results separate.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/14"
+    },
+    {
+      "id": "C0-GATE",
+      "title": "M0 closure and M1 handoff",
+      "parent_packet": "M0.5",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-OWN-2",
+        "C0-COVER-2",
+        "C0-ABI-2"
+      ],
+      "requirement_ids": [
+        "SAFE-BASE-003",
+        "SAFE-VER-007",
+        "SAFE-VER-009"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-BASE-003",
+        "SAFECASE-VER-007",
+        "SAFECASE-VER-009"
+      ],
+      "deliverable_and_exit_gate": "Publish a source-bound closure report with every M0 obligation and remaining hazard disposition. Infrastructure may close with assigned legacy findings; unresolved ownership review, missing required hooks/controls or the declared reference environment cannot be called complete. No whole-core safety claim.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/2"
+    },
+    {
+      "id": "C1-PROTO",
+      "title": "M1 signal and blocked-I/O feasibility",
+      "parent_packet": "M1.1",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C0-GATE"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-SIG-002",
+        "SAFE-SIG-006",
+        "SAFE-SIG-008"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-001",
+        "SAFECASE-SIG-002",
+        "SAFECASE-SIG-006",
+        "SAFECASE-SIG-008"
+      ],
+      "deliverable_and_exit_gate": "Write ADR-SIGNAL-BACKEND and prototype blocked pipe reads/FIFO open, writer-connect-without-data, notification exhaustion and before-syscall cancellation with deterministic barriers. Prove resource lifetime and reference semantics before selecting the backend.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3"
+    },
+    {
+      "id": "C1-IMPLEMENT",
+      "title": "M1 notification dispatch and lifecycle migration",
+      "parent_packet": "M1.2",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "depends_on": [
+        "C1-PROTO"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-SIG-002",
+        "SAFE-SIG-003",
+        "SAFE-SIG-004",
+        "SAFE-SIG-005",
+        "SAFE-SIG-006",
+        "SAFE-SIG-007",
+        "SAFE-SIG-008"
+      ],
+      "acceptance_ids": [
+        "SAFECASE-SIG-001",
+        "SAFECASE-SIG-002",
+        "SAFECASE-SIG-003",
+        "SAFECASE-SIG-004",
+        "SAFECASE-SIG-005",
+        "SAFECASE-SIG-006",
+        "SAFECASE-SIG-007",
+        "SAFECASE-SIG-008"
+      ],
+      "deliverable_and_exit_gate": "Replace fabricated dispositions and handler-side pager work; main-loop dispatch, timer generations, notification accounting, inheritance and actual stop/child handoff. Execute every signal variant/profile and independent boundary review; later M2-M5 remain open.",
+      "github_issue": "https://github.com/JLuethe/rless/issues/3"
+    }
+  ],
+  "m1_runtime_change_gate": "C0-GATE plus C1-PROTO evidence; documentation and unreviewed inventories do not satisfy it.",
+  "legacy_findings": [
+    "https://github.com/JLuethe/rless/issues/9",
+    "https://github.com/JLuethe/rless/issues/10"
+  ]
+}

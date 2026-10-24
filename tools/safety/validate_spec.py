@@ -63,6 +63,17 @@ assert final['inputs_per_fuzz_target_min']==100000 and final['cpu_minutes_per_fu
 assert final['bounded_native_scenarios_min']==10000 and final['repeats_per_required_race_recovery_min']==100
 assert next(x for x in c['lanes'] if x['id']=='INTEGRATION')['scheduled_now'] is False
 assert (root/'tools/safety/run.py').is_file()
+closure=read('closure-plan.json')
+assert closure['plan_version']=='1.0.0' and closure['safety_specification_version']==r['specification_version']
+closure_packets={x['id']:x for x in closure['packets']}
+assert len(closure_packets)==len(closure['packets'])==11
+dag(closure_packets)
+for x in closure_packets.values():
+ assert x['parent_packet'] in packets and set(x['requirement_ids'])<=set(req)
+ assert set(x['acceptance_ids'])<=set(cases)
+ assert x['status'] in ('planned','in-progress') and x['evidence_status']=='not-verified'
+ assert x['deliverable_and_exit_gate']
+assert 'C0-GATE' in closure_packets['C1-PROTO']['depends_on']
 links=0
 for p in list(s.glob('*.md'))+[root/'README.md',root/'docs/current-state.md',root/'spec/README.md']:
  for href in re.findall(r'\[[^\]]+\]\(([^)]+)\)',p.read_text()):
@@ -73,6 +84,6 @@ for p in list(s.glob('*.md'))+[root/'README.md',root/'docs/current-state.md',roo
   links+=1
 corpus=json.loads((root/'compat/corpus.json').read_text())
 for p,h in corpus['files'].items(): assert digest(root/p)==h,p
-report={'schema_version':1,'specification_version':'0.2.0','recorded_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'Specification structure and traceability only; no safety implementation or runtime test result is asserted.','specification_checks_passed':True,'runtime_safety_verified':False,'implementation_tests_executed':0,'requirements':43,'planned_acceptance_families':43,'named_variants':175,'workstreams':dict(sorted(Counter(str(x['workstream']) for x in req.values()).items())),'delivery_packets':28,'phases':6,'in_progress_phases':['M0'],'planned_in_process_fuzz_targets':15,'planned_native_event_scenario_groups':12,'checked_local_links':links,'dependency_graph':'acyclic (requirements and delivery packets)','packet_requirement_coverage':'43 of 43','original_frozen_corpus':'hashes unchanged','github_tracking':'six phase issues/milestones plus parent; M0 in progress/not-verified','inputs_sha256':{str(p.relative_to(root)):digest(p) for p in sorted(s.iterdir()) if p.suffix in {'.json','.md'} and p.name!='validation.json'}}
+report={'schema_version':1,'specification_version':'0.2.0','recorded_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'Specification structure and traceability only; no safety implementation or runtime test result is asserted.','specification_checks_passed':True,'runtime_safety_verified':False,'implementation_tests_executed':0,'requirements':43,'planned_acceptance_families':43,'named_variants':175,'workstreams':dict(sorted(Counter(str(x['workstream']) for x in req.values()).items())),'delivery_packets':28,'phases':6,'in_progress_phases':['M0'],'planned_in_process_fuzz_targets':15,'planned_native_event_scenario_groups':12,'checked_local_links':links,'dependency_graph':'acyclic (requirements and delivery packets)','packet_requirement_coverage':'43 of 43','closure_refinement_packets':11,'closure_dependency_graph':'acyclic','original_frozen_corpus':'hashes unchanged','github_tracking':'six phase issues/milestones plus parent; M0 in progress/not-verified','inputs_sha256':{str(p.relative_to(root)):digest(p) for p in sorted(s.iterdir()) if p.suffix in {'.json','.md'} and p.name!='validation.json'}}
 (s/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps({k:v for k,v in report.items() if k!='inputs_sha256'},indent=2))
