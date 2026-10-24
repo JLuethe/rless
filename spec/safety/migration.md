@@ -5,6 +5,10 @@ has not started under this specification. No phase is complete merely because a
 new wrapper or test file exists. Requirements are tracked in the separate safety
 ledger so the original 544 behavioral requirements retain their meanings.
 
+The detailed [execution plan](execution-plan.md) and [campaign plan](campaign-plan.md)
+expand these gates into delivery packets, target budgets and evidence requirements.
+All packets and campaigns are planned/not-verified.
+
 ## Phase sequence
 
 | Phase | Work and required output | Gate |

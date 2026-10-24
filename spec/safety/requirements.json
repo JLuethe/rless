@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "specification_version": "0.1.0",
+  "specification_version": "0.2.0",
   "scope": "Safety migration specification; statuses describe design, not implementation conformance.",
   "milestone_semantics": "Owning delivery phase; recurring checks remain required through M5. M2 leaf progress does not close whole-core M3/M5 requirements.",
   "requirements": [

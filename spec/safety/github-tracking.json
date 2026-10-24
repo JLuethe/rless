@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "specification_version": "0.2.0",
+  "recorded_date": "2026-10-24",
+  "repository": "https://github.com/JLuethe/rless",
+  "scope": "Planning references at publication; GitHub issue states are live tracking, not safety evidence.",
+  "status": "planned",
+  "evidence_status": "not-verified",
+  "parent_issue": {
+    "number": 1,
+    "url": "https://github.com/JLuethe/rless/issues/1"
+  },
+  "phases": [
+    {
+      "phase": "M0",
+      "number": 2,
+      "url": "https://github.com/JLuethe/rless/issues/2",
+      "title": "M0: Baseline and safety infrastructure",
+      "state": "open",
+      "milestone": 1
+    },
+    {
+      "phase": "M1",
+      "number": 3,
+      "url": "https://github.com/JLuethe/rless/issues/3",
+      "title": "M1: Signal boundary and cancellable operations",
+      "state": "open",
+      "milestone": 2
+    },
+    {
+      "phase": "M2",
+      "number": 4,
+      "url": "https://github.com/JLuethe/rless/issues/4",
+      "title": "M2: Owned primitives and parser foundations",
+      "state": "open",
+      "milestone": 3
+    },
+    {
+      "phase": "M3",
+      "number": 5,
+      "url": "https://github.com/JLuethe/rless/issues/5",
+      "title": "M3: Owned application state and lifecycle",
+      "state": "open",
+      "milestone": 4
+    },
+    {
+      "phase": "M4",
+      "number": 6,
+      "url": "https://github.com/JLuethe/rless/issues/6",
+      "title": "M4: Audited native boundary consolidation",
+      "state": "open",
+      "milestone": 5
+    },
+    {
+      "phase": "M5",
+      "number": 7,
+      "url": "https://github.com/JLuethe/rless/issues/7",
+      "title": "M5: Full safety campaigns and scoped completion",
+      "state": "open",
+      "milestone": 6
+    }
+  ]
+}

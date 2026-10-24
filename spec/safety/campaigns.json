@@ -1,0 +1,587 @@
+{
+  "schema_version": 1,
+  "specification_version": "0.2.0",
+  "status": "planned",
+  "evidence_status": "not-verified",
+  "scope": "Campaign design only. No safety harness, tool pin, budget execution or passing runtime evidence is asserted.",
+  "planned_runner": "tools/safety/run.py (to be implemented in M0.4; does not exist yet)",
+  "profiles": [
+    "NATIVE",
+    "ASAN",
+    "LSAN",
+    "MIRI",
+    "FUZZ",
+    "ABI",
+    "STATIC",
+    "AUDIT"
+  ],
+  "lanes": [
+    {
+      "id": "READINESS",
+      "owner_packet": "M0.3",
+      "status": "planned",
+      "gate": "Exact tool/ABI pins, expected detector failures, safe controls and correct empty/stale/unsupported rejection."
+    },
+    {
+      "id": "CHANGE",
+      "owner_packet": "M0.4",
+      "status": "planned",
+      "native_debug_release_regression": true,
+      "affected_fuzz_inputs_min": 10000,
+      "miri": "affected converted components",
+      "instrumented": "affected unsafe/native paths"
+    },
+    {
+      "id": "INTEGRATION",
+      "owner_packet": "M0.4",
+      "status": "planned",
+      "scheduled_now": false,
+      "cpu_minutes_per_active_fuzz_target_min": 15,
+      "gate": "All required component/native profiles, retained corpus/coverage and stalled-target triage; future CI configuration only."
+    },
+    {
+      "id": "FINAL",
+      "owner_packet": "M5.3",
+      "status": "planned",
+      "inputs_per_fuzz_target_min": 100000,
+      "cpu_minutes_per_fuzz_target_min": 60,
+      "both_fuzz_floors_required": true,
+      "bounded_native_scenarios_min": 10000,
+      "repeats_per_required_race_recovery_min": 100,
+      "reset_rule": "Since final relevant source, harness, ABI or instrumentation change; no pooling unrelated targets or stale runs."
+    },
+    {
+      "id": "ARTIFACT",
+      "owner_packet": "M5.4",
+      "status": "planned",
+      "gate": "Clean install and source-archive rebuild; 809 cases plus all integration/helper/safety regressions; exact binary/helper/source binding."
+    }
+  ],
+  "in_process_targets": [
+    {
+      "id": "FUZZ-CLI",
+      "family": "CLI and environment",
+      "mode": "CLI and environment",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "option/environment byte streams and startup precedence",
+      "oracle": "full consumption or precise rejection; no partial option commits",
+      "current_paths": [
+        "src/option.rs",
+        "src/opttbl.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-005",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-LESSKEY",
+      "family": "lesskey",
+      "mode": "lesskey",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "section grammar, escapes, conditionals, expansion and malformed records",
+      "oracle": "bounded consumption; precedence and malformed-record diagnostics",
+      "current_paths": [
+        "src/lesskey_parse.rs",
+        "src/decode.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-005",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-PROMPT",
+      "family": "Prompts and messages",
+      "mode": "prompt",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "nested formatting conditions, expansions and arbitrary byte values",
+      "oracle": "bounded output and correct conditional/escape semantics",
+      "current_paths": [
+        "src/prompt.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-005",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-MESSAGE",
+      "family": "Prompts and messages",
+      "mode": "message",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "format operations, missing values and byte escapes",
+      "oracle": "defined diagnostics/output routing; no format-type confusion",
+      "current_paths": [
+        "src/output.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-005",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-HISTORY",
+      "family": "History and marks",
+      "mode": "history and marks",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "truncated records, duplicate entries, stale file handles and invalid positions",
+      "oracle": "no stale access or unintended persistent writes",
+      "current_paths": [
+        "src/cmdbuf.rs",
+        "src/mark.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-002",
+        "SAFE-STATE-007",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-EDIT",
+      "family": "Keyboard and input editing",
+      "mode": "key editing",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "partial escape keys, editing commands, prefixes and history actions",
+      "oracle": "progress, valid cursor ranges and exact edit model",
+      "current_paths": [
+        "src/cmdbuf.rs",
+        "src/decode.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-MOUSE",
+      "family": "Keyboard and input editing",
+      "mode": "mouse",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "split/truncated mouse packets, large coordinates and malformed delimiters",
+      "oracle": "bounded parsing, correct rejection and coordinate conversion",
+      "current_paths": [
+        "src/decode.rs",
+        "src/command.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-MEM-004",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-PASTE",
+      "family": "Keyboard and input editing",
+      "mode": "paste",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "split bracketed paste delimiters and arbitrary pasted bytes",
+      "oracle": "progress, cancellation, ownership and command separation",
+      "current_paths": [
+        "src/cmdbuf.rs",
+        "src/command.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-TEXT",
+      "family": "Text and terminal sequences",
+      "mode": "UTF and charset",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "split UTF, invalid bytes, wide/combining characters and charset tables",
+      "oracle": "source offsets stay valid; pinned classification and byte preservation",
+      "current_paths": [
+        "src/charset.rs",
+        "src/cvt.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-MEM-004",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-ANSI",
+      "family": "Text and terminal sequences",
+      "mode": "ANSI and OSC",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "nested, truncated and oversized terminal/OSC sequences",
+      "oracle": "bounded scanning and correct visible/source mapping; no uncontrolled helper execution",
+      "current_paths": [
+        "src/line.rs",
+        "src/cvt.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-LAYOUT",
+      "family": "Layout and navigation",
+      "mode": "layout and navigation",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "tiny/large geometry, wrap/chop, headers, marks and counts",
+      "oracle": "model-consistent ranges, stable handles and valid layout maps",
+      "current_paths": [
+        "src/line.rs",
+        "src/position.rs",
+        "src/jump.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-MEM-006",
+        "SAFE-STATE-002",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-LITERAL",
+      "family": "Search",
+      "mode": "literal search",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "literal byte patterns, empty matches, source transforms and invalid locations",
+      "oracle": "match ranges and zero-length progress; no stale filtered views",
+      "current_paths": [
+        "src/search.rs",
+        "src/cvt.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-006",
+        "SAFE-MEM-007",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-GNU",
+      "family": "Search",
+      "mode": "GNU regex search",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "native GNU patterns, flags, invalid/large patterns and transformed byte input",
+      "oracle": "GNU semantics, checked native match ranges, owned compile/free lifecycle",
+      "current_paths": [
+        "src/pattern.rs",
+        "src/search.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-003",
+        "SAFE-MEM-005",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-STATE",
+      "family": "Pager state",
+      "mode": "pager state",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "file/options/search/filter/mark/cancel action traces",
+      "oracle": "invariant preservation, transactional rollback and resource ownership",
+      "current_paths": [
+        "src/command.rs",
+        "src/ifile.rs",
+        "src/search.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-STATE-001",
+        "SAFE-STATE-002",
+        "SAFE-STATE-004",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    },
+    {
+      "id": "FUZZ-EVENT",
+      "family": "I/O and event model",
+      "mode": "I/O and event model",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "inputs": "short reads, append/truncate/rotate, timer generations and notification/failure traces",
+      "oracle": "no lost cancellation; resource conservation and specified state transitions",
+      "current_paths": [
+        "src/ch.rs",
+        "src/os.rs",
+        "src/runtime.rs"
+      ],
+      "requirement_ids": [
+        "SAFE-SIG-002",
+        "SAFE-SIG-006",
+        "SAFE-STATE-003",
+        "SAFE-VER-004",
+        "SAFE-VER-008"
+      ],
+      "engine": "Pinned coverage-guided in-process engine selected and proven in M0.3; native GNU target runs natively with Rust/native-shim instrumentation."
+    }
+  ],
+  "native_event_scenarios": [
+    {
+      "id": "EVENT-01",
+      "title": "Notification at each read/wait boundary",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Before mask change, after readiness check, immediately before syscall, during wait, and after wake; initial pipe read and follow with writer still open.",
+      "oracle": "No lost wakeup or stuck cancellation; flags consumed in the documented order.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-02",
+      "title": "FIFO open without a writer",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Actual FIFO with no writer; cancellation before and during open; retry and shutdown.",
+      "oracle": "Cancellation completes and releases resources; a worker backend must also prove bounded lifetime and join/reap.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-03",
+      "title": "SIGINT with growing filters/search",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Barrier inside growth/replacement and around commit; repeated interrupts and rollback.",
+      "oracle": "No handler allocation/free; old or new valid filter is owned exactly once; terminal remains usable.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-04",
+      "title": "SIGUSR1 queue and exhaustion",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Repeated commands before/during dispatch and at notification capacity.",
+      "oracle": "Specified ordering/coalescing and exhaustion; no async command allocation or silent stranded work.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-05",
+      "title": "Resize then numbered movement",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "A real TIOCSWINSZ followed immediately by a numbered command, including same-size requests.",
+      "oracle": "One intended notification, exact command semantics and final geometry; no harness double-signal.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-06",
+      "title": "Timer expiry and rearm",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Stale generations, rapid rearm/cancel and expiry around waits.",
+      "oracle": "Old timer cannot affect a new operation; real-clock results supplement controlled-clock tests.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-07",
+      "title": "Live input lifecycle",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Append, truncate, rotate/replace, open writer, short reads and unavailable backward data.",
+      "oracle": "Defined retention and recovery; no stale position/storage; sparse seek beyond 4 GiB has separate coverage.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-08",
+      "title": "Actual foreground stop/resume",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Foreground PTY SIGTSTP, terminal inspection while stopped, SIGCONT and immediate input.",
+      "oracle": "Actual stopped state and restored terminal/session ownership, not a simulated signal-only test.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-09",
+      "title": "Child/helper handoff and failure",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Editor/shell/pipe/URI controlled child stubs, exec/native failure, cleanup and secure restrictions.",
+      "oracle": "Exact argv/bytes/effects/status; descriptors, signal masks and terminal modes restored.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-10",
+      "title": "Termination and reusable resources",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "SIGTERM/SIGHUP around startup, active I/O and teardown; repeated switch/cancel/drop.",
+      "oracle": "Specified status and cleanup; no leaked FDs, children, workers or unbounded live allocations.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-11",
+      "title": "Native callback and allocation faults",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "Fail each logical reserve/commit, compile/free/callback/handoff boundary; inject EINTR/EAGAIN/short I/O/invalid FD.",
+      "oracle": "Rollback or specified controlled failure; no panic/unwind crosses C; release pairs and init lengths remain valid.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    },
+    {
+      "id": "EVENT-12",
+      "title": "Inherited process state",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "exercise": "SIGPIPE ignore/default and supported inherited masks/dispositions, startup failure and child exec.",
+      "oracle": "Pager and children have the required state; setup failure restores prior dispositions/masks.",
+      "release_repeats_min": 100,
+      "requirement_ids": [
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ]
+    }
+  ],
+  "miri_seed_plan": [
+    0,
+    1,
+    712,
+    20261023
+  ],
+  "abi_matrix": [
+    {
+      "id": "REFERENCE-GLIBC-2.41",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "scope": "Declared Linux x86_64/glibc 2.41 reference ABI; matching headers, runtime, terminfo and GNU regex probes."
+    },
+    {
+      "id": "BUILDER-GLIBC-2.44",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "scope": "Observed baseline Linux x86_64/glibc 2.44 builder ABI, separately probed and tested; no inference for other glibc releases."
+    }
+  ],
+  "acceptance_catalogue": "spec/safety/acceptance.json",
+  "requirement_catalogue": "spec/safety/requirements.json",
+  "evidence_required_fields": [
+    "run_id",
+    "requirement_ids",
+    "scenario_id",
+    "variant",
+    "profile",
+    "status",
+    "source_commit",
+    "dirty_state",
+    "input_fingerprints",
+    "lockfile_sha256",
+    "target_triple",
+    "toolchain_and_native_pins",
+    "build_flags",
+    "instrumentation_scope",
+    "seed",
+    "corpus_sha256",
+    "execution_counts",
+    "coverage_report",
+    "cpu_seconds",
+    "wall_seconds",
+    "original_exit_status",
+    "symbolized_logs",
+    "findings",
+    "review_records",
+    "artifact_hashes"
+  ],
+  "closure": "All 43 requirements and all 175 variants, each applicable required profile, reviewed native exclusions and explicit applicability decisions; zero unresolved application memory-safety findings. No required skip counts as passed."
+}

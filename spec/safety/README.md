@@ -1,6 +1,6 @@
 # rless safety migration specification
 
-Version: **0.1.0**. Status: **specified, implementation and safety verification pending**.
+Version: **0.2.0**. Status: **specified, implementation and safety verification pending**.
 Target: the existing `linux-gnu-712` compatibility profile, Linux x86_64/glibc.
 
 This specification defines the work required to replace the translated pager's
@@ -24,6 +24,11 @@ This specification does not promise that native dependencies contain no defects.
 | 5. Verification | [Safety tests and release evidence](05-verification.md) |
 
 [Migration](migration.md) defines implementation order and phase gates.
+The [M0–M4 execution plan](execution-plan.md) expands this into 28 delivery packets
+including the M5 handoff; [work-packages.json](work-packages.json) records their dependencies.
+The [full campaign plan](campaign-plan.md) and [campaigns.json](campaigns.json)
+define target-specific budgets, native event scenarios and evidence gates.
+See [current state](../../docs/current-state.md) for the published baseline and tracking links.
 [requirements.json](requirements.json) maps requirements to compatibility parents,
 acceptance scenarios and milestones. [acceptance.json](acceptance.json) describes
 the planned safety scenarios and their oracles. These are separate from the frozen
@@ -137,3 +142,7 @@ this package are the project's migration contract.
 Tool capabilities MUST be rechecked against the exact pinned versions selected
 when the safety infrastructure is implemented. No sanitizer/Miri toolchain is
 claimed to have been installed or run by writing this specification.
+
+[GitHub migration tracker #1](https://github.com/JLuethe/rless/issues/1) links the
+six open phase issues and milestones. Their publication snapshot is in
+[github-tracking.json](github-tracking.json); implementation/evidence states remain planned/not-verified.
