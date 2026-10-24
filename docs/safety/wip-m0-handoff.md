@@ -1,9 +1,33 @@
 # Current resumed M0 checkpoint — 2026-10-24
 
+Implementation **`ee313be75f639a4d2c9928366a7904a4887c82b8`** is now committed and
+pushed in [draft PR #17](https://github.com/JLuethe/rless/pull/17). A separate
+[Codex review was requested](https://github.com/JLuethe/rless/pull/17#issuecomment-6389636456)
+and [completed without major findings](https://github.com/JLuethe/rless/pull/17#issuecomment-6389666465).
+**Formal C0 invariant approval has not been supplied.** A second model or a green
+test suite does not itself close the review gate.
+
+The committed glibc **2.41** native baseline now passes debug/release/reference/
+installation/source rebuild (809/809 each), 2,832 stress comparisons, helpers,
+integrations, foreground job control and the enhanced fixed-register ABI probe.
+The matching native fault slice passes **19 tests**, including 100 cleanup
+repetitions per feature/native counterpart, and all eight new PTY leak cases pass.
+Pinned Miri safe/alias controls and actual runtime component tests pass all four
+seeds hosted by glibc 2.41. Whole native/core Miri remains excluded.
+
+The glibc 2.41 **ASan/LSan profile is blocked** by the missing exact pinned LLVM
+symbolizer/runtime environment. No host libc/library substitution or weaker pin
+was used. The new [gate evaluation](resume-gates.json) checks every closure packet:
+M0 remains open with 686 reviews incomplete, partial hook/acceptance oracles and
+pending independent approval. Full commands, logs/statuses and environment/artifact hashes
+are in [the updated compact record](../verification/resume-m0-checkpoint.json).
+No local build/container remains running after the recorded campaigns. The
+separate GitHub review has finished; no further background work is scheduled.
+
 Resume in `/home/john/Code/rless`, branch
 `implement/m0-review-faults-verification`. The original handoff was `d513f97`.
-The current implementation is the commit adding this section; later documentation
-checkpoints identify the exact implementation tested by the ABI run. No merge or
+Implementation commit `ee313be` is the exact source tested by the ABI run;
+subsequent checkpoints update documentation only. No merge or
 release is authorized. **M0 is open, M1 is gated, and independent approval is
 pending.** The historical handoff below is retained verbatim as evidence and does
 not override this current section.
@@ -71,14 +95,15 @@ failed runs remain local. Empty strings remain covered by the alias unit test.
 - Callback sentinel propagation, parser partial commits, history replacement,
   all per-site ordinal/native-failure counterparts, and repeated in-process
   FD/child/live-byte conservation remain incomplete. A hit is not an oracle.
-- The pinned glibc 2.41 image exists, but its native baseline is not yet rerun
-  against this committed implementation at this checkpoint. Instrumented ABI
-  lanes need their own evidence and the exact pinned tools. The read-only,
-  network-closed image probe found no llvm-symbolizer/cargo/Miri in the image;
-  do not bypass tool pins or substitute the host libc/libraries.
-- Independent unsafe-boundary approval remains unavailable/pending a reviewer.
-  The user was asked to identify that reviewer while implementation continued.
-  This requirement and incomplete infrastructure prevent C0-GATE/M1 entry.
+- The pinned glibc 2.41 native baseline and bounded fault/Miri slices pass for
+  `ee313be`. The ASan/LSan ABI lane still needs the exact pinned symbolizer/runtime
+  environment. Base image Cargo/Miri were supplied via explicit read-only public
+  toolchain mounts for the supported Miri slice. Do not substitute host libc or
+  libraries, weaken pins, or transfer host ASan evidence to another ABI.
+- A separate Codex diff review completed with no major findings. Formal unsafe
+  invariant approval remains pending; the diff receipt does not complete the
+  ownership ledger or certify every native invariant. This and incomplete
+  infrastructure prevent C0-GATE/M1 entry.
 
 ## Resume commands
 
@@ -108,7 +133,7 @@ ABI runner archives committed source only. Preserve exact commands, original
 statuses, logs, tool identities and source/artifact hashes; no compatibility
 result substitutes for memory-safety or independent review. Continue the open
 owner/native/fault slices before evaluating C0-GATE. No background work is
-scheduled once this session ends.
+scheduled once this session ends; the requested separate review has completed.
 
 ---
 

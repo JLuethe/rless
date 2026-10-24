@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-24T21:19:03.560805+00:00",
+  "implementation_commit": "ee313be75f639a4d2c9928366a7904a4887c82b8",
+  "scope": "Packet-by-packet M0 evaluation; no phase closure or independent approval.",
+  "runtime_safety_verified": false,
+  "status": "M0 open / M1 gated",
+  "gates": [
+    {
+      "id": "C0-OWN-1",
+      "status": "not-verified",
+      "evidence": "Fresh source/expanded inventory and exhaustive 690-entry seed; structural/omission/staleness controls pass.",
+      "remaining": "Native/indirect classifications and full expanded/feature proof remain coupled to incomplete reviews."
+    },
+    {
+      "id": "C0-OWN-2",
+      "status": "not-verified",
+      "evidence": "Four source-bound author hazard records; validator checks all entries and rejects closure.",
+      "remaining": "686 entries incomplete; no independent unsafe approval."
+    },
+    {
+      "id": "C0-HOOK-1",
+      "status": "not-verified",
+      "evidence": "Real allocation ordinals and seven allocation controls pass on both glibc ABIs; normal builds contain no configuration strings.",
+      "remaining": "Bounded first slice only; all logical allocation/create positions are not covered."
+    },
+    {
+      "id": "C0-HOOK-2",
+      "status": "not-verified",
+      "evidence": "All 16 IDs hit actual pager paths; cleanup/native EINTR and short-write counterparts, filter/handoff/error recovery and negative controls pass.",
+      "remaining": "History replacement; parser partial commits; callback error propagation; native counterparts and ordinal separation at every site; repeated in-process resource conservation."
+    },
+    {
+      "id": "C0-COVER-1",
+      "status": "not-verified",
+      "evidence": "Exact 175 variants expand to 500 whole profile rows; mutation controls reject wrong variants/stale/partial bindings.",
+      "remaining": "Zero complete whole rows; new bounded diagnostics are not bound as complete acceptance variants."
+    },
+    {
+      "id": "C0-COVER-2",
+      "status": "not-verified",
+      "evidence": "Host full ASan replay passes 809/809; native/ASan fault suites pass 19 tests each; findings retained and aggregate fails closed.",
+      "remaining": "Remaining real oracles/profiles/budgets, permanent EIO findings and independent review."
+    },
+    {
+      "id": "C0-ABI-1",
+      "status": "passed",
+      "evidence": "Existing immutable glibc 2.41 image/rootfs/packages and exact observer dependencies reused; manifests retained.",
+      "remaining": "No full safety claim; profile trust and instrumentation limits retained."
+    },
+    {
+      "id": "C0-ABI-2",
+      "status": "not-verified",
+      "evidence": "Committed native debug/release/reference/install/source baseline passes 809/809 each plus ABI probes, stress, job control and fault/PTY regressions; four Miri component seeds pass.",
+      "remaining": "glibc 2.41 required ASan/LSan profile lacks exact pinned symbolizer environment; native internals and whole-core Miri remain explicit gaps."
+    },
+    {
+      "id": "C0-GATE",
+      "status": "blocked",
+      "evidence": "All above evidence inspected; author notes and exact input/artifact/source identities recorded.",
+      "remaining": "Incomplete owner/native/oracle coverage, glibc 2.41 sanitizer profile and independent approval. No M1 handoff."
+    },
+    {
+      "id": "C1-PROTO",
+      "status": "not-started",
+      "evidence": "M1 runtime unchanged.",
+      "remaining": "C0-GATE must pass before backend prototype/decision."
+    },
+    {
+      "id": "C1-IMPLEMENT",
+      "status": "not-started",
+      "evidence": "No runtime signal migration.",
+      "remaining": "C0-GATE and reviewed C1-PROTO must pass."
+    }
+  ],
+  "phase_packets": {
+    "M0.1": "native baselines reproduced for committed implementation on 2.44/2.41",
+    "M0.2": "incomplete ownership classification/review",
+    "M0.3": "host detectors and supported Miri pass; glibc 2.41 sanitizer tool profile blocked",
+    "M0.4": "partial real hooks/oracles/evidence runner",
+    "M0.5": "initial host diagnostics rerun; findings and unsupported ABI/whole-core profiles retained"
+  },
+  "independent_diff_review": {
+    "status": "Separate Codex diff review completed without major findings; formal C0 invariant approval not supplied",
+    "implementation_commit": "ee313be75f639a4d2c9928366a7904a4887c82b8",
+    "pull_request": "https://github.com/JLuethe/rless/pull/17",
+    "request": "https://github.com/JLuethe/rless/pull/17#issuecomment-6389636456",
+    "reviewer": "Separate GitHub Codex Code Review service; implementation author supplies no independent approval",
+    "last_observed": "completed",
+    "reviewed_commit": "ee313be75f639a4d2c9928366a7904a4887c82b8",
+    "receipt": "https://github.com/JLuethe/rless/pull/17#issuecomment-6389666465",
+    "formal_c0_approval": false,
+    "limitations": "No submitted approval review or source-invariant-by-invariant C0 signoff; 686 ownership entries and other gates remain incomplete."
+  }
+}
