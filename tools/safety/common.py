@@ -51,7 +51,7 @@ def fingerprint(root=ROOT):
         if name in ('spec/safety/validation.json', 'spec/safety/github-tracking.json'):
             continue  # Generated structure report and external tracking references.
         if not (name.startswith(('src/', 'tests/', 'tools/', 'vendor/', 'compat/', 'spec/'))
-                or name in ('Cargo.toml', 'Cargo.lock', 'build.rs')):
+                or name in ('.gitignore', 'Cargo.toml', 'Cargo.lock', 'build.rs')):
             continue
         path = root / name
         if path.is_file():
@@ -169,6 +169,11 @@ def validate_report(path, root=ROOT):
     report = json.loads(Path(path).read_text())
     if report['input_fingerprints'] != fingerprint(root):
         raise ValueError('stale input fingerprint')
+    if report.get('tool_pins', PINS) != PINS:
+        raise ValueError('tool profile changed')
+    for tool, value in report.get('tool_files_sha256', {}).items():
+        if not Path(tool).is_file() or sha(tool) != value:
+            raise ValueError('stale tool or toolchain source')
     records = report['records']
     if not records:
         raise ValueError('empty selection')

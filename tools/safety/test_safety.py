@@ -88,6 +88,16 @@ class EvidenceGate(unittest.TestCase):
         binary.write_bytes(b'new bytes')
         self.assert_rejected()
 
+    def test_changed_tool_rejects(self):
+        from common import sha
+        tool = self.directory / 'tool'
+        tool.write_bytes(b'original tool')
+        self.evidence.report['tool_files_sha256'] = {str(tool): sha(tool)}
+        self.run_python('print("safe")')
+        self.evidence.finish()
+        tool.write_bytes(b'changed tool')
+        self.assert_rejected()
+
     def test_unsupported_required_record_rejects(self):
         self.evidence.unavailable('miri', 'missing', 'MIRI')
         self.assertFalse(self.evidence.finish())

@@ -1,0 +1,13 @@
+[package]
+name = "rless-miri-components"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+libc = "=0.2.174"
+
+[lib]
+path = "lib.rs"

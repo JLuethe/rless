@@ -50,6 +50,10 @@ def check_tools(args, evidence):
     files = [tc / 'bin/rustc', tc / 'bin/cargo', tc / 'bin/miri',
              Path(shutil.which(PINS['symbolizer']['name']) or '/missing-symbolizer'),
              tc / 'lib/rustlib/src/rust/library/Cargo.lock']
+    files.extend((tc / 'lib').glob('librustc_driver*.so'))
+    files.extend((tc / 'lib/rustlib' / PINS['target'] / 'lib').glob('libstd-*.rlib'))
+    for suffix in ('*.rs', '*.toml'):
+        files.extend((tc / 'lib/rustlib/src/rust/library').rglob(suffix))
     evidence.report['tool_pins'] = PINS
     evidence.report['tool_files_sha256'] = {str(p): sha(p) for p in files}
     evidence.save()
@@ -212,12 +216,25 @@ def initial(args, evidence):
              classification='instrumented diagnostic; triage each report before assigning application/native/tool ownership',
              blocks_final_safety_gate=True, reports=reports))
         evidence.unavailable('sanitizer-findings-open', 'Sanitizer reports require triage and fixes; expected application exits cannot hide them.', 'ASAN')
-    # The actual application has one pure atomic wait-depth regression available now.
+    # Full-program Miri stops in the native ELF sigaction constructor before any
+    # test runs. Compile the real runtime module in isolation, never a stub.
+    evidence.report['boundary_exclusions'] = [dict(profile='MIRI',
+        boundary='src/process.rs::remember_sigpipe ELF constructor calls native sigaction',
+        reason='Pinned Miri reports unsupported foreign function sigaction on Linux.',
+        status='unsupported', native_alternative=dict(record='asan-rust-tests',
+          test_names=['a_closed_output_pipe_preserves_default_sigpipe',
+                      'an_inherited_ignored_sigpipe_stays_ignored']),
+        review_status='independent boundary review pending')]
     for seed in PINS['miri_seeds']:
         seeded = {**env, 'MIRIFLAGS': f'-Zmiri-seed={seed}'}
-        evidence.run('miri-runtime-' + str(seed), ['cargo', 'miri', 'test', '--locked', '--offline', '--lib',
+        record = evidence.run('miri-runtime-' + str(seed), ['cargo', 'miri', 'test', '--locked', '--offline',
+                     '--manifest-path', ROOT / 'tools/safety/components/Cargo.toml', '--lib',
                      'runtime::tests::nested_key_read_keeps_the_file_read_interruptible', '--', '--exact'],
                      env=seeded, timeout=300, profile='MIRI', requirement_ids=['SAFE-VER-003'])
+        output = (args.output / ('miri-runtime-' + str(seed) + '.log')).read_text()
+        if 'running 1 test' not in output or '1 passed; 0 failed' not in output:
+            record['status'] = 'failed'
+            record['oracle_error'] = 'Empty or unexpected component test selection'
     evidence.unavailable('miri-unconverted-core', 'Owned buffer/parser/state components are not migrated yet; one atomic regression is not whole-core Miri coverage.', 'MIRI')
     current = subprocess.check_output(['getconf', 'GNU_LIBC_VERSION'], text=True).strip()
     evidence.report['observed_glibc'] = current
@@ -279,8 +296,16 @@ def fuzz(args, evidence):
         evidence.run('fuzz-minimization', ['cargo', 'fuzz', 'tmin', '--fuzz-dir', project, '--target-dir', args.output / 'target',
                      'rollback_fault', crashes[0], '--', '-runs=1000', '-seed=712'], env=env,
                      timeout=300, profile='FUZZ')
+        minimized = sorted((project / 'artifacts').rglob('minimized-from-*'), key=lambda p: p.stat().st_size)
+        if not minimized:
+            evidence.unavailable('minimized-reproducer', 'Minimizer produced no retained input.', 'FUZZ')
+        else:
+            evidence.run('fuzz-minimized-replay', [*base, 'rollback_fault', minimized[0], '--', '-runs=1'],
+                         env=env, timeout=300, diagnostic=r'injected rollback violation: detector control',
+                         profile='FUZZ', artifacts=[minimized[0]])
+            evidence.report['minimized_reproducer'] = dict(path=str(minimized[0]), sha256=sha(minimized[0]), bytes=minimized[0].stat().st_size)
         evidence.report['retained_fuzz_artifacts'] = [dict(path=str(p), sha256=sha(p), bytes=p.stat().st_size)
-                  for p in artifacts.iterdir() if p.is_file()]
+                  for directory in (artifacts, project / 'artifacts') for p in directory.rglob('*') if p.is_file()]
     evidence.save()
 
 
