@@ -5,6 +5,38 @@ translated pager safe or implement every final acceptance variant. Generated log
 corpora, binaries and full syntax inventories stay under ignored `compat/.runs/`.
 The [progress report](../../docs/safety/m0-progress.md) records actual results and gaps.
 
+The [M0 closure specification](../../spec/safety/m0-closure-m1.md) refines the next
+gates. `ownership.py` seeds/checks source-bound owner/native/indirect-call reviews;
+`coverage.py` expands 175 variants to 500 exact profile rows and binds scoped
+evidence. Pending reviews and partial hook coverage never count as completed gates.
+The [glibc 2.41 runner](glibc241/README.md) builds/tests in an isolated matching ABI.
+
+## Real allocation hook slice
+
+The `safety-injection` Cargo feature is off by default. Its actual pager `ecalloc`
+hook fails the configured positive allocation ordinal with ENOMEM and takes the
+existing controlled out-of-memory path. Test-only `RLESS_FAULT=alloc:N` and a
+dedicated nonblocking pipe `RLESS_FAULT_FD` are validated before pager mutation.
+Fixed 16-byte hit events record magic/site/observed ordinal; the hook never formats
+or allocates, and the descriptor is close-on-exec. Missing/full-channel hit evidence
+fails the harness. Normal builds contain no injection configuration strings and
+ignore these variables. Do not ship feature builds as release candidates.
+
+```sh
+cargo build --locked --bins
+cargo build --locked --features safety-injection --bins \
+  --target-dir compat/.runs/injected-target
+python tools/safety/run.py hooks --normal-binary target/debug/rless \
+  --injected-binary compat/.runs/injected-target/debug/rless \
+  --output compat/.runs/allocation-hook-evidence
+python tools/safety/test_closure.py
+python tools/safety/coverage.py --output compat/.runs/acceptance-matrix.json
+```
+
+This proves a partial allocation-site slice, not all logical reserve/create, I/O,
+commit, callback, handoff or cleanup sites. `coverage.py --require-complete` fails
+until every required row has current complete evidence. Existing leaks remain open.
+
 ## Setup
 
 Use the normal Rust 1.90/Python environment for native baseline work. On this host:

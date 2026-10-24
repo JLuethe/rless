@@ -123,7 +123,7 @@
     },
     {
       "id": "M0-COV-001",
-      "title": "Reference glibc 2.41 safety environment has not been reproduced",
+      "title": "glibc 2.41 native baseline reproduced; safety profile evidence remains pending",
       "status": "open",
       "classification": "coverage/environment gap",
       "severity": "not exploit-assessed",
@@ -133,7 +133,9 @@
         "SAFE-VER-008"
       ],
       "evidence_refs": [
-        "tools/safety/profiles.json"
+        "tools/safety/profiles.json",
+        "docs/verification/glibc241-baseline.json",
+        "docs/verification/glibc241-environment.json"
       ],
       "blocks_final_safety_gate": true,
       "fix_commit": null,

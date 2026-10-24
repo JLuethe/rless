@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "started_at_utc": "2026-10-24T18:31:56.338464+00:00",
+  "status": "passed",
+  "source_commit": "9d281f35592d4bfca3c3e98e2a7be49ac9e24f36",
+  "source_tar_sha256": "2f2b56becb11f173a9f7bf6bc03bea0b1e41a155759039d0a9ec66e4e49801f5",
+  "image_id": "4ed3eed82d4b5d725f9d3d20afe950e8a648531cf709eb12e601de307ad38e4d",
+  "image_rootfs": {
+    "Type": "layers",
+    "Layers": [
+      "sha256:a70f6272827f64e1427d048ced77491aab5d64ab95725e56920802ff391197d7",
+      "sha256:06888b54c5c9b4858e338250cd65feb1ca489284fa90a03b3f52e21172c7ca97",
+      "sha256:7a71acda5eb25aeb0ded6af90b6cf45054a508a3738e24e54e76d7c272662127",
+      "sha256:daefefa3ff838723480ed6c70f2e35dea29dc6f2b0bdcc5e8310e7d64e1b92fb"
+    ]
+  },
+  "containerfile_sha256": "508dae6b547f1a50c799d7f9649624c3d7f84c3fc1cb9696f6680dbfbe292f11",
+  "references": {
+    "less": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+    "lessecho": "6aa653970a3a0f490a0def514ef8f4e17c21ac438f75145f0430f527bc24d1d6",
+    "less-osc8-open.sh": "67597ae3d23d064662c8ea5c8df469cc21f65dabe4832daf2e7fa92c05e6d062"
+  },
+  "runtime_safety_verified": false,
+  "environment_manifests": {
+    "packages.tsv": "bc06a8302d3850e72e8536fbeff7b85639c745cc4837a128f95106fd5714c687",
+    "packages.sha256": "a5d33588450983878d174e0459d4d8a465f5fc65a66975f922c59e77a0415da3",
+    "apt-metadata.sha256": "4a61b77b4458ae0f4a973184da35294a78466f8286cdc90f52121895c84c0be5",
+    "runtime.txt": "0584cb92f3422fd95c4a1d03a2843f3e844cfe5466619885dafbc31ebed1e323",
+    "python-wheels.sha256": "d6bb8b9c3e9202c4dbd9bd7b4c96f749c78b5eb6cb4d4114ca86cfc095a05522",
+    "python-packages.txt": "b01ccfce8202daa289bf9d6cbaca35c90bdaf43f17dab138fe7feb20fbd08040"
+  },
+  "command": [
+    "podman",
+    "run",
+    "--rm",
+    "--network=none",
+    "--read-only",
+    "--cap-drop=all",
+    "--userns=keep-id",
+    "--user",
+    "1000:1000",
+    "--tmpfs",
+    "/tmp:rw,nosuid,nodev",
+    "-v",
+    "/home/john/Code/rless/compat/.runs/closure-glibc241-user/input:/input:ro",
+    "-v",
+    "/home/john/Code/rless/compat/.runs/closure-glibc241-user/work:/work:rw",
+    "-v",
+    "/home/john/Code/rless/compat/.runs/closure-glibc241-user/reference:/reference:ro",
+    "-v",
+    "/home/john/Code/rless-env/rust-1.90.0:/opt/rust:ro",
+    "-v",
+    "/home/john/Code/rless-env/cargo-home/registry:/cache/registry:ro",
+    "--env",
+    "PATH=/opt/rless-python/bin:/opt/rust/bin:/usr/bin:/bin",
+    "--env",
+    "CARGO_HOME=/work/cargo",
+    "--env",
+    "CARGO_NET_OFFLINE=true",
+    "--env",
+    "HOME=/work/home",
+    "4ed3eed82d4b5d725f9d3d20afe950e8a648531cf709eb12e601de307ad38e4d",
+    "python3",
+    "-c",
+    "import tarfile; t=tarfile.open('/input/source.tar'); s=t.extractfile('tools/safety/glibc241/inside.py').read(); exec(compile(s,'inside.py','exec'), {'__name__':'__main__'})"
+  ],
+  "original_exit_status": 0,
+  "result": {
+    "status": "passed",
+    "runtime_safety_verified": false,
+    "scope": "Actual glibc 2.41 native baseline; no full safety campaign claim.",
+    "runtime": "glibc 2.41",
+    "identity": {
+      "uid": 1000,
+      "euid": 1000,
+      "gid": 1000
+    },
+    "header_probe": {
+      "glibc_headers": "2.41",
+      "ncurses_headers": "6.5",
+      "pointer_bytes": 8,
+      "off_t_bytes": 8,
+      "regex_bytes": 64,
+      "regex_alignment": 8,
+      "regex_nsub_offset": 48,
+      "regmatch_bytes": 8,
+      "sigaction_bytes": 152,
+      "sigset_bytes": 128,
+      "termios_bytes": 60,
+      "stat_bytes": 144,
+      "sigint": 2,
+      "sigwinch": 28,
+      "sigpipe": 13
+    },
+    "libraries": {
+      "reference": {
+        "binary_sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+        "ldd": "\tlinux-vdso.so.1 (0x00007fda59bc3000)\n\tlibncursesw.so.6 => /lib/x86_64-linux-gnu/libncursesw.so.6 (0x00007fda59b24000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fda59930000)\n\tlibtinfo.so.6 => /lib/x86_64-linux-gnu/libtinfo.so.6 (0x00007fda598fa000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fda59bc5000)\n",
+        "libraries_sha256": {
+          "/lib/x86_64-linux-gnu/libncursesw.so.6": "ea1e3fea29b3d3f35e240f626e5e783885d1d17f7915e7840f2a1542058c154c",
+          "/lib/x86_64-linux-gnu/libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+          "/lib/x86_64-linux-gnu/libtinfo.so.6": "4013e7651ac68f547d8333517def25b2366c97eec7de7f06e105dbf3444ffebf",
+          "/lib64/ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307"
+        }
+      },
+      "debug": {
+        "binary_sha256": "1b4f0c8319dd4ab90d24e9917dc84b5a9097e9766960f0f9b896f16a720188ed",
+        "ldd": "\tlinux-vdso.so.1 (0x00007f9ab4ebe000)\n\tlibtinfo.so.6 => /lib/x86_64-linux-gnu/libtinfo.so.6 (0x00007f9ab4d0d000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f9ab4ce0000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f9ab4aec000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f9ab4ec0000)\n",
+        "libraries_sha256": {
+          "/lib/x86_64-linux-gnu/libtinfo.so.6": "4013e7651ac68f547d8333517def25b2366c97eec7de7f06e105dbf3444ffebf",
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af",
+          "/lib/x86_64-linux-gnu/libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+          "/lib64/ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307"
+        }
+      },
+      "release": {
+        "binary_sha256": "28522a2665b3765a1d8650db0afa9984b5056b1a96be16a0f98dc1cbe0d3f7b3",
+        "ldd": "\tlinux-vdso.so.1 (0x00007ff9d8330000)\n\tlibtinfo.so.6 => /lib/x86_64-linux-gnu/libtinfo.so.6 (0x00007ff9d81e5000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ff9d81b8000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ff9d7fc4000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007ff9d8332000)\n",
+        "libraries_sha256": {
+          "/lib/x86_64-linux-gnu/libtinfo.so.6": "4013e7651ac68f547d8333517def25b2366c97eec7de7f06e105dbf3444ffebf",
+          "/lib/x86_64-linux-gnu/libgcc_s.so.1": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af",
+          "/lib/x86_64-linux-gnu/libc.so.6": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+          "/lib64/ld-linux-x86-64.so.2": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307"
+        }
+      }
+    },
+    "native_summary": {
+      "started_at_utc": "2026-10-24T18:32:00.792567+00:00",
+      "passed": true,
+      "steps": [
+        {
+          "name": "format",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "rust-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "rust-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "observer",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "corpus",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "negative-candidate",
+          "returncode": 1,
+          "expected_returncode": 1,
+          "passed": true
+        },
+        {
+          "name": "acceptance-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "acceptance-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "reference",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "integrations-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "job-control-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "helpers-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-debug-712",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-debug-20261023",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "integrations-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "job-control-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "helpers-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-release-712",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-release-20261023",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "clean-install",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "acceptance-installed",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        }
+      ],
+      "binaries": {
+        "debug": {
+          "path": "/work/source/target/debug/rless",
+          "sha256": "1b4f0c8319dd4ab90d24e9917dc84b5a9097e9766960f0f9b896f16a720188ed",
+          "companion_sha256": "47428471233fd7c077046477dbfe63ce035d2dff39e9cdfd80a85253bce9a4b2"
+        },
+        "release": {
+          "path": "/work/source/target/release/rless",
+          "sha256": "28522a2665b3765a1d8650db0afa9984b5056b1a96be16a0f98dc1cbe0d3f7b3",
+          "companion_sha256": "5c07df8370fd991acb73e2d447d3e7c6fad2f426ba8970df482d1acfc35e9b88"
+        }
+      },
+      "build_and_test_inputs_sha256": "d64c93afaef5ba5b6ea120a0b8505b1a53fdedc536ccde6a300eb75266a65822",
+      "helpers": {
+        "osc8_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+      },
+      "finished_at_utc": "2026-10-24T18:34:12.225710+00:00"
+    },
+    "source_acceptance": {
+      "binary": "/work/rebuild/rless-0.1.0-source/target/release/rless",
+      "sha256": "33e9409e00974f809636cfb0c716e5b13b53d632ef095d909963f1796c2bce5d",
+      "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.41",
+      "observer_sha256": "acd6ad610f1ba68321bf89221217e51996db8e9b919cf78dd719c5fa7ed27d01",
+      "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      },
+      "executed": 809,
+      "passed": 809,
+      "failed": 0
+    },
+    "packages": {
+      "archive": "/work/packages/rless-0.1.0-linux-x86_64.tar.gz",
+      "sha256": "02d11b9d0296eca327dbdd4347db578ee5c5c6575dfea02a04cf5403674da275",
+      "source_archive": "/work/packages/rless-0.1.0-source.tar.gz",
+      "source_sha256": "c195d93237726f622aa737064868b353e8f489cffc7abef7becc9d41d30f31d6",
+      "extracted_smoke_tests": "passed"
+    },
+    "allocation_hook_profile": "NATIVE allocation hook controls passed; remaining sites unimplemented",
+    "safety_profile_status": "ASan/LSan/Miri not-run here; native baseline/hooks do not establish full safety campaigns"
+  },
+  "finished_at_utc": "2026-10-24T18:34:53.739932+00:00",
+  "container_log_sha256": "ffd3bfa49850498969a4c56729f7808498e6091efe68bd07d155ec402eb72ad1"
+}

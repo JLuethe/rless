@@ -853,7 +853,18 @@ pub unsafe extern "C" fn out_of_memory() {
 #[no_mangle]
 pub unsafe extern "C" fn ecalloc(mut count: size_t, mut size: size_t) -> *mut ::core::ffi::c_void {
     let mut p: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
-    p = calloc(count, size);
+    #[cfg(feature = "safety-injection")]
+    {
+        p = if crate::fault::fail_allocation() {
+            ::core::ptr::null_mut()
+        } else {
+            calloc(count, size)
+        };
+    }
+    #[cfg(not(feature = "safety-injection"))]
+    {
+        p = calloc(count, size);
+    }
     if p.is_null() {
         out_of_memory();
     }
@@ -952,6 +963,11 @@ pub unsafe extern "C" fn secure_allow(mut features: ::core::ffi::c_uint) -> lboo
     );
 }
 pub fn main() {
+    #[cfg(feature = "safety-injection")]
+    if let Err(error) = crate::fault::initialize() {
+        eprintln!("rless safety injection: {error}");
+        ::std::process::exit(2);
+    }
     let mut args_strings: Vec<Vec<u8>> = ::std::env::args_os()
         .map(|arg| {
             ::std::ffi::CString::new(arg.into_vec())

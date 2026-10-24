@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "bindings": [
+    {
+      "row_id": "SAFECASE-MEM-007:NATIVE:c120e745a27262e5",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "fail each logical reserve/create boundary",
+      "profile": "NATIVE",
+      "implementation_path": "tools/safety/test_hooks.py",
+      "coverage_scope": "partial",
+      "scope_notes": "Only actual pager ecalloc ordinals 1/2 and native controls. Other logical reserve/create/native/cleanup sites remain uncovered.",
+      "report": "/home/john/Code/rless/compat/.runs/closure-hooks-record/summary.json",
+      "record_name": "allocation-hook-native"
+    }
+  ]
+}

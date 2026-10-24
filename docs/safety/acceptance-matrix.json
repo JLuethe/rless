@@ -1,0 +1,6020 @@
+{
+  "schema_version": 1,
+  "scope": "Final variant/profile matrix; one native allocation slice is partial, not a variant pass.",
+  "catalogue_sha256": "1ba4920a37959048a2e5dc101aee8683eda9d7c4b17953fb201946fa9b8d3c92",
+  "status": "not-verified",
+  "runtime_safety_verified": false,
+  "row_count": 500,
+  "rows": [
+    {
+      "id": "SAFECASE-BASE-001:NATIVE:f7066e85b2207a30",
+      "scenario_id": "SAFECASE-BASE-001",
+      "variant": "all 809 cases on debug and release",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-001:NATIVE:5f71ced55be0b066",
+      "scenario_id": "SAFECASE-BASE-001",
+      "variant": "clean install and packaged-source rebuild",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-001:NATIVE:054000b04dd87cb1",
+      "scenario_id": "SAFECASE-BASE-001",
+      "variant": "negative comparator mutation",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:NATIVE:6a7043da90d5eacb",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "arbitrary byte/filename inputs",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:ASAN:6114229ba9468bf3",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "arbitrary byte/filename inputs",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:LSAN:b1760b257ce4f391",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "arbitrary byte/filename inputs",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:AUDIT:d7d96aece9134359",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "arbitrary byte/filename inputs",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:NATIVE:bdf794daf636d721",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "malformed configuration and key packets",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:ASAN:ccb2d88d7159972b",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "malformed configuration and key packets",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:LSAN:5465a815d1cb4146",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "malformed configuration and key packets",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:AUDIT:04652b055e246e21",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "malformed configuration and key packets",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:NATIVE:b1c1564887923f21",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "short I/O and native failure",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:ASAN:ee4eb8528b85ce54",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "short I/O and native failure",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:LSAN:f9002b9032b27774",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "short I/O and native failure",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:AUDIT:64b9d7932aa762dd",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "short I/O and native failure",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:NATIVE:c1299a6fcb246230",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "resource exhaustion with cleanup available",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:ASAN:9ccaa36cd1c2f558",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "resource exhaustion with cleanup available",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:LSAN:c95605ddcbaf443b",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "resource exhaustion with cleanup available",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-002:AUDIT:fce5985f6bbcd66d",
+      "scenario_id": "SAFECASE-BASE-002",
+      "variant": "resource exhaustion with cleanup available",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-003:STATIC:432d9712ef173c41",
+      "scenario_id": "SAFECASE-BASE-003",
+      "variant": "reproduce source snapshot fingerprint",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-003:AUDIT:bc294a6c3023714c",
+      "scenario_id": "SAFECASE-BASE-003",
+      "variant": "reproduce source snapshot fingerprint",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-003:STATIC:1347f2a6a753cf62",
+      "scenario_id": "SAFECASE-BASE-003",
+      "variant": "inventory macro-expanded unsafe and duplicate declarations",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-003:AUDIT:777399bc13d65ff9",
+      "scenario_id": "SAFECASE-BASE-003",
+      "variant": "inventory macro-expanded unsafe and duplicate declarations",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-003:STATIC:103840b567afd12b",
+      "scenario_id": "SAFECASE-BASE-003",
+      "variant": "change one build/test input",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-BASE-003:AUDIT:bd0fe66e6eb7b384",
+      "scenario_id": "SAFECASE-BASE-003",
+      "variant": "change one build/test input",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-BASE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:STATIC:c98555795ed44292",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "safe API inspection",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:AUDIT:fd3b796d24fa5113",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "safe API inspection",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:STATIC:73fbb021353a03d2",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "attempt direct core native import",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:AUDIT:36f087e332b846e1",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "attempt direct core native import",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:STATIC:c98809b391e8de86",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "raw handle escape attempt",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:AUDIT:6915fd21221283d0",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "raw handle escape attempt",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:STATIC:aea06bfae950d567",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "inventory symbol categories",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-001:AUDIT:4e369b33b7511a18",
+      "scenario_id": "SAFECASE-FFI-001",
+      "variant": "inventory symbol categories",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ABI:d4d5310272b40418",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "C/Rust size/alignment/offset probes",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ASAN:b3e1edec4560d292",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "C/Rust size/alignment/offset probes",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:STATIC:9c5faa33c420af83",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "C/Rust size/alignment/offset probes",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ABI:b17bd3a5ee2ada35",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "native constant and signedness probes",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ASAN:f426ec05a521ad0c",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "native constant and signedness probes",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:STATIC:69ae45122b943826",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "native constant and signedness probes",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ABI:d57735d270f18dc0",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "opaque object lifecycle",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ASAN:94b94b1703744a1c",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "opaque object lifecycle",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:STATIC:d5f39840305b134e",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "opaque object lifecycle",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ABI:f567b128096efe97",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "unsupported target build",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:ASAN:39216b9b1bec810d",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "unsupported target build",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-002:STATIC:a291aad618635764",
+      "scenario_id": "SAFECASE-FFI-002",
+      "variant": "unsupported target build",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:NATIVE:afcea49690417f76",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "backreferences and leftmost-longest/submatches",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ASAN:328d574d5542baf7",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "backreferences and leftmost-longest/submatches",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:LSAN:2b0941f7b449e439",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "backreferences and leftmost-longest/submatches",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ABI:12f03336a92f41f6",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "backreferences and leftmost-longest/submatches",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:FUZZ:f4a2dc60d1f143e8",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "backreferences and leftmost-longest/submatches",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:NATIVE:4ec1f0ed99225815",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "empty/zero-length/invalid patterns",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ASAN:1e921ba16e4f9c02",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "empty/zero-length/invalid patterns",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:LSAN:f74546dd5bb06d27",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "empty/zero-length/invalid patterns",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ABI:18be1851e3c6a783",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "empty/zero-length/invalid patterns",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:FUZZ:395696f4937854e8",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "empty/zero-length/invalid patterns",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:NATIVE:334fd5d28369c8a4",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "large native length conversion",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ASAN:b0b1648fb1e730fe",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "large native length conversion",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:LSAN:dd356f48a8ae7717",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "large native length conversion",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ABI:6d54f664631c4a08",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "large native length conversion",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:FUZZ:fd8678f1d3da0b91",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "large native length conversion",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:NATIVE:bfb8340344b4beff",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "compile failure/drop and repeated replacement",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ASAN:935d67c9113e779a",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "compile failure/drop and repeated replacement",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:LSAN:ec5ffc0634610de3",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "compile failure/drop and repeated replacement",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ABI:607122f8d9455029",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "compile failure/drop and repeated replacement",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:FUZZ:31a66c632bf9c2d2",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "compile failure/drop and repeated replacement",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:NATIVE:7af1eb1ad6c92a75",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "native global syntax restoration",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ASAN:6c0045e6b10e791b",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "native global syntax restoration",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:LSAN:263db46c963529b2",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "native global syntax restoration",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:ABI:7eb326a552af8888",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "native global syntax restoration",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-003:FUZZ:5242804211eb00cf",
+      "scenario_id": "SAFECASE-FFI-003",
+      "variant": "native global syntax restoration",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:NATIVE:017b0f2e83ae08fd",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "null/-1 capability results",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ASAN:211d53753131198b",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "null/-1 capability results",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ABI:0e42ec82e548cc4b",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "null/-1 capability results",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:NATIVE:9117e98b5034ebca",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "scratch string overwritten by next native call",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ASAN:6ddd06373cd86eef",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "scratch string overwritten by next native call",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ABI:e6d635aa7a4458cf",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "scratch string overwritten by next native call",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:NATIVE:214848d67c5e4e1b",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "terminal reinitialization",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ASAN:9a834a22576a8269",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "terminal reinitialization",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ABI:2c3ab94f4c372810",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "terminal reinitialization",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:NATIVE:9303b82442d5e0e5",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "partial native read and callback output failure",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ASAN:2fdf56c79fdc6f0d",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "partial native read and callback output failure",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-004:ABI:3d90de6722af7976",
+      "scenario_id": "SAFECASE-FFI-004",
+      "variant": "partial native read and callback output failure",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ASAN:6fc4d97c5e2ae5c4",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "all sentinel representations",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:MIRI:9530195f745e4a58",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "all sentinel representations",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ABI:b565932ffbe2d0e1",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "all sentinel representations",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:AUDIT:6a6f443844268648",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "all sentinel representations",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ASAN:c449056f6379240f",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "callback retains/finishes context",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:MIRI:5b6f5c2ccd8fb92e",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "callback retains/finishes context",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ABI:77a03d7c24bdbfc8",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "callback retains/finishes context",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:AUDIT:aec66f7b616c800a",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "callback retains/finishes context",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ASAN:cb5b549ae338a019",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "reentrant callback rejection",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:MIRI:de92590fe54a0510",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "reentrant callback rejection",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ABI:38ed56a50143f320",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "reentrant callback rejection",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:AUDIT:b978093668f5400c",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "reentrant callback rejection",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ASAN:2b0188b7e5d1a1b7",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "native failure followed by cleanup failure",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:MIRI:00b3159a9b8d17ab",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "native failure followed by cleanup failure",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:ABI:50d2525aa12f8f10",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "native failure followed by cleanup failure",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-005:AUDIT:0b7421f21e57bc88",
+      "scenario_id": "SAFECASE-FFI-005",
+      "variant": "native failure followed by cleanup failure",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:STATIC:34f0c326eb3db310",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "unsafe block/item inventory",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:AUDIT:1c8d3d95a31afecd",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "unsafe block/item inventory",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:STATIC:b405dcd081c0722b",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "macro-expanded compile checks",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:AUDIT:344bfd3e85eb9f76",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "macro-expanded compile checks",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:STATIC:8683769e01e486ce",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "missing safety proof negative fixture",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:AUDIT:a154e9c951157546",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "missing safety proof negative fixture",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:STATIC:9fddb57f108791cc",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "independent invariant review",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-006:AUDIT:6d42fe589173597a",
+      "scenario_id": "SAFECASE-FFI-006",
+      "variant": "independent invariant review",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:STATIC:8e0a0dc7056e76e0",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "locked dependency and header inventory",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:AUDIT:ebdef735e7e7f8b5",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "locked dependency and header inventory",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:STATIC:0c407a2bb8e03ef8",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "loaded native library identity",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:AUDIT:de212cb6fe3f1784",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "loaded native library identity",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:STATIC:48a5c3bb1453ff62",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "vendored patch/advisory review",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:AUDIT:64df510fbbf3eb60",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "vendored patch/advisory review",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:STATIC:f3b6a6825d69122e",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "bitfield dependency retirement or explicit boundary review",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-FFI-007:AUDIT:4d409989c89866d6",
+      "scenario_id": "SAFECASE-FFI-007",
+      "variant": "bitfield dependency retirement or explicit boundary review",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:NATIVE:924f4a7e0341b09b",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "empty buffer and reset/pop",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:MIRI:8dfbfec93702751a",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "empty buffer and reset/pop",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:FUZZ:c757af945424a7ed",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "empty buffer and reset/pop",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:STATIC:9ba50be59252953b",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "empty buffer and reset/pop",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:NATIVE:8b77fd35299cb582",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "growth and reuse",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:MIRI:3167feacf6d33879",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "growth and reuse",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:FUZZ:8bb4b64d7be75ff2",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "growth and reuse",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:STATIC:047a305cb77567bc",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "growth and reuse",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:NATIVE:c7b0a410e9537dd4",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "self-copy and overlap semantics",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:MIRI:bb186d8eef8ab7f6",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "self-copy and overlap semantics",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:FUZZ:82f8ee08d610451f",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "self-copy and overlap semantics",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:STATIC:79dc3c95045d26c0",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "self-copy and overlap semantics",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:NATIVE:7a4e7417c56df45d",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "NUL/invalid UTF-8/CRLF/no-final-newline",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:MIRI:2dc3fd4b034c285c",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "NUL/invalid UTF-8/CRLF/no-final-newline",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:FUZZ:0bd6830a25c64f61",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "NUL/invalid UTF-8/CRLF/no-final-newline",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-001:STATIC:571be522f93ec975",
+      "scenario_id": "SAFECASE-MEM-001",
+      "variant": "NUL/invalid UTF-8/CRLF/no-final-newline",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:NATIVE:fe679bc1256124fb",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "zero and near-usize size arithmetic",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:MIRI:ef349b60107792df",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "zero and near-usize size arithmetic",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:FUZZ:e0ec9867074362ec",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "zero and near-usize size arithmetic",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:NATIVE:712de3c37fb01216",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "negative/unknown positions",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:MIRI:b684132b3c028c4f",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "negative/unknown positions",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:FUZZ:a48fec89db40a1df",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "negative/unknown positions",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:NATIVE:a1e2095d85ec8533",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "native length narrowing",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:MIRI:9940b67b1b87d167",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "native length narrowing",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:FUZZ:d5e0ef2ec0a6d198",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "native length narrowing",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:NATIVE:33ed29c6ff47dbfd",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "real sparse seek beyond 4 GiB",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:MIRI:015f61eff0e9c0bd",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "real sparse seek beyond 4 GiB",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-002:FUZZ:71cae11444d2ae18",
+      "scenario_id": "SAFECASE-MEM-002",
+      "variant": "real sparse seek beyond 4 GiB",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:MIRI:2c6fe07d52618f1b",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "grow while locations are retained",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:ASAN:b2c04f218b6356d1",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "grow while locations are retained",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:STATIC:1d6638f97f514630",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "grow while locations are retained",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:MIRI:10952ea8e7d86172",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "replace filter/history storage",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:ASAN:96612b7af8647b94",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "replace filter/history storage",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:STATIC:8595c660ddbed620",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "replace filter/history storage",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:MIRI:32330a25598e7038",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "truncate/evict retained input",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:ASAN:855eed3f2d444446",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "truncate/evict retained input",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:STATIC:aaa298f805d0f85f",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "truncate/evict retained input",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:MIRI:fbf99c0e9b1f07ce",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "compile-fail borrow invalidation with a valid counterpart",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:ASAN:211af495294f1ed1",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "compile-fail borrow invalidation with a valid counterpart",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-003:STATIC:e0aa07bf1a4679ac",
+      "scenario_id": "SAFECASE-MEM-003",
+      "variant": "compile-fail borrow invalidation with a valid counterpart",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:NATIVE:d0da82d10f97fc3a",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "truncated/incomplete grammar productions",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:MIRI:0bf727ebed9dd185",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "truncated/incomplete grammar productions",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:FUZZ:c9de6641a502365a",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "truncated/incomplete grammar productions",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:NATIVE:4e37fded8747bb67",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "invalid/partial UTF and terminal packets",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:MIRI:a05f467f0c913291",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "invalid/partial UTF and terminal packets",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:FUZZ:64bc97baf839ad84",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "invalid/partial UTF and terminal packets",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:NATIVE:ff9e7dfe1de04062",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "nested and malformed prompt/config syntax",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:MIRI:7069b56dbbe0ca6e",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "nested and malformed prompt/config syntax",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:FUZZ:22c509e163283962",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "nested and malformed prompt/config syntax",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:NATIVE:bd9e0b70a39136cf",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "zero-length transformations",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:MIRI:96db52e396fcfef9",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "zero-length transformations",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:FUZZ:e5432282f2ce2e2e",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "zero-length transformations",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:NATIVE:2f6cc0fc3e056d67",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "lessecho numeric/quote/metachar options with byte-valued arguments",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:MIRI:b64dddd10f1ac47d",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "lessecho numeric/quote/metachar options with byte-valued arguments",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-004:FUZZ:fb0ca91f62d1f345",
+      "scenario_id": "SAFECASE-MEM-004",
+      "variant": "lessecho numeric/quote/metachar options with byte-valued arguments",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ASAN:29ba0186fec646ab",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native initialization succeeds/fails partially",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:LSAN:dd9d0b1e80cbe8e4",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native initialization succeeds/fails partially",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ABI:30d10479fa0c72b9",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native initialization succeeds/fails partially",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:AUDIT:82a0cf339d96a80b",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native initialization succeeds/fails partially",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ASAN:6fdac302de61d515",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "ownership transfer and copying",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:LSAN:36721a60cbf529ea",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "ownership transfer and copying",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ABI:633be1922f1e64a5",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "ownership transfer and copying",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:AUDIT:f415e4cd49b4bc46",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "ownership transfer and copying",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ASAN:21b0468be76a8307",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "repeated close/drop",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:LSAN:f0991fa454135004",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "repeated close/drop",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ABI:5aa23806dbee8589",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "repeated close/drop",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:AUDIT:4446c20180c91b43",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "repeated close/drop",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ASAN:c1a2b19dcbade3bc",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native error string/capability replacement",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:LSAN:da5efc9e002f074f",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native error string/capability replacement",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:ABI:d0cf5980ea95d128",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native error string/capability replacement",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-005:AUDIT:c72ed6edcd337b95",
+      "scenario_id": "SAFECASE-MEM-005",
+      "variant": "native error string/capability replacement",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:NATIVE:29bbfb914a148c27",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "first page before pipe EOF",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:ASAN:e4625b9533985e66",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "first page before pipe EOF",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:FUZZ:0101b9f76994f93d",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "first page before pipe EOF",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:NATIVE:c6e087da4909430f",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "finite retention and unavailable backward data",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:ASAN:e550ed201c0330be",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "finite retention and unavailable backward data",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:FUZZ:ab9a5727162aff3a",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "finite retention and unavailable backward data",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:NATIVE:15b4f59216c25df5",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "append/incomplete final line",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:ASAN:8940a7d1b3731fdc",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "append/incomplete final line",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:FUZZ:93f61b525a6c0313",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "append/incomplete final line",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:NATIVE:1666b69fe4b077ec",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "truncate/rotation/flush repaint",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:ASAN:e878da8cc19b97a7",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "truncate/rotation/flush repaint",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-006:FUZZ:e0803fca06ec368e",
+      "scenario_id": "SAFECASE-MEM-006",
+      "variant": "truncate/rotation/flush repaint",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:NATIVE:c120e745a27262e5",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "fail each logical reserve/create boundary",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-verified",
+      "implementation_path": "tools/safety/test_hooks.py",
+      "evidence": {
+        "row_id": "SAFECASE-MEM-007:NATIVE:c120e745a27262e5",
+        "scenario_id": "SAFECASE-MEM-007",
+        "variant": "fail each logical reserve/create boundary",
+        "profile": "NATIVE",
+        "implementation_path": "tools/safety/test_hooks.py",
+        "coverage_scope": "partial",
+        "scope_notes": "Only actual pager ecalloc ordinals 1/2 and native controls. Other logical reserve/create/native/cleanup sites remain uncovered.",
+        "report": "/home/john/Code/rless/compat/.runs/closure-hooks-record/summary.json",
+        "record_name": "allocation-hook-native"
+      }
+    },
+    {
+      "id": "SAFECASE-MEM-007:ASAN:81c617fee4d391fe",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "fail each logical reserve/create boundary",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:LSAN:9f23cfb79c81c294",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "fail each logical reserve/create boundary",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:NATIVE:c560f7481c3bdcc8",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "failure before and after commit staging",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:ASAN:b222a9a907478780",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "failure before and after commit staging",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:LSAN:c5ce5756206ed815",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "failure before and after commit staging",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:NATIVE:098936ba0fa3cb6c",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "format/native allocation failure",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:ASAN:c8da58b0ce774893",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "format/native allocation failure",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:LSAN:af275dc7c12c412e",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "format/native allocation failure",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:NATIVE:70576b6c5502eba2",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "failure during cleanup",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:ASAN:fe66df22de24c10a",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "failure during cleanup",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-007:LSAN:399f92a193582177",
+      "scenario_id": "SAFECASE-MEM-007",
+      "variant": "failure during cleanup",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-008:STATIC:93566624f0f3168e",
+      "scenario_id": "SAFECASE-MEM-008",
+      "variant": "compile every converted memory/parser module",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-008:AUDIT:897274d22b3093d3",
+      "scenario_id": "SAFECASE-MEM-008",
+      "variant": "compile every converted memory/parser module",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-008:STATIC:0081cd94a7bd966c",
+      "scenario_id": "SAFECASE-MEM-008",
+      "variant": "attempt forbidden unsafe/FFI escape",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-008:AUDIT:5d913721b4efc21b",
+      "scenario_id": "SAFECASE-MEM-008",
+      "variant": "attempt forbidden unsafe/FFI escape",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-008:STATIC:dbb50a180591a368",
+      "scenario_id": "SAFECASE-MEM-008",
+      "variant": "audit legacy aliases after caller migration",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-MEM-008:AUDIT:c98a155b2a189625",
+      "scenario_id": "SAFECASE-MEM-008",
+      "variant": "audit legacy aliases after caller migration",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-MEM-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:NATIVE:932164a2880e51b4",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGINT during filter replacement/allocation",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:ASAN:6ea75cc8d6559c4f",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGINT during filter replacement/allocation",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:STATIC:938071f3c923228e",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGINT during filter replacement/allocation",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:AUDIT:751367358c2fa554",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGINT during filter replacement/allocation",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:NATIVE:378a8b2afa3cf365",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGUSR1 during command queue growth",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:ASAN:9ba5626e774fde78",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGUSR1 during command queue growth",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:STATIC:232c644160f4eaab",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGUSR1 during command queue growth",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:AUDIT:169b7b3b1fae0720",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGUSR1 during command queue growth",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:NATIVE:2210065191e23af6",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGTERM during active allocation or output",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:ASAN:9ea1ac176bab34c3",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGTERM during active allocation or output",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:STATIC:dd747d78b05eb5c6",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGTERM during active allocation or output",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-001:AUDIT:fd87cc6c2e615dd8",
+      "scenario_id": "SAFECASE-SIG-001",
+      "variant": "SIGTERM during active allocation or output",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:NATIVE:864d6a879e73a5f9",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "notification before wait registration",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:ASAN:af797d3f6517f015",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "notification before wait registration",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:NATIVE:0917ab761d6d8acf",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "notification between readiness check and blocking syscall",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:ASAN:9a91e933dcf761e6",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "notification between readiness check and blocking syscall",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:NATIVE:b3c457aa7ea36f74",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "notification during and after read",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:ASAN:98a0cf80e759f4b8",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "notification during and after read",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:NATIVE:71184dc8a080ef1f",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "nested terminal/file reads",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:ASAN:735f3b968085d92f",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "nested terminal/file reads",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:NATIVE:3eee3351a81fb493",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "immediate command after resize",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-002:ASAN:5b1c913d6ab1c207",
+      "scenario_id": "SAFECASE-SIG-002",
+      "variant": "immediate command after resize",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:NATIVE:435225e2e83ede67",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGINT and -K",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:ASAN:f444fce61fbd68b6",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGINT and -K",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:NATIVE:4779e5989aec2841",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGTERM and SIGHUP",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:ASAN:6fd78b59b8bc7b05",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGTERM and SIGHUP",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:NATIVE:878a972485a501a9",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGQUIT",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:ASAN:264a3aab3c4cc936",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGQUIT",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:NATIVE:a6ff4134437b4516",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGUSR1 repeated delivered actions",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:ASAN:231990fc641f21cf",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "SIGUSR1 repeated delivered actions",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:NATIVE:377d551e5b2d7c38",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "timer cancel/rearm and stale expiry",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:ASAN:f4b794ec39a41b7e",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "timer cancel/rearm and stale expiry",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:NATIVE:fcbcbbff52bd4f63",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "simultaneous defined event orders",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-003:ASAN:7e7ca25a958ea5b1",
+      "scenario_id": "SAFECASE-SIG-003",
+      "variant": "simultaneous defined event orders",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:NATIVE:bbb6ac212a8a6226",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "foreground stop and continuation",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:ASAN:2aba41861a349f6e",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "foreground stop and continuation",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:NATIVE:9ede47fe8b26b85a",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "secure-disabled stop",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:ASAN:da4b4e9daf4d5ed1",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "secure-disabled stop",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:NATIVE:587f762a564540a6",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "signal during editor/shell/URI handoff",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:ASAN:5e4caace07fe8353",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "signal during editor/shell/URI handoff",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:NATIVE:f56211664f2a14be",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "child exec failure",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:ASAN:62c2a6166b38c776",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "child exec failure",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:NATIVE:03e4dcc4786b030a",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "orphan-group negative control",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-004:ASAN:d15350d38c796adc",
+      "scenario_id": "SAFECASE-SIG-004",
+      "variant": "orphan-group negative control",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:NATIVE:4d4f3c069fce8f4c",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "inherited default SIGPIPE",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:LSAN:09eadb9ced34d347",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "inherited default SIGPIPE",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:NATIVE:632d92640a9ce8e5",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "inherited ignored SIGPIPE",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:LSAN:0e511b246cdd4a4a",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "inherited ignored SIGPIPE",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:NATIVE:fa5de38919974aa6",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "setup failure at each registration stage",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:LSAN:29a050e9ef753680",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "setup failure at each registration stage",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:NATIVE:cc3ad8595f7d68a6",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "reinitialization and child exec",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-005:LSAN:1da4fb466ac6b961",
+      "scenario_id": "SAFECASE-SIG-005",
+      "variant": "reinitialization and child exec",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:NATIVE:7a63a6ac75a8c157",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "notification channel saturation",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:ASAN:60e96fab347625d4",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "notification channel saturation",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:AUDIT:a18f9bec28ab534b",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "notification channel saturation",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:NATIVE:c9af2e07d1a6bba8",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "nested delivery",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:ASAN:28d4e03b8e31b382",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "nested delivery",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:AUDIT:d28bfc5ca38a7642",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "nested delivery",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:NATIVE:1768b5422a84fa59",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "counter/generation limit",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:ASAN:7d66cef4022fa37d",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "counter/generation limit",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:AUDIT:0f5f8d7d8d6b9676",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "counter/generation limit",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:NATIVE:82f7f0589125f0a7",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "notification during drain/rearm",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:ASAN:cd80b1ed4bbe4885",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "notification during drain/rearm",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-006:AUDIT:7fc6050d6ac945a9",
+      "scenario_id": "SAFECASE-SIG-006",
+      "variant": "notification during drain/rearm",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:NATIVE:839c9ecb53dc1e87",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "Default/Ignore/Handler dispositions",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:ABI:c962886ce08fad67",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "Default/Ignore/Handler dispositions",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:STATIC:98ea89aec9029d47",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "Default/Ignore/Handler dispositions",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:AUDIT:7cd1182b640264e9",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "Default/Ignore/Handler dispositions",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:NATIVE:40d0c232225cd1ea",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "sigaction and mask failures",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:ABI:5e635c858f7e972d",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "sigaction and mask failures",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:STATIC:638c76bc9310cf23",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "sigaction and mask failures",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:AUDIT:1548b45770071ad5",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "sigaction and mask failures",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:NATIVE:56d1cd5cacb5931e",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "timer registration failure",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:ABI:dd383eca7d2e05f9",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "timer registration failure",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:STATIC:665d9f7d28d99707",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "timer registration failure",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:AUDIT:504982974f8d6019",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "timer registration failure",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:NATIVE:472196581827e0bc",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "callback error",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:ABI:bbfa7798b65cf7a6",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "callback error",
+      "profile": "ABI",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:STATIC:8e02afe145b1e0c8",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "callback error",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-007:AUDIT:91e0c81fb9790e05",
+      "scenario_id": "SAFECASE-SIG-007",
+      "variant": "callback error",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:NATIVE:a35b1e4e332ca542",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "FIFO open with no writer",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:ASAN:bb17faf555206adc",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "FIFO open with no writer",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:LSAN:9eebd68e2a103ca4",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "FIFO open with no writer",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:AUDIT:7a892b8a7983401f",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "FIFO open with no writer",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:NATIVE:1d446a9a48787868",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "signal immediately before entering open",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:ASAN:d319e09a8b6c72bf",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "signal immediately before entering open",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:LSAN:b91fb9fb10b15015",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "signal immediately before entering open",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:AUDIT:4b9c176e6268bbf3",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "signal immediately before entering open",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:NATIVE:13bfa6016522980b",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "writer connects without writing then closes",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:ASAN:80df796d2b1240df",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "writer connects without writing then closes",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:LSAN:0ad71099ff0b510a",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "writer connects without writing then closes",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:AUDIT:15cad562d1e9dcdb",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "writer connects without writing then closes",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:NATIVE:adf3d6fe9790b56e",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "repeated cancel/open cycles",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:ASAN:472b9b0352f2370d",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "repeated cancel/open cycles",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:LSAN:7d086ed0ba3ad5b2",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "repeated cancel/open cycles",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:AUDIT:b8fcc2804af212a7",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "repeated cancel/open cycles",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:NATIVE:80964ebd32c6162d",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "initial pipe read with writer held open",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:ASAN:270318df95bfd81c",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "initial pipe read with writer held open",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:LSAN:6f614c91dae25f40",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "initial pipe read with writer held open",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-SIG-008:AUDIT:5b8010efb5ee90df",
+      "scenario_id": "SAFECASE-SIG-008",
+      "variant": "initial pipe read with writer held open",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-SIG-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:MIRI:f06088623a7a3197",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "cross-subsystem command actions",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:STATIC:345397266c755c65",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "cross-subsystem command actions",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:AUDIT:982b96ff1e91528e",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "cross-subsystem command actions",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:MIRI:82b04ece4b2bbccd",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "search/filter with configuration changes",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:STATIC:adba433bcecfa934",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "search/filter with configuration changes",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:AUDIT:5e65f2a45894f855",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "search/filter with configuration changes",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:MIRI:c1c352fdc46c87e7",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "nested effects during redraw",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:STATIC:bdc89e21404a0f71",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "nested effects during redraw",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:AUDIT:2c77b2a28719c6a8",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "nested effects during redraw",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:MIRI:8d9e1bc106ee4fb4",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "audit all former mutable state owners",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:STATIC:304dda8cb189d03e",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "audit all former mutable state owners",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-001:AUDIT:1fcb22c95187b51d",
+      "scenario_id": "SAFECASE-STATE-001",
+      "variant": "audit all former mutable state owners",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:NATIVE:acdc1b17204aad0a",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "delete/recreate a file handle",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:MIRI:76c72dcc4e7c92aa",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "delete/recreate a file handle",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:FUZZ:19ed1a79bdf41307",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "delete/recreate a file handle",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:NATIVE:9f5c03e0b43688ea",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "evict and reuse buffer slots",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:MIRI:1e8be467575b53d7",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "evict and reuse buffer slots",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:FUZZ:0ecad550ed887202",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "evict and reuse buffer slots",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:NATIVE:05ac06b2378facc7",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "replace pattern/mark targets",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:MIRI:c428660853767daf",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "replace pattern/mark targets",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:FUZZ:b19c118fd73fcea6",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "replace pattern/mark targets",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:NATIVE:917dad6a4db381ad",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "generation overflow and unknown positions",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:MIRI:ddb61ebe7b29cb47",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "generation overflow and unknown positions",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-002:FUZZ:63f46df609de2f1f",
+      "scenario_id": "SAFECASE-STATE-002",
+      "variant": "generation overflow and unknown positions",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:NATIVE:ade014228ebfcb05",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "normal/error/catchable-signal exit",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:ASAN:402fec3814c723f7",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "normal/error/catchable-signal exit",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:NATIVE:4c0671a4110108f7",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "partial terminal initialization",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:ASAN:e6092fb4bad5e027",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "partial terminal initialization",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:NATIVE:d5cf1218e480638c",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "suspend/resume and child return",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:ASAN:f288ff88d9c20a35",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "suspend/resume and child return",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:NATIVE:8369ddce92413a9e",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "unwind with a live terminal guard",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:ASAN:022473a38dc4d635",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "unwind with a live terminal guard",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:NATIVE:48ea4f91fb9b48ad",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "repeated shutdown and cleanup error",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-003:ASAN:96643e2c5fcf2956",
+      "scenario_id": "SAFECASE-STATE-003",
+      "variant": "repeated shutdown and cleanup error",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:NATIVE:c474b90d28b36ffb",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "file/preprocessor/log switching",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:LSAN:dab6ab72d6308bad",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "file/preprocessor/log switching",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:AUDIT:9c73e5c741636f77",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "file/preprocessor/log switching",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:NATIVE:ad0b0761c42fd5cc",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "repeated child failures/cancels",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:LSAN:5faced44cdf11cf9",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "repeated child failures/cancels",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:AUDIT:c03decb8a57d0aa8",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "repeated child failures/cancels",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:NATIVE:6cce7610f42749d9",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "history/marks save failure",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:LSAN:7c07d6ae6d5b86aa",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "history/marks save failure",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:AUDIT:938b643ab8af862d",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "history/marks save failure",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:NATIVE:83f7498099a81758",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "borrowed versus owned standard descriptors",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:LSAN:fcbae7d0b3f1f4bd",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "borrowed versus owned standard descriptors",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-004:AUDIT:d2801f1303d53436",
+      "scenario_id": "SAFECASE-STATE-004",
+      "variant": "borrowed versus owned standard descriptors",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:NATIVE:57f76e362167f902",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "system/local/process/argv precedence",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:MIRI:68f0bbbfd49d2d6b",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "system/local/process/argv precedence",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:FUZZ:6ba5992167e71842",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "system/local/process/argv precedence",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:NATIVE:08211331a06cc3db",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "unset and empty configuration",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:MIRI:9a1a0e32e9a1a153",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "unset and empty configuration",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:FUZZ:df1c6cc410d41a58",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "unset and empty configuration",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:NATIVE:d663285c9b2939ae",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "startup/runtime option transitions",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:MIRI:b3061d1e00bbc451",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "startup/runtime option transitions",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:FUZZ:9b79ba1d105a074d",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "startup/runtime option transitions",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:NATIVE:008bd042a06ebf99",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "signal action and per-file command lookup timing",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:MIRI:361a1dfc004166c6",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "signal action and per-file command lookup timing",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-005:FUZZ:964e61823c4e03d8",
+      "scenario_id": "SAFECASE-STATE-005",
+      "variant": "signal action and per-file command lookup timing",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:NATIVE:128a4752f93d54d8",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "malformed external input",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:ASAN:ea72bda3a9dffa2e",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "malformed external input",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:AUDIT:90a50ddb6bee2e4d",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "malformed external input",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:NATIVE:fc9d9c89a047a77e",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "injected internal unwind",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:ASAN:1ac43f05bc152f57",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "injected internal unwind",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:AUDIT:39da92fe9fdec19f",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "injected internal unwind",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:NATIVE:054a5467843c39ef",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "native callback error and contained panic",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:ASAN:dfa76dfa0af0c917",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "native callback error and contained panic",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:AUDIT:91055b8b6e5ff5da",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "native callback error and contained panic",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:NATIVE:73641754f52d9fd9",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "secondary error during terminal cleanup",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:ASAN:1e8e371f60e6d88b",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "secondary error during terminal cleanup",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-006:AUDIT:d516c70fd6584f55",
+      "scenario_id": "SAFECASE-STATE-006",
+      "variant": "secondary error during terminal cleanup",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:NATIVE:3e55248fab94d673",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "worker late result after cancel",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:MIRI:27bb9e64c8035bd2",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "worker late result after cancel",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:STATIC:4ea8ad76906a8b73",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "worker late result after cancel",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:AUDIT:0babf84ff6a191d4",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "worker late result after cancel",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:NATIVE:f8879bac37bcf90c",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "concurrent notification during shutdown",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:MIRI:98c2188e3dadd614",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "concurrent notification during shutdown",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:STATIC:c137dc482914f473",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "concurrent notification during shutdown",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:AUDIT:40c1fff5854b7333",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "concurrent notification during shutdown",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:NATIVE:3a0d40e0c25f34d0",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "repeat worker create/cancel",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:MIRI:d526dae4e396406c",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "repeat worker create/cancel",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:STATIC:513a912893bdc58d",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "repeat worker create/cancel",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:AUDIT:cfa1e11a6f0b9de8",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "repeat worker create/cancel",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:NATIVE:da9fe9930ab2c645",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "forbidden Send/Sync or static-reference escape",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:MIRI:3ea7d0e21aab9452",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "forbidden Send/Sync or static-reference escape",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:STATIC:89837af0e83431dd",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "forbidden Send/Sync or static-reference escape",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-STATE-007:AUDIT:8507a73cc7746b4e",
+      "scenario_id": "SAFECASE-STATE-007",
+      "variant": "forbidden Send/Sync or static-reference escape",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-STATE-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-001:NATIVE:91ed870e9e26b50b",
+      "scenario_id": "SAFECASE-VER-001",
+      "variant": "all native regression profiles",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-001:NATIVE:dd22265fe8830efc",
+      "scenario_id": "SAFECASE-VER-001",
+      "variant": "changed expected observation negative control",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-001:NATIVE:d4bc575da4392735",
+      "scenario_id": "SAFECASE-VER-001",
+      "variant": "clean install and source archive",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-001"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:ASAN:83ba301e1a2edfa3",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "instrumented component tests",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:LSAN:e3c1bdb5e471d7d8",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "instrumented component tests",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:ASAN:2e59634e9e888454",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "instrumented real PTY/event/fault cases",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:LSAN:fb78d9cc9cb2ea41",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "instrumented real PTY/event/fault cases",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:ASAN:5ca542a347dff456",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "expected-nonzero case with injected sanitizer finding",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:LSAN:125d5b646cc4b9fe",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "expected-nonzero case with injected sanitizer finding",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:ASAN:3a838f0abd7005f4",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "symbolizer/native instrumentation manifest",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-002:LSAN:baca93ef846fca45",
+      "scenario_id": "SAFECASE-VER-002",
+      "variant": "symbolizer/native instrumentation manifest",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-002"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-003:MIRI:f9b0fc966164fb9e",
+      "scenario_id": "SAFECASE-VER-003",
+      "variant": "converted pure components under several seeds",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-003:MIRI:e7d5550888cb6ca3",
+      "scenario_id": "SAFECASE-VER-003",
+      "variant": "unsupported native operation",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-003:MIRI:6e69ef740ee7f71c",
+      "scenario_id": "SAFECASE-VER-003",
+      "variant": "invalid alias/provenance probe",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-003:MIRI:406d85456d1be482",
+      "scenario_id": "SAFECASE-VER-003",
+      "variant": "safe normal counterpart",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-003"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:FUZZ:f8d9c215953e309d",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "all independent fuzz families",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:AUDIT:d1336685500a9ffc",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "all independent fuzz families",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:FUZZ:d3a4199f5fc11637",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "seed/mutation coverage accounting",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:AUDIT:7a1ad09643a212a7",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "seed/mutation coverage accounting",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:FUZZ:833e9d6bcd802e09",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "minimized crash/hang/behavior differences",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:AUDIT:54732216231414b4",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "minimized crash/hang/behavior differences",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:FUZZ:c6839e242fcb6014",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "controlled helper/network boundaries",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-004:AUDIT:e94916c12be02ad3",
+      "scenario_id": "SAFECASE-VER-004",
+      "variant": "controlled helper/network boundaries",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-004"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:NATIVE:1fcc30fc26c3aece",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "all declared fault injection hooks",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:ASAN:5619f2d73d03816b",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "all declared fault injection hooks",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:MIRI:2aa630e68b2663f4",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "all declared fault injection hooks",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:NATIVE:70da1f280aa6ed0e",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "signal at each transaction/wait edge",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:ASAN:ad5049a2bc1ecab8",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "signal at each transaction/wait edge",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:MIRI:79078cfb8d66cb0d",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "signal at each transaction/wait edge",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:NATIVE:939e5feb66f40275",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "callback and cleanup errors",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:ASAN:afbc2fbd29772d07",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "callback and cleanup errors",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:MIRI:3cb24032937157e6",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "callback and cleanup errors",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:NATIVE:36be40631daa81e2",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "test backend versus actual syscall comparison",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:ASAN:2c63d9e283d99bad",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "test backend versus actual syscall comparison",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-005:MIRI:24dbcef454b53b9c",
+      "scenario_id": "SAFECASE-VER-005",
+      "variant": "test backend versus actual syscall comparison",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-005"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:NATIVE:b18008ebda4bc6b9",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "all real recovery sequences",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:ASAN:1886f5b1c15880b7",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "all real recovery sequences",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:LSAN:012120e2edd9aca0",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "all real recovery sequences",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:NATIVE:4142acd537a30ea9",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "100 repeated races/cancel cycles at release",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:ASAN:fd8bfaf46af5420b",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "100 repeated races/cancel cycles at release",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:LSAN:36e43eb34d2fac4a",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "100 repeated races/cancel cycles at release",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:NATIVE:044fa461c7830f3a",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "FD/worker/child/live allocation accounting",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:ASAN:e673fd71930a2f70",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "FD/worker/child/live allocation accounting",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:LSAN:78d8fdb72625ed5d",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "FD/worker/child/live allocation accounting",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:NATIVE:c5dcdcea2d02cbeb",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "large sparse input and pipe retention",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:ASAN:baa51c0f24dfef50",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "large sparse input and pipe retention",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-006:LSAN:9a401418046f2af2",
+      "scenario_id": "SAFECASE-VER-006",
+      "variant": "large sparse input and pipe retention",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-006"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:STATIC:5acb436fa4dd8a7e",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "missing/empty/unsupported lane",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:AUDIT:3f8a6cb37587bb0c",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "missing/empty/unsupported lane",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:STATIC:8e155b8d6653a111",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "stale binary/source fingerprint",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:AUDIT:26a93b13de30239b",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "stale binary/source fingerprint",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:STATIC:749a5b1595f086d1",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "minimized finding and rerun record",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:AUDIT:a6ca6832c86fcb8d",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "minimized finding and rerun record",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:STATIC:adf3952dd4d88f6c",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "tool/version/corpus/coverage provenance",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-007:AUDIT:2059fe0f27a7cffd",
+      "scenario_id": "SAFECASE-VER-007",
+      "variant": "tool/version/corpus/coverage provenance",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-007"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:NATIVE:a22181ef7e1431bc",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "per-change budgets",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:ASAN:af2fcae45bf67184",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "per-change budgets",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:MIRI:d94e5495f02360ee",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "per-change budgets",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:FUZZ:d03e33cd0624d021",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "per-change budgets",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:AUDIT:fd110dd0815040cd",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "per-change budgets",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:NATIVE:1340a8e0daf36ad6",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "scheduled integration budgets",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:ASAN:96df24fa8412985d",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "scheduled integration budgets",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:MIRI:9607b2cd05953447",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "scheduled integration budgets",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:FUZZ:e2df459ecbef0419",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "scheduled integration budgets",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:AUDIT:993f439b6dea3570",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "scheduled integration budgets",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:NATIVE:ed081cac69ee7c60",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "final release fuzz/event floors",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:ASAN:07fb7808b0d1f05a",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "final release fuzz/event floors",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:MIRI:30b9463824dafaf9",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "final release fuzz/event floors",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:FUZZ:a97c20c0dfe6923f",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "final release fuzz/event floors",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:AUDIT:62f733d581b2f4c8",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "final release fuzz/event floors",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:NATIVE:e24010cf4a9e17d8",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "real-clock and declared controlled-clock runs",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:ASAN:1259bf557904258e",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "real-clock and declared controlled-clock runs",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:MIRI:21cdf0f649b40c55",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "real-clock and declared controlled-clock runs",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:FUZZ:959de513492319e7",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "real-clock and declared controlled-clock runs",
+      "profile": "FUZZ",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-008:AUDIT:7f848e89a0f12877",
+      "scenario_id": "SAFECASE-VER-008",
+      "variant": "real-clock and declared controlled-clock runs",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-008"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-009:AUDIT:c1bf3d26826a763c",
+      "scenario_id": "SAFECASE-VER-009",
+      "variant": "all requirements have current evidence",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-009"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-009:AUDIT:168073125f914414",
+      "scenario_id": "SAFECASE-VER-009",
+      "variant": "safe core and reviewed remaining boundary",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-009"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-009:AUDIT:a46b74c9883e8399",
+      "scenario_id": "SAFECASE-VER-009",
+      "variant": "clean artifact hash matching",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-009"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-009:AUDIT:1803b4130d49aed7",
+      "scenario_id": "SAFECASE-VER-009",
+      "variant": "independent review and scope statement",
+      "profile": "AUDIT",
+      "requirement_ids": [
+        "SAFE-VER-009"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:NATIVE:913b7f70135f306f",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known ASan/LSan defect probes",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:ASAN:db25d9f6aa0b0eb1",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known ASan/LSan defect probes",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:LSAN:f2946ad1919d3f78",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known ASan/LSan defect probes",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:MIRI:cb61bcaeaa4fc9c8",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known ASan/LSan defect probes",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:STATIC:14bc21cc3b41a247",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known ASan/LSan defect probes",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:NATIVE:c399d1b041d694c0",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known Miri ownership violation",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:ASAN:0881b9335eb560ac",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known Miri ownership violation",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:LSAN:0e8d4e628f471bb1",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known Miri ownership violation",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:MIRI:e4e43cba4261ff6a",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known Miri ownership violation",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:STATIC:4dd8c66ee5a24c45",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "known Miri ownership violation",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:NATIVE:0afdc052a2c953bc",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "forbidden unsafe compile error with valid counterpart",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:ASAN:be40306ddae651b6",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "forbidden unsafe compile error with valid counterpart",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:LSAN:91948602874a636e",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "forbidden unsafe compile error with valid counterpart",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:MIRI:ea8b83e43ab5970c",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "forbidden unsafe compile error with valid counterpart",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:STATIC:8a7e27c416e8f517",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "forbidden unsafe compile error with valid counterpart",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:NATIVE:be6d36ef13f08a0d",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "wrong screen/mode/status/bell/effect/helper output",
+      "profile": "NATIVE",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:ASAN:e584a5f7b9dc0437",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "wrong screen/mode/status/bell/effect/helper output",
+      "profile": "ASAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:LSAN:d78695551f5069ac",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "wrong screen/mode/status/bell/effect/helper output",
+      "profile": "LSAN",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:MIRI:26f996fda360d35b",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "wrong screen/mode/status/bell/effect/helper output",
+      "profile": "MIRI",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    },
+    {
+      "id": "SAFECASE-VER-010:STATIC:4222ace5d6cad174",
+      "scenario_id": "SAFECASE-VER-010",
+      "variant": "wrong screen/mode/status/bell/effect/helper output",
+      "profile": "STATIC",
+      "requirement_ids": [
+        "SAFE-VER-010"
+      ],
+      "status": "not-run",
+      "implementation_path": null,
+      "evidence": null
+    }
+  ]
+}

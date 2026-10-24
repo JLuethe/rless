@@ -234,6 +234,24 @@
       "status": "open",
       "review_status": "pending",
       "closure_evidence": null
+    },
+    {
+      "id": "OWN-13",
+      "title": "Test-only allocation injection boundary",
+      "current_paths": [
+        "src/fault.rs"
+      ],
+      "delivery_packet": "M0.4",
+      "requirement_ids": [
+        "SAFE-MEM-007",
+        "SAFE-VER-005"
+      ],
+      "logical_owner": "One main-entry configuration owns a dedicated inherited trace pipe; atomics own ordinal/hit state.",
+      "aliases_and_hazards": "Fixed stack event is borrowed only during nonblocking write; errno is thread-local. Existing signal-to-allocation paths remain hazardous until M1.",
+      "release_and_migration": "Close-on-exec prevents ordinary helper inheritance; process exit closes the dedicated descriptor. No raw memory is returned by the hook.",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
     }
   ],
   "native_trust": [

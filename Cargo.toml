@@ -8,6 +8,11 @@ description = "A native Rust port of the less 712 terminal pager"
 autobins = false
 default-run = "rless"
 
+[features]
+default = []
+# Test-only fault injection in real pager paths. Never enable for release artifacts.
+safety-injection = []
+
 [[bin]]
 name = "rless"
 path = "src/bin/rless.rs"

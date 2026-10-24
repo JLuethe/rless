@@ -157,6 +157,12 @@ def inventory(args, evidence):
     write_json(args.output / 'callgraph.json', dict(scope='Syntactic direct-call candidates; indirect/alias/link-name resolution requires manual review.', calls=calls))
     definitions = {r['symbol'] for r in records if r['kind'] == 'abi_function_definition'}
     externs = {r['symbol'] for r in records if r['kind'] == 'extern_function_declaration'}
+    # Canonical libc calls do not have a local extern declaration. Keep their
+    # qualified identities until review resolves linkage; do not silently omit
+    # them or conflate a declaration with an actual native object.
+    qualified_native = [r for r in records if r['kind']=='direct_call' and
+                        r['symbol'].replace(' ','').lstrip(':').startswith('libc::')]
+    native_candidates = (externs - definitions) | {r['symbol'].replace(' ','').lstrip(':') for r in qualified_native}
     files = {}
     for file in sources:
         rows = [r for r in records if r['file'] == file]
@@ -172,10 +178,12 @@ def inventory(args, evidence):
     summary = dict(schema_version=1, recorded_at_utc=utc(), status='partial', evidence_status='not-verified',
                    scope='AST and compiler-expanded syntax inventory; not a complete ownership/alias or indirect-call proof.',
                    files=files, counts=dict(Counter(r['kind'] for r in records)),
-                   expanded_counts=expanded_counts, candidate_external_symbols=sorted(externs - definitions),
+                   expanded_counts=expanded_counts, candidate_external_symbols=sorted(native_candidates),
+                   qualified_native_calls=qualified_native,
                    application_c_abi_symbols=sorted(definitions),
                    mutable_static_definitions=[r for r in records if r['kind'] == 'mutable_static_definition'],
                    raw_inventory=dict(path=str(raw_path), sha256=sha(raw_path)),
+                   indirect_call_sites=[r for r in records if r['kind'] == 'indirect_call'],
                    source_fingerprint=evidence.report['input_fingerprints']['sha256'],
                    manual_register='docs/safety/ownership-register.json')
     write_json(args.output / 'inventory.json', summary)
@@ -309,9 +317,23 @@ def fuzz(args, evidence):
     evidence.save()
 
 
+def hooks(args, evidence):
+    if args.normal_binary is None or args.injected_binary is None:
+        raise ValueError('hooks lane requires --normal-binary and --injected-binary')
+    evidence.report['coverage_scope'] = 'Partial: real ecalloc allocation hook only; not every reserve/create/native/cleanup boundary.'
+    evidence.report['remaining_fault_families'] = ['other logical allocation sites', 'I/O', 'commit', 'callback', 'handoff', 'cleanup']
+    evidence.run('allocation-hook-native', [sys.executable, ROOT / 'tools/safety/test_hooks.py',
+                 '--normal', args.normal_binary, '--injected', args.injected_binary],
+                 profile='NATIVE', requirement_ids=['SAFE-MEM-007','SAFE-VER-005','SAFE-VER-010'],
+                 scenario_id='SAFECASE-MEM-007', variant='fail each logical reserve/create boundary',
+                 artifacts=[args.normal_binary,args.injected_binary],coverage_scope='partial')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('lane', choices=('detectors', 'inventory', 'initial', 'fuzz', 'verify'))
+    parser.add_argument('lane', choices=('detectors', 'inventory', 'initial', 'fuzz', 'hooks', 'verify'))
+    parser.add_argument('--normal-binary', type=Path)
+    parser.add_argument('--injected-binary', type=Path)
     parser.add_argument('--tool-home', type=Path, help='Isolated rustup/cargo installation root')
     parser.add_argument('--output', type=Path, help='New ignored report directory, or summary JSON for verify')
     args = parser.parse_args()
@@ -326,7 +348,7 @@ def main():
             return 1
         print('Infrastructure report verified; this is not final safety acceptance.')
         return 0
-    if args.tool_home is None:
+    if args.tool_home is None and args.lane != 'hooks':
         parser.error('--tool-home is required')
     if args.output is None:
         (ROOT / 'compat/.runs').mkdir(parents=True, exist_ok=True)
