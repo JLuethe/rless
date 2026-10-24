@@ -1,6 +1,6 @@
 # Full safety campaign plan
 
-Version: **0.2.0**. Status: **planned / not-verified**. No sanitizer, Miri or coverage-guided safety campaign is recorded as executed. The existing compatibility/stress reports are behavioral evidence.
+Version: **0.2.0**. Status: **planned / not-verified**. M0 detector and initial diagnostic lanes are being implemented; full safety campaigns remain unexecuted. The existing compatibility/stress reports are behavioral evidence.
 
 [Execution packets](execution-plan.md) define the implementation sequence. [campaigns.json](campaigns.json) is the machine-readable campaign inventory; [acceptance.json](acceptance.json) remains the authoritative 43-family / 175-variant acceptance catalogue. The campaign inventory adds targets and execution lanes without replacing any acceptance variant or required profile. Each campaign must resolve the acceptance catalogue to an explicit variant × applicable-profile matrix; target totals alone cannot close a requirement.
 
@@ -76,7 +76,7 @@ Run real-clock timer/signal/cancellation tests as well as explicitly controlled-
 
 ## Planned runner and evidence contract
 
-M0.4 will implement a safety runner, proposed as `tools/safety/run.py`. **That runner does not exist yet.** Do not present future commands as runnable today. The existing `tools/check.py` exercises the behavioral baseline and remains the regression entry point.
+M0.4 has an initial implementation at [tools/safety/run.py](../../tools/safety/run.py). Its detector, inventory, initial diagnostic and test-model fuzz lanes are runnable with the pinned setup; see [tool instructions](../../tools/safety/README.md). These lanes do not implement or close all 175 acceptance variants or the 15 production fuzz targets. The existing `tools/check.py` remains the behavioral regression entry point.
 
 The future runner must accept an immutable source/profile/campaign manifest, resolve requirement/scenario/variant/profile selections, reject empty selections, check tool and ABI pins, prove detector controls, build exact candidates, run bounded cases, retain original status/diagnostics, emit per-run JSON and a human report, and bind artifacts. It must whitelist required instrumentation variables into the isolated test environment and inspect sanitizer logs even for cases expecting a nonzero exit. It must fail on missing logs, stale binaries, mismatched fingerprints, changed inputs, unsupported required work or unplanned skips. Gate evaluation must derive from child results, not a manually edited summary boolean.
 

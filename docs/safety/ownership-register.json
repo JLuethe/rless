@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "status": "initial-inventory",
+  "evidence_status": "not-verified",
+  "scope": "Initial ownership-cycle register, not a complete alias/soundness proof. AST inventory and compiler expansion supply locations; each listed cycle still needs caller/indirect callback review.",
+  "regions": [
+    {
+      "id": "OWN-01",
+      "title": "Input cache and retained file state",
+      "current_paths": [
+        "src/ch.rs",
+        "src/input.rs",
+        "src/ifile.rs"
+      ],
+      "delivery_packet": "M3.2",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "logical_owner": "filestate and buf linked storage plus file descriptors",
+      "aliases_and_hazards": "ch_* cache pointers, ifile handles and retained byte positions",
+      "release_and_migration": "ch_close/free/close; cross-file invalidation must retire every alias",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-02",
+      "title": "Expandable byte buffers",
+      "current_paths": [
+        "src/xbuf.rs",
+        "src/cmdbuf.rs"
+      ],
+      "delivery_packet": "M2.1",
+      "requirement_ids": [
+        "SAFE-MEM-003"
+      ],
+      "logical_owner": "xbuffer.data, size/end/init_size; editing storage",
+      "aliases_and_hazards": "raw data pointers escape to callers; self-copy/growth may invalidate source aliases",
+      "release_and_migration": "ecalloc/free; reserve-before-commit and borrowed-slice migration required",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-03",
+      "title": "Command injection queue",
+      "current_paths": [
+        "src/command.rs",
+        "src/signal.rs"
+      ],
+      "delivery_packet": "M1.3",
+      "requirement_ids": [
+        "SAFE-SIG-001"
+      ],
+      "logical_owner": "ungot singly linked queue",
+      "aliases_and_hazards": "SIGUSR1 ungetsc/ungetcc_back can mutate and allocate while interrupted code owns the queue",
+      "release_and_migration": "ecalloc/free; dispatch in main loop and define action accounting",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-04",
+      "title": "Rendered lines and source maps",
+      "current_paths": [
+        "src/line.rs",
+        "src/cvt.rs",
+        "src/forwback.rs"
+      ],
+      "delivery_packet": "M3.3",
+      "requirement_ids": [
+        "SAFE-MEM-006"
+      ],
+      "logical_owner": "line buffers, attributes, converted bytes and source-position arrays",
+      "aliases_and_hazards": "display/search retain pointers across resize, conversion and replacement",
+      "release_and_migration": "ecalloc/free and replacement; retain maps under stable owner and generation",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-05",
+      "title": "Search filters and highlights",
+      "current_paths": [
+        "src/search.rs"
+      ],
+      "delivery_packet": "M3.3",
+      "requirement_ids": [
+        "SAFE-MEM-007"
+      ],
+      "logical_owner": "filter_infos/pattern_info chains and converted line/match storage",
+      "aliases_and_hazards": "SIGINT enters set_filter_pattern and frees chains asynchronously; screen/search aliases need retirement",
+      "release_and_migration": "clear_pattern/free; staged compile/replace and main-loop-only mutation",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-06",
+      "title": "GNU regular expressions",
+      "current_paths": [
+        "src/pattern.rs"
+      ],
+      "delivery_packet": "M4.2",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "logical_owner": "native regex_t buffer and native compile/match state",
+      "aliases_and_hazards": "GNU global syntax options and native error/range storage have distinct lifetimes",
+      "release_and_migration": "GNU compile/free ownership and matching allocator, no Rust freeing of borrowed native memory",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-07",
+      "title": "Positions marks and navigation",
+      "current_paths": [
+        "src/position.rs",
+        "src/jump.rs",
+        "src/linenum.rs",
+        "src/mark.rs"
+      ],
+      "delivery_packet": "M3.2",
+      "requirement_ids": [
+        "SAFE-STATE-002"
+      ],
+      "logical_owner": "position arrays, line indexes and mark records",
+      "aliases_and_hazards": "mark/file raw handles and position sentinel/width conversions survive file switches",
+      "release_and_migration": "invalidate marks/positions with file generation; explicit persistent restoration",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-08",
+      "title": "Configuration and language storage",
+      "current_paths": [
+        "src/option.rs",
+        "src/opttbl.rs",
+        "src/optfunc.rs",
+        "src/decode.rs",
+        "src/lesskey_parse.rs",
+        "src/evar.rs",
+        "src/lmsg.rs",
+        "src/prompt.rs"
+      ],
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-STATE-005"
+      ],
+      "logical_owner": "option values, lesskey tables, expansion and message/prompt storage",
+      "aliases_and_hazards": "borrowed getenv strings, allocated expansions and global option pointers cross parse/commit boundaries",
+      "release_and_migration": "owned parser outputs and configuration precedence; M2.3 parser slice precedes whole-state closure",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-09",
+      "title": "Terminal session and output capabilities",
+      "current_paths": [
+        "src/screen.rs",
+        "src/output.rs",
+        "src/ttyin.rs"
+      ],
+      "delivery_packet": "M4.3",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "logical_owner": "terminal state, terminfo capability/scratch strings and output buffers",
+      "aliases_and_hazards": "native capability scratch lifetime and callback context; session restoration during stop/child handoff",
+      "release_and_migration": "termios/session restoration and explicitly scoped native callbacks; no C unwind",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-10",
+      "title": "OS process resources and handoff",
+      "current_paths": [
+        "src/os.rs",
+        "src/process.rs",
+        "src/lsystem.rs",
+        "src/filename.rs",
+        "src/edit.rs",
+        "src/tags.rs",
+        "src/pager.rs"
+      ],
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-003"
+      ],
+      "logical_owner": "FDs, FILE pointers, child processes, command strings and input replacements",
+      "aliases_and_hazards": "startup/shutdown/exec failure and SIGTERM can overlap active resource cleanup",
+      "release_and_migration": "close/fclose/pclose/wait/free and explicit primary-error-preserving shutdown",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-11",
+      "title": "Signals and wait notification",
+      "current_paths": [
+        "src/runtime.rs",
+        "src/signal.rs"
+      ],
+      "delivery_packet": "M1.2",
+      "requirement_ids": [
+        "SAFE-SIG-007"
+      ],
+      "logical_owner": "signal dispositions/masks, atomic I/O flags, legacy sigs and timer state",
+      "aliases_and_hazards": "fabricated function-pointer sentinels, asynchronous mutable globals and ppoll/read/open windows",
+      "release_and_migration": "checked dispositions, reviewed notification and rollback; FIFO feasibility in M1.1",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    },
+    {
+      "id": "OWN-12",
+      "title": "Companion and bitfield dependency",
+      "current_paths": [
+        "src/bin/lessecho.rs",
+        "vendor/c2rust-bitfields/src/lib.rs",
+        "vendor/c2rust-bitfields-derive/src/lib.rs"
+      ],
+      "delivery_packet": "M4.4",
+      "requirement_ids": [
+        "SAFE-FFI-007"
+      ],
+      "logical_owner": "lessecho argument/output state and generated packed field access",
+      "aliases_and_hazards": "raw/native calls and macro-expanded generated pointer/bit storage",
+      "release_and_migration": "lessecho byte semantics; retire unnecessary bitfield code or narrowly audit boundary",
+      "status": "open",
+      "review_status": "pending",
+      "closure_evidence": null
+    }
+  ],
+  "native_trust": [
+    {
+      "name": "libc/glibc",
+      "status": "trusted-external",
+      "limitations": "System library internals uninstrumented; Rust layouts must be checked on each ABI."
+    },
+    {
+      "name": "GNU regex",
+      "status": "trusted-external",
+      "limitations": "Native syntax/allocation internals uninstrumented; owning wrapper and semantic/native probes remain M4."
+    },
+    {
+      "name": "ncurses/terminfo",
+      "status": "trusted-external",
+      "limitations": "Capability buffers and callback lifetimes need independent review; no audit of system library internals."
+    },
+    {
+      "name": "Rust standard library/compiler",
+      "status": "trusted-external",
+      "limitations": "Prebuilt normal/ASan std and compiler trusted; Miri builds its own pinned-source interpreter sysroot."
+    },
+    {
+      "name": "C2Rust bitfields",
+      "status": "trusted-external",
+      "limitations": "Vendored unsafe and derive-generated code included in source/expanded inventory; independent audit or removal remains pending."
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "scope": "Initial source-inspection hazards and coverage limits. These are not all demonstrated crashes or exploits. Instrumented findings are added separately with preserved reports.",
+  "findings": [
+    {
+      "id": "M0-SIG-001",
+      "title": "SIGINT can free active filter storage from a handler",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M1.3",
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-SIG-003"
+      ],
+      "evidence_refs": [
+        "src/signal.rs:u_interrupt",
+        "src/search.rs:set_filter_pattern"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-SIG-002",
+      "title": "SIGUSR1 performs configuration lookup and queue allocation asynchronously",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M1.3",
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-SIG-006"
+      ],
+      "evidence_refs": [
+        "src/signal.rs:sigusr1/sigusr",
+        "src/command.rs:ungetsc/ungetcc_back1"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-SIG-003",
+      "title": "Termination enters pager cleanup asynchronously",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M1.3",
+      "requirement_ids": [
+        "SAFE-SIG-001",
+        "SAFE-STATE-003"
+      ],
+      "evidence_refs": [
+        "src/signal.rs:terminate",
+        "src/pager.rs:quit"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-SIG-004",
+      "title": "Signal sentinels are transmuted into Rust function pointers",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M1.2",
+      "requirement_ids": [
+        "SAFE-SIG-007",
+        "SAFE-FFI-005"
+      ],
+      "evidence_refs": [
+        "src/runtime.rs:rless_signal",
+        "src/signal.rs:init_signals"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-MEM-001",
+      "title": "Raw owners, cross-module aliases and mutable globals remain in application core",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.5",
+      "requirement_ids": [
+        "SAFE-MEM-008",
+        "SAFE-STATE-001"
+      ],
+      "evidence_refs": [
+        "docs/safety/ownership-register.json",
+        "src/lib.rs"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-ABI-001",
+      "title": "Copied native layouts and repeated declarations need canonical ABI consolidation",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.1",
+      "requirement_ids": [
+        "SAFE-FFI-002"
+      ],
+      "evidence_refs": [
+        "src/pattern.rs",
+        "src/screen.rs"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-COV-001",
+      "title": "Reference glibc 2.41 safety environment has not been reproduced",
+      "status": "open",
+      "classification": "coverage/environment gap",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M0.1",
+      "requirement_ids": [
+        "SAFE-VER-007",
+        "SAFE-VER-008"
+      ],
+      "evidence_refs": [
+        "tools/safety/profiles.json"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-001",
+      "title": "GNU regex match-register allocations are not released",
+      "status": "open",
+      "classification": "reproduced LeakSanitizer finding",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.2",
+      "requirement_ids": [
+        "SAFE-FFI-003",
+        "SAFE-MEM-005"
+      ],
+      "github_issue": "https://github.com/JLuethe/rless/issues/9",
+      "reproducer": "docs/safety/reproducers/m0-leak-regex.json",
+      "diagnostic": "docs/safety/reproducers/m0-leak-regex.log",
+      "diagnostic_sha256": "e3cff5f867bb2b47cca134dac7c7f591c4966b97e1e59f9d321eb211f1fcdfec",
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-002",
+      "title": "Startup --cmd saved string loses ownership after queueing",
+      "status": "open",
+      "classification": "reproduced LeakSanitizer finding",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-STATE-001",
+        "SAFE-STATE-005",
+        "SAFE-MEM-005"
+      ],
+      "github_issue": "https://github.com/JLuethe/rless/issues/10",
+      "reproducer": "docs/safety/reproducers/m0-leak-command.json",
+      "diagnostic": "docs/safety/reproducers/m0-leak-command.log",
+      "diagnostic_sha256": "fcfe1a9d0e15089029d25a5ee61bc6201995f68812a8fc7742afda049b8c31b7",
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    }
+  ]
+}

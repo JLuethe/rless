@@ -1,0 +1,12 @@
+[package]
+name = "rless-safety-inventory"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+proc-macro2 = { version = "=1.0.103", features = ["span-locations"] }
+quote = "=1.0.40"
+syn = { version = "=2.0.106", features = ["full", "visit"] }

@@ -148,6 +148,17 @@ def run_case(binary, case):
                 env.pop(key, None)
             else:
                 env[key] = expand(value)
+        # Optional test-only instrumentation, selected by an explicit manifest.
+        # The frozen v1 observer and all expected observations stay unchanged.
+        instrumentation = os.environ.get('RLESS_SAFETY_ENV')
+        if instrumentation:
+            variables = load(instrumentation)
+            allowed = {'ASAN_OPTIONS', 'LSAN_OPTIONS', 'ASAN_SYMBOLIZER_PATH'}
+            if not isinstance(variables, dict) or not set(variables) <= allowed:
+                raise ValueError('unsupported safety instrumentation environment')
+            if not all(isinstance(value, str) for value in variables.values()):
+                raise ValueError('instrumentation values must be strings')
+            env.update(variables)
         argv = [str(binary), *[expand(x) for x in case['argv']]]
         def norm(data):
             return data.replace(directory.encode(), b'{ROOT}')

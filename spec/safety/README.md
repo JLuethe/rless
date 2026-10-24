@@ -1,6 +1,6 @@
 # rless safety migration specification
 
-Version: **0.2.0**. Status: **specified, implementation and safety verification pending**.
+Version: **0.2.0**. Status: **specified; M0 infrastructure in progress; application migration and full safety verification pending**.
 Target: the existing `linux-gnu-712` compatibility profile, Linux x86_64/glibc.
 
 This specification defines the work required to replace the translated pager's
@@ -140,8 +140,9 @@ this package are the project's migration contract.
 - [Rust Fuzz Book](https://rust-fuzz.github.io/book/cargo-fuzz.html): coverage-guided fuzzing workflow.
 
 Tool capabilities MUST be rechecked against the exact pinned versions selected
-when the safety infrastructure is implemented. No sanitizer/Miri toolchain is
-claimed to have been installed or run by writing this specification.
+when the safety infrastructure is implemented. Tool installation and M0 diagnostic evidence are recorded separately in
+[the M0 progress report](../../docs/safety/m0-progress.md); this specification alone
+does not establish that a detector or safety campaign passed.
 
 [GitHub migration tracker #1](https://github.com/JLuethe/rless/issues/1) links the
 six open phase issues and milestones. Their publication snapshot is in

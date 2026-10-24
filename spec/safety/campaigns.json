@@ -4,7 +4,7 @@
   "status": "planned",
   "evidence_status": "not-verified",
   "scope": "Campaign design only. No safety harness, tool pin, budget execution or passing runtime evidence is asserted.",
-  "planned_runner": "tools/safety/run.py (to be implemented in M0.4; does not exist yet)",
+  "planned_runner": "tools/safety/run.py (initial M0 infrastructure implemented; full acceptance/campaign runner remains incomplete)",
   "profiles": [
     "NATIVE",
     "ASAN",

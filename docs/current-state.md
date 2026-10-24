@@ -16,7 +16,7 @@ The historical reports were captured before the implementation commit, with a wo
 
 **Experimental, with substantial unsafe translated code. No memory-safety or speedup claim.** Signal handlers still reach allocation/free and cleanup paths; raw ownership, mutable globals, cross-module aliases and duplicated native layouts remain migration targets. Passing compatibility tests does not prove memory safety.
 
-The safety package is specified at version 0.2.0: **43 requirements, 175 named acceptance variants, 28 delivery packets, 15 proposed in-process fuzz targets and 12 native event scenario groups**. Every safety phase, packet and campaign remains planned/not-verified. No safety sanitizer, Miri, coverage-guided fuzz campaign or independent final unsafe review is recorded as complete.
+The safety package is specified at version 0.2.0: **43 requirements, 175 named acceptance variants, 28 delivery packets, 15 proposed in-process fuzz targets and 12 native event scenario groups**. M0 infrastructure is now in progress. Detector controls, a syntax/ownership inventory, a test-model coverage-guided fuzz control and initial ASan/Miri diagnostics have run. The instrumented pager replay passed 665/809 cases and retained 144 leak reports; two reduced leak families are tracked in issues #9 and #10. The real runtime atomic test passes Miri under four seeds using an isolated component crate. No safety phase, full production campaign or independent final unsafe review is complete. See the [M0 report](safety/m0-progress.md) and [compact evidence](verification/m0-infrastructure.json).
 
 The target is Linux x86_64/glibc with GNU regex and terminfo. The glibc 2.41 reference ABI and observed glibc 2.44 builder ABI need separate safety/ABI evidence. Rust standard library, compiler, OS and native libraries remain explicit trusted dependencies.
 
@@ -24,14 +24,14 @@ The target is Linux x86_64/glibc with GNU regex and terminfo. The glibc 2.41 ref
 
 | Phase | Result required | Current state |
 | --- | --- | --- |
-| M0 | Reproducible source/ABI baseline, unsafe inventory, pinned/proven tools and evidence runner | Planned; start at M0.1 |
+| M0 | Reproducible source/ABI baseline, unsafe inventory, pinned/proven tools and evidence runner | In progress; baseline reproduced and initial tooling/diagnostics run |
 | M1 | Signal-safe boundary, cancellable waits/opens and actual job-control/handoff behavior | Planned |
 | M2 | Fallible owned storage, checked positions/handles and safe parser foundations | Planned |
 | M3 | Owned pager/session state, input retention, layout/search and resource lifecycle | Planned |
 | M4 | Canonical/opaque native ABI, owning wrappers and independent boundary review | Planned |
 | M5 | Full native/Miri/sanitizer/fault/fuzz campaigns, clean artifacts and scoped safety decision | Planned |
 
-Start with **M0.1: freeze and reproduce the committed baseline**, then follow packet dependencies. M0 may record existing legacy findings for later fixes; those findings still block final safety completion. No phase is done merely because its plan or tracking issue exists.
+The M0 baseline has been reproduced. Next complete the ownership/alias review, native fault hooks, acceptance coverage and separate reference ABI environment, following packet dependencies. M0 may record existing legacy findings for later fixes; those findings still block final safety completion. No phase is done merely because its plan or tracking issue exists.
 
 - [Safety specification](../spec/safety/README.md)
 - [M0–M4 execution plan and M5 handoff](../spec/safety/execution-plan.md)
@@ -43,4 +43,4 @@ The source checkout is `rless`; the sibling `rless-env` holds toolchains, refere
 
 [GitHub tracker #1](https://github.com/JLuethe/rless/issues/1) links phase issues
 [#2](https://github.com/JLuethe/rless/issues/2) through [#7](https://github.com/JLuethe/rless/issues/7)
-and the six open milestones. Start with [M0](https://github.com/JLuethe/rless/issues/2).
+and the six open milestones. Continue with [M0](https://github.com/JLuethe/rless/issues/2).

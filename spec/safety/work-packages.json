@@ -7,7 +7,7 @@
     {
       "id": "M0",
       "title": "Baseline and safety infrastructure",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "github_issue": "https://github.com/JLuethe/rless/issues/2",
       "github_milestone": "https://github.com/JLuethe/rless/milestone/1"
@@ -58,7 +58,7 @@
       "id": "M0.1",
       "phase": "M0",
       "title": "Freeze the reproducible baseline",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [],
       "requirement_ids": [
@@ -89,7 +89,7 @@
       "id": "M0.2",
       "phase": "M0",
       "title": "Inventory unsafe code and ownership",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "M0.1"
@@ -120,7 +120,7 @@
       "id": "M0.3",
       "phase": "M0",
       "title": "Pin and prove safety tool profiles",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "M0.1"
@@ -153,7 +153,7 @@
       "id": "M0.4",
       "phase": "M0",
       "title": "Implement the evidence and campaign runner",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "M0.2",
@@ -186,7 +186,7 @@
       "id": "M0.5",
       "phase": "M0",
       "title": "Run the initial diagnostic campaign",
-      "status": "planned",
+      "status": "in-progress",
       "evidence_status": "not-verified",
       "depends_on": [
         "M0.2",

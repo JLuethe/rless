@@ -1,6 +1,6 @@
 # M0 through M4 execution plan and safety campaign handoff
 
-Version: **0.2.0**. Status: **planned; no safety phase is complete**.
+Version: **0.2.0**. Status: **M0 infrastructure in progress; no safety phase is complete**.
 
 This plan turns the [safety requirements](README.md) into reviewable delivery packets. It covers M0–M4 implementation and the M5 full-campaign handoff. The existing native pager remains an experimental unsafe translation until the final safety gate passes.
 
@@ -9,7 +9,7 @@ The published baseline implementation snapshot is `dd6ef28f0c136109611f3c225457c
 ## Working rules
 
 - The 43 requirements and 175 named acceptance variants remain authoritative. Packets add delivery order and outputs, not a new compatibility exception.
-- All packet and phase states begin planned/not-verified. Specification completion is separate from implementation completion.
+- M0 packets are in progress/not-verified; M1–M5 packets remain planned/not-verified. Specification completion is separate from implementation completion.
 - Start with M0.1. Dependencies below are the default delivery order; independently safe leaf work may proceed only with its prerequisite owner/ABI decisions and no premature phase closure.
 - Complete each ownership/callback cycle as one reviewable slice, update its inventory and run its affected safety lane plus native regression before proceeding.
 - Keep all 809 reference cases and existing observer corrections intact. Changes to semantics, scope or campaign floors require a versioned decision before execution, not a failing-run exception.

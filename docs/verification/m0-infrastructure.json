@@ -1,0 +1,1586 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-24",
+  "scope": "Compact publication record of initial M0 infrastructure and diagnostics. Full raw reports/logs remain in ignored local run directories. This is not final safety acceptance.",
+  "runtime_safety_verified": false,
+  "runs": {
+    "detectors": {
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "dirty_state": "",
+      "status": "passed",
+      "started_at_utc": "2026-10-24T17:17:57.192320+00:00",
+      "finished_at_utc": "2026-10-24T17:18:01.473099+00:00",
+      "runtime_safety_verified": false,
+      "input_fingerprint_sha256": "efcc4720122540efc852963d80a14571cf2d931db2aa409f697b6ce8b438fc3f",
+      "raw_report_path": "compat/.runs/m0-detectors-2/summary.json",
+      "raw_report_sha256": "f5a357fb5db4098cea90001c44c3dce15d47df28eddc5b6b7a94704dec31f0af",
+      "records": [
+        {
+          "name": "tool-rustc",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-rustc",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.07698321300267708,
+          "cpu_seconds": 0.039603,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/tool-rustc.log",
+          "log_sha256": "3490ee6e8bcdb72c1c69a3dd110ba44354faa27549f1f6fce37148b2b8b1f6c6",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-cargo",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-cargo",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.08000037899182644,
+          "cpu_seconds": 0.052173999999999984,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/tool-cargo.log",
+          "log_sha256": "0aace72cfe5464362dc29118bd0d8bd5d5a2a9931ee8704efae227e72f86bf36",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-miri",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-miri",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.12950100100715645,
+          "cpu_seconds": 0.11044999999999998,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/tool-miri.log",
+          "log_sha256": "e4515aceed97938f49306c1edf1847fd4c799fb5881520f3ff73dc1862f59e96",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "build-detectors",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "build-detectors",
+          "profile": "ASAN",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTFLAGS": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+            "LSAN_OPTIONS": "exitcode=87:report_objects=1",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 0.56177474699507,
+          "cpu_seconds": 0.9821460000000002,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/build-detectors.log",
+          "log_sha256": "d0121e61e8b3315a2464f463e2a15c0815eba21e7d8bd7eca15a9fcacc598b7a",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "asan-safe",
+          "requirement_ids": [
+            "SAFE-VER-002",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "asan-safe",
+          "profile": "ASAN",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTFLAGS": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+            "LSAN_OPTIONS": "exitcode=87:report_objects=1",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 0.0465385179995792,
+          "cpu_seconds": 0.011027999999999927,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/asan-safe.log",
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-detectors-2/target/x86_64-unknown-linux-gnu/debug/safe": "1fea99a5219bc293ae9d9e05f4a41e6a41a904da157652f3af2e4888c77a1e12"
+          }
+        },
+        {
+          "name": "asan-uaf",
+          "requirement_ids": [
+            "SAFE-VER-002",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "asan-uaf",
+          "profile": "ASAN",
+          "status": "passed",
+          "original_exit_status": 87,
+          "expected_exit_status": 0,
+          "expected_diagnostic": "ERROR: AddressSanitizer: heap-use-after-free",
+          "diagnostic_found": true,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTFLAGS": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+            "LSAN_OPTIONS": "exitcode=87:report_objects=1",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 0.08544859099492896,
+          "cpu_seconds": 0.007824000000000053,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/asan-uaf.log",
+          "log_sha256": "96584fbd308606b51268a717b4ab118edc27d1f4279aa8cb89b6adb127036625",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-detectors-2/target/x86_64-unknown-linux-gnu/debug/asan-uaf": "a324d356e53362f86e58afee1140fe6848bd0bc84c1f938fc5274b4a75839769"
+          }
+        },
+        {
+          "name": "lsan-leak",
+          "requirement_ids": [
+            "SAFE-VER-002",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "lsan-leak",
+          "profile": "LSAN",
+          "status": "passed",
+          "original_exit_status": 87,
+          "expected_exit_status": 0,
+          "expected_diagnostic": "ERROR: LeakSanitizer: detected memory leaks.*8192 byte",
+          "diagnostic_found": true,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTFLAGS": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+            "LSAN_OPTIONS": "exitcode=87:report_objects=1",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 0.09179090199177153,
+          "cpu_seconds": 0.010687000000000002,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/lsan-leak.log",
+          "log_sha256": "d8a715980a04c42553fb8eab25196730c5200f2a4e01173b93cb38ae9976e2b7",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-detectors-2/target/x86_64-unknown-linux-gnu/debug/lsan-leak": "14bc19f5d9d8cde3ffca97df1a55b3f3bf2cac5c9560b9143b71ca24f9593e29"
+          }
+        },
+        {
+          "name": "miri-setup",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "miri-setup",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.23248625801352318,
+          "cpu_seconds": 0.18656899999999987,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/miri-setup.log",
+          "log_sha256": "91bb497ec81d8b5a41661761e7bb6383db846b781035ced66ccffd5ab5b40685",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-safe-0",
+          "requirement_ids": [
+            "SAFE-VER-003",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "miri-safe-0",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=0",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.389294182008598,
+          "cpu_seconds": 0.3428720000000002,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/miri-safe-0.log",
+          "log_sha256": "d4e8826e09a2597681b749fdd3abcdadd4146aaaf2ed62f3b552458579dc06ff",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-safe-1",
+          "requirement_ids": [
+            "SAFE-VER-003",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "miri-safe-1",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=1",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.28831063299730886,
+          "cpu_seconds": 0.25775499999999996,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/miri-safe-1.log",
+          "log_sha256": "dd029447056a7b4c2ea8c111d3ad2f28082cee200a1ffee64b209cf0173b1864",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-safe-712",
+          "requirement_ids": [
+            "SAFE-VER-003",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "miri-safe-712",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=712",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.3822999309923034,
+          "cpu_seconds": 0.3440159999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/miri-safe-712.log",
+          "log_sha256": "08702784114e13bee0e9e59c9e4f714d0f08ecaeafec84037c11ce67fc65b433",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-safe-20261023",
+          "requirement_ids": [
+            "SAFE-VER-003",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "miri-safe-20261023",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=20261023",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.3885374610108556,
+          "cpu_seconds": 0.3249210000000001,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/miri-safe-20261023.log",
+          "log_sha256": "08702784114e13bee0e9e59c9e4f714d0f08ecaeafec84037c11ce67fc65b433",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-alias",
+          "requirement_ids": [
+            "SAFE-VER-003",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "miri-alias",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 1,
+          "expected_exit_status": 0,
+          "expected_diagnostic": "error: Undefined Behavior:.*(?:tag|borrow|alloc)",
+          "diagnostic_found": true,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.2897032129985746,
+          "cpu_seconds": 0.2353099999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/miri-alias.log",
+          "log_sha256": "ebf29c00c7ddc0155c61fac9c3ba7ecf7cb75755f29bfbd95cae3d73bf93946b",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "compiler-forbidden",
+          "requirement_ids": [
+            "SAFE-FFI-006",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "compiler-forbidden",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 1,
+          "expected_exit_status": 0,
+          "expected_diagnostic": "error: usage of an `unsafe` block",
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.1399889010062907,
+          "cpu_seconds": 0.10180399999999978,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/compiler-forbidden.log",
+          "log_sha256": "41649e888f466e1d4162d921526fbc8decab298f052ef8982d3598de6c4c6448",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "compiler-safe",
+          "requirement_ids": [
+            "SAFE-FFI-006",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "compiler-safe",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.18938334700942505,
+          "cpu_seconds": 0.172531,
+          "log": "/home/john/Code/rless/compat/.runs/m0-detectors-2/compiler-safe.log",
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_hashes": {}
+        }
+      ],
+      "tool_profile": {
+        "schema_version": 1,
+        "normal_rust_release": "1.90.0",
+        "nightly": "nightly-2025-09-18",
+        "rustc_commit": "4645a7988",
+        "target": "x86_64-unknown-linux-gnu",
+        "channel_manifest_sha256": "26ec8d980ee28b1bc604337ed03a62bd0a1f0ce0c5adddaa87e904e01dd7dc8f",
+        "rustup_version": "1.28.2",
+        "rustup_init_sha256": "20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c",
+        "components": [
+          "rust-src",
+          "miri",
+          "llvm-tools-preview"
+        ],
+        "asan_rustflags": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+        "asan_options": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+        "lsan_options": "exitcode=87:report_objects=1",
+        "miri_seeds": [
+          0,
+          1,
+          712,
+          20261023
+        ],
+        "instrumentation_scope": "Rust application and Rust dependencies instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. No native shims exist yet. Record this gap; no native-internals audit is claimed.",
+        "abi_profiles": [
+          {
+            "id": "REFERENCE-GLIBC-2.41",
+            "glibc": "2.41",
+            "required": true
+          },
+          {
+            "id": "BUILDER-GLIBC-2.44",
+            "glibc": "2.44",
+            "required": true
+          }
+        ],
+        "symbolizer": {
+          "name": "llvm-symbolizer",
+          "version": "23.1.3",
+          "sha256": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+        },
+        "cargo_fuzz_version": "0.13.1",
+        "libfuzzer_sys_version": "0.4.10"
+      },
+      "tool_files_manifest_sha256": "aff74e828ecd2dcd4877fbce88aa6360e91915065ad4887a29801bff4fcc6b50",
+      "tool_files_hashed": 1940,
+      "tool_executables_sha256": {
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/rustc": "69a4a757b38d4f806c6f9a28a85d9bdedda02c14ae71308a3ecfe6c0658202d9",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/cargo": "274bdd31a7493d091398a8bf9dc27b5eb07b54ff2a049d1f42d31ff364cdc921",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/miri": "1bf0aa1ea10b1bbd16110dc3bb46f7fe0665e6218899f0d0f5c1a94e6adf7afb",
+        "/usr/bin/llvm-symbolizer": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+      }
+    },
+    "inventory": {
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "dirty_state": "",
+      "status": "passed",
+      "started_at_utc": "2026-10-24T17:17:58.399128+00:00",
+      "finished_at_utc": "2026-10-24T17:18:20.510806+00:00",
+      "runtime_safety_verified": false,
+      "input_fingerprint_sha256": "efcc4720122540efc852963d80a14571cf2d931db2aa409f697b6ce8b438fc3f",
+      "raw_report_path": "compat/.runs/m0-inventory-2/summary.json",
+      "raw_report_sha256": "17bf2368fa3663ae57d1c55cba4579258ec30dc7ac3c5a34c7d1fe5dcebd6e55",
+      "records": [
+        {
+          "name": "tool-rustc",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-rustc",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.1390331279981183,
+          "cpu_seconds": 0.08471699999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/tool-rustc.log",
+          "log_sha256": "3490ee6e8bcdb72c1c69a3dd110ba44354faa27549f1f6fce37148b2b8b1f6c6",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-cargo",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-cargo",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.13564077099727,
+          "cpu_seconds": 0.06915299999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/tool-cargo.log",
+          "log_sha256": "0aace72cfe5464362dc29118bd0d8bd5d5a2a9931ee8704efae227e72f86bf36",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-miri",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-miri",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.18479962600395083,
+          "cpu_seconds": 0.136873,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/tool-miri.log",
+          "log_sha256": "e4515aceed97938f49306c1edf1847fd4c799fb5881520f3ff73dc1862f59e96",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "build-inventory",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "build-inventory",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 4.741856257998734,
+          "cpu_seconds": 6.741816,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/build-inventory.log",
+          "log_sha256": "39d943eb6d6f742d5412a800ecf5019275c41407183e7fb9f8ad9403c300b121",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "source-ast",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "source-ast",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 4.141166265006177,
+          "cpu_seconds": 3.8717949999999988,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/source-ast.log",
+          "log_sha256": "760849c423771c09409bcfd8ddecea034caa1baac2ba7b21e5b8bbf2f31994e5",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-inventory-2/target/debug/rless-safety-inventory": "e2415d16dec035f99230c7f40c340796fa28deffb86df1decbe6243e934e2627"
+          }
+        },
+        {
+          "name": "inventory-detector-control",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "inventory-detector-control",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.02824256700114347,
+          "cpu_seconds": 0.0022880000000000678,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/inventory-detector-control.log",
+          "log_sha256": "b2f116dc50ece11a15b001ea6d7627337abe8a0ab3f16e75bd42d2b49af89747",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "expand-lib",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expand-lib",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 5.749078603010275,
+          "cpu_seconds": 7.663066000000003,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/expand-lib.log",
+          "log_sha256": "00e65b72005d2c373d12efadcbe0aacf819c4efefc067da5eb886652d42e0a29",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "expanded-ast-lib",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expanded-ast-lib",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 2.6159023869986413,
+          "cpu_seconds": 2.364900000000002,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/expanded-ast-lib.log",
+          "log_sha256": "18f07d07a8dc82129f8a19d73254d98cbe97119618200169994812811570d8b4",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-inventory-2/target/debug/rless-safety-inventory": "e2415d16dec035f99230c7f40c340796fa28deffb86df1decbe6243e934e2627",
+            "/home/john/Code/rless/compat/.runs/m0-inventory-2/expanded-lib.rs": "78742e6f5925ddc5959b6baec0a06f36e18336ecf6c6de850404aac706de453f"
+          }
+        },
+        {
+          "name": "expand-lessecho",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expand-lessecho",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 2.5380931819963735,
+          "cpu_seconds": 3.0478830000000006,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/expand-lessecho.log",
+          "log_sha256": "dadea9714ebae27761381e5b06545cdcab9873fd202f27ff8539f5f97171d7ff",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "expanded-ast-lessecho",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "expanded-ast-lessecho",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.06414269900415093,
+          "cpu_seconds": 0.02460000000000262,
+          "log": "/home/john/Code/rless/compat/.runs/m0-inventory-2/expanded-ast-lessecho.log",
+          "log_sha256": "56af6976a3e1dd4e8c071a3b8f3f32368f6f3a2a5a3b7c1e450b6d0276dc2230",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-inventory-2/target/debug/rless-safety-inventory": "e2415d16dec035f99230c7f40c340796fa28deffb86df1decbe6243e934e2627",
+            "/home/john/Code/rless/compat/.runs/m0-inventory-2/expanded-lessecho.rs": "41d6860db74867d125571b032c0c81397559635b1371c4d1173954e5e612a4bf"
+          }
+        }
+      ],
+      "tool_profile": {
+        "schema_version": 1,
+        "normal_rust_release": "1.90.0",
+        "nightly": "nightly-2025-09-18",
+        "rustc_commit": "4645a7988",
+        "target": "x86_64-unknown-linux-gnu",
+        "channel_manifest_sha256": "26ec8d980ee28b1bc604337ed03a62bd0a1f0ce0c5adddaa87e904e01dd7dc8f",
+        "rustup_version": "1.28.2",
+        "rustup_init_sha256": "20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c",
+        "components": [
+          "rust-src",
+          "miri",
+          "llvm-tools-preview"
+        ],
+        "asan_rustflags": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+        "asan_options": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+        "lsan_options": "exitcode=87:report_objects=1",
+        "miri_seeds": [
+          0,
+          1,
+          712,
+          20261023
+        ],
+        "instrumentation_scope": "Rust application and Rust dependencies instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. No native shims exist yet. Record this gap; no native-internals audit is claimed.",
+        "abi_profiles": [
+          {
+            "id": "REFERENCE-GLIBC-2.41",
+            "glibc": "2.41",
+            "required": true
+          },
+          {
+            "id": "BUILDER-GLIBC-2.44",
+            "glibc": "2.44",
+            "required": true
+          }
+        ],
+        "symbolizer": {
+          "name": "llvm-symbolizer",
+          "version": "23.1.3",
+          "sha256": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+        },
+        "cargo_fuzz_version": "0.13.1",
+        "libfuzzer_sys_version": "0.4.10"
+      },
+      "tool_files_manifest_sha256": "aff74e828ecd2dcd4877fbce88aa6360e91915065ad4887a29801bff4fcc6b50",
+      "tool_files_hashed": 1940,
+      "tool_executables_sha256": {
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/rustc": "69a4a757b38d4f806c6f9a28a85d9bdedda02c14ae71308a3ecfe6c0658202d9",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/cargo": "274bdd31a7493d091398a8bf9dc27b5eb07b54ff2a049d1f42d31ff364cdc921",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/miri": "1bf0aa1ea10b1bbd16110dc3bb46f7fe0665e6218899f0d0f5c1a94e6adf7afb",
+        "/usr/bin/llvm-symbolizer": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+      }
+    },
+    "fuzz-control": {
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "dirty_state": "",
+      "status": "passed",
+      "started_at_utc": "2026-10-24T17:17:59.542697+00:00",
+      "finished_at_utc": "2026-10-24T17:18:43.756698+00:00",
+      "runtime_safety_verified": false,
+      "input_fingerprint_sha256": "efcc4720122540efc852963d80a14571cf2d931db2aa409f697b6ce8b438fc3f",
+      "raw_report_path": "compat/.runs/m0-fuzz-2/summary.json",
+      "raw_report_sha256": "1199e2dfd6255b928ff80a0713ab367280649b92914422a4cdfc3601a6c44a9d",
+      "records": [
+        {
+          "name": "tool-rustc",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-rustc",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.13702796200232115,
+          "cpu_seconds": 0.066687,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/tool-rustc.log",
+          "log_sha256": "3490ee6e8bcdb72c1c69a3dd110ba44354faa27549f1f6fce37148b2b8b1f6c6",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-cargo",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-cargo",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.13765515699924435,
+          "cpu_seconds": 0.07309099999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/tool-cargo.log",
+          "log_sha256": "0aace72cfe5464362dc29118bd0d8bd5d5a2a9931ee8704efae227e72f86bf36",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-miri",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-miri",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.18346909299725667,
+          "cpu_seconds": 0.15370999999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/tool-miri.log",
+          "log_sha256": "e4515aceed97938f49306c1edf1847fd4c799fb5881520f3ff73dc1862f59e96",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "fuzz-version",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "fuzz-version",
+          "profile": "FUZZ",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 0.13737553999817465,
+          "cpu_seconds": 0.06415699999999998,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-version.log",
+          "log_sha256": "96d55979026675c25fd3870116aa604bd21b0a36d67378fe6199cb5b2ff4e0b7",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "fuzz-model",
+          "requirement_ids": [
+            "SAFE-VER-004",
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "fuzz-model",
+          "profile": "FUZZ",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 38.8270381080074,
+          "cpu_seconds": 74.16497,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-model.log",
+          "log_sha256": "575f97dd723e35730fcdbd349ce7380b50566ff6aaa13bd61a9f38aa1e429bd2",
+          "artifact_hashes": {
+            "/home/john/Code/rless-env/safety/fuzz/bin/cargo-fuzz": "d94d7174f262be1f062be0b6107ef6a08cf841074b9bf9adca27e5767c907a15",
+            "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/Cargo.toml": "d3d5dbd00f3647bab067bac7a4884dc3b0b0e8f787cc4ef1b00eed4ed12e5971",
+            "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/model.rs": "2417c19595f091a54566bf7e4665bc570141f587db22b98a500f05d9e8384451",
+            "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/rollback_model.rs": "60937c07637c7fa60f48b180c407a47b920e9eb02aed141f34ecb0d431bf2052",
+            "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/rollback_fault.rs": "f2771cbeafd219f9649651db33be3fad8e9c5642898da06ea2b6fb5c27e4a4f1",
+            "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/Cargo.lock": "067f8cbc5c621e2afef1adb3f77415ac8d42420b7d553685b8ceabbe88e13401"
+          }
+        },
+        {
+          "name": "fuzz-oracle-negative",
+          "requirement_ids": [
+            "SAFE-VER-010"
+          ],
+          "scenario_id": null,
+          "variant": "fuzz-oracle-negative",
+          "profile": "FUZZ",
+          "status": "passed",
+          "original_exit_status": 1,
+          "expected_exit_status": 0,
+          "expected_diagnostic": "injected rollback violation: detector control.*(?:libFuzzer|deadly signal)",
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 1.0828008419921389,
+          "cpu_seconds": 1.139857000000001,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-oracle-negative.log",
+          "log_sha256": "83a52ef4abf163b27eef77a710023799d7a47ecccca0227afa61c09ebf15d9ae",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "fuzz-minimization",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "fuzz-minimization",
+          "profile": "FUZZ",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 2.5014993869990576,
+          "cpu_seconds": 0.9713229999999875,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-minimization.log",
+          "log_sha256": "b069c9830cd2b0c24b324ad281a265286863315ae38d6b41fffcc09f3f3d8bb8",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "fuzz-minimized-replay",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "fuzz-minimized-replay",
+          "profile": "FUZZ",
+          "status": "passed",
+          "original_exit_status": 1,
+          "expected_exit_status": 0,
+          "expected_diagnostic": "injected rollback violation: detector control",
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 0.5974627109972062,
+          "cpu_seconds": 0.42872799999999334,
+          "log": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-minimized-replay.log",
+          "log_sha256": "51b943d2045d9cae5d14b75b75b4a9c914aa245342c73f75f5253c83deb51e85",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/artifacts/rollback_fault/minimized-from-c2a1d8131d54c13be98bc9d5203e9569531040d4": "30bdd2790a29b7e37f8febbae0c7a5664b9233b9bef16f1efa4bf75d0675a92d"
+          }
+        }
+      ],
+      "tool_profile": {
+        "schema_version": 1,
+        "normal_rust_release": "1.90.0",
+        "nightly": "nightly-2025-09-18",
+        "rustc_commit": "4645a7988",
+        "target": "x86_64-unknown-linux-gnu",
+        "channel_manifest_sha256": "26ec8d980ee28b1bc604337ed03a62bd0a1f0ce0c5adddaa87e904e01dd7dc8f",
+        "rustup_version": "1.28.2",
+        "rustup_init_sha256": "20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c",
+        "components": [
+          "rust-src",
+          "miri",
+          "llvm-tools-preview"
+        ],
+        "asan_rustflags": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+        "asan_options": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+        "lsan_options": "exitcode=87:report_objects=1",
+        "miri_seeds": [
+          0,
+          1,
+          712,
+          20261023
+        ],
+        "instrumentation_scope": "Rust application and Rust dependencies instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. No native shims exist yet. Record this gap; no native-internals audit is claimed.",
+        "abi_profiles": [
+          {
+            "id": "REFERENCE-GLIBC-2.41",
+            "glibc": "2.41",
+            "required": true
+          },
+          {
+            "id": "BUILDER-GLIBC-2.44",
+            "glibc": "2.44",
+            "required": true
+          }
+        ],
+        "symbolizer": {
+          "name": "llvm-symbolizer",
+          "version": "23.1.3",
+          "sha256": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+        },
+        "cargo_fuzz_version": "0.13.1",
+        "libfuzzer_sys_version": "0.4.10"
+      },
+      "tool_files_manifest_sha256": "aff74e828ecd2dcd4877fbce88aa6360e91915065ad4887a29801bff4fcc6b50",
+      "tool_files_hashed": 1940,
+      "tool_executables_sha256": {
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/rustc": "69a4a757b38d4f806c6f9a28a85d9bdedda02c14ae71308a3ecfe6c0658202d9",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/cargo": "274bdd31a7493d091398a8bf9dc27b5eb07b54ff2a049d1f42d31ff364cdc921",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/miri": "1bf0aa1ea10b1bbd16110dc3bb46f7fe0665e6218899f0d0f5c1a94e6adf7afb",
+        "/usr/bin/llvm-symbolizer": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+      },
+      "fuzz_model": {
+        "scope": "Test-only rollback model, not any of the 15 production targets.",
+        "executions": 10000,
+        "coverage_edges": 80,
+        "seed": 712
+      },
+      "minimized_reproducer": {
+        "path": "/home/john/Code/rless/compat/.runs/m0-fuzz-2/fuzz-project/artifacts/rollback_fault/minimized-from-c2a1d8131d54c13be98bc9d5203e9569531040d4",
+        "sha256": "30bdd2790a29b7e37f8febbae0c7a5664b9233b9bef16f1efa4bf75d0675a92d",
+        "bytes": 5
+      },
+      "coverage_engine": {
+        "path": "/home/john/Code/rless-env/safety/fuzz/bin/cargo-fuzz",
+        "sha256": "d94d7174f262be1f062be0b6107ef6a08cf841074b9bf9adca27e5767c907a15",
+        "cargo_fuzz_version": "0.13.1",
+        "libfuzzer_sys_version": "0.4.10"
+      }
+    },
+    "initial-diagnostics": {
+      "source_commit": "610bb4ff6673107acab4638e657a8ac77578f00c",
+      "dirty_state": "",
+      "status": "not-verified",
+      "started_at_utc": "2026-10-24T17:17:30.288835+00:00",
+      "finished_at_utc": "2026-10-24T17:18:40.680103+00:00",
+      "runtime_safety_verified": false,
+      "input_fingerprint_sha256": "efcc4720122540efc852963d80a14571cf2d931db2aa409f697b6ce8b438fc3f",
+      "raw_report_path": "compat/.runs/m0-initial-2/summary.json",
+      "raw_report_sha256": "75f3b323d08bfb895b1420d4f367d5030ac04d24473dbf18afe39e95f9a412c1",
+      "records": [
+        {
+          "name": "tool-rustc",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-rustc",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.13695376401301473,
+          "cpu_seconds": 0.07936599999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/tool-rustc.log",
+          "log_sha256": "3490ee6e8bcdb72c1c69a3dd110ba44354faa27549f1f6fce37148b2b8b1f6c6",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-cargo",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-cargo",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.08129772900429089,
+          "cpu_seconds": 0.05938100000000001,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/tool-cargo.log",
+          "log_sha256": "0aace72cfe5464362dc29118bd0d8bd5d5a2a9931ee8704efae227e72f86bf36",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "tool-miri",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "tool-miri",
+          "profile": "STATIC",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 0.13600658999348525,
+          "cpu_seconds": 0.09236699999999998,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/tool-miri.log",
+          "log_sha256": "e4515aceed97938f49306c1edf1847fd4c799fb5881520f3ff73dc1862f59e96",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "build-asan-candidate",
+          "requirement_ids": [],
+          "scenario_id": null,
+          "variant": "build-asan-candidate",
+          "profile": "ASAN",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTFLAGS": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+            "LSAN_OPTIONS": "exitcode=87:report_objects=1",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 8.096248472007574,
+          "cpu_seconds": 11.964661999999999,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/build-asan-candidate.log",
+          "log_sha256": "f805b8d59ef3c75bcdf1d603354b4bb20870b29996b54f8322b71dcf7f0ee92e",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "asan-rust-tests",
+          "requirement_ids": [
+            "SAFE-VER-002"
+          ],
+          "scenario_id": null,
+          "variant": "asan-rust-tests",
+          "profile": "ASAN",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "RUSTFLAGS": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18",
+            "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+            "LSAN_OPTIONS": "exitcode=87:report_objects=1",
+            "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer"
+          },
+          "wall_seconds": 3.8352440710004885,
+          "cpu_seconds": 5.9265870000000005,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/asan-rust-tests.log",
+          "log_sha256": "40121258db735b9cd02817c13f10e8740528fac9baa523c6a119a72a9d2b77bf",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "asan-acceptance",
+          "requirement_ids": [
+            "SAFE-VER-001",
+            "SAFE-VER-002"
+          ],
+          "scenario_id": null,
+          "variant": "asan-acceptance",
+          "profile": "ASAN",
+          "status": "failed",
+          "original_exit_status": 1,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {},
+          "wall_seconds": 50.815163872000994,
+          "cpu_seconds": 38.537872,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/asan-acceptance.log",
+          "log_sha256": "450c673a7d41ca834be1265e3bed5a4ae371a4af13fc41b2233043cc57a49aec",
+          "artifact_hashes": {
+            "/home/john/Code/rless/compat/.runs/m0-initial-2/target/x86_64-unknown-linux-gnu/debug/rless": "cbba4d2c09edce3cc289ec62aadb566045a13fc05a1f83f7e18c613ea2f621d5",
+            "/home/john/Code/rless/compat/.runs/m0-initial-2/instrumentation-env.json": "55f5b4a419afa9e5f44235e3c86ddb3230d3cbf45abd5820b817a0a1dbbd8370"
+          }
+        },
+        {
+          "name": "sanitizer-findings-open",
+          "status": "unsupported",
+          "reason": "Sanitizer reports require triage and fixes; expected application exits cannot hide them.",
+          "profile": "ASAN",
+          "requirement_ids": []
+        },
+        {
+          "name": "miri-runtime-0",
+          "requirement_ids": [
+            "SAFE-VER-003"
+          ],
+          "scenario_id": null,
+          "variant": "miri-runtime-0",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=0",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 2.292261223003152,
+          "cpu_seconds": 2.307108000000003,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/miri-runtime-0.log",
+          "log_sha256": "2eda5e04a64672d3f32a79a04e2b2dd97a0bdb9c1440e8e0f1c292197c43d565",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-runtime-1",
+          "requirement_ids": [
+            "SAFE-VER-003"
+          ],
+          "scenario_id": null,
+          "variant": "miri-runtime-1",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=1",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 1.1390466519951588,
+          "cpu_seconds": 1.0777249999999956,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/miri-runtime-1.log",
+          "log_sha256": "f043abebadcda74c72b163eb3f57a2e7a8d77a851c7e952f69ff00f98df5d506",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-runtime-712",
+          "requirement_ids": [
+            "SAFE-VER-003"
+          ],
+          "scenario_id": null,
+          "variant": "miri-runtime-712",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=712",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 1.6349339419975877,
+          "cpu_seconds": 1.6012789999999963,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/miri-runtime-712.log",
+          "log_sha256": "51fdcc9c2cfe0daa276f498c1ea54018b51ca83a60152e850b7119f72c3aae7b",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-runtime-20261023",
+          "requirement_ids": [
+            "SAFE-VER-003"
+          ],
+          "scenario_id": null,
+          "variant": "miri-runtime-20261023",
+          "profile": "MIRI",
+          "status": "passed",
+          "original_exit_status": 0,
+          "expected_exit_status": 0,
+          "expected_diagnostic": null,
+          "diagnostic_found": false,
+          "timed_out": false,
+          "stale_inputs": false,
+          "build_flags": {
+            "MIRIFLAGS": "-Zmiri-seed=20261023",
+            "RUSTUP_TOOLCHAIN": "nightly-2025-09-18"
+          },
+          "wall_seconds": 1.1369441380084027,
+          "cpu_seconds": 1.0750379999999993,
+          "log": "/home/john/Code/rless/compat/.runs/m0-initial-2/miri-runtime-20261023.log",
+          "log_sha256": "dc2cdeda1e9942dfe9b9f06e5cd0ed609ad085e9801fd06ce8dd5d28ca397237",
+          "artifact_hashes": {}
+        },
+        {
+          "name": "miri-unconverted-core",
+          "status": "unsupported",
+          "reason": "Owned buffer/parser/state components are not migrated yet; one atomic regression is not whole-core Miri coverage.",
+          "profile": "MIRI",
+          "requirement_ids": []
+        },
+        {
+          "name": "reference-abi-2.41",
+          "status": "unsupported",
+          "reason": "This host is glibc 2.44; no glibc 2.41 test environment was supplied.",
+          "profile": "ABI",
+          "requirement_ids": []
+        }
+      ],
+      "tool_profile": {
+        "schema_version": 1,
+        "normal_rust_release": "1.90.0",
+        "nightly": "nightly-2025-09-18",
+        "rustc_commit": "4645a7988",
+        "target": "x86_64-unknown-linux-gnu",
+        "channel_manifest_sha256": "26ec8d980ee28b1bc604337ed03a62bd0a1f0ce0c5adddaa87e904e01dd7dc8f",
+        "rustup_version": "1.28.2",
+        "rustup_init_sha256": "20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c",
+        "components": [
+          "rust-src",
+          "miri",
+          "llvm-tools-preview"
+        ],
+        "asan_rustflags": "-Zsanitizer=address -Cdebuginfo=2 -Cforce-frame-pointers=yes",
+        "asan_options": "detect_leaks=1:halt_on_error=1:abort_on_error=0:exitcode=86",
+        "lsan_options": "exitcode=87:report_objects=1",
+        "miri_seeds": [
+          0,
+          1,
+          712,
+          20261023
+        ],
+        "instrumentation_scope": "Rust application and Rust dependencies instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. No native shims exist yet. Record this gap; no native-internals audit is claimed.",
+        "abi_profiles": [
+          {
+            "id": "REFERENCE-GLIBC-2.41",
+            "glibc": "2.41",
+            "required": true
+          },
+          {
+            "id": "BUILDER-GLIBC-2.44",
+            "glibc": "2.44",
+            "required": true
+          }
+        ],
+        "symbolizer": {
+          "name": "llvm-symbolizer",
+          "version": "23.1.3",
+          "sha256": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+        },
+        "cargo_fuzz_version": "0.13.1",
+        "libfuzzer_sys_version": "0.4.10"
+      },
+      "tool_files_manifest_sha256": "aff74e828ecd2dcd4877fbce88aa6360e91915065ad4887a29801bff4fcc6b50",
+      "tool_files_hashed": 1940,
+      "tool_executables_sha256": {
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/rustc": "69a4a757b38d4f806c6f9a28a85d9bdedda02c14ae71308a3ecfe6c0658202d9",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/cargo": "274bdd31a7493d091398a8bf9dc27b5eb07b54ff2a049d1f42d31ff364cdc921",
+        "/home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/bin/miri": "1bf0aa1ea10b1bbd16110dc3bb46f7fe0665e6218899f0d0f5c1a94e6adf7afb",
+        "/usr/bin/llvm-symbolizer": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
+      },
+      "instrumented_binaries": {
+        "rless": {
+          "path": "/home/john/Code/rless/compat/.runs/m0-initial-2/target/x86_64-unknown-linux-gnu/debug/rless",
+          "sha256": "cbba4d2c09edce3cc289ec62aadb566045a13fc05a1f83f7e18c613ea2f621d5"
+        },
+        "lessecho": {
+          "path": "/home/john/Code/rless/compat/.runs/m0-initial-2/target/x86_64-unknown-linux-gnu/debug/lessecho",
+          "sha256": "3564a9833e3b794d70d3d65a6e350464e6eefe0794b1be0e9dc41d6b858a9222"
+        }
+      },
+      "boundary_exclusions": [
+        {
+          "profile": "MIRI",
+          "boundary": "src/process.rs::remember_sigpipe ELF constructor calls native sigaction",
+          "reason": "Pinned Miri reports unsupported foreign function sigaction on Linux.",
+          "status": "unsupported",
+          "native_alternative": {
+            "record": "asan-rust-tests",
+            "test_names": [
+              "a_closed_output_pipe_preserves_default_sigpipe",
+              "an_inherited_ignored_sigpipe_stays_ignored"
+            ]
+          },
+          "review_status": "independent boundary review pending"
+        }
+      ],
+      "observed_glibc": "glibc 2.44",
+      "acceptance": {
+        "binary": "/home/john/Code/rless/compat/.runs/m0-initial-2/target/x86_64-unknown-linux-gnu/debug/rless",
+        "sha256": "cbba4d2c09edce3cc289ec62aadb566045a13fc05a1f83f7e18c613ea2f621d5",
+        "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+        "observer_sha256": "acd6ad610f1ba68321bf89221217e51996db8e9b919cf78dd719c5fa7ed27d01",
+        "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+        "families": {
+          "options": {
+            "executed": 230,
+            "passed": 227,
+            "failed": 3,
+            "errors": []
+          },
+          "behavior": {
+            "executed": 467,
+            "passed": 356,
+            "failed": 111,
+            "errors": []
+          },
+          "interactions": {
+            "executed": 108,
+            "passed": 79,
+            "failed": 29,
+            "errors": []
+          },
+          "integration": {
+            "executed": 4,
+            "passed": 3,
+            "failed": 1,
+            "errors": []
+          }
+        },
+        "executed": 809,
+        "passed": 665,
+        "failed": 144
+      },
+      "sanitizer_process_reports": 144,
+      "sanitizer_classification": "All 144 process reports identify leaks. Dominant allocation path: GNU re_search -> pattern::match_pattern1; separate startup-command save storage leak. No final safety pass.",
+      "finding_issues": [
+        "https://github.com/JLuethe/rless/issues/9",
+        "https://github.com/JLuethe/rless/issues/10"
+      ],
+      "acceptance_matrix_status": "All 175 final safety variants remain not-run in the M0 matrix; these diagnostics do not implement the catalogue."
+    }
+  },
+  "post_observer_native_regression": {
+    "source_commit": "610bb4f",
+    "raw_report_path": "compat/.runs/verification-379qhqju/summary.json",
+    "raw_report_sha256": "d6b7ad6f0a8cfd9c8d07ad7ba53cd20f73e96cef8952e1df9731314f431c3f01",
+    "summary": {
+      "started_at_utc": "2026-10-24T17:47:36.617521+00:00",
+      "passed": true,
+      "steps": [
+        {
+          "name": "format",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "rust-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "rust-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "observer",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "corpus",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "negative-candidate",
+          "returncode": 1,
+          "expected_returncode": 1,
+          "passed": true
+        },
+        {
+          "name": "acceptance-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "acceptance-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "reference",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "integrations-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "job-control-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "helpers-debug",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-debug-712",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-debug-20261023",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "integrations-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "job-control-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "helpers-release",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-release-712",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "stress-release-20261023",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "clean-install",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        },
+        {
+          "name": "acceptance-installed",
+          "returncode": 0,
+          "expected_returncode": 0,
+          "passed": true
+        }
+      ],
+      "binaries": {
+        "debug": {
+          "path": "/home/john/Code/rless/target/debug/rless",
+          "sha256": "f306b47d835b99f9560d32226984cdf5d88ee1c9ed946a1981454b8d5793cd4e",
+          "companion_sha256": "0e8963bfd3e3ae9d7faeae7ca7d06d3cfc08ccf0d1716649ec1baf14a41645b1"
+        },
+        "release": {
+          "path": "/home/john/Code/rless/target/release/rless",
+          "sha256": "8188fe99befa448f79d224fb25ce41e2e22410573a2954b3f3b5941fc907dca0",
+          "companion_sha256": "407f9eb7b465dc3ae74a926e902e66aea96457962f1fef1bb9d0d471f5762aab"
+        }
+      },
+      "build_and_test_inputs_sha256": "1c36855e220f5858411d635ccd299b3a8835288c7c438aaad8e11285509a4a4f",
+      "helpers": {
+        "osc8_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+      },
+      "finished_at_utc": "2026-10-24T17:49:47.156258+00:00"
+    },
+    "scope": "Complete normal debug/release, reference, integrations/helpers/job control/stress and clean-install rerun after safety instrumentation opt-in was added; all steps passed."
+  }
+}

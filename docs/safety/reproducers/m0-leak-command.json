@@ -1,0 +1,28 @@
+[
+  {
+    "id": "M0-LEAK-COMMAND",
+    "mode": "pty",
+    "argv": [
+      "--cmd=g",
+      "-PsREADY",
+      "-PmREADY",
+      "-PMREADY",
+      "i"
+    ],
+    "files": {
+      "i": {
+        "text": "x\n"
+      }
+    },
+    "events": [
+      {
+        "await": [
+          "READY"
+        ]
+      },
+      {
+        "send": "q"
+      }
+    ]
+  }
+]

@@ -1,0 +1,764 @@
+{
+  "schema_version": 1,
+  "started_at_utc": "2026-10-24T17:07:30.678511+00:00",
+  "source_commit": "53f5aa9907cd475fd58a67f3329c4b3121cc5123",
+  "status": "passed",
+  "scope": "Native unsafe compatibility baseline; not safety migration completion.",
+  "source_files_sha256": {
+    ".gitignore": "01836bb7fda9efd0d80b66a526405c6c586e876ae4845253a80dddba75859d9a",
+    "Cargo.lock": "5a8cdcd0e51a724b4b122522af12072beea6cb0fa3598b5bfcd5e6f0fa7bdbf3",
+    "Cargo.toml": "fe726916d0b07994b7ae25c4f3d0f9d5d68489b57d8bb8798c27ff47431ed074",
+    "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "LICENSE-LESS": "0f94cd7f9b1d122522e1b988e42be49c88a997781494615113e7bbcf28d2c952",
+    "README.md": "edf01b3d1d78c6cde303813b0811ccbda1ae2f7597e7320c62378d8d1b49f9ff",
+    "build.rs": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+    "compat/cases/behavior.json": "ba9d188d96f4154bd4284d2aa547d02fd30e06afeeb1d58fce89e56ce0b6b71e",
+    "compat/cases/integration.json": "a0debe50f5c67260bf75ae03f38dfd5ce3eee133d031162c11f5b50c9a8bbd8e",
+    "compat/cases/interactions.json": "900cfe8c0a56fa71eb5f120011b39294e85a659283cceb12c62197b0d78cf161",
+    "compat/cases/options.json": "962004b2bf2cd485cf453d03e40c198ce6500503bbd3b4df3bf5071fabe33e10",
+    "compat/corpus.json": "ab9224adb7ff6efa150620c6c2cd30f13edba0045486f3a23b409ecd4ba83851",
+    "compat/expected-behavior.json": "da773283e9c54deb46dbb294d94acf0a508cba54ff2cf17018c60d059fd6d8c9",
+    "compat/expected-integration.json": "30852f992a0cb40115b0c0d14352b3f3644b966d69f423baec8619890f9e61c6",
+    "compat/expected-interactions.json": "29aaecaa19053d57b35d7da3581eab319e1fefebf8c96c3cdd78f6e7035b9404",
+    "compat/expected-options.json": "347573e25848a33b817381135cfadd0e223ef5fb089ce8314624bc6fa2f08e2d",
+    "compat/fixtures/pager.json": "20365c670cd4532c8a300ac7cd4e3c7739421407f536f344efec296d9c09aabb",
+    "compat/interactions.json": "73b1d6a81d7fa4b0cf36d03806b0005de1801618d1d19b31a2d36b870d828182",
+    "compat/observer-v2.json": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+    "compat/observer-validation.json": "699e208dc491ead58f73f4e345c4373730d3ac7900ebe77551d3ffee21c1719d",
+    "compat/rebuild-replay-behavior.json": "b59a90502537a8cff0ef46c739ca663bda6825e6d0207ab2b62f26671d0905f4",
+    "compat/rebuild-replay-integration.json": "3f24a901ac37e12c7429318b36174360cb4817221bb1152bdb0f51237977c87f",
+    "compat/rebuild-replay-interactions.json": "c66bcdd28b81958c7ce86a3e81f3a0fb75216323751eb5749cecfa08e1bae948",
+    "compat/rebuild-replay-options.json": "b33e84ce54212d627f415fbb66af1d0025f5b2043e1db46649951c0e1a63396b",
+    "compat/rebuild.json": "1a898051cada22a3cdfb5c7eb0ba759d1d0b6f062fdbcbfd1351370a5fce72e4",
+    "compat/reference.json": "bbaa135346b13bda9d9c5925fb9b1404da2b39757ccebc6d10a90d097cf143a2",
+    "compat/replay-behavior.json": "b59a90502537a8cff0ef46c739ca663bda6825e6d0207ab2b62f26671d0905f4",
+    "compat/replay-integration.json": "3f24a901ac37e12c7429318b36174360cb4817221bb1152bdb0f51237977c87f",
+    "compat/replay-interactions.json": "c66bcdd28b81958c7ce86a3e81f3a0fb75216323751eb5749cecfa08e1bae948",
+    "compat/replay-options.json": "b33e84ce54212d627f415fbb66af1d0025f5b2043e1db46649951c0e1a63396b",
+    "compat/schemas/capability.schema.json": "0aba941e561ca7093bba52e65bce1d5e6061dea7971fc82f24ecc941d91597ce",
+    "compat/schemas/case.schema.json": "112d373d744f7659060ad1d2cd8199c9cb90828f6803154cc9797d9a1bfff4e9",
+    "compat/schemas/requirement.schema.json": "170ac304888a3a8c2ec6548fddc1aa24484ecd7a8fc0f49b8d2bb560ed69c64a",
+    "compat/special-keys.json": "70c77c0e69d63d95e6fc80cd9a4ac080c3c29ea920612c2bbef4c79ef37561d4",
+    "docs/current-state.md": "70706d89bd1c909223a9b7961f2ba35c9fb8dce71e1aa3d55bb4cf61057e7650",
+    "docs/implementation.md": "4f99c4d485daf5b34125b8c9152c3e9982b73e8d3c12d4c9dae65a82fa711e6e",
+    "docs/less-analysis-plan.md": "f21a4ba757a9ee7429f8851ec66da099b42c3452df21fbbff5af3ad52c343ef3",
+    "docs/less-interface-inventory.md": "f76571fab01a251b28a7ca2085239dd87c7b1c22b5ec9d7e056897f56f564f1d",
+    "docs/less-source-audit.md": "0bb86644a2487d02c1204344a4d6af4a059f8e519d8b469dbac32d0d91a2752a",
+    "docs/less-spec-review.md": "d6a3bf648d948670465033b27bfa592dde68526c5d19d8e1fcf411c52069df62",
+    "docs/rless-compatibility-spec.md": "1608b627d3e03ddaf83607015848090b43547c72f316112077932a9da549695f",
+    "docs/spec-completion-plan.md": "5a49be503b8c0de97002e098472875a6ebf1c99df631a90a193010a1a9fe642f",
+    "docs/verification/less-712-review.json": "034e15afdf1bf79838748e61ef3efbed21ab75dcb07fa083ef536f68777f6e13",
+    "docs/verification/overnight.json": "1e2d03b8f66be84a2e0008a27dd099ee4fcfcb5cf585a15a5b91ea0e62adab3a",
+    "docs/verification/rust-baseline.json": "2e40b36e424c8f01a5f2f1f6fdfb92e32f19d6201b48ae2841b9514ac94df09d",
+    "spec/README.md": "bc34651fc9431aa73cfcee45a33c7e7ce33f4aedd425c09c813fa6afe1730827",
+    "spec/VERSION": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03",
+    "spec/behavior/01-startup-options.md": "6e42a5fe8380e8a346e5145f393e9286fdea9daca7e0630c0d74c55c1eb64543",
+    "spec/behavior/02-input-files-errors.md": "0d09434948ca2b9782146bd074df8098a811526f4b019a6d76561f06dd040c8b",
+    "spec/behavior/03-terminal-events.md": "cb75617e377a382d232206d3f64249b2f3ac8e3a62a7b4cd5d83eded94da39c1",
+    "spec/behavior/04-layout-navigation.md": "d7822403e07d7501107ba79e34b78c68fe094e684cf7eb7b000f1ff432f2990d",
+    "spec/behavior/05-search-filters.md": "6ebf4f0f162766333d5578ea65ae29e661ca9442ba0b47385e9fe643d54b3dd3",
+    "spec/behavior/06-languages-state.md": "1f403042de1b359469bb8077cbd82db4b3326ec3fc5c6797f2966bda802bf863",
+    "spec/behavior/07-integrations.md": "84c8d43b8f66e147749670a03558dbc40c193bce3d3b45297f720433317c23a2",
+    "spec/capabilities.json": "392eabb61a612f1cedbff0a4817f84e861c1beb9ceac2482d3e75682f9697c98",
+    "spec/coverage.json": "aa3a8c4b1341aeb179ff3e395326647a4dd975c96bafc84f4eb7c16f0911a4af",
+    "spec/defaults.md": "1fd8f67ac0b9a91f8ea11946e294d7da49e1a30d166b55dd3173259e7b6aba4c",
+    "spec/format.md": "f5781a09033e0ac604340adf12e9978a0d99da988d45f65d2b21c200d01c0e87",
+    "spec/open-questions.md": "fdc8fb36db1b9ce4301861f148c930c3ccc46ef12cb6a92373e8faa9b94135a7",
+    "spec/readiness.md": "c2486b666f7e6aac45401524e7eb0f5b02ea3bcbe7515b6b500533e5e0672421",
+    "spec/reference/LESS-LICENSE": "0f94cd7f9b1d122522e1b988e42be49c88a997781494615113e7bbcf28d2c952",
+    "spec/reference/compose.uni": "227a9680fbb14a427b9e5817a8580a26e492073f657af39ed55c284374f470d5",
+    "spec/reference/fmt.uni": "93f4909058f2cdfc05e0b8642c30391774c0235ebfa1bf4e3d1a7e3fc52ecbe4",
+    "spec/reference/less.txt": "bb27895d8148ef68e2edee5721b49a177558652705bcf88ffadbebcbccdd58ea",
+    "spec/reference/lessecho.txt": "8a3ba070401ebe42fc57be4496e5a33c21f4ec8b42271268da89e16ad0216c24",
+    "spec/reference/lesskey.txt": "93711207dbd64bb590d45888731047fea8c854d3f6f8aaa8dedd9a242710239f",
+    "spec/reference/lessmsg": "6c96692dbf23c7a76b9948de64ec004f0a3b27a79109392788c8734c1ebfd3f5",
+    "spec/reference/lessmsg_int": "96aad5d853c4249e18f40e4f6b8f8c9a37f27e9443cb105e87c5b966a69948a4",
+    "spec/reference/omit.uni": "e3e20d2aab1fbb8afc069ad7488a74ace2839b9b00aeb8e0b36002db579a4a61",
+    "spec/reference/ubin.uni": "1972deffaf944868730c85a42392602719c7483a0e0f1f7944a1ae7c95c884e8",
+    "spec/reference/wide.uni": "ca7f5f6156fe4c5d0cc827cea065d579677e7ff1cc39c774a62c8502a0d35723",
+    "spec/requirements.json": "4e3bedd505f42f01e88a81a048e120f82e2f67ff469e9da85bd4b7996f723ec3",
+    "spec/safety/01-signals.md": "9b591fdddd530168977ab198e76eda7f4c6c85a4081b41b36f95d4c68cec55c5",
+    "spec/safety/02-memory.md": "461c1199858e1ebd84b0128687caee128eaf0d13b6bd50934b0e60cebbbafc7a",
+    "spec/safety/03-state.md": "5b898e4e91329368623b5f4a8eb07d4d02f2d67bfef34ef53ea971947e1d9b24",
+    "spec/safety/04-ffi.md": "69344ad1585d4fac1a874f7cffc625100abe3bef65a919cacbb5009595b4330f",
+    "spec/safety/05-verification.md": "c7e809400d5e37756eff55f60a9e7c357af44511a1c96edb4c664f78acbaac8b",
+    "spec/safety/README.md": "761fb3c276e52178aed0dde236232a1cc136ff7fda1c423fe249cdbbbd52af32",
+    "spec/safety/acceptance.json": "1ba4920a37959048a2e5dc101aee8683eda9d7c4b17953fb201946fa9b8d3c92",
+    "spec/safety/campaign-plan.md": "1b5b195e2dfa1996c956ea36a9d4bdce91a897a331a3e1d8a41814715bd81c8b",
+    "spec/safety/campaigns.json": "8984516ae0590cbfb9498c0077e3be4b9bcc3f354a5a63f1d9a7396542e8e13e",
+    "spec/safety/execution-plan.md": "8981fb6ed02d0ffe8895309d1feebfc4b1856e8c4b106a02c0821821475f1e5c",
+    "spec/safety/github-tracking.json": "4f7c584e64853c633b8f68d9234b7816dcf8afea45773762b51e8d5ff89db694",
+    "spec/safety/migration.md": "b8e72028e7189e2b50a501a21ffc5dea660292ddea775dbc5f1a395470341a88",
+    "spec/safety/requirements.json": "a7747557d63bbc71c91247b1d7dc4787ec960950f8f10b9245fed05c39f91e87",
+    "spec/safety/validation.json": "4a4a137cc3a2800c807494e08d3090446f30656e8b69948d433a3a5621434f86",
+    "spec/safety/work-packages.json": "2a79156bcaea9117b4271bf2fc792f6b0cccc46eba58017bb663220e532187c6",
+    "spec/scope.md": "e44a9008fd593d5ad50700d560874a629a7f400c24f91e36cfa875c4ad122202",
+    "src/bin/lessecho.rs": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+    "src/bin/rless.rs": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+    "src/brac.rs": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+    "src/ch.rs": "4334fb3bd0f7fa991135834cb66b00d782094b215b6ad6ed4f61f668cdfbc055",
+    "src/charset.rs": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+    "src/cmdbuf.rs": "a78d8d8fd859f46e004fde4a07678d391d24fe20ef70b0fedf42bde0db356df0",
+    "src/command.rs": "14066354f489fc8bbf57adfd64508586f0ee5c3660925600ffcbcb0eb113fe2d",
+    "src/cvt.rs": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+    "src/decode.rs": "c1521c60349aba72b0e96fd07b76278600632756fa8071a107093bfc3776fbfe",
+    "src/edit.rs": "e918db9a0b69ff556ccb93b2788204f231353381bf23abfa6f5ffa3e1f474cbc",
+    "src/evar.rs": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+    "src/filename.rs": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+    "src/forwback.rs": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+    "src/help.rs": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+    "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+    "src/input.rs": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+    "src/jump.rs": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+    "src/lesskey_parse.rs": "a6cc839cbd24bdbd550c56490a60224c3739fb713a1ddf818438d28a8cf541a7",
+    "src/lib.rs": "c07fcb87b346975a66be65eb1c3973e2b4096b527c10dd1e19cf0d429758645c",
+    "src/line.rs": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+    "src/linenum.rs": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+    "src/lmsg.rs": "34bec4c61b308b5e699e043a282a57175e993424c19afdf22efcc6df3efa3c0a",
+    "src/lsystem.rs": "20710ec5e6d72df6634bf01c4380bef2cd403c73d063a11039333bec512c28d9",
+    "src/mark.rs": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+    "src/optfunc.rs": "295ac094091579eadd3d8558975e012c6d564f1f22fb5c4b78ffe5b395532ab7",
+    "src/option.rs": "0f7c72fc3a85a02af62064ea13c5bb9c981cbde0c035f797c23f08108b41e327",
+    "src/opttbl.rs": "020c15b3233ac77bde699dc75ade24c6199448d956d5998fa3d6569d981c5a2d",
+    "src/os.rs": "0ddafbf288b132c4c88bdcd533f010db900fab7768d2a393f0f40fc0974d6796",
+    "src/output.rs": "ce8b7ff6c503042f497849fb17db68162d978aa21273326ff7e5bb1474fa32cd",
+    "src/pager.rs": "c5459e29029be397d7cc51f4b1b07a801c0b5ff4b0ebdba33a884ebbaa6d7db4",
+    "src/pattern.rs": "eda1e86cc14808ec0c6c29c97b21d8f61f5f11256afc93b42dab7607b9f645f9",
+    "src/position.rs": "86eedbe6b76173ca3efd8754438df93698dba841b0c3b778ccc1e473a6d15a63",
+    "src/process.rs": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+    "src/prompt.rs": "f2d2c149b8686f0c4374958333158bc31ad420c34952cc16b48d54a7f75b075d",
+    "src/runtime.rs": "6c8a9be8fdfe80375adc64edf5735f2415e33006d73f6436dea0a520d2dbb0ee",
+    "src/screen.rs": "edfe2aad92080feb8e5860b0549318821bf944be5d79bdad4d8a57bac52f10f5",
+    "src/search.rs": "8808b413f2750b458dbc29e5d66754981949cb964cbc2f783b76d10b41d7c796",
+    "src/signal.rs": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+    "src/tags.rs": "5f757a969fce4634665063e9a8d129a97e52c49c72f3a59a3c6c9e36b9283726",
+    "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599",
+    "src/version.rs": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+    "src/xbuf.rs": "1125bd2ae3b097581d2e6f6755cae96c82a2f77999252c0f3e0b746dd61011b1",
+    "tests/process.rs": "ca681b4430375ba4af37c32550cef158ef9398737387cdc1efc445ae5b5cdd00",
+    "tools/check.py": "40631b47f4101469ad3031d211bc8ef06f94d3574c7c3f01215e26db22513aa4",
+    "tools/compat/build_reference.sh": "8e97c2b1570ce3f9d94f4a5350bb19eb62d21ab781083e4ff20c7c514ba72dd2",
+    "tools/compat/catalogue.py": "23185a621cba6d281c4e381ee974a8a756189d9c272c8808e2ead066209ece19",
+    "tools/compat/check_candidate.py": "1a4e5099283f51c0bdc25ea81b5730af0577936c42fd13d58a8dc78bfaef35ad",
+    "tools/compat/extend_cases.py": "51b28a5776b80a4ac336e91bbf473730d57dbe3fbfdaa696fcf3f3d836178ec0",
+    "tools/compat/interactions.py": "f0b7f44ac48daea4c0222462c2d1e5f997796654290e3f7089c9b79b9bd1a4d8",
+    "tools/compat/link_cases.py": "aaca2da92d0c7dfde41a6863894699565763d6a3895bb3b9280e4c77befef44f",
+    "tools/compat/probes/fixed_clock.c": "27f68d792a64b1582682641482956b3d79980dec48a80f59ce379edbc12d95f5",
+    "tools/compat/probes/gnu_regex.c": "6cc25c2b7fa1477c9cfa0d98cea6046e30c61b7faf3f20d84472066c6f39bbb0",
+    "tools/compat/probes/gnu_regex.rs": "fc28c1d0f0e1e47204188c54099e5f9caac8f76de7e31434e33cc28c27104b54",
+    "tools/compat/requirements.txt": "4b1853c6871e77e83fd479ee4b2479aa2d8c26b0abe1635c6448217c778ef4ad",
+    "tools/compat/run.py": "a84d8d0e7538740acbb4e7fbbab9aec7a9a7d9386e106382d848b5b6e20e29e3",
+    "tools/compat/run_v2.py": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+    "tools/compat/stress.py": "02515a5c1478f73e839bdba616bf963ebd2d9d50d5600f5a6e34b6788925bc87",
+    "tools/compat/test_helpers.py": "05a1e02d704f41396e8c638fa5e72bde691fde019bc1ef976a0a4bd68842fd2b",
+    "tools/compat/test_integrations.py": "45fec57c1e45795b1ce3d450b41c93e61d548e297616736e2bcef130ab1a8395",
+    "tools/compat/test_runner.py": "25dfb47f778739edef6357a4e2f204a3189ed0522f66898360c9f84c874b88c0",
+    "tools/compat/test_suspend.py": "b7ab705de273c3c7817c16d07664cde50f60187a5441e05a6f16fe8bf1e7baea",
+    "tools/compat/validate.py": "ff3f57c2c0444d0a61a24b9abcfa7e688e3460d433c62c00719907ebf6fd446e",
+    "tools/package.py": "c82e97f06d773eb97cac4f31dd8f5d12e1c5cf91d9f76379f1d228393cf4114a",
+    "tools/port/c2rust-recursive-types.patch": "ad7142d3797ecaabd378fc27d371aebd391fa4bef84c535a676f992a82423409",
+    "tools/port/recursive_types.c": "9c5b0a0a6f415ef4ca21cdb1f5f1398724419da2fefdba69101c7c6838dca2e1",
+    "vendor/c2rust-bitfields-derive/Cargo.toml": "641f86a2c2db3e1fae17053b8d1ea9ce392ca5ef1e5b426b3e574a415bd43428",
+    "vendor/c2rust-bitfields-derive/LICENSE": "2bd73a6df34e41c531e4088a97e90a489b163926fb214ac90e9c172d124bc2f8",
+    "vendor/c2rust-bitfields-derive/README.md": "91c4c6d07121f4e2af545ec5e753a01d4f7a0d35027036ea406673fe994778da",
+    "vendor/c2rust-bitfields-derive/src/lib.rs": "a90f105f9c466b8a6b372d7d8f65024ceb5b34114b996fa12984508a878a55fa",
+    "vendor/c2rust-bitfields/Cargo.toml": "f38ec3294f99b2338a68902e36b2c8b692c3d42b8b2295de4a0b5047df23f5cc",
+    "vendor/c2rust-bitfields/LICENSE": "2bd73a6df34e41c531e4088a97e90a489b163926fb214ac90e9c172d124bc2f8",
+    "vendor/c2rust-bitfields/README.md": "3673e5c882b1e0878d5555e2c69e31a00578de8a5d65af21ba245e2e8849867c",
+    "vendor/c2rust-bitfields/c2rust-tests/bitfields.c": "f023775421255fa098c8ae8a05f3b331518796fd479d660049fe977adbe35703",
+    "vendor/c2rust-bitfields/c2rust-tests/test_structs.rs": "a7cbfb22bacb354101e8bceb8506f98dd7e11a2d6ec81ad8bb663e2c1e008502",
+    "vendor/c2rust-bitfields/src/lib.rs": "1c62567dc4a541ae6de8bc840f2eb322c014e7af26956c8d46b1e7e57a6134b0",
+    "vendor/less-helpers/README.md": "d3ca88616b485d01549bc20579b51eb16efe2504d66a62ef8b62dbb3b4faa615",
+    "vendor/less-helpers/less-osc8-open": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+  },
+  "source_manifest_sha256": "446c8097a85a157cec91295ff66958a6a34e4ed0ad4387f99fa1f4c223fdf202",
+  "reference": {
+    "path": "/home/john/Code/rless-env/less-reference/less",
+    "sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771"
+  },
+  "observer_sha256": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+  "frozen_corpus_sha256": "ab9224adb7ff6efa150620c6c2cd30f13edba0045486f3a23b409ecd4ba83851",
+  "permissions": {
+    "uid": 1000,
+    "euid": 1000,
+    "gid": 1000,
+    "resource_limits": {
+      "RLIMIT_AS": [
+        -1,
+        -1
+      ],
+      "RLIMIT_DATA": [
+        -1,
+        -1
+      ],
+      "RLIMIT_STACK": [
+        8388608,
+        -1
+      ],
+      "RLIMIT_NOFILE": [
+        65536,
+        524288
+      ]
+    }
+  },
+  "host": {
+    "system": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "machine": "x86_64"
+  },
+  "header_probe": {
+    "glibc_headers": "2.44",
+    "ncurses_headers": "6.6",
+    "pointer_bytes": 8,
+    "off_t_bytes": 8,
+    "regex_bytes": 64,
+    "regex_alignment": 8,
+    "regex_nsub_offset": 48,
+    "regmatch_bytes": 8,
+    "sigaction_bytes": 152,
+    "sigset_bytes": 128,
+    "termios_bytes": 60,
+    "stat_bytes": 144,
+    "sigint": 2,
+    "sigwinch": 28,
+    "sigpipe": 13
+  },
+  "headers_sha256": {
+    "/home/john/Code/rless/tools/safety/abi_probe.c": "22f60b830d06bfdea14a1178e81c5f7cc9efa972bee9d00a0bc8d08a1ae223da",
+    "/usr/include/stdc-predef.h": "383ff8bd7dcc87deefedd062637f4afe28f85f8be443beda8b41d15e45ef1679",
+    "/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stddef.h": "868352506950054491b9c76a4e2814f4f3601d227d3dea62a3e75875f327f2c1",
+    "/usr/include/stdio.h": "7b9d4ea5a3d988998113785f389c635428dbfd25f503197d81688ec9ef0149fa",
+    "/usr/include/bits/libc-header-start.h": "9ec1af1a58b5d6431708a7ca71ef65944622921ca6fce878ae2ab486f3145296",
+    "/usr/include/features.h": "5ac21294ba6a85013ead693eba6b5587ddbb8afd6922e4fb351e858b14833a12",
+    "/usr/include/features-time64.h": "c7c33cddd4ffbbca1eb0de042131a51201a42f29139820d0a36c1e1dd0d16ba5",
+    "/usr/include/bits/wordsize.h": "948177c0fc84c4746588f62252029880ec4c6f88b743ba55d952f980303ebfbb",
+    "/usr/include/bits/timesize.h": "9d075412fa9c84e68a59e22944daad36905cb2eb19c3a7613d652b85ece4f207",
+    "/usr/include/sys/cdefs.h": "a5a71b01109709190529d0c3532751869d05db6a5e8ce01c8c73229b797cfb83",
+    "/usr/include/bits/long-double.h": "9b3fe370666b72e74d2c19c9fa44bd18a72f671e5ca24fbf4cca6a29b114459d",
+    "/usr/include/gnu/stubs.h": "ef444295a0a9e8f5c40918399a00cc91ba0bd79774110cdf6e652baa6cfadb2e",
+    "/usr/include/gnu/stubs-64.h": "3836bee19ddace5e06e967be88015d8492335daa08ce39a236618f520ccc40db",
+    "/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdarg.h": "173a81bfbe88a2da5ed5d238e14e0eaca61b090ee6d7b12b5f9614daeea21600",
+    "/usr/include/bits/types.h": "3fcf066dbf9fac9c5a15ff6327ca6a437e955e9aa571de1c3347cd0f4da4f93d",
+    "/usr/include/bits/typesizes.h": "a52fb9d6cca3d305618b036183fe11fbb1789afea64f5436197bbb058e5edf0f",
+    "/usr/include/bits/time64.h": "c502af2b2d265699b53ccb52e7a20521ab3ec4d346deb1366f494d1e22354ff9",
+    "/usr/include/bits/types/__fpos_t.h": "603e58ab31ed75b7e0ab09a2ca94e99955f7fbc63310466321ce27c906227eb4",
+    "/usr/include/bits/types/__mbstate_t.h": "c561df72d5b987ccbd022059fdb1bcb6899c3e94b403997a0576ef3e1afb0f94",
+    "/usr/include/bits/types/__fpos64_t.h": "8afae3abf006beb39fd9d4d4bae38745cdf08a91e6217ddf25833c8d4b04751b",
+    "/usr/include/bits/types/__FILE.h": "26c909942e8a6bc82725e9c402f393aed9e32d94190257ddf71e1b5f819b4e5e",
+    "/usr/include/bits/types/FILE.h": "37515f78be386f2edad4746f2947c928f480728c56d9a94e25302ebbdaef3c96",
+    "/usr/include/bits/types/struct_FILE.h": "5e9432ad4ca91afc6849cc610093b81721f425e24f38bb60e756ffa37a09a075",
+    "/usr/include/bits/types/cookie_io_functions_t.h": "68dd9728ed4cb7d36d745e4131588a700fd2071f7218a93637a6d4035df4dd4f",
+    "/usr/include/bits/stdio_lim.h": "7f6274022abc6b0a4970c9c78280abdf548660656e76f066949fedbfe6445920",
+    "/usr/include/bits/floatn.h": "00524c02db9c4aa6dce6cdee90183bfca40fb254a93f0ea22a397f3355711d1f",
+    "/usr/include/bits/floatn-common.h": "8d5c5517e58c6d7ac4c915037f3af518fadc41ceb47999ee3387e4fb91cb4eaa",
+    "/usr/include/regex.h": "ae656ea6032f59d670c8c1055e1eebcb93ddbc482fd26b333ed529d6a4784b97",
+    "/usr/include/sys/types.h": "25d29436b206e2b36e3fbe7057fa8b9822fa9f0f7823659c489a8fc71c8cd1db",
+    "/usr/include/bits/types/clock_t.h": "81e60e8a8d99b28bc723c14b156d7f7fc8ff663d98a857a3f5aea90431f577e3",
+    "/usr/include/bits/types/clockid_t.h": "dcd64d184855b245e5c7acf21910a0aaca590f1faf094e400da5d30551d11eb0",
+    "/usr/include/bits/types/time_t.h": "d1cc45e24a80009117f61ee4ae9cae5d12f69f38d691e0a933f989f7a1d27bb0",
+    "/usr/include/bits/types/timer_t.h": "d96a2452da0d933941273d11d1048ea525f033306892835b0a7a0999b13853aa",
+    "/usr/include/bits/stdint-intn.h": "ed15fd5be7a39b8145b2beb08fd4a316bb72f0bd5ebca707399b4f5b0c0bf304",
+    "/usr/include/endian.h": "5eef32c1a3965adcc0f4a838c8b631f4f42541e0de1692bb424de75d22b656ff",
+    "/usr/include/bits/endian.h": "112b43d5b891adcb526fbbbd582625d1d92d68612f8251dc2ee5b47ba488899f",
+    "/usr/include/bits/endianness.h": "659a7060004eda113671a38852c4d1e9cb97a35932bcd1d8540f98c09c180747",
+    "/usr/include/bits/byteswap.h": "6462236f7c0743d1fd371e12fd318c7f65595604744bbd564d2942096e96fd07",
+    "/usr/include/bits/uintn-identity.h": "9546f287d641234edb1dc1082032b7256f9dae76b2244cef63d0769d5b4d536b",
+    "/usr/include/sys/select.h": "9becffb0018558dd368e025bffb8cb75d6b531cb8d18806e859172991a41f1a5",
+    "/usr/include/bits/select.h": "e879dad16c60061ac0ef11e917ddcb39b0ccb6fa082f7033479c3ce96fc18eef",
+    "/usr/include/bits/types/sigset_t.h": "3db5ded9d98a694e8c7196a06690b2e816ec6bb82689940d281f6504533f37e1",
+    "/usr/include/bits/types/__sigset_t.h": "05291a7d38bb1d0da1ed01c09fe85fa2b1f4d5bc708e06bb930efec672db08d5",
+    "/usr/include/bits/types/struct_timeval.h": "6585bf0dcd3d5a780d6246da841031f9b314ceb7400a3210f34815f5da93b1fa",
+    "/usr/include/bits/types/struct_timespec.h": "798e773d0c7f3796033c043910db2b093d1e43116c4b3d2cf3be85f8c4304cf1",
+    "/usr/include/bits/pthreadtypes.h": "aa3af8683d56aa08f5fcedf866212c48f227f1f9f7045944f7977c0ad58ffe81",
+    "/usr/include/bits/thread-shared-types.h": "2c1bcabe7b6b7e9192feb703d888f4e871749070b8fb30f96878386e869ff21b",
+    "/usr/include/bits/pthreadtypes-arch.h": "1e4016c31b2b5412c4984f7f12f6659cf93ec5c55cad21dfb0ecf2813ba3116c",
+    "/usr/include/bits/atomic_wide_counter.h": "7d508b02d7ed3a94c1a556779fdd590fd2e0668a34b0d736e40eab6df7d60154",
+    "/usr/include/bits/struct_mutex.h": "dca410963a519c04fa3ed4175b13d0baaf20c22723c67414cf2433b00237d1e3",
+    "/usr/include/bits/struct_rwlock.h": "309124e37fac2b64a00fd0a93973fef769943cfeb36e8fc8678f83f705635255",
+    "/usr/include/signal.h": "0e8d59e4c063f557872f9af1e02ee74e1adb0f78b6f52c58b40d032b13e189b5",
+    "/usr/include/bits/signum-generic.h": "b25a7bcc4f873e2c6cd95efa16806946e66a1297d7c8c6c1e6362422473281d5",
+    "/usr/include/bits/signum-arch.h": "a48a6dfb740730af6bb1960468c61b24688513d76fc8f8106145718d5074818b",
+    "/usr/include/bits/types/sig_atomic_t.h": "8c44b91c2eb6e509905e1becec6b98f8ac006709bfa5d85d86e34a46eb9013cc",
+    "/usr/include/bits/types/siginfo_t.h": "88b1392b88af3a08d908866f4e9c5650c5cddb0c8e021b0a3f8293cef6616feb",
+    "/usr/include/bits/types/__sigval_t.h": "a377397164665009dd36a21630faade43a37a9c0f1fd7d3bec09305ae29a87f5",
+    "/usr/include/bits/siginfo-arch.h": "0839bdc7af291182ff9822a7b6419659fb26a49af5e4264857a71af4ccb12213",
+    "/usr/include/bits/siginfo-consts.h": "35baefa3a44cc71c0446cf09c90daa3a099f8f5584f802d69288e64a08851969",
+    "/usr/include/bits/siginfo-consts-arch.h": "56e019330b859cc4e28af30854df4d29be120ec4bff74849301bb3c40c9f19ca",
+    "/usr/include/bits/types/sigval_t.h": "7d94a894bed0b9490967e8dbcd53725c0f2af9559e58d4b19bd14d3707974ee3",
+    "/usr/include/bits/types/sigevent_t.h": "7125083b8096dd146e6498a61f38bf3bc7215c1c9237e92469550bb355545bab",
+    "/usr/include/bits/sigevent-consts.h": "83996c23ffac8e30fc342b4d3e65d0c4aa875220954fded856fde15084d96c85",
+    "/usr/include/bits/sigaction.h": "9ea3eaaf51055ef3a49117b554fb3711105e1f7c23c4cd4674deb51197242daf",
+    "/usr/include/bits/sigcontext.h": "2c74b178ee498e58a04d411362ae0b2ffc24b50c9244b78106d5ba03799407be",
+    "/usr/include/bits/types/stack_t.h": "d154a3e12ce11790567af28ff14faaf2159cd15f59f0758ad5d35670ef65e4cf",
+    "/usr/include/sys/ucontext.h": "99f04327182d994f3b479b5d920de12f6647c885ceb3a3dc1162ad2f78889363",
+    "/usr/include/bits/sigstack.h": "c4da1a44ff6215753c41c5a5acca85c990797f58e222e0ecc65a55a5dde167a0",
+    "/usr/include/bits/sigstksz.h": "331575588642f73713b7d63b2db1a05ebb553ef57ef49cb673ae43735b5a4b73",
+    "/usr/include/unistd.h": "ba5298d74a8f21968b08d1a59ed493c63e8344198ab03df127e8015428a109ea",
+    "/usr/include/bits/posix_opt.h": "b2825f0ce2b045cff606a35ca14c2e47d990d94cf0092c9a8c7d25042feaff83",
+    "/usr/include/bits/environments.h": "26080a9c9e54409330a6e05c9022e03d97c066ea0412fb5a2d04e5f0e527f441",
+    "/usr/include/bits/confname.h": "dbed2d3724ad68fac2eeb79b553ef113c008c4f3f787e1acec1b874802497182",
+    "/usr/include/bits/getopt_posix.h": "660e8e89f9b4df5722c3ac2d57320bdf1c1fafcff17db9f0e57c681fcc8d3a79",
+    "/usr/include/bits/getopt_core.h": "238ff9f16662d515d6b191662965bb27e208b04dc929d04a69399de41bcd7d45",
+    "/usr/include/bits/unistd_ext.h": "40f5c4a876a8cd22796eb07359505082515db6ef4540b07be0e88c5925579d8f",
+    "/usr/include/linux/close_range.h": "54f02dee64fba028529c5265273d23a96629f3217d6abc31574ef7cce5a63f70",
+    "/usr/include/bits/ss_flags.h": "a827cdfde7b90b3c6ad52621410f0a9e4a5d4456d23877d22c471cd7035b9cdb",
+    "/usr/include/bits/types/struct_sigstack.h": "598f147c438e07a3d6c4bf6263e57cabf13cc5894d39c1b8df138e269621423c",
+    "/usr/include/bits/sigthread.h": "7fde3083b4f6d96258a01a5ff7d7d6aa9f78f370f9617bd6b63a674e81330f82",
+    "/usr/include/bits/signal_ext.h": "217a18aa8da45f4bbfa870650e2b3bc85fa00019c2d7d5eba80be57df0debae3",
+    "/usr/include/termios.h": "33da7ec0b7075ddb0bffaed73e7b2d145b151e49f3eac67e7c7bc4dcc9d444be",
+    "/usr/include/bits/termios.h": "24efa41491ae8a25de046b8c9e0a4712b9daf078728dc2b6d2d1219f2f84d1de",
+    "/usr/include/bits/termios-struct.h": "f7edd0bf95ee7c2a565f665caeadbcaee598261c2ecbae40f4be3804d6b99ca2",
+    "/usr/include/bits/termios-c_cc.h": "2e3c00af6fa78d495b59d44f27c89bf69832b387316f4285bea926314fb6d72a",
+    "/usr/include/bits/termios-c_iflag.h": "c8715623f85bec3ff55705530dddae5e91ebbe75a5132b523d128d73be3ba254",
+    "/usr/include/bits/termios-c_oflag.h": "5b02d5c4c8d86d54bdfa835da3248c506e76c558802a4a56b6b6730add7c95f2",
+    "/usr/include/bits/termios-c_cflag.h": "86d913bda3d7277631b3b691cbc85a3f4b1c8255d6cc71362b1f390e767082e1",
+    "/usr/include/bits/termios-cbaud.h": "709ebc59f1f53c60fb55078221ede658ac547111f47c3aa9829f02b62bf52a74",
+    "/usr/include/bits/termios-c_lflag.h": "7d514272fff476d921e1c65d5b1771a985486d2fcbfd032eb46fa51a19f55ea6",
+    "/usr/include/bits/termios-tcflow.h": "73d8f701bb3eb68413c10e684c7ef2a3472d97948db16f1a3526f39ac41c371d",
+    "/usr/include/bits/termios-misc.h": "602338a912d55801d3ddf52c6093366744184c8bbf39e03a00d388b37b78c236",
+    "/usr/include/bits/termios-baud.h": "4e87e73ca12edb2cdc2af1f900a587a0fa9365603dfaa95d1a05b520a8d5a4f9",
+    "/usr/include/sys/ttydefaults.h": "23dbc1caef6d19508707ffb8aef4498beba70340c87440dfafcf4f3c9dd6589f",
+    "/usr/include/sys/stat.h": "68bd6f632451258448ae3563612cf100059b723c3690850acdb0aaf4d200d895",
+    "/usr/include/bits/stat.h": "13945ae82e81d5433007b1da37c5a4a98ecd3906e58e6e16abf8880c05e89061",
+    "/usr/include/bits/struct_stat.h": "b19478cbd3055193a7b184d8f8b7e36b2ebbf637c660c68b184603b247e17f6f",
+    "/usr/include/bits/statx.h": "1bedf57c04aebf74f2116bfde1abf0e78b8e203c31d7a37c48b3401f5f9c5941",
+    "/usr/include/linux/stat.h": "32bb5a3e3064a8c83db9666783fa1196c606580a179cd9c8f993203eddb4af73",
+    "/usr/include/linux/types.h": "03cba5fa5bd26f706db74707d3175d7f931b16a4c2a13b958ab8df71ff50cd73",
+    "/usr/include/asm/types.h": "b6bdcd528bce555b2ecb58e8a1624e3e13e09312c31318023c4e86b957e2b01f",
+    "/usr/include/asm-generic/types.h": "09b4477d655ddd2c5657e83a0761700d6706f012c7365f310a6b0a6696936a10",
+    "/usr/include/asm-generic/int-ll64.h": "d5812a5b146927c557f106dd1648794b3b433d4e37e26410abbbb351837a649b",
+    "/usr/include/asm/bitsperlong.h": "8ef5efeb3f25ae47ce03ba892f5caf77631b1257715fc12de72c21e61db17e43",
+    "/usr/include/asm-generic/bitsperlong.h": "3a8e58cc67210c5a2b3bf24c84a96328e974dfe94206c74e5478d3142c991cf7",
+    "/usr/include/linux/posix_types.h": "bc68636a383418f235d3457e4b21cf27cefc7c7f3edea4c1f6706f1018db196f",
+    "/usr/include/linux/stddef.h": "8de0ac8eae3695cbf769f27069f44dd622f9bb4ba2ca8e35e4af8c2a14f0bf5f",
+    "/usr/include/asm/posix_types.h": "983090c7e5e7eaff27114ec216889a8ad26e40ad8fbb78b8ae6c09391dc61543",
+    "/usr/include/asm/posix_types_64.h": "5cdabc01dac0a3e9731ac16353210a615ca44e85b6ec9eafd2e79206e0b26c76",
+    "/usr/include/asm-generic/posix_types.h": "f9b2bcd020a7041ca71acdc66ed04113d37d4141eba74a26f9a9fd81286c14fe",
+    "/usr/include/bits/statx-generic.h": "57a7c1dbc6b85c8e7197ca59aaf4a14a8fb1b864192257795e618181fd3c82f3",
+    "/usr/include/bits/types/struct_statx_timestamp.h": "6744471600ad2bfc67f2d38c8cef2f60cdac905f199dfd397acee12780606696",
+    "/usr/include/bits/types/struct_statx.h": "80eddd8c371d25a096f0a26ead003e172ce2bfeb65469a881fd6daba178e7998",
+    "/usr/include/curses.h": "4ad06821dd27b5184324299ca765d6b2b8cc2c00dcd7acf1663fa159d71a9eed",
+    "/usr/include/ncurses_dll.h": "8ce112a66482f18fa5e0378b46a4f028b21a80f8e6c43815c562ad0d6b7ed727",
+    "/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdint.h": "64ab730bb09eba38f01a62174fb8371ef281778ac33f141a6fa4217a9b39466a",
+    "/usr/include/stdint.h": "fbd21c7a64b876eddd4e179172fb58a4921fd616d103b8107a28a54cf687289b",
+    "/usr/include/bits/wchar.h": "9a3e6e246753da1e142227f6a81a9d0064cbb3189073c367263a491b4044373f",
+    "/usr/include/bits/stdint-uintn.h": "f0d1ad8c0effab436bebd7a4c177a28a567f0faaae69877e9ccbe3d631a7cd68",
+    "/usr/include/bits/stdint-least.h": "24c527a005947517a1d3032fdf161577e5a62184f4419066a2112a79ab2da788",
+    "/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdbool.h": "f2a112e8b2128fb1d76e7c0b625cec8760955ebeae5cdf6b419ccf0c6d62768f",
+    "/usr/include/wchar.h": "b8279993675f508cd2dd46b624b7ac536c2890d81a60b573bd7883627e3bab2b",
+    "/usr/include/bits/types/wint_t.h": "7321a39e4baa04e5d730bfe4e52d00ce82f2ae62dbd8292a4a6a3073b6ae3593",
+    "/usr/include/bits/types/mbstate_t.h": "c0608830973c4e1a71219e477b470b7ed77b211dc870410776ec13a1b7bb759a",
+    "/usr/include/bits/types/locale_t.h": "8675fb9fc99a2763f278421e4adf57ecc8838ac5668b2db3cac52fabb440d802",
+    "/usr/include/bits/types/__locale_t.h": "293f874c654c206b3f18021510b2612487177d9010a333b9313991ae1877fc96",
+    "/usr/include/unctrl.h": "0619493e74ccfbbf9af89cb7ac87aeed2ad4363f774212f22b686e8b359b34f5"
+  },
+  "tool_versions": {
+    "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)\nbinary: rustc\ncommit-hash: 1159e78c4747b02ef996e55082b704c09b970588\ncommit-date: 2025-09-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.90.0\nLLVM version: 20.1.8\n",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)\n",
+    "cc": "cc (GCC) 16.2.1 20260810\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "linker": "GNU ld (GNU Binutils) 2.47\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) a later version.\nThis program has absolutely no warranty.\n",
+    "glibc": "glibc 2.44\n"
+  },
+  "native_verification": {
+    "started_at_utc": "2026-10-24T16:56:31.744797+00:00",
+    "passed": true,
+    "steps": [
+      {
+        "name": "format",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "rust-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "rust-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "observer",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "corpus",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "negative-candidate",
+        "returncode": 1,
+        "expected_returncode": 1,
+        "passed": true
+      },
+      {
+        "name": "acceptance-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "acceptance-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "reference",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "integrations-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "job-control-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "helpers-debug",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-debug-712",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-debug-20261023",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "integrations-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "job-control-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "helpers-release",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-release-712",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "stress-release-20261023",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "clean-install",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      },
+      {
+        "name": "acceptance-installed",
+        "returncode": 0,
+        "expected_returncode": 0,
+        "passed": true
+      }
+    ],
+    "binaries": {
+      "debug": {
+        "path": "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/target/debug/rless",
+        "sha256": "f1edb579e5886fcd4afe048d265c9ef7f0bfbae45b53394699c4f18b77ca39e7",
+        "companion_sha256": "cd0e7004892bcacbf5c7ad5c8d39e2a488fa3551021eb2e2ae4cb260d67de527"
+      },
+      "release": {
+        "path": "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/target/release/rless",
+        "sha256": "4e51d6e6e9e51f232fbecd1e6da68c53f22ca1c0fdfa52621e3dd3a3d17d5268",
+        "companion_sha256": "941cf9236811410210248cc1d6ce9015ef9ea075393a82f30d5cba507fff5282"
+      }
+    },
+    "build_and_test_inputs_sha256": "ec8d75ab7342e76b4bf90c60ab0644cf3231959c73833bae5408084729b19961",
+    "helpers": {
+      "osc8_sha256": "926edda4f2720965c4321b03b987f284f25fad966837a57f38cd4b0000565d11"
+    },
+    "finished_at_utc": "2026-10-24T16:59:13.021036+00:00"
+  },
+  "acceptance": {
+    "acceptance-debug": {
+      "binary": "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/target/debug/rless",
+      "sha256": "f1edb579e5886fcd4afe048d265c9ef7f0bfbae45b53394699c4f18b77ca39e7",
+      "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "observer_sha256": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+      "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      },
+      "executed": 809,
+      "passed": 809,
+      "failed": 0
+    },
+    "acceptance-release": {
+      "binary": "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/target/release/rless",
+      "sha256": "4e51d6e6e9e51f232fbecd1e6da68c53f22ca1c0fdfa52621e3dd3a3d17d5268",
+      "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "observer_sha256": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+      "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      },
+      "executed": 809,
+      "passed": 809,
+      "failed": 0
+    },
+    "reference": {
+      "binary": "/home/john/Code/rless-env/less-reference/less",
+      "sha256": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+      "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "observer_sha256": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+      "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      },
+      "executed": 809,
+      "passed": 809,
+      "failed": 0
+    },
+    "acceptance-installed": {
+      "binary": "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/installed/bin/rless",
+      "sha256": "4e51d6e6e9e51f232fbecd1e6da68c53f22ca1c0fdfa52621e3dd3a3d17d5268",
+      "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "observer_sha256": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+      "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+      "families": {
+        "options": {
+          "executed": 230,
+          "passed": 230,
+          "failed": 0,
+          "errors": []
+        },
+        "behavior": {
+          "executed": 467,
+          "passed": 467,
+          "failed": 0,
+          "errors": []
+        },
+        "interactions": {
+          "executed": 108,
+          "passed": 108,
+          "failed": 0,
+          "errors": []
+        },
+        "integration": {
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": []
+        }
+      },
+      "executed": 809,
+      "passed": 809,
+      "failed": 0
+    }
+  },
+  "packages": {
+    "archive": "/home/john/Code/rless/compat/.runs/m0-baseline-record/packages/rless-0.1.0-linux-x86_64.tar.gz",
+    "sha256": "b96e978ce73eda7219fc6d99f83f7b0843f5348b38050782d87d7cfa65a8859d",
+    "source_archive": "/home/john/Code/rless/compat/.runs/m0-baseline-record/packages/rless-0.1.0-source.tar.gz",
+    "source_sha256": "b825e2545e65dde70f4da61b6fd98438f16ef594d4c1030d73d46b3fb5f6c32a",
+    "extracted_smoke_tests": "passed"
+  },
+  "source_acceptance": {
+    "binary": "/home/john/Code/rless/compat/.runs/m0-baseline-record/source-rebuild/rless-0.1.0-source/target/release/rless",
+    "sha256": "b2530b0c13d938e17c856291215e7eea921737935c2f3341f1b024a03d9672fa",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "observer_sha256": "f38cd18b9056c49a2f6d163e9b5549af7d87bd093f8b0bd1f8142f71d3cf15ef",
+    "observer_revision_sha256": "a8c859be689f2acf875502e361e11771748674d6f86f37ede11562ab2c3de9a9",
+    "families": {
+      "options": {
+        "executed": 230,
+        "passed": 230,
+        "failed": 0,
+        "errors": []
+      },
+      "behavior": {
+        "executed": 467,
+        "passed": 467,
+        "failed": 0,
+        "errors": []
+      },
+      "interactions": {
+        "executed": 108,
+        "passed": 108,
+        "failed": 0,
+        "errors": []
+      },
+      "integration": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "errors": []
+      }
+    },
+    "executed": 809,
+    "passed": 809,
+    "failed": 0
+  },
+  "native_libraries": {
+    "reference": {
+      "ldd": "\tlinux-vdso.so.1 (0x00007f4a55394000)\n\tlibncursesw.so.6 => /usr/lib/libncursesw.so.6 (0x00007f4a5529b000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007f4a55000000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007f4a55396000)\n",
+      "libraries_sha256": {
+        "/usr/lib/libncursesw.so.6": "7498a0b0f75deb5417e109d1853679f1a6b201e52e03b247c914fec0a36e3a5b",
+        "/usr/lib/libc.so.6": "02c8c3d06180beee9c7d0392aa85736c7d19f274a81e7f8f0b3d9e28e0641524",
+        "/lib64/ld-linux-x86-64.so.2": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757",
+        "/usr/lib64/ld-linux-x86-64.so.2": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757"
+      }
+    },
+    "debug": {
+      "ldd": "\tlinux-vdso.so.1 (0x00007fe8fefdd000)\n\tlibncursesw.so.6 => /usr/lib/libncursesw.so.6 (0x00007fe8fedce000)\n\tlibgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007fe8feda1000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007fe8fea00000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007fe8fefdf000)\n",
+      "libraries_sha256": {
+        "/usr/lib/libncursesw.so.6": "7498a0b0f75deb5417e109d1853679f1a6b201e52e03b247c914fec0a36e3a5b",
+        "/usr/lib/libgcc_s.so.1": "e618cb9c90c2eb3a1dad1cfea5b6c1eebcf2e799ad805976f4ae47bdd61c716a",
+        "/usr/lib/libc.so.6": "02c8c3d06180beee9c7d0392aa85736c7d19f274a81e7f8f0b3d9e28e0641524",
+        "/lib64/ld-linux-x86-64.so.2": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757",
+        "/usr/lib64/ld-linux-x86-64.so.2": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757"
+      }
+    },
+    "release": {
+      "ldd": "\tlinux-vdso.so.1 (0x00007f5fa7003000)\n\tlibncursesw.so.6 => /usr/lib/libncursesw.so.6 (0x00007f5fa6e5a000)\n\tlibgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007f5fa6e2d000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007f5fa6c00000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007f5fa7005000)\n",
+      "libraries_sha256": {
+        "/usr/lib/libncursesw.so.6": "7498a0b0f75deb5417e109d1853679f1a6b201e52e03b247c914fec0a36e3a5b",
+        "/usr/lib/libgcc_s.so.1": "e618cb9c90c2eb3a1dad1cfea5b6c1eebcf2e799ad805976f4ae47bdd61c716a",
+        "/usr/lib/libc.so.6": "02c8c3d06180beee9c7d0392aa85736c7d19f274a81e7f8f0b3d9e28e0641524",
+        "/lib64/ld-linux-x86-64.so.2": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757",
+        "/usr/lib64/ld-linux-x86-64.so.2": "f5e11cc62f8f2c24dff532982559f4303dba3b17e7450551372a88c8e7ea8757"
+      }
+    }
+  },
+  "terminfo_xterm256_sha256": "2473ac0899875315d19e185c2177a906966032934ec31b939a0eafd264a63a6d",
+  "glibc_241_safety_evidence": "not-verified; requires a separate environment",
+  "diagnostic_logs": {
+    "/home/john/Code/rless/compat/.runs/m0-baseline-record/abi-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/john/Code/rless/compat/.runs/m0-baseline-record/abi-probe.log": "f01fe17881383c8ddcda1969bfac3835069534a700b076b12dfd79185581c462",
+    "/home/john/Code/rless/compat/.runs/m0-baseline-record/package.log": "bfb424766171aab35994eca8f12c5e4bc6daf8fc1fa783658d722ece17e50211",
+    "/home/john/Code/rless/compat/.runs/m0-baseline-record/source-acceptance.log": "972e6b18880ca655318e3662f3ba2e8482f52463a1c55d10b5d309de7ca2dad6",
+    "/home/john/Code/rless/compat/.runs/m0-baseline-record/source-tests.log": "79bb644f37876ffee748e673692e58e348096dd8b89cc58bd5dd0019daed96e9"
+  },
+  "native_logs": {
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/acceptance-debug.log": "6a9bbd3362338ff5f2c8d11537a5ef71cd3c4a3029337cc5f86cbb9d02669f09",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/acceptance-installed.log": "fd62541454b0177588dfacf0fd909f8e970fe6bad90529baa8d0c3bf7035a24a",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/acceptance-release.log": "fda9dc35fcc58ad592e56b86854ebf9188125c75bd957bcd5b1074c8d2b9ff11",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/clean-install.log": "fccca7e0653d9d29e404a21bc82ff913f83140bc5cc7cefd93ecb74ed6029d13",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/corpus.log": "64137592624fdd09071135c8466b830456272a198ba508ddc2beefa47e87c1e8",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/helpers-debug.log": "e7b3a4f9818ed247fd288881a09fcbe4bbd1564a1eaacef439a015f105c71606",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/helpers-release.log": "e7b3a4f9818ed247fd288881a09fcbe4bbd1564a1eaacef439a015f105c71606",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/integrations-debug.log": "9bf1534222bbc84cc9b0189654389f9409afd7c71d8af31d9d166dc8cf56acd3",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/integrations-release.log": "9bf1534222bbc84cc9b0189654389f9409afd7c71d8af31d9d166dc8cf56acd3",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/job-control-debug.log": "f8a0d6fcb95d104f0fcd743203939255ccc791b61708b2b9b9bf32bd13b925f6",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/job-control-release.log": "f8a0d6fcb95d104f0fcd743203939255ccc791b61708b2b9b9bf32bd13b925f6",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/negative-candidate.log": "c31c4ec95fad77a942e0c4d72b65948cd03c716a51ef3dfd387dfcd14483461e",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/observer.log": "8813707c68aefdf0d7216e86f1a7e0ee823b4f90687aed7c39ae97176e154e86",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/reference.log": "22c63c530e4b4a9e5b4033e3da5ab410787194972660922c97586eae76d84a8e",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/rust-debug.log": "d1b74938aac2783356f48427effe6877bb9b540dd8c22c59096984e0d6376e06",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/rust-release.log": "28237b0b92063d4791af430264c2ea8c386a9cd40c9ce4190461d97b0c01332d",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/stress-debug-20261023.log": "664ba3c84914cf0b92791e01eadf90963be551a5d759b844a97a4fec51f42ba9",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/stress-debug-712.log": "c0c28d1f0c51bd1150079c7df76456f64f14c225d04026ff4e7f4aa596e4dbbb",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/stress-release-20261023.log": "aefeb7c3087fc4fc5ba457f91bb2d0015e42b773ca03440b7408bff3bb8801ef",
+    "/home/john/Code/rless/compat/.runs/m0-start-baseline/source/compat/.runs/verification-qrzt_uv3/stress-release-712.log": "ed4a3ebe30c40688c7ff38cf5db79983a51a0673e515fba879616c5ab2c37fea"
+  },
+  "runtime_safety_verified": false,
+  "finished_at_utc": "2026-10-24T17:08:04.772122+00:00"
+}

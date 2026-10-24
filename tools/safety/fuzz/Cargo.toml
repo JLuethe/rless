@@ -1,0 +1,27 @@
+[package]
+name = "rless-m0-fuzz-controls"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.10"
+
+[[bin]]
+name = "rollback_model"
+path = "rollback_model.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "rollback_fault"
+path = "rollback_fault.rs"
+test = false
+doc = false
+bench = false
