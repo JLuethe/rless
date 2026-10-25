@@ -1,9 +1,9 @@
 # M2–M5 specification and preparation checkpoint
 
 Recorded 2026-10-25 on `implement/m0-review-faults-verification`, resuming from
-`b648c2e`. Specification refinement committed as `3d1874e`; the commit containing
-the implementation/evidence is the next checkpoint. Later documentation records
-its exact identity. No merge or release. **Full M2–M5 is not complete.**
+`b648c2e`. Specification refinement is `3d1874e`; implementation is
+`796305ba51dcabbab6081f9895745734a90c1de7`. Later documentation checkpoints
+change evidence/handoff text only. No merge or release. **Full M2–M5 is not complete.**
 
 Read [the refined implementation spec](../../spec/safety/m2-m5-implementation.md),
 [19-packet manifest](../../spec/safety/m2-m5-plan.json),
@@ -70,6 +70,16 @@ records were retained only after all their original source/evidence hashes were
 checked unchanged. Eight new clear author records cover isolated preparation.
 The newly retained legacy crate root accounts for one extra incomplete entry;
 these counts do not describe new bugs or production migration completion.
+
+The committed component also passes debug/release tests in the pinned glibc 2.41
+rootfs with read-only image/toolchain mounts, dropped capabilities, invoking UID,
+no network and isolated work/temporary directories. Its source archive, image,
+commands, original statuses and logs are bound in the compact record. This does
+not supply glibc 2.41 ASan evidence. A separate
+[Codex review of 796305b was requested](https://github.com/JLuethe/rless/pull/17#issuecomment-6395106197)
+and [completed without major findings](https://github.com/JLuethe/rless/pull/17#issuecomment-6395122436).
+This diff receipt supplies no formal phase/native-invariant approval. No local
+campaign or external review remains running at this recorded checkpoint.
 
 ## Entry gates and remaining work
 
