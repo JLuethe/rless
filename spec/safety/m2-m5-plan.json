@@ -1,0 +1,585 @@
+{
+  "schema_version": 1,
+  "refinement_version": "1.0.0",
+  "safety_specification_version": "0.2.0",
+  "baseline_commit": "b648c2e47fc82ed9ee3da26be02eabe654c01fec",
+  "scope": "Detailed remaining M2\u2013M5 work; preserves prerequisite gates and campaign floors.",
+  "production_integration_authorized": false,
+  "entry_gates": [
+    "C0-GATE",
+    "C1-PROTO",
+    "M1.4"
+  ],
+  "preparation": {
+    "scope": "Isolated pure Rust components and verification infrastructure; not linked into either production executable.",
+    "source_root": "src/safe_core",
+    "isolated_manifest": "tools/safety/core/Cargo.toml",
+    "forbid_unsafe": true,
+    "direct_native_imports": false,
+    "counts_as_production_migration": false,
+    "counts_toward_final_campaign_floors": false,
+    "units": [
+      "fallible-bytebuf",
+      "checked-coordinate-domains",
+      "owner-bound-generational-handles"
+    ]
+  },
+  "packets": [
+    {
+      "id": "M2.1",
+      "title": "Introduce fallible byte ownership",
+      "integration_prerequisites": [
+        "M1.4"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-001",
+        "SAFE-MEM-003",
+        "SAFE-MEM-007"
+      ],
+      "current_paths": [
+        "src/xbuf.rs",
+        "src/cmdbuf.rs",
+        "src/line.rs"
+      ],
+      "implementation_units": [
+        "Owned ByteBuf with fallible reserve-before-commit",
+        "Validated self-copy and staged replacement",
+        "Explicit owned NUL-terminated conversion",
+        "Complete xbuffer caller/alias migration after M1.4"
+      ],
+      "exit_gate": "Converted leaves forbid unsafe code and have no untracked aliases; unfinished core callers remain explicitly open.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M2.2",
+      "title": "Introduce checked coordinates and stable IDs",
+      "integration_prerequisites": [
+        "M2.1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-STATE-002"
+      ],
+      "current_paths": [
+        "src/position.rs",
+        "src/ifile.rs",
+        "src/mark.rs",
+        "src/linenum.rs"
+      ],
+      "implementation_units": [
+        "Distinct checked source/index/line/display types",
+        "Checked native narrowing and >4-GiB file offsets",
+        "Owner-bound generational handles with permanent retirement on overflow"
+      ],
+      "exit_gate": "Invalid values cannot become indexes or revived handles; valid wide offsets preserve existing semantics.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M2.3",
+      "title": "Convert byte parsers and companion state",
+      "integration_prerequisites": [
+        "M2.1",
+        "M2.2"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-004",
+        "SAFE-STATE-005"
+      ],
+      "current_paths": [
+        "src/option.rs",
+        "src/lesskey_parse.rs",
+        "src/prompt.rs",
+        "src/lmsg.rs",
+        "src/decode.rs",
+        "src/charset.rs",
+        "src/bin/lessecho.rs"
+      ],
+      "implementation_units": [
+        "Bounded consumed/incomplete/error parser interfaces",
+        "Separate CLI/lesskey/prompt/message/history/input/text/lessecho migrations",
+        "Family-specific byte corpora and in-process harnesses"
+      ],
+      "exit_gate": "Malformed input returns defined outcomes without panic or unchecked access; no UTF-8-only or dialect substitution is introduced.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M2.4",
+      "title": "Prove leaf safety and integration seams",
+      "integration_prerequisites": [
+        "M2.1",
+        "M2.2",
+        "M2.3"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-007",
+        "SAFE-MEM-008",
+        "SAFE-VER-003",
+        "SAFE-VER-004",
+        "SAFE-VER-005"
+      ],
+      "current_paths": [
+        "src/lib.rs",
+        "tests",
+        "tools/compat/stress.py"
+      ],
+      "implementation_units": [
+        "Compiler and expanded-AST safe-core restrictions",
+        "Borrow/unsafe/error detector controls",
+        "Alias retirement and component-to-pager integration evidence"
+      ],
+      "exit_gate": "No leaf is labeled safe solely because pointers moved into a wrapper; whole-core M3/M5 requirements remain open where applicable.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M3.1",
+      "title": "Own configuration and command state",
+      "integration_prerequisites": [
+        "M2.4"
+      ],
+      "requirement_ids": [
+        "SAFE-STATE-001",
+        "SAFE-STATE-005"
+      ],
+      "current_paths": [
+        "src/pager.rs",
+        "src/opttbl.rs",
+        "src/option.rs",
+        "src/command.rs",
+        "src/cmdbuf.rs"
+      ],
+      "implementation_units": [
+        "Authoritative main-thread PagerState",
+        "Immutable typed option metadata and typed effects",
+        "Owned command/editing/history prefixes and deferred lookup timing"
+      ],
+      "exit_gate": "One authoritative owner drives mutation; no global backdoor or duplicate state remains for converted subsystems.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M3.2",
+      "title": "Own retained input and navigation",
+      "integration_prerequisites": [
+        "M3.1"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-002",
+        "SAFE-MEM-003",
+        "SAFE-MEM-006",
+        "SAFE-STATE-002",
+        "SAFE-STATE-004"
+      ],
+      "current_paths": [
+        "src/ch.rs",
+        "src/input.rs",
+        "src/ifile.rs",
+        "src/position.rs",
+        "src/jump.rs",
+        "src/mark.rs"
+      ],
+      "implementation_units": [
+        "Owned per-file input and retained ranges",
+        "Explicit temporary-no-data/EOF/error/unavailable states",
+        "Append/truncate/rotate/evict invalidation and sparse positions"
+      ],
+      "exit_gate": "Storage reuse cannot revive a view or mark; ordinary paging does not wait for EOF or silently buffer every stream.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M3.3",
+      "title": "Own layout search and filters",
+      "integration_prerequisites": [
+        "M3.2"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-MEM-006",
+        "SAFE-MEM-007",
+        "SAFE-STATE-001",
+        "SAFE-STATE-002"
+      ],
+      "current_paths": [
+        "src/line.rs",
+        "src/cvt.rs",
+        "src/search.rs",
+        "src/forwback.rs",
+        "src/screen.rs"
+      ],
+      "implementation_units": [
+        "Owned layout and source mappings",
+        "Staged filter/pattern publication and rollback",
+        "Cancellation without overlapping borrows or stale retained views"
+      ],
+      "exit_gate": "No cross-module pointer persists into replaced storage; rendering/search behavior and cancellation positions remain compatible.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M3.4",
+      "title": "Own terminal children and persistence",
+      "integration_prerequisites": [
+        "M3.1",
+        "M3.2",
+        "M3.3"
+      ],
+      "requirement_ids": [
+        "SAFE-STATE-003",
+        "SAFE-STATE-004",
+        "SAFE-STATE-006",
+        "SAFE-STATE-007",
+        "SAFE-MEM-005"
+      ],
+      "current_paths": [
+        "src/screen.rs",
+        "src/ttyin.rs",
+        "src/lsystem.rs",
+        "src/edit.rs",
+        "src/filename.rs",
+        "src/mark.rs"
+      ],
+      "implementation_units": [
+        "Explicit terminal lifecycle state machine",
+        "Fallible idempotent shutdown retaining primary error",
+        "Owned/borrowed/duplicated FD and child/persistence responsibilities"
+      ],
+      "exit_gate": "Normal/error/catchable-signal paths attempt all required cleanup once; no repeated cancellation or failure leaks children, FDs or ownership.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M3.5",
+      "title": "Close the safe-core migration slices",
+      "integration_prerequisites": [
+        "M3.4"
+      ],
+      "requirement_ids": [
+        "SAFE-MEM-001",
+        "SAFE-MEM-002",
+        "SAFE-MEM-003",
+        "SAFE-MEM-004",
+        "SAFE-MEM-005",
+        "SAFE-MEM-006",
+        "SAFE-MEM-007",
+        "SAFE-MEM-008",
+        "SAFE-STATE-001",
+        "SAFE-STATE-002",
+        "SAFE-STATE-003",
+        "SAFE-STATE-004",
+        "SAFE-STATE-005",
+        "SAFE-STATE-007",
+        "SAFE-VER-006"
+      ],
+      "current_paths": [
+        "src/lib.rs",
+        "src/bin",
+        "tests"
+      ],
+      "implementation_units": [
+        "Retire mutable globals and raw core ownership",
+        "Remove accidental C exports and legacy alias backdoors",
+        "Enforce core policy with a narrow explicit residual boundary"
+      ],
+      "exit_gate": "No unfinished core is hidden in an unsafe adapter. Final native proofs and overall safety sign-off remain M4/M5 gates.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M4.1",
+      "title": "Select and probe canonical native ABIs",
+      "integration_prerequisites": [
+        "M3.5"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-001",
+        "SAFE-FFI-002",
+        "SAFE-FFI-007"
+      ],
+      "current_paths": [
+        "src/pattern.rs",
+        "src/screen.rs",
+        "src/runtime.rs",
+        "src/process.rs",
+        "build.rs"
+      ],
+      "implementation_units": [
+        "ADR-NATIVE-ABI with maintained/opaque definitions",
+        "Matching glibc 2.41/2.44 probes and library identities",
+        "Minimal native shims with no application control flow"
+      ],
+      "exit_gate": "Unsupported ABIs fail clearly; a current-host build does not certify the original glibc 2.41 profile.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M4.2",
+      "title": "Finalize owning GNU regex interfaces",
+      "integration_prerequisites": [
+        "M4.1"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-003",
+        "SAFE-MEM-005",
+        "SAFE-MEM-002"
+      ],
+      "current_paths": [
+        "src/pattern.rs",
+        "src/search.rs"
+      ],
+      "implementation_units": [
+        "Owned GNU pattern/error lifetimes",
+        "Checked full/submatch ranges and native length strategy",
+        "Scoped syntax settings and exact GNU semantics"
+      ],
+      "exit_gate": "Native ranges and lifetimes are valid; no different regex dialect or uninstrumented-native safety claim is substituted.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M4.3",
+      "title": "Finalize terminal signal and callback interfaces",
+      "integration_prerequisites": [
+        "M4.1"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-004",
+        "SAFE-FFI-005",
+        "SAFE-SIG-007",
+        "SAFE-STATE-006"
+      ],
+      "current_paths": [
+        "src/screen.rs",
+        "src/output.rs",
+        "src/runtime.rs",
+        "src/process.rs",
+        "src/ttyin.rs"
+      ],
+      "implementation_units": [
+        "Scoped terminal capability/scratch storage",
+        "Initialized read bytes and correct write/error semantics",
+        "Reviewed callback context, sentinels, errno and no cross-C unwind"
+      ],
+      "exit_gate": "Safe APIs establish every raw precondition; callback/context storage cannot dangle or alias a live mutable borrow.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M4.4",
+      "title": "Retire legacy boundaries and review dependencies",
+      "integration_prerequisites": [
+        "M4.2",
+        "M4.3"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-001",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007",
+        "SAFE-MEM-008"
+      ],
+      "current_paths": [
+        "src/lib.rs",
+        "Cargo.toml",
+        "Cargo.lock",
+        "vendor"
+      ],
+      "implementation_units": [
+        "Retire duplicate native definitions and plumbing",
+        "Review vendored/dependency unsafe code and advisories",
+        "Remove or narrowly justify C2Rust bitfields"
+      ],
+      "exit_gate": "No undocumented unsafe path or hidden pager logic remains outside the allowlist; counts alone do not establish soundness.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M4.5",
+      "title": "Complete independent boundary review",
+      "integration_prerequisites": [
+        "M4.4"
+      ],
+      "requirement_ids": [
+        "SAFE-FFI-001",
+        "SAFE-FFI-002",
+        "SAFE-FFI-003",
+        "SAFE-FFI-004",
+        "SAFE-FFI-005",
+        "SAFE-FFI-006",
+        "SAFE-FFI-007",
+        "SAFE-STATE-006"
+      ],
+      "current_paths": [
+        "spec/safety/requirements.json",
+        "spec/safety/acceptance.json"
+      ],
+      "implementation_units": [
+        "Independent invariant-by-invariant native review",
+        "Source/caller/native/test bindings and finding dispositions"
+      ],
+      "exit_gate": "Every remaining unsafe/native item has current reviewed evidence; full release campaigns and artifacts still must pass.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M5.1",
+      "title": "Establish campaign readiness",
+      "integration_prerequisites": [
+        "M0.5"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-007",
+        "SAFE-VER-010"
+      ],
+      "current_paths": [
+        "spec/safety/campaigns.json"
+      ],
+      "implementation_units": [
+        "Immutable exact scenario/variant/profile/ABI campaign manifest",
+        "Detector, applicability and source/artifact readiness",
+        "Fail closed for missing/stale/unsupported-required work"
+      ],
+      "exit_gate": "No required detector is silently unavailable and no stale input can be reported as passing.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M5.2",
+      "title": "Run regression Miri and instrumented campaigns",
+      "integration_prerequisites": [
+        "M4.5",
+        "M5.1"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-001",
+        "SAFE-VER-002",
+        "SAFE-VER-003",
+        "SAFE-VER-005"
+      ],
+      "current_paths": [
+        "tools/check.py",
+        "spec/safety/acceptance.json"
+      ],
+      "implementation_units": [
+        "Complete regression/Miri/instrumented executions on supported ABIs",
+        "Reviewed native exclusions with named alternatives",
+        "Retained diagnostics and minimized failures"
+      ],
+      "exit_gate": "All applicable normal, Miri, ABI and instrumented evidence is current; skipped required checks cannot pass.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M5.3",
+      "title": "Complete coverage and real event budgets",
+      "integration_prerequisites": [
+        "M5.2"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-004",
+        "SAFE-VER-005",
+        "SAFE-VER-006",
+        "SAFE-VER-008"
+      ],
+      "current_paths": [
+        "spec/safety/campaigns.json"
+      ],
+      "implementation_units": [
+        "15 independent production fuzz targets with both input and CPU floors",
+        "10000 bounded native events and 100 repeats per required race/recovery case",
+        "Coverage/resource metrics and reset after relevant changes"
+      ],
+      "exit_gate": "Every target/scenario meets its own floor; aggregate counts, sleeps, build time and untriaged hangs do not substitute.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M5.4",
+      "title": "Verify exact clean artifacts",
+      "integration_prerequisites": [
+        "M5.3"
+      ],
+      "requirement_ids": [
+        "SAFE-VER-001",
+        "SAFE-VER-007",
+        "SAFE-VER-008",
+        "SAFE-VER-009"
+      ],
+      "current_paths": [
+        "tools/package.py",
+        "tools/check.py"
+      ],
+      "implementation_units": [
+        "Exact clean installation/source rebuild artifacts",
+        "809-case and relevant safety/helper/integration/job-control replays",
+        "Artifact/tool/source checksums and activation/permission verification"
+      ],
+      "exit_gate": "The distributed bytes match the tested/reviewed payload and the source archive rebuilds without the C pager.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    },
+    {
+      "id": "M5.5",
+      "title": "Make the scoped safety completion decision",
+      "integration_prerequisites": [
+        "M5.4"
+      ],
+      "requirement_ids": [
+        "SAFE-BASE-001",
+        "SAFE-BASE-002",
+        "SAFE-BASE-003",
+        "SAFE-MEM-008",
+        "SAFE-VER-007",
+        "SAFE-VER-008",
+        "SAFE-VER-009"
+      ],
+      "current_paths": [
+        "spec/safety/requirements.json"
+      ],
+      "implementation_units": [
+        "Complete current requirement/profile gate derivation",
+        "Zero unresolved application memory-safety findings",
+        "Scoped safe-core/native trust report with independent approval"
+      ],
+      "exit_gate": "SAFE-VER-009 is met. A partial migration, tool failure or clean behavioral suite alone cannot close M5.",
+      "status": "planned",
+      "evidence_status": "not-verified",
+      "completion_record": null
+    }
+  ],
+  "preserved_contract": {
+    "requirements": 43,
+    "acceptance_families": 43,
+    "named_variants": 175,
+    "profile_rows": 500,
+    "production_fuzz_targets": 15,
+    "final_inputs_per_target_min": 100000,
+    "final_cpu_minutes_per_target_min": 60,
+    "final_native_scenarios_min": 10000,
+    "final_repetitions_per_race_recovery_min": 100,
+    "merge_authorized": false,
+    "release_authorized": false
+  }
+}
