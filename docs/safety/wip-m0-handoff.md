@@ -1,3 +1,15 @@
+# Latest work — M2–M5 refinement and isolated preparation, 2026-10-25
+
+Continue with [the new handoff](m2-m5-handoff.md) and
+[preparation evidence](../verification/m2-preparation-checkpoint.json).
+The M2–M5 spec is refined and pure Rust storage/coordinates/handles are implemented
+and tested in isolation. Production runtime inputs are unchanged; M0/M1 gates
+remain open and full M2–M5 is incomplete. The corrected global inventory has
+699 entries, 687 incomplete, including the previously omitted legacy crate root.
+The sections below preserve the earlier M0 checkpoint and original handoff.
+
+---
+
 # Current resumed M0 checkpoint — 2026-10-24
 
 Implementation **`ee313be75f639a4d2c9928366a7904a4887c82b8`** is now committed and

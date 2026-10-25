@@ -3,3 +3,8 @@ compat/.runs/
 .venv/
 /target/
 /dist/
+/tools/safety/core/target/
+/tools/safety/core-fuzz/target/
+/tools/safety/core-fuzz/artifacts/
+/tools/safety/core-fuzz/corpus/
+/tools/safety/core-fuzz/coverage/
