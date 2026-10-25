@@ -25,6 +25,7 @@ extern "C" {
         -> *mut ::core::ffi::c_char;
     fn strlen(__s: *const ::core::ffi::c_char) -> size_t;
     fn xbuf_init(xbuf: *mut xbuffer);
+    fn xbuf_deinit(xbuf: *mut xbuffer);
     fn save(s: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn ecalloc(count: size_t, size: size_t) -> *mut ::core::ffi::c_void;
     fn secure_allow(features: ::core::ffi::c_uint) -> lbool;
@@ -2924,6 +2925,11 @@ unsafe extern "C" fn lesskey_text(
     } else {
         add_uvar_table(tables.vartable.buf.data, tables.vartable.buf.end);
     }
+    // Variable expansion copies into the published table's own xbuffer. The
+    // parser's input bytes are not retained there; release them before the next
+    // parse reinitializes tables and loses this owner. Command/edit buffers, in
+    // contrast, are retained directly by their published table lists.
+    xbuf_deinit(&raw mut tables.vartable.buf);
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]

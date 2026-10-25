@@ -161,7 +161,9 @@
       "blocks_final_safety_gate": true,
       "fix_commit": null,
       "regression": null,
-      "rerun_evidence": null
+      "rerun_evidence": null,
+      "candidate_validation": "docs/verification/resume-m0-checkpoint.json",
+      "candidate_status": "Focused/full host ASan and matching glibc 2.41 native regressions pass; glibc 2.41 ASan and independent approval remain pending. Finding remains open."
     },
     {
       "id": "M0-LEAK-002",
@@ -183,7 +185,73 @@
       "blocks_final_safety_gate": true,
       "fix_commit": null,
       "regression": null,
+      "rerun_evidence": null,
+      "candidate_validation": "docs/verification/resume-m0-checkpoint.json",
+      "candidate_status": "Focused/full host ASan and matching glibc 2.41 native regressions pass; glibc 2.41 ASan and independent approval remain pending. Finding remains open."
+    },
+    {
+      "id": "M0-IO-001",
+      "title": "A read EIO can discard unread input and exit success without a diagnostic",
+      "status": "open",
+      "classification": "reproduced production-path fault-injection finding; native permanent-EIO counterpart pending",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.2",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "tools/safety/test_fault_paths.py:test_diagnostic_read_error_reproduces_unreported_legacy_failure",
+        "compat/.runs/resume-fault-paths-native-4/summary.json",
+        "compat/.runs/resume-fault-paths-asan-2/summary.json"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "test_diagnostic_read_error_reproduces_unreported_legacy_failure",
       "rerun_evidence": null
+    },
+    {
+      "id": "M0-IO-002",
+      "title": "A write EIO can discard pending output and exit success without a diagnostic",
+      "status": "open",
+      "classification": "reproduced production-path fault-injection finding; native permanent-EIO counterpart pending",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.3",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "evidence_refs": [
+        "tools/safety/test_fault_paths.py:test_diagnostic_write_error_reproduces_unreported_legacy_failure",
+        "compat/.runs/resume-fault-paths-native-4/summary.json",
+        "compat/.runs/resume-fault-paths-asan-2/summary.json"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "test_diagnostic_write_error_reproduces_unreported_legacy_failure",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-003",
+      "title": "Parsed lesskey variable bytes lose their owner when a later parse initializes tables",
+      "status": "open",
+      "classification": "reproduced 16-byte LeakSanitizer finding; candidate parser-buffer release under validation",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "reproducer": "docs/safety/reproducers/m0-leak-lesskey.json",
+      "diagnostic": "docs/safety/reproducers/m0-leak-lesskey.log",
+      "diagnostic_sha256": "9f64bd213d6310b9dcf27ce009b8a14f7e841a08e3af36854e93e4b9ed28d29e",
+      "source_commit": "d513f97a1a45557091bdb173eacf8d8cc8f01b33",
+      "tested_working_tree": true,
+      "source_input_sha256": "86a0ef8a56667941a3d5696de2d64a454fea9bf721b402dde3930bd788d8ddcf",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "tools/safety/leaks.py:LEAK-lesskey-file-then-inline and LEAK-lesskey-repeated-variables",
+      "rerun_evidence": null,
+      "candidate_validation": "docs/verification/resume-m0-checkpoint.json",
+      "candidate_status": "Focused/full host ASan and matching glibc 2.41 native regressions pass; glibc 2.41 ASan and independent approval remain pending. Finding remains open."
     }
   ]
 }

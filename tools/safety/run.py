@@ -100,6 +100,14 @@ def detectors(args, evidence):
                  requirement_ids=['SAFE-FFI-006', 'SAFE-VER-010'])
 
 
+def source_file_summaries(records, sources, root=ROOT):
+    """Every parsed input needs a review row, including module/type-only files."""
+    return {file: dict(sha256=sha(root / file),
+                counts=dict(Counter(r['kind'] for r in records if r['file'] == file)),
+                classification='manual ownership/indirect-call review pending')
+            for file in sources}
+
+
 def inventory(args, evidence):
     env = check_tools(args, evidence)
     helper_manifest = ROOT / 'tools/safety/inventory/Cargo.toml'
@@ -163,13 +171,7 @@ def inventory(args, evidence):
     qualified_native = [r for r in records if r['kind']=='direct_call' and
                         r['symbol'].replace(' ','').lstrip(':').startswith('libc::')]
     native_candidates = (externs - definitions) | {r['symbol'].replace(' ','').lstrip(':') for r in qualified_native}
-    files = {}
-    for file in sources:
-        rows = [r for r in records if r['file'] == file]
-        if not rows:
-            continue
-        files[file] = dict(sha256=sha(ROOT / file), counts=dict(Counter(r['kind'] for r in rows)),
-                           classification='manual ownership/indirect-call review pending')
+    files = source_file_summaries(records, sources)
     expanded_counts = {}
     for name in ('lib', 'lessecho'):
         log = args.output / ('expanded-ast-' + name + '.log')

@@ -1750,10 +1750,38 @@ pub unsafe extern "C" fn opt_first_cmd_at_prompt(
 ) {
     match r#type {
         0 | 2 => {
-            first_cmd_at_prompt = save(s);
+            // Reserve/copy before releasing the old value: s may borrow it and
+            // an allocation failure must not publish a dangling replacement.
+            let replacement = save(s);
+            free(first_cmd_at_prompt.cast());
+            first_cmd_at_prompt = replacement;
         }
         1 | _ => {}
     };
+}
+
+#[cfg(test)]
+mod ownership_tests {
+    use super::*;
+    use std::ffi::CStr;
+
+    #[test]
+    fn saved_command_replacement_copies_self_and_interior_aliases() {
+        unsafe {
+            assert!(first_cmd_at_prompt.is_null());
+            opt_first_cmd_at_prompt(0, c"12g".as_ptr());
+            for _ in 0..256 {
+                opt_first_cmd_at_prompt(2, first_cmd_at_prompt);
+                assert_eq!(CStr::from_ptr(first_cmd_at_prompt).to_bytes(), b"12g");
+            }
+            opt_first_cmd_at_prompt(2, first_cmd_at_prompt.add(2));
+            assert_eq!(CStr::from_ptr(first_cmd_at_prompt).to_bytes(), b"g");
+            opt_first_cmd_at_prompt(2, first_cmd_at_prompt.add(1));
+            assert_eq!(CStr::from_ptr(first_cmd_at_prompt).to_bytes(), b"");
+            free(first_cmd_at_prompt.cast());
+            first_cmd_at_prompt = std::ptr::null_mut();
+        }
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn opt_intr(
