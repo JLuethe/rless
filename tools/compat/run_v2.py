@@ -119,7 +119,7 @@ class Screen(pyte.Screen):
         return result
 
 
-def run_case(binary, case):
+def run_case(binary, case, *, checkpoint_observer=None):
     if case.get('executable'):
         if case['executable'] not in ('lessecho',):
             raise ValueError('unsupported companion executable')
@@ -168,7 +168,7 @@ def run_case(binary, case):
             observed = dict(status=result.returncode, stdout_b64=b64(norm(result.stdout)),
                             stderr_b64=b64(norm(result.stderr)))
         else:
-            observed = run_pty(argv, env, work, case, norm)
+            observed = run_pty(argv, env, work, case, norm, checkpoint_observer=checkpoint_observer)
         observed['files'] = {}
         for path in sorted(work.rglob('*')):
             if path.is_file():
@@ -178,7 +178,7 @@ def run_case(binary, case):
         return observed
 
 
-def run_pty(argv, env, work, case, norm):
+def run_pty(argv, env, work, case, norm, *, checkpoint_observer=None):
     master, slave = pty.openpty()
     rows, columns = case.get('size', [24, 80])
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', rows, columns, 0, 0))
@@ -339,6 +339,10 @@ def run_pty(argv, env, work, case, norm):
                 write_fd = None
             if 'await' in event:
                 wait(event['await'], start)
+            if 'heap_checkpoint' in event:
+                if 'await' not in event or checkpoint_observer is None:
+                    raise ValueError('heap observation requires an input barrier and explicit observer')
+                checkpoint_observer(pid, event['heap_checkpoint'])
             if event.get('snapshot'):
                 checkpoints.append(screen.state())
             if event.get('resources'):
