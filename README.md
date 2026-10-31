@@ -39,9 +39,10 @@ cargo build --release --locked
 printf 'hello\n' | ./target/release/rless
 ```
 
-The local development environment is in the sibling `../rless-env` directory.
-`source ../rless-env/activate.sh` selects its Rust toolchain, Cargo cache and this
-checkout's Python virtual environment. Work on source code in this `rless` checkout.
+See [CONTRIBUTING](CONTRIBUTING.md) for a fresh Linux setup with Python dependencies.
+The optional maintainer environment in `../rless-env` is not required to build.
+Only `x86_64-unknown-linux-gnu` is supported; no musl, ARM, macOS or Windows support
+is claimed.
 
 ## Test
 
@@ -49,29 +50,38 @@ checkout's Python virtual environment. Work on source code in this `rless` check
 cargo test --locked
 cargo test --release --locked
 python tools/compat/test_runner.py
-python tools/compat/validate.py
+mkdir -p compat/.runs/local
+python tools/compat/validate.py --output compat/.runs/local/coverage.json
 python tools/compat/check_candidate.py --binary target/debug/rless
 python tools/compat/check_candidate.py --binary target/release/rless
 ```
 
 The Python checks require Python 3.12+ and `tools/compat/requirements.txt`.
-The local environment already includes these dependencies. To run the complete
-build, reference comparison, stress and clean-install checks in one command:
+The [Linux CI workflow](.github/workflows/linux.yml) covers ordinary Rust tests,
+isolated safe-core tests and tooling controls. It does not certify a safety phase
+or run the complete release campaign. To qualify a clean committed release
+candidate with reference comparison, stress and clean-install checks:
 
 ```sh
-python tools/check.py --reference ../rless-env/less-reference/less --stress-rounds 100 --install-check
+python tools/check.py --release --reference /absolute/path/to/less-712
 ```
 
+Use the specified less 712 reference from the compatibility specification.
 This prints the path to its verification summary. With that summary, create
-binary and source archives and SHA-256 checksums under `dist/`:
+binary and source archives and SHA-256 checksums in a fresh output directory:
 
 ```sh
-python tools/package.py --verification /path/to/verification-summary.json
+python tools/package.py --verification /path/to/verification-summary.json --output-dir dist/candidate-1
 ```
 
-The packager verifies both executables and the helper match the tested bytes,
-extracts the archive and smoke-tests them. Source the archive's `activate.sh` to
-select its executables and helper locations without installing them.
+The packager requires complete native evidence tied to the exact committed source,
+checks executable/helper hashes, and rebuilds and replays 809 cases from an internal
+source archive before creating final artifacts. It then extracts and smoke-tests
+the binary archive. A final `*-release.json` attestation marks the completed set;
+failed candidate directories are not releases. Source the binary archive's
+`activate.sh` with Bash to select its executables and helpers. The archive records
+its required glibc symbol floor and shared libraries; Linux x86_64 alone does not
+guarantee ABI compatibility. Packaging does not publish or verify memory safety.
 
 The candidate runner replays **809 reference cases** and writes diagnostic
 reports under `compat/.runs/`. The case inputs and version 1 observations remain
@@ -95,3 +105,5 @@ Passing these cases does not establish equivalence for every input or platform.
 
 Project license: [GPLv3](LICENSE). Translated upstream code also retains the
 [Less License](LICENSE-LESS); vendored C2Rust bitfield support retains its BSD license.
+See [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md) and the
+[unreleased changelog](CHANGELOG.md) for contribution, reporting and release scope.

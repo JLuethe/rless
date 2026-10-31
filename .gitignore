@@ -1,7 +1,7 @@
 __pycache__/
 compat/.runs/
 .venv/
-/target/
+target/
 /dist/
 /tools/safety/core/target/
 /tools/safety/core-fuzz/target/

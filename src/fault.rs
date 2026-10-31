@@ -4,15 +4,20 @@
 //! lock-free atomics, fixed-size nonblocking pipe writes and errno assignment.
 //! It cannot call the allocator, format, panic, or acquire an ordinary lock.
 use std::os::unix::ffi::OsStrExt;
-use std::sync::atomic::{AtomicI32, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI32, AtomicUsize, Ordering};
 
-#[cfg(not(all(target_has_atomic = "ptr", target_has_atomic = "32")))]
+#[cfg(not(all(
+    target_has_atomic = "ptr",
+    target_has_atomic = "32",
+    target_has_atomic = "8"
+)))]
 compile_error!("safety injection requires lock-free pointer-width atomics");
 
 static FAIL_SITE: AtomicUsize = AtomicUsize::new(0);
 static FAIL_AT: AtomicUsize = AtomicUsize::new(0);
 static ATTEMPTS: AtomicUsize = AtomicUsize::new(0);
 static TRACE_FD: AtomicI32 = AtomicI32::new(-1);
+static EXHAUSTION_REPORTED: AtomicBool = AtomicBool::new(false);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(usize)]
@@ -95,6 +100,7 @@ pub(crate) fn initialize() -> Result<(), &'static str> {
     FAIL_SITE.store(0, Ordering::Relaxed);
     FAIL_AT.store(0, Ordering::Relaxed);
     ATTEMPTS.store(0, Ordering::Relaxed);
+    EXHAUSTION_REPORTED.store(false, Ordering::Relaxed);
     TRACE_FD.store(-1, Ordering::Relaxed);
     let Some(plan) = std::env::var_os("RLESS_FAULT") else {
         if std::env::var_os("RLESS_FAULT_FD").is_some() {
@@ -114,8 +120,14 @@ pub(crate) fn initialize() -> Result<(), &'static str> {
     // close it on helper exec so ordinary children cannot inherit test plumbing.
     unsafe {
         let flags = libc::fcntl(fd, libc::F_GETFL);
-        if flags < 0 || flags & libc::O_NONBLOCK == 0 {
+        if flags < 0 {
+            return Err("cannot inspect trace descriptor");
+        }
+        if flags & libc::O_NONBLOCK == 0 {
             return Err("trace pipe must already be nonblocking");
+        }
+        if flags & libc::O_ACCMODE == libc::O_RDONLY {
+            return Err("trace pipe must be writable");
         }
         let mut metadata: libc::stat = std::mem::zeroed();
         if libc::fstat(fd, &mut metadata) != 0 || metadata.st_mode & libc::S_IFMT != libc::S_IFIFO {
@@ -126,6 +138,11 @@ pub(crate) fn initialize() -> Result<(), &'static str> {
             return Err("cannot set trace pipe close-on-exec");
         }
     }
+    // Startup is single-threaded and precedes handler registration. These are
+    // harness configuration, not pager configuration: helpers must not inherit
+    // a plan referring to the descriptor that CLOEXEC removes from them.
+    std::env::remove_var("RLESS_FAULT");
+    std::env::remove_var("RLESS_FAULT_FD");
     TRACE_FD.store(fd, Ordering::Relaxed);
     FAIL_AT.store(ordinal, Ordering::Relaxed);
     FAIL_SITE.store(site as usize, Ordering::Release);
@@ -136,6 +153,28 @@ pub(crate) fn fail_allocation() -> bool {
     hit(Site::Alloc)
 }
 
+#[derive(Debug, PartialEq, Eq)]
+enum Trigger {
+    Fault(u64),
+    Exhausted,
+}
+
+fn next_trigger(
+    attempts: &AtomicUsize,
+    exhausted: &AtomicBool,
+    requested: usize,
+) -> Option<Trigger> {
+    if requested == 0 {
+        return None;
+    }
+    match attempts.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1)) {
+        Ok(before) if before == requested - 1 => Some(Trigger::Fault((before + 1) as u64)),
+        Ok(_) => None,
+        Err(_) if !exhausted.swap(true, Ordering::Relaxed) => Some(Trigger::Exhausted),
+        Err(_) => None,
+    }
+}
+
 pub(crate) fn hit(selected: Site) -> bool {
     if FAIL_SITE.load(Ordering::Acquire) != selected as usize {
         return false;
@@ -144,16 +183,12 @@ pub(crate) fn hit(selected: Site) -> bool {
     if requested == 0 {
         return false;
     }
-    let previous =
-        ATTEMPTS.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1));
     // Overflow is never a wrap into an old ordinal. It fails the test explicitly.
-    let (fail, site, ordinal) = match previous {
-        Ok(before) => (before == requested - 1, selected as u8, (before + 1) as u64),
-        Err(_) => (true, 255u8, u64::MAX),
+    let (site, ordinal) = match next_trigger(&ATTEMPTS, &EXHAUSTION_REPORTED, requested) {
+        Some(Trigger::Fault(ordinal)) => (selected as u8, ordinal),
+        Some(Trigger::Exhausted) => (255u8, u64::MAX),
+        None => return false,
     };
-    if !fail {
-        return false;
-    }
     // Wire format: magic, little-endian site ID, little-endian observed ordinal.
     // Actual observed ordinal (not just the plan) lets the harness reject a hook
     // firing at the wrong attempt. Site 255 denotes counter exhaustion.
@@ -163,26 +198,136 @@ pub(crate) fn hit(selected: Site) -> bool {
     ];
     unsafe {
         let saved_errno = *libc::__errno_location();
-        // The fixed event is smaller than PIPE_BUF. At most three EINTR retries;
-        // a full/broken channel yields missing hit evidence and fails the harness.
-        for _ in 0..3 {
-            let result = libc::write(
-                TRACE_FD.load(Ordering::Relaxed),
-                marker.as_ptr().cast(),
-                marker.len(),
-            );
-            if result >= 0 || *libc::__errno_location() != libc::EINTR {
-                break;
-            }
-        }
+        write_marker(TRACE_FD.load(Ordering::Relaxed), &marker);
         *libc::__errno_location() = selected.error().unwrap_or(saved_errno);
     }
     true
 }
 
+/// Write only harness evidence without changing the application's SIGPIPE
+/// disposition or consuming a SIGPIPE that was already pending. All calls use
+/// stack-owned canonical libc types and async-signal-safe, bounded operations.
+/// A failed trace operation deliberately supplies no valid marker to the oracle.
+unsafe fn write_marker(fd: i32, marker: &[u8; 16]) {
+    let mut pipe_signal: libc::sigset_t = std::mem::zeroed();
+    let mut blocked: libc::sigset_t = std::mem::zeroed();
+    let mut saved_mask: libc::sigset_t = std::mem::zeroed();
+    let mut pending: libc::sigset_t = std::mem::zeroed();
+    libc::sigemptyset(&mut pipe_signal);
+    libc::sigaddset(&mut pipe_signal, libc::SIGPIPE);
+    libc::sigfillset(&mut blocked);
+    // Mask catchable signals for this bounded nonblocking operation so another
+    // handler cannot repeatedly interrupt consumption of a generated SIGPIPE.
+    // Restore the caller's exact mask; never change process-wide dispositions.
+    if libc::pthread_sigmask(libc::SIG_BLOCK, &blocked, &mut saved_mask) != 0 {
+        return;
+    }
+    if libc::sigpending(&mut pending) == 0 {
+        let already_pending = libc::sigismember(&pending, libc::SIGPIPE) == 1;
+        for _ in 0..3 {
+            let result = libc::write(fd, marker.as_ptr().cast(), marker.len());
+            let error = *libc::__errno_location();
+            if result < 0 && error == libc::EPIPE && !already_pending {
+                let immediate = libc::timespec {
+                    tv_sec: 0,
+                    tv_nsec: 0,
+                };
+                // With SIGPIPE ignored there is nothing to consume (EAGAIN).
+                // Otherwise consume only the signal generated by this broken
+                // harness write before restoring the caller's original mask.
+                for _ in 0..3 {
+                    if libc::sigtimedwait(&pipe_signal, std::ptr::null_mut(), &immediate) >= 0
+                        || *libc::__errno_location() != libc::EINTR
+                    {
+                        break;
+                    }
+                }
+            }
+            if result >= 0 || error != libc::EINTR {
+                break;
+            }
+        }
+    }
+    libc::pthread_sigmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut());
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{parse_plan, Site};
+    use super::{
+        next_trigger, parse_plan, write_marker, AtomicBool, AtomicUsize, Ordering, Site, Trigger,
+    };
+
+    #[test]
+    fn trace_write_preserves_existing_pending_sigpipe_and_thread_mask() {
+        unsafe {
+            let mut set: libc::sigset_t = std::mem::zeroed();
+            let mut original: libc::sigset_t = std::mem::zeroed();
+            libc::sigemptyset(&mut set);
+            libc::sigaddset(&mut set, libc::SIGPIPE);
+            assert_eq!(
+                libc::pthread_sigmask(libc::SIG_BLOCK, &set, &mut original),
+                0
+            );
+            // Target this test thread, never another parallel unit test.
+            assert_eq!(libc::pthread_kill(libc::pthread_self(), libc::SIGPIPE), 0);
+            let mut pipe = [-1; 2];
+            assert_eq!(
+                libc::pipe2(pipe.as_mut_ptr(), libc::O_NONBLOCK | libc::O_CLOEXEC),
+                0
+            );
+            libc::close(pipe[0]);
+            write_marker(pipe[1], &[0; 16]);
+            libc::close(pipe[1]);
+            let mut pending: libc::sigset_t = std::mem::zeroed();
+            assert_eq!(libc::sigpending(&mut pending), 0);
+            assert_eq!(libc::sigismember(&pending, libc::SIGPIPE), 1);
+            let mut after: libc::sigset_t = std::mem::zeroed();
+            assert_eq!(
+                libc::pthread_sigmask(libc::SIG_BLOCK, std::ptr::null(), &mut after),
+                0
+            );
+            assert_eq!(libc::sigismember(&after, libc::SIGPIPE), 1);
+            let immediate = libc::timespec {
+                tv_sec: 0,
+                tv_nsec: 0,
+            };
+            assert_eq!(
+                libc::sigtimedwait(&set, std::ptr::null_mut(), &immediate),
+                libc::SIGPIPE
+            );
+            assert_eq!(
+                libc::pthread_sigmask(libc::SIG_SETMASK, &original, std::ptr::null_mut()),
+                0
+            );
+        }
+    }
+
+    #[test]
+    fn highest_ordinal_fires_once_then_exhaustion_is_reported_once() {
+        let count = AtomicUsize::new(usize::MAX - 1);
+        let exhausted = AtomicBool::new(false);
+        assert_eq!(
+            next_trigger(&count, &exhausted, usize::MAX),
+            Some(Trigger::Fault(u64::MAX))
+        );
+        assert_eq!(
+            next_trigger(&count, &exhausted, usize::MAX),
+            Some(Trigger::Exhausted)
+        );
+        assert_eq!(next_trigger(&count, &exhausted, usize::MAX), None);
+        assert_eq!(count.load(Ordering::Relaxed), usize::MAX);
+    }
+
+    #[test]
+    fn requested_attempt_does_not_repeat_and_disabled_plan_does_not_count() {
+        let count = AtomicUsize::new(0);
+        let exhausted = AtomicBool::new(false);
+        assert_eq!(next_trigger(&count, &exhausted, 0), None);
+        assert_eq!(count.load(Ordering::Relaxed), 0);
+        assert_eq!(next_trigger(&count, &exhausted, 2), None);
+        assert_eq!(next_trigger(&count, &exhausted, 2), Some(Trigger::Fault(2)));
+        assert_eq!(next_trigger(&count, &exhausted, 2), None);
+    }
 
     #[test]
     fn positive_ordinals_have_no_arbitrary_small_limit() {

@@ -1,0 +1,67 @@
+name: Linux checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-and-tooling:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RUSTUP_TOOLCHAIN: 1.90.0
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install native and Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes build-essential libncurses-dev binutils
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          python -m pip install -r tools/compat/requirements.txt
+      - name: Format and ordinary Rust tests
+        run: |
+          cargo fmt --all -- --check
+          cargo test --locked
+          cargo test --release --locked
+          cargo test --locked --features safety-injection
+      - name: Isolated safe core
+        run: |
+          cargo test --locked --manifest-path tools/safety/core/Cargo.toml
+          cargo test --release --locked --features fault-testing --manifest-path tools/safety/core/Cargo.toml
+      - name: Observer and frozen corpus structure
+        run: |
+          mkdir -p compat/.runs/ci
+          python tools/compat/test_runner.py
+          python tools/compat/validate.py --output compat/.runs/ci/coverage.json
+      - name: Evidence and release policy mutation controls
+        run: |
+          python tools/test_release.py
+          python tools/safety/test_safety.py
+          python tools/safety/test_oracle_controls.py
+          python tools/safety/test_m0_controls.py
+          python tools/safety/test_host_evidence.py
+          python tools/safety/test_closure.py
+          python tools/safety/test_inventory_coverage.py
+          python tools/safety/test_m0_gate.py
+          python tools/safety/glibc241/test_offline.py
+          python tools/safety/glibc241/test_evidence.py
+      - name: Inventory parser controls
+        run: |
+          cargo build --locked --manifest-path tools/safety/inventory/Cargo.toml
+          python tools/safety/test_inventory_parser.py --binary tools/safety/inventory/target/debug/rless-safety-inventory
+      # These tests need no local reference binary or pinned sanitizer bundle.
+      # A green job is neither release qualification nor a safety-phase approval.

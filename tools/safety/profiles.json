@@ -21,7 +21,7 @@
     712,
     20261023
   ],
-  "instrumentation_scope": "Rust application and Rust dependencies instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. No native shims exist yet. Record this gap; no native-internals audit is claimed.",
+  "instrumentation_scope": "Rust application and Rust dependencies are instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. Test-only C failure counterparts exercise selected native boundaries; they are not production boundary replacements and are not themselves compiled with memory sanitizers. The scoped calloc wrapper forwards unselected calls to the active allocator/interceptor. No native-internals safety audit is claimed.",
   "abi_profiles": [
     {
       "id": "REFERENCE-GLIBC-2.41",

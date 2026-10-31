@@ -1,0 +1,81 @@
+# rless test report: current-state baseline (a planning baseline, not release approval)
+
+Everything I ran passed. I found no reproducible test failures. The release blockers are all in the packaging and verification tooling, and the main one is that the source archive can pick up build output and untracked files.
+
+**Source and environment**
+- **Revision:** HEAD `4862cf9dcc09565a1fe419e66cce97cdfbefbe24` on branch `implement/m0-review-faults-verification`.
+- **Git status:** clean at the start. At the end there is one untracked file, `docs/github-release-plan.md`. Another process created it at 22:17:47, probably the parallel Codex review. I didn't touch it, and I wrote nothing tracked.
+- **Toolchain:** `source ../rless-env/activate.sh`, Rust 1.90.0, Python 3.14.8, host glibc 2.44, Linux x86_64, 12 cores. Cargo ran with `--locked --offline` and installed nothing.
+- **Binaries:** the debug and release `rless`/`lessecho` hashes were the same before, after the build and after the replays. Cargo found them up to date for HEAD (release `rless` is `271b12d7…`).
+- **Logs:** everything is in `/tmp/rless-claude-review/`, with a summary of each command in `status.txt`.
+
+## Fresh results (run today)
+
+| Check | Status | Count / note | Log |
+|---|---|---|---|
+| `cargo fmt --all -- --check` | PASS | — | `fmt.log` |
+| `cargo test --locked --offline` (debug) | PASS | 9 tests (3 lib + 6 process; the bin harnesses have 0) | `rust-debug.log` |
+| `cargo test --release --locked --offline` | PASS | 9 | `rust-release.log` |
+| Safe-core debug/release (`--features fault-testing`, target in /tmp) | PASS | 13 unit + 1 model + 4 compile-fail doctests, each profile | `core-{debug,release}.log` |
+| `tools/compat/test_runner.py` (observer tests) | PASS | 6 | `observer.log` |
+| `tools/compat/validate.py` (corpus validator) | PASS | 809 cases, 536 of 536 required interfaces | `corpus.log`, `coverage.json` |
+| Negative control (`/bin/cat` as the candidate) | PASS | rejected as expected: 2 executed, 2 failed, 0 errors | `negative.json` |
+| 809-case replay, debug | PASS | 809/809 (options 230, behavior 467, interactions 108, integration 4), 32 s | `acceptance-debug/` |
+| 809-case replay, release | PASS | 809/809, 29 s | `acceptance-release/` |
+| Replay against the reference less | PASS | 809/809 (reference binary `1dd4f58a…`) | `reference/` |
+| Integrations, job control, helpers (release only) | PASS | 10 integrations, real SIGTSTP/SIGCONT, 10 helper cases | `*-release.log` |
+| Safety tests: `test_safety`, `test_closure`, `test_inventory_coverage`, `test_m2_m5_plan`, `validate_m2_m5` | PASS | 18 / 13 / 2 / 4 / valid | `safety-*.log` |
+| `test_hooks.py` (injected binary built in /tmp) | PASS | 7. Normal binaries contain no `RLESS_FAULT` string. | `safety-test_hooks.log` |
+| `ownership.py check --allow-pending` | PASS (exit 0) | Status `not-verified`, 699 entries, 687 pending. This is not a passed gate. | `ownership-check.log` |
+
+**Not run:**
+- **`tools/safety/validate_spec.py`:** it writes into a tracked file (finding 5).
+- **`test_fault_paths.py`, `leaks.py`, the ASan/Miri/fuzz lanes, `baseline.py`, the glibc 2.41 rootfs and `core_prepare.py`:** these need shims or the long safety campaign you asked me to leave out.
+- **Debug integrations, stress (2 seeds × 2 profiles), clean install, source-archive rebuild and `package.py`:** skipped to keep the run short.
+
+**Blocked:** nothing.
+
+The README's claims (clean install and source rebuild at 809/809, plus 2,832 stress comparisons) come from earlier recorded runs. I did not re-verify them today.
+
+## Findings
+
+**Release blockers (packaging and release tooling)**
+1. **High: the source archive can include build output and stray files.** `tools/package.py:135-138` walks the folders on disk and only skips `.runs`, `__pycache__` and `.git`. I copied that exact logic into a test layout (`pkg-fixture-walk.txt`). It packed `tools/safety/core/target/…`, `tools/safety/inventory/target/…`, `vendor/*/target/…`, `core-fuzz/corpus/…`, `core-fuzz/artifacts/…` and an untracked notes file. On the real repo today it would also pack the untracked `docs/github-release-plan.md`.
+   - The documented command at `docs/safety/m2-m5-handoff.md:110` creates `tools/safety/core/target` if `--target-dir` is left off.
+   - Fix: build the file list from `git ls-files`, or archive with `git archive HEAD`, and refuse to run on a dirty tree.
+2. **Medium: `.gitignore` misses the target folders of four nested crates.** It covers only the root, `core` and `core-fuzz` targets. `tools/safety/{components,fuzz,inventory,probes}/target` and `vendor/*/target` would show up as untracked files, risking an accidental commit, and would also be packaged.
+3. **High: the packager accepts a weak verification summary.** `tools/package.py:31` only checks `passed: true`. But `tools/check.py:76-93` sets `passed` without the reference, stress or install checks (`reference_checks: 'Not requested'`). So a release can be packaged with no differential or clean-install evidence. The packager should require those steps and a minimum stress-round count.
+4. **Medium: the source archive isn't tied to what was tested.**
+   - The input fingerprint in `tools/check.py:29-37` leaves out `tests/`, `compat/cases/`, `compat/expected-*.json`, `docs/` and `spec/`.
+   - Neither script records the git SHA or whether the tree was clean.
+   - `package.py` never compares the fingerprint with the current tree. Only the binary and helper hashes are checked.
+   - `tools/safety/baseline.py` already archives committed source and rebuilds it, so it is the better path for a release.
+5. **Low: running `validate_spec.py` changes a tracked file.** `tools/safety/validate_spec.py:88` rewrites `spec/safety/validation.json` with a timestamp. Running the validator dirties the tree and changes a checked-in record. It should write to an output path that is passed in.
+6. **Medium (process): `dist/` holds stale archives.** Their checksums verify, but the packaged `rless` is `8188fe99…`, not the current `271b12d7…`. The source archive has 148 files against 275 tracked now. It's ignored by git, but it must not be uploaded to a GitHub release. Regenerate from HEAD.
+7. **Low:** `Cargo.toml` has no `repository` field. The README's description of the 809 results should say which run they come from.
+
+**Longer-term safety work (not blockers for an experimental compatibility release that makes no safety claim)**
+- M0 and M1 are still open:
+  - Ownership review: 687 of 699 entries pending.
+  - Silent EIO success: findings M0-IO-001 and M0-IO-002.
+  - No ASan symbolizer and runtime bundle for glibc 2.41.
+  - No formal independent native-invariant approval.
+- The safe core isn't linked into the pager, and its fuzz runs give no credit toward the production fuzz budget.
+- The main crate has only 9 Rust tests. Behavior coverage rests on the Python replay.
+
+## Recommended independent release acceptance matrix
+
+| # | Gate | Profiles | Required |
+|---|---|---|---|
+| 1 | Clean committed tree at a tagged SHA; source built with `git archive` | — | SHA recorded in the summary |
+| 2 | fmt, cargo test `--locked` | debug and release | PASS |
+| 3 | Observer tests, corpus validator, negative control | — | PASS; exactly 2 of 2 rejected |
+| 4 | 809-case replay | debug, release, reference, clean install, rebuild from source archive | 809/809 each |
+| 5 | Integrations, job control, helpers | debug and release | PASS |
+| 6 | Stress, seeds 712 and 20261023, 100 or more rounds | debug and release | 0 differences |
+| 7 | `package.py` with a summary that has steps 4–6, from a fresh `dist/` | release | Extraction smoke test PASS; file list equals `git ls-files` (no `target/`, corpus, artifacts or untracked files) |
+| 8 | Release binaries contain no injection strings; glibc floor and NEEDED libraries recorded | release | PASS |
+| 9 | Cheap safety checks (`test_safety`, `test_closure`, `test_hooks`, `validate_m2_m5`, `ownership check --allow-pending`) | — | PASS, with `not-verified` and pending counts reported honestly |
+| 10 | Release notes label this an unsafe experimental translation with no memory-safety claim | — | Reviewed |
+
+On today's run, gates 2–5 pass at 4862cf9 (gate 5 for release only). Gates 1, 6 and 7 are not met yet: findings 1–4 have to be fixed in Codex and then re-tested independently.

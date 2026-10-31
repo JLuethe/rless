@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "procedure_id": "REFERENCE-GLIBC-2.41-ASAN-OFFLINE-v1",
+  "target_abi": "REFERENCE-GLIBC-2.41",
+  "sanitizer_toolchain": "tools/safety/profiles.json",
+  "symbolizer_pin": "tools/safety/profiles.json#/symbolizer",
+  "execution": "Compile and execute the pinned Rust ASan/LSan instrumentation inside the matching glibc 2.41 rootfs; retain raw diagnostics with symbolize=0.",
+  "postprocessing": "Run the exact pinned host llvm-symbolizer on hashed target object files using module-relative offsets. Do not execute target files on the host or mount host symbolizer libraries into the rootfs.",
+  "controls": "Safe, heap-use-after-free and 8192-byte leak controls run through the real pipe and PTY observers. Diagnostic exit and raw text must match before symbolization. Positive reports must resolve the intended application source frames afterward.",
+  "acceptance": "Zero unexpected raw reports; all detector controls and declared fault checks pass; runtime and headers identify glibc 2.41; source, image, tools, objects, raw logs and postprocessing are hash-bound. Incomplete final acceptance variants remain open.",
+  "scope": "A diagnostic procedure refinement only. No pin, detector floor, compatibility expectation or final safety gate is relaxed.",
+  "references": [
+    "https://clang.llvm.org/docs/AddressSanitizer.html#symbolizing-the-reports",
+    "https://llvm.org/docs/CommandGuide/llvm-symbolizer.html"
+  ]
+}

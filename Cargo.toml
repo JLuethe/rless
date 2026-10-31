@@ -5,6 +5,7 @@ edition = "2021"
 rust-version = "1.90"
 license = "GPL-3.0-or-later"
 description = "A native Rust port of the less 712 terminal pager"
+repository = "https://github.com/JLuethe/rless"
 autobins = false
 default-run = "rless"
 

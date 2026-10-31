@@ -4,6 +4,7 @@
 
 use ::c2rust_bitfields;
 extern "C" {
+    fn free(ptr: *mut ::core::ffi::c_void);
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn fopen(
         __filename: *const ::core::ffi::c_char,
@@ -2371,6 +2372,11 @@ static mut lmsg_syms: [lmsg_sym; 340] = [
 pub static mut help_data: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
 #[no_mangle]
 pub static mut size_help_data: ::core::ffi::c_int = 0;
+// Message overrides are installed only by startup lmsg_init, before the pager
+// lends message/help pointers to its normal command loop. Defaults are borrowed
+// literals; only replacements allocated by saven may be released.
+static mut owned_messages: [bool; 340] = [false; 340];
+static mut owned_help: bool = false;
 unsafe extern "C" fn lmsg_error(
     mut err: *const ::core::ffi::c_char,
     mut lmsg_file: *const ::core::ffi::c_char,
@@ -2546,14 +2552,25 @@ unsafe extern "C" fn lmsg_line(
     }
     msg = saven(xbuf_char_data(xbuf), (*xbuf).end);
     if id.0 == lessmsg_id::LM_HELP.0 {
+        if owned_help {
+            free(help_data.cast());
+        }
         help_data = msg;
+        owned_help = true;
         size_help_data = (*xbuf).end as ::core::ffi::c_int;
     } else {
+        if owned_messages[id.0 as usize] {
+            free(lmsgs[id.0 as usize].cast());
+        }
         lmsgs[id.0 as usize] = msg;
+        owned_messages[id.0 as usize] = true;
     }
     return lbool::LTRUE;
 }
 #[no_mangle]
+/// # Safety
+/// Initialize on the startup thread before any message/help pointer is retained
+/// by the command loop. Replacements invalidate earlier pointers to that entry.
 pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     let mut fd: *mut FILE = ::core::ptr::null_mut::<FILE>();
     let mut line: [::core::ffi::c_char; 512] = [0; 512];
@@ -2567,6 +2584,10 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     let mut parg: PARG = parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
     };
+    if owned_help {
+        free(help_data.cast());
+        owned_help = false;
+    }
     help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
     size_help_data = size_helpdata;
     if isnullenv(lmsg_file).0 != 0 {

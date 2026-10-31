@@ -109,43 +109,65 @@ def source_file_summaries(records, sources, root=ROOT):
 
 
 def inventory(args, evidence):
+    from inventory_format import (EXPANDED_CONFIGURATIONS, all_statics, boundary_comparison, expanded_review_sites,
+                                  native_candidates, parse_records, source_inputs)
     env = check_tools(args, evidence)
     helper_manifest = ROOT / 'tools/safety/inventory/Cargo.toml'
     if evidence.run('build-inventory', ['cargo', 'build', '--locked', '--offline', '--manifest-path',
                      helper_manifest], env=env, profile='STATIC')['status'] != 'passed':
         return
     helper = args.output / 'target/debug/rless-safety-inventory'
-    sources = sorted(str(p.relative_to(ROOT)) for top in ('src', 'vendor')
-                     for p in (ROOT / top).rglob('*.rs')) + ['build.rs']
+    sources = source_inputs(ROOT)
     if evidence.run('source-ast', [helper, *sources], env=env, profile='STATIC',
                     artifacts=[helper])['status'] != 'passed':
         return
     fixture = args.output / 'inventory-fixture.rs'
     fixture.write_text('static mut OBJECT: i32 = 0; extern "C" { static mut ALIAS: i32; fn native(); }\n'
+                       'type Shared = std::sync::atomic::AtomicUsize;\n'
+                       'static ATOMIC: Shared = Shared::new(0); static FIXED: i32 = 1;\n'
                        'unsafe fn caller(p: *mut i32) { unsafe { *p = 1; native(); } }\n')
     checked = evidence.run('inventory-detector-control', [helper, fixture], env=env, profile='STATIC')
     text = (args.output / 'inventory-detector-control.log').read_text()
     counts = Counter(line.split('\t', 1)[0] for line in text.splitlines())
-    if counts != Counter({'mutable_static_definition':1, 'extern_static_declaration':1,
+    fixture_records = parse_records(text) if checked['status'] == 'passed' else []
+    if counts != Counter({'static_definition':3, 'static_declared_type':3,
+                         'mutable_static_definition':1, 'extern_static_declaration':1,
                          'extern_function_declaration':1, 'function_definition':1,
-                         'unsafe_function':1, 'raw_pointer_type':1, 'unsafe_block':1, 'direct_call':1}):
+                         'unsafe_function':1, 'raw_pointer_type':1, 'unsafe_block':1, 'direct_call':2}) or {
+                         r['symbol'] for r in all_statics(fixture_records)} != {'OBJECT', 'ATOMIC', 'FIXED'}:
         checked['status'] = 'failed'
-        checked['oracle_error'] = 'AST failed to separate a mutable definition from an extern declaration'
-    for name, target in [('lib', ['--lib']), ('lessecho', ['--bin', 'lessecho'])]:
-        record = evidence.run('expand-' + name, ['cargo', 'rustc', '--locked', '--offline', *target,
+        checked['oracle_error'] = 'AST omitted shared/aliased atomic statics or conflated definitions and externs'
+    expanded_configurations = {}
+    for name, configuration in EXPANDED_CONFIGURATIONS.items():
+        target = configuration['target']
+        feature_args = ['--features', ','.join(configuration['features'])] if configuration['features'] else []
+        record = evidence.run('expand-' + name, ['cargo', 'rustc', '--locked', '--offline', *target, *feature_args,
                               '--', '-Zunpretty=expanded'], env=env, profile='STATIC')
         if record['status'] != 'passed':
             continue
         # Cargo messages are on stderr; reroute only rustc stdout to a source file.
         source = args.output / ('expanded-' + name + '.rs')
         with source.open('wb') as out:
-            subprocess.run(['cargo', 'rustc', '--locked', '--offline', *target, '--', '-Zunpretty=expanded'],
+            subprocess.run(['cargo', 'rustc', '--locked', '--offline', *target, *feature_args, '--', '-Zunpretty=expanded'],
                            cwd=ROOT, env=env, stdout=out, stderr=subprocess.DEVNULL, check=True)
-        evidence.run('expanded-ast-' + name, [helper, source], env=env, profile='STATIC', artifacts=[helper, source])
-    records = []
-    for line in (args.output / 'source-ast.log').read_text().splitlines():
-        kind, file, row, col, context, symbol = line.split('\t', 5)
-        records.append(dict(kind=kind, file=file, line=int(row), column=int(col), context=context, symbol=symbol))
+        parsed = evidence.run('expanded-ast-' + name, [helper, source], env=env,
+                              profile='STATIC', artifacts=[helper, source])
+        if parsed['status'] != 'passed':
+            continue
+        syntax = args.output / ('expanded-ast-' + name + '.log')
+        expanded = parse_records(syntax.read_text())
+        expanded_configurations[name] = dict(**configuration,
+            source=dict(path=str(source), sha256=sha(source)),
+            syntax=dict(path=str(syntax), sha256=sha(syntax)),
+            review_sites=expanded_review_sites(expanded))
+    for name, configuration in expanded_configurations.items():
+        if name.endswith('-safety-injection'):
+            baseline = name.removesuffix('-safety-injection')
+            if baseline in expanded_configurations:
+                configuration['baseline_configuration'] = baseline
+                configuration['boundary_comparison'] = boundary_comparison(
+                    expanded_configurations[baseline]['review_sites'], configuration['review_sites'])
+    records = parse_records((args.output / 'source-ast.log').read_text())
     raw_path = args.output / 'syntax-inventory.json'
     write_json(raw_path, records)
     definitions_by_name = {}
@@ -164,26 +186,26 @@ def inventory(args, evidence):
               candidate_definitions=definitions_by_name.get(symbol, [])))
     write_json(args.output / 'callgraph.json', dict(scope='Syntactic direct-call candidates; indirect/alias/link-name resolution requires manual review.', calls=calls))
     definitions = {r['symbol'] for r in records if r['kind'] == 'abi_function_definition'}
-    externs = {r['symbol'] for r in records if r['kind'] == 'extern_function_declaration'}
     # Canonical libc calls do not have a local extern declaration. Keep their
     # qualified identities until review resolves linkage; do not silently omit
     # them or conflate a declaration with an actual native object.
     qualified_native = [r for r in records if r['kind']=='direct_call' and
                         r['symbol'].replace(' ','').lstrip(':').startswith('libc::')]
-    native_candidates = (externs - definitions) | {r['symbol'].replace(' ','').lstrip(':') for r in qualified_native}
     files = source_file_summaries(records, sources)
     expanded_counts = {}
-    for name in ('lib', 'lessecho'):
+    for name in EXPANDED_CONFIGURATIONS:
         log = args.output / ('expanded-ast-' + name + '.log')
         if log.exists():
             expanded_counts[name] = dict(Counter(line.split('\t', 1)[0] for line in log.read_text().splitlines()))
-    summary = dict(schema_version=1, recorded_at_utc=utc(), status='partial', evidence_status='not-verified',
+    summary = dict(schema_version=2, recorded_at_utc=utc(), status='partial', evidence_status='not-verified',
                    scope='AST and compiler-expanded syntax inventory; not a complete ownership/alias or indirect-call proof.',
                    files=files, counts=dict(Counter(r['kind'] for r in records)),
-                   expanded_counts=expanded_counts, candidate_external_symbols=sorted(native_candidates),
+                   expanded_counts=expanded_counts, expanded_configurations=expanded_configurations,
+                   candidate_external_symbols=native_candidates(records),
                    qualified_native_calls=qualified_native,
                    application_c_abi_symbols=sorted(definitions),
                    mutable_static_definitions=[r for r in records if r['kind'] == 'mutable_static_definition'],
+                   static_definitions=all_statics(records),
                    raw_inventory=dict(path=str(raw_path), sha256=sha(raw_path)),
                    indirect_call_sites=[r for r in records if r['kind'] == 'indirect_call'],
                    source_fingerprint=evidence.report['input_fingerprints']['sha256'],

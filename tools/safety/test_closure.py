@@ -134,5 +134,40 @@ class AcceptanceControls(unittest.TestCase):
         self.catalogue['scenarios'][0]['required_profiles'].append('UNKNOWN')
         with self.assertRaises(ValueError):matrix(self.catalogue)
 
+    def test_multiple_partial_oracles_cannot_be_promoted_to_complete(self):
+        self.evidence.run('second',[sys.executable,'-c','print("second fixture oracle")'],
+            scenario_id='CASE-TST', variant='fault before commit',profile='NATIVE')
+        item={key:value for key,value in self.binding.items() if key not in ('report','record_name')}
+        item['executions']=[dict(report=self.binding['report'],record_name=name)
+                            for name in ('selected','second')]
+        self.assertEqual(bind(self.rows,[item],self.root)[item['row_id']]['status'],'not-verified')
+        with self.assertRaises(ValueError):
+            bind(self.rows,[{**item,'coverage_scope':'complete'}],self.root)
+        item['executions'].append(item['executions'][0])
+        with self.assertRaises(ValueError):bind(self.rows,[item],self.root)
+
+    def test_binding_preserves_legacy_findings_without_closing_row(self):
+        self.evidence.run('legacy',[sys.executable,'-c','print("known behavior reproduced")'],
+            scenario_id='CASE-TST',variant='fault before commit',profile='NATIVE',finding_ids=['LEGACY-1'])
+        item={**self.binding,'record_name':'legacy'}
+        row=bind(self.rows,[item],self.root)[item['row_id']]
+        self.assertEqual(row['status'],'finding-open')
+        self.assertEqual(row['finding_ids'],['LEGACY-1'])
+
+    def test_binding_cannot_change_hook_ordinal_abi_seed_or_corpus(self):
+        (self.root/'compat').mkdir()
+        corpus=self.root/'compat/corpus.json';corpus.write_text('{}')
+        evidence=Evidence(self.directory/'metadata',self.root)
+        metadata=dict(abi_profile='BUILDER-GLIBC-2.44',corpus_sha256=sha(corpus),
+            seed=712,test_selector='Fixture.selected',hook_sites=['read'],hook_ordinals=[1])
+        evidence.run('selected',[sys.executable,'-c','print("oracle")'],scenario_id='CASE-TST',
+            variant='fault before commit',profile='NATIVE',oracle_metadata=metadata)
+        item={**self.binding,'report':str(evidence.directory/'summary.json'),'oracle_metadata':metadata}
+        bind(self.rows,[item],self.root)
+        for field,value in [('hook_ordinals',[2]),('abi_profile','REFERENCE-GLIBC-2.41'),
+                            ('seed',713),('corpus_sha256','0'*64)]:
+            with self.assertRaises(ValueError):
+                bind(self.rows,[{**item,'oracle_metadata':{**metadata,field:value}}],self.root)
+
 
 if __name__=='__main__':unittest.main()

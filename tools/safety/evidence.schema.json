@@ -15,13 +15,54 @@
         "type": "object",
         "required": ["name", "profile", "status", "requirement_ids"],
         "properties": {
-          "status": {"enum": ["passed", "failed", "unsupported", "blocked", "not-run"]},
+          "status": {"enum": ["passed", "failed", "finding-open", "unsupported", "blocked", "not-run"]},
           "profile": {"enum": ["NATIVE", "ASAN", "LSAN", "MIRI", "FUZZ", "ABI", "STATIC", "AUDIT"]},
-          "requirement_ids": {"type": "array", "items": {"type": "string"}}
+          "requirement_ids": {"type": "array", "items": {"type": "string"}},
+          "finding_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "gap_kind": {"const": "infrastructure"},
+          "oracle_report": {"$ref": "#/$defs/retainedReport"},
+          "detector_capture_report": {"$ref": "#/$defs/retainedReport"},
+          "observed_hooks": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["site", "ordinal", "magic"],
+              "additionalProperties": false,
+              "properties": {
+                "site": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+                "ordinal": {"type": "integer", "minimum": 1},
+                "magic": {"enum": ["RLF1", "RNT1"]}
+              }
+            }
+          },
+          "oracle_metadata": {
+            "type": ["object", "null"],
+            "required": ["abi_profile", "corpus_sha256", "seed", "test_selector", "hook_sites", "hook_ordinals"],
+            "properties": {
+              "abi_profile": {"enum": ["REFERENCE-GLIBC-2.41", "BUILDER-GLIBC-2.44"]},
+              "corpus_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "seed": {"type": ["integer", "null"], "minimum": 0},
+              "test_selector": {"type": "string", "minLength": 1},
+              "hook_sites": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+              "hook_ordinals": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "minimum": 1}}
+            }
+          }
         },
-        "allOf": [{"if": {"properties": {"status": {"enum": ["passed", "failed"]}}}, "then": {"required": ["command", "original_exit_status", "variant", "log", "log_sha256", "cpu_seconds", "wall_seconds", "artifact_hashes"]}}]
+        "allOf": [{"if": {"properties": {"status": {"enum": ["passed", "failed", "finding-open"]}}}, "then": {"required": ["command", "original_exit_status", "variant", "log", "log_sha256", "cpu_seconds", "wall_seconds", "artifact_hashes"]}}, {"if": {"properties": {"status": {"const": "finding-open"}}}, "then": {"required": ["finding_ids"], "properties": {"finding_ids": {"minItems": 1}}}}]
       }
     },
     "findings": {"type": "array"}
+  },
+  "$defs": {
+    "retainedReport": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
   }
 }

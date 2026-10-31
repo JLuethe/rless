@@ -10,6 +10,8 @@ import subprocess
 import sys
 import tempfile
 
+from release import source_identity, sha_file
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -18,25 +20,26 @@ def main():
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--stress-rounds', type=int, default=20)
     parser.add_argument('--install-check', action='store_true')
+    parser.add_argument('--release', action='store_true',
+                        help='Require committed source, reference, install checks and at least 100 stress rounds')
     args = parser.parse_args()
+    if sys.flags.optimize:
+        parser.error('verification requires Python assertions enabled')
+    if args.stress_rounds < 1:
+        parser.error('--stress-rounds must be positive')
+    if args.release:
+        if not args.reference:
+            parser.error('--release requires --reference')
+        args.install_check = True
+        args.stress_rounds = max(100, args.stress_rounds)
     os.umask(0o077)
     (ROOT/'compat/.runs').mkdir(parents=True, exist_ok=True)
     directory = Path(tempfile.mkdtemp(prefix='verification-', dir=ROOT/'compat/.runs'))
     print(f'Verification reports: {directory}', flush=True)
-    report = dict(started_at_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                  passed=False, steps=[], binaries={})
-
-    def fingerprint():
-        paths = [ROOT/name for name in ('Cargo.toml', 'Cargo.lock', 'build.rs', 'compat/observer-v2.json')]
-        for top in ('src', 'vendor', 'tools'):
-            paths.extend(path for path in (ROOT/top).rglob('*')
-                         if path.is_file() and '__pycache__' not in path.parts)
-        digest = hashlib.sha256()
-        for path in sorted(paths):
-            digest.update(str(path.relative_to(ROOT)).encode()+b'\0'+path.read_bytes()+b'\0')
-        return digest.hexdigest()
-
-    report['build_and_test_inputs_sha256'] = fingerprint()
+    report = dict(schema_version=2, started_at_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                  passed=False, steps=[], binaries={}, evidence_files={},
+                  selection=dict(reference=bool(args.reference), install_check=args.install_check,
+                                 stress_rounds=args.stress_rounds), release_prerequisites_complete=False)
 
     def save():
         (directory/'summary.json').write_text(json.dumps(report, indent=2)+'\n')
@@ -48,7 +51,9 @@ def main():
                                     stdout=log, stderr=subprocess.STDOUT)
         report['steps'].append(dict(name=name, returncode=result.returncode,
                                    expected_returncode=expected_returncode,
+                                   command=[str(arg) for arg in command], cwd=str(ROOT),
                                    passed=result.returncode == expected_returncode))
+        report['evidence_files'][name + '.log'] = sha_file(directory / (name + '.log'))
         save()
         if result.returncode != expected_returncode:
             print((directory/f'{name}.log').read_text()[-6000:], file=sys.stderr)
@@ -56,6 +61,9 @@ def main():
 
     python = sys.executable
     try:
+        report['source'] = source_identity(ROOT, require_clean=args.release)
+        report['build_and_test_inputs_sha256'] = report['source']['manifest_sha256']
+        save()
         run('format', ['cargo', 'fmt', '--all', '--', '--check'])
         run('rust-debug', ['cargo', 'test', '--locked'])
         run('rust-release', ['cargo', 'test', '--release', '--locked'])
@@ -75,6 +83,7 @@ def main():
                 companion_sha256=hashlib.sha256((binary.parent/'lessecho').read_bytes()).hexdigest())
         if args.reference:
             reference = args.reference.resolve(strict=True)
+            report['reference'] = dict(path=str(reference), sha256=sha_file(reference))
             run('reference', [python, 'tools/compat/check_candidate.py', '--binary', reference,
                              '--results-dir', directory/'reference'])
             for profile in ('debug', 'release'):
@@ -96,12 +105,27 @@ def main():
                 '--target-dir', directory/'clean-target', '--root', directory/'installed'])
             run('acceptance-installed', [python, 'tools/compat/check_candidate.py',
                 '--binary', directory/'installed/bin/rless', '--results-dir', directory/'acceptance-installed'])
-        if fingerprint() != report['build_and_test_inputs_sha256']:
+            report['installed'] = dict(sha256=sha_file(directory/'installed/bin/rless'),
+                                       companion_sha256=sha_file(directory/'installed/bin/lessecho'))
+        current = source_identity(ROOT, require_clean=args.release)
+        if any(current.get(field) != report['source'].get(field)
+               for field in ('source_commit', 'manifest_sha256', 'files', 'clean', 'dirty_state')):
             raise RuntimeError('build/test inputs changed during verification; rerun against a stable tree')
         helper = ROOT/'vendor/less-helpers/less-osc8-open'
         report['helpers'] = dict(osc8_sha256=hashlib.sha256(helper.read_bytes()).hexdigest())
+        evidence_names = ['negative.json', 'coverage.json', 'acceptance-debug/summary.json', 'acceptance-release/summary.json']
+        if args.reference:
+            evidence_names += ['reference/summary.json']
+            evidence_names += [f'{lane}-{profile}.json' for profile in ('debug', 'release')
+                               for lane in ('integrations', 'job-control', 'helpers')]
+            evidence_names += [f'stress-{profile}-{seed}.json' for profile in ('debug', 'release') for seed in (712, 20261023)]
+        if args.install_check:
+            evidence_names += ['acceptance-installed/summary.json']
+        report['evidence_files'].update({name: sha_file(directory / name) for name in evidence_names})
+        report['release_prerequisites_complete'] = bool(current['clean'] and args.reference and
+                                                       args.install_check and args.stress_rounds >= 100)
         report['passed'] = True
-    except (RuntimeError, OSError) as error:
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
         report['error'] = str(error)
         print(error, file=sys.stderr)
     report['finished_at_utc'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
