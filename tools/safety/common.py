@@ -176,7 +176,7 @@ def validate_detector_capture_evidence(item, root=ROOT):
 
 
 def is_external_report(report):
-    if report.get('report_kind') in ('m0-controls', 'host-native-baseline'):
+    if report.get('report_kind') in ('m0-controls', 'host-native-baseline', 'boundary-controls'):
         return True
     return ('input_fingerprints' not in report and (
         report.get('source_kind') == 'explicit-working-tree-snapshot' or
@@ -253,7 +253,7 @@ class Evidence:
                       coverage_scope=coverage_scope,
                       status=('finding-open' if finding_ids else 'passed') if passed else 'failed',
                       finding_ids=finding_ids, oracle_metadata=oracle_metadata,
-                      command=[str(x) for x in command],
+                      command=[str(x) for x in command], cwd=str(Path(cwd or self.root).resolve()),
                       original_exit_status=status, expected_exit_status=expected,
                       expected_diagnostic=diagnostic, diagnostic_found=has_finding,
                       timed_out=timed_out, stale_inputs=stale,
@@ -321,6 +321,8 @@ def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=F
             from m0_controls import validate_external_report
         elif report.get('report_kind') == 'host-native-baseline':
             from host_evidence import validate_external_report
+        elif report.get('report_kind') == 'boundary-controls':
+            from boundary_controls import validate_external_report
         else:
             from glibc241.evidence import validate_external_report
         report = validate_external_report(Path(path), root=root)
@@ -365,6 +367,13 @@ def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=F
             if not corpus.is_file() or sha(corpus) != metadata['corpus_sha256']:
                 raise ValueError('changed executed corpus')
         validate_fault_oracle_evidence(item, root, external=external)
+        if not external and item.get('boundary_controls_report') is not None:
+            from boundary_controls import checked, validate_external_report as validate_boundary
+            boundary = validate_boundary(checked(item['boundary_controls_report']), root)
+            if boundary['source_commit'] != report['source_commit']:
+                raise ValueError('supplemental boundary commit differs from fault runner')
+            item['_validated_boundary_controls'] = [x['name'] for x in boundary['records']]
+
         # Host JSON cannot supply a trusted proof bit. External normalized values
         # originate only from the specialized validator above, which rederives all
         # six detector controls and their retained observations/diagnostics.

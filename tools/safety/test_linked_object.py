@@ -16,14 +16,15 @@ ROOT = Path(__file__).resolve().parents[2]
 RUN = ROOT / 'compat/.runs/liveheap-link-20261031T081000Z'
 OBJECT = RUN / 'live_heap.o'
 BINARY = RUN / 'target/x86_64-unknown-linux-gnu/debug/rless'
+ANCHOR = '__wrap_read'
 
 
 class LinkedObjectMutations(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not OBJECT.is_file() or not BINARY.is_file():
-            raise unittest.SkipTest('retained liveheap ELF pair is unavailable')
-        cls.proof = linked_object.verify(BINARY, OBJECT, '__wrap_read')
+            raise ValueError('required retained liveheap ELF pair is unavailable; supply unit_tests.py fixture arguments')
+        cls.proof = linked_object.verify(BINARY, OBJECT, ANCHOR)
         cls.binary = linked_object.Elf(BINARY.read_bytes(), {2, 3})
         cls.object = linked_object.Elf(OBJECT.read_bytes(), {1})
 
@@ -34,7 +35,7 @@ class LinkedObjectMutations(unittest.TestCase):
             path = Path(directory) / 'rless-mutated'
             path.write_bytes(data)
             with self.assertRaises(ValueError):
-                linked_object.verify(path, OBJECT, '__wrap_read')
+                linked_object.verify(path, OBJECT, ANCHOR)
 
     def test_retained_body_proves(self):
         self.assertEqual(self.proof['source_code_sha256'],
@@ -50,7 +51,7 @@ class LinkedObjectMutations(unittest.TestCase):
 
     def test_relocation_target_change_rejected(self):
         relocation = next(row for row in self.proof['relocations']
-                          if row['symbol'] == '__real_read')
+                          if row['symbol'] == ('__real_read' if ANCHOR == '__wrap_read' else '__real_calloc'))
         address = self.proof['section_bases']['.text'] + relocation['offset']
         section = self.binary.only('.text')
         offset = section['offset'] + address - section['address']
@@ -88,7 +89,7 @@ class LinkedObjectMutations(unittest.TestCase):
             path = Path(directory) / 'unsupported.o'
             path.write_bytes(data)
             with self.assertRaises(ValueError):
-                linked_object.verify(BINARY, path, '__wrap_read')
+                linked_object.verify(BINARY, path, ANCHOR)
 
 
 if __name__ == '__main__':

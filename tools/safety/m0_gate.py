@@ -14,7 +14,7 @@ from common import ROOT, PINS, fingerprint, git, is_external_report, sha, valida
 from coverage import bind, matrix
 from ownership import validate as validate_ownership
 
-POLICY_VERSION = '1.0.0'
+POLICY_VERSION = '1.1.0'
 REQUIRED_ABIS = ('REFERENCE-GLIBC-2.41', 'BUILDER-GLIBC-2.44')
 HOOK_PROFILES = ('NATIVE', 'ASAN')
 HOOK_CONTROLS = ('fired', 'unfaulted', 'unreached', 'ordinal-separation',
@@ -68,8 +68,9 @@ def obligations(root=ROOT):
     for control, (packet, profile) in COMMON_CONTROLS.items():
         result[control] = dict(control=control, packet=packet, profile=profile,
                                abi_profile='BUILDER-GLIBC-2.44', site=None)
+    from boundary_controls import ABI_CONTROLS as BOUNDARY_CONTROLS
     for abi in REQUIRED_ABIS:
-        for control, (packet, profile) in ABI_CONTROLS.items():
+        for control, (packet, profile) in {**ABI_CONTROLS, **BOUNDARY_CONTROLS}.items():
             result[f'{control}:{abi}'] = dict(control=control, packet=packet,
                 profile=profile, abi_profile=abi, site=None)
         for site in sorted(declared_sites(root)):

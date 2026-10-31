@@ -43,9 +43,15 @@ def validate_shape(binding):
 
 def validate_observations(report, resolve=Path):
     """Re-derive each binding from actual retained ELF bytes, never run the ELF."""
+    if not isinstance(report, dict) or not isinstance(report.get('records'), list):
+        raise ValueError('native callback report requires records')
     checked = {}
     for record in report['records']:
+        if not isinstance(record, dict) or not isinstance(record.get('observations'), list):
+            raise ValueError('native callback record requires observations')
         for observation in record['observations']:
+            if not isinstance(observation, dict):
+                raise ValueError('invalid native callback observation')
             binding = observation.get('native_callback_binding')
             if binding is None:
                 continue  # Marker-level validation rejects unbound callback hits.

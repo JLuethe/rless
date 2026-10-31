@@ -19,7 +19,7 @@ LANES = ('static', 'hooks', 'detectors', 'fuzz')
 UNIT_GROUPS = {
     'inventory-coverage': ['test_inventory_coverage'],
     'ownership-mutations': ['test_closure.ReviewControls'],
-    'binding-mutations': ['test_closure.AcceptanceControls', 'test_safety.EvidenceGate',
+    'binding-mutations': ['test_closure.AcceptanceControls', 'test_safety', 'test_boundary_controls', 'test_native_callback',
                           'test_m0_gate', 'test_oracle_controls', 'test_m0_controls'],
 }
 COMPONENT_TEST = 'runtime::tests::nested_key_read_keeps_the_file_read_interruptible'
@@ -111,7 +111,7 @@ def run_hooks(args, evidence):
 
 
 def run_detectors(args, evidence):
-    from run import detectors, nightly_environment
+    from safety_runner import detectors, nightly_environment
     detectors(args, evidence)
     env = nightly_environment(args)
     for seed in PINS['miri_seeds']:
@@ -405,7 +405,7 @@ def main():
         evidence.run('observed-host-abi', ['getconf', 'GNU_LIBC_VERSION'], profile='ABI')
         try:
             if lane == 'fuzz':
-                from run import fuzz
+                from safety_runner import fuzz
                 fuzz(args, evidence)
             else:
                 globals()['run_' + lane](args, evidence)

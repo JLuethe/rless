@@ -10,7 +10,7 @@ from common import sha
 from inventory_format import (EXPANDED_CONFIGURATIONS, all_statics, boundary_comparison,
                               expanded_review_sites, source_inputs, REGION_REGISTER)
 from ownership import CHECKLIST, seed, validate
-from run import source_file_summaries
+from safety_runner import source_file_summaries
 
 
 class SourceCoverage(unittest.TestCase):

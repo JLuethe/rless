@@ -15,6 +15,14 @@ class CallbackBindingControls(unittest.TestCase):
             symbol='_ZN5rless6screen13inc_costcount17h0123456789abcdefE', offset=0x1234,
             helper_sha256=callback.sha(callback.__file__), shim_source_sha256=callback.sha(callback.SOURCE))
 
+    def test_report_requires_structural_records_even_without_callback_binding(self):
+        for report in (None, {}, {'records': None}, {'records': [None]},
+                       {'records': [{}]}, {'records': [{'observations': [None]}]}):
+            with self.subTest(report=report), self.assertRaises(ValueError):
+                callback.validate_observations(report)
+        callback.validate_observations({'records': []})
+        callback.validate_observations({'records': [{'observations': []}]})
+
     def test_shape_rejects_omitted_changed_or_ambiguous_identity(self):
         good = self.binding()
         callback.validate_shape(good)

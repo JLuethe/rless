@@ -148,3 +148,20 @@ A successful result is `m0-verified`, with both `runtime_safety_verified` and
 `m5_verified` false. An incomplete or stale receipt exits nonzero and records
 `not-verified`. Earlier historical reports and review ledgers are never relabeled
 as runs of a new source snapshot.
+
+
+## Supplemental boundary controls (policy 1.1)
+
+The maintained `tools/safety/boundary_controls.py` runner executes the 30-case
+IO suite, first-buffer ENOMEM/LRU reuse, borrowed-stdin deletion, and linked
+allocation/first-buffer counterparts on native and ASAN for each required ABI.
+ASAN additionally requires four warmed live-heap sessions, a linked heap object,
+and the cleanup-skipping mutation rejected by allocated-byte balance independently
+of LSAN status. Exact isolated first-buffer/stdin mutations and all thirty boundary
+status mutations must be rejected. Missing fixtures are failures, never skips.
+
+`fault_paths.py` invokes this runner by default. Its retained source/binary/object,
+raw observation, build, execution and mutation references are rederived through
+`common.validate_report` and the new M0 obligations. A pass bit or copied summary
+alone grants no control credit. This wiring does not close product findings or
+replace field-specific ownership review or independent qualification.

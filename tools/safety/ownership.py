@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Seed and validate source-bound ownership reviews, never infer review from counts."""
 import argparse
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -147,18 +148,39 @@ def expected_entries(inventory, regions, root=ROOT):
     if version == 2:
         for name, configuration in inventory['expanded_configurations'].items():
             entries['EXPANDED:' + name] = dict(kind='expanded-source', paths=[], packet=None,
-                configuration=name, source_artifact=configuration['source'],
-                syntax_artifact=configuration['syntax'],
+                configuration=name, source_artifact={'sha256': configuration['source']['sha256']},
+                syntax_artifact={'sha256': configuration['syntax']['sha256']},
                 site_ids=[site['id'] for site in configuration['review_sites']],
                 review_sites_sha256=hashlib.sha256(json.dumps(configuration['review_sites'], sort_keys=True).encode()).hexdigest(),
                 scope='Review compiler-generated code and configuration-specific owner/native/callback reachability.')
     return entries
 
 
+INVENTORY_BINDING = 'source-inventory-content-v1'
+
+
+def inventory_digest(inventory):
+    """Bind complete inventory content, independently of run timestamp/storage.
+
+    Artifact hashes, compiler configurations, build derivation hashes and every
+    source/static/native/indirect/expanded site remain bound. validate_inventory_v2
+    still checks actual retained artifacts against a fresh source derivation.
+    """
+    value = copy.deepcopy(inventory)
+    value.pop('recorded_at_utc', None)
+    if isinstance(value.get('raw_inventory'), dict):
+        value['raw_inventory'].pop('path', None)
+    for config in value.get('expanded_configurations', {}).values():
+        for kind in ('source', 'syntax'):
+            if isinstance(config.get(kind), dict):
+                config[kind].pop('path', None)
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
 def seed(inventory, regions, root=ROOT):
     entries = expected_entries(inventory, regions, root)
-    return dict(schema_version=1, scope='Pending review entries; seeding is not review completion.',
-                inventory_sha256=hashlib.sha256(json.dumps(inventory, sort_keys=True).encode()).hexdigest(),
+    return dict(schema_version=2, inventory_binding=INVENTORY_BINDING, scope='Pending review entries; seeding is not review completion.',
+                inventory_sha256=inventory_digest(inventory),
                 region_register_sha256=hashlib.sha256(json.dumps(regions, sort_keys=True).encode()).hexdigest(),
                 source_files_sha256={p:sha(root / p) for p in inventory['files']},
                 status='not-verified', entries=[dict(id=key, **item, status='pending', reviewer=None,
@@ -226,6 +248,8 @@ def validate(review, inventory, regions, findings, root=ROOT, complete=True):
     if complete and inventory.get('schema_version', 1) != 2:
         raise ValueError('complete ownership review requires source-derived schema-2 inventory')
     expected = seed(inventory, regions, root)
+    if review.get('schema_version') != 2 or review.get('inventory_binding') != INVENTORY_BINDING:
+        raise ValueError('ownership review requires explicit migration to source-inventory-content-v1')
     for field in ('inventory_sha256', 'region_register_sha256', 'source_files_sha256'):
         if review[field] != expected[field]:
             raise ValueError('stale review ' + field)

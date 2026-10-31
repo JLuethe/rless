@@ -38,21 +38,23 @@ def check(value, message):
         raise AssertionError(message)
 
 
-def run(binary, output):
-    output.mkdir(parents=True, exist_ok=True)
+def run(binary, output, *, retained=None):
     shim = output / 'boundary_fault.so'
-    subprocess.run(['cc', '-Wall', '-Wextra', '-Werror', '-shared', '-fPIC',
-                    str(Path(__file__).parent / 'native/boundary_fault.c'),
-                    '-ldl', '-o', str(shim)], check=True)
+    if retained is None:
+        output.mkdir(parents=True, exist_ok=False)
+        subprocess.run(['cc', '-Wall', '-Wextra', '-Werror', '-shared', '-fPIC',
+                        str(Path(__file__).parent / 'native/boundary_fault.c'),
+                        '-ldl', '-o', str(shim)], check=True)
     results = {}
     def observe(name, case, verify):
         try:
-            actual = run_case(binary, case)
+            actual = run_case(binary, case) if retained is None else retained[name]['observed']
             verify(actual)
             results[name] = dict(passed=True, observed=actual)
         except Exception as error:
             results[name] = dict(passed=False, error=f'{type(error).__name__}: {error}')
-        (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
+        if retained is None:
+            (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
     def healthy(o):
         check(o['status'] == 0 and o['termios_restored'], 'exit or terminal restore failed')
     def hit(o):
@@ -191,6 +193,20 @@ def run(binary, output):
     # directly to verify both success and rollback against an old symlink.
     for plan in ('baseline', 'hist-rename'):
         name = 'history-symlink-' + plan
+        def verify_symlink(o, plan=plan):
+            healthy(o)
+            effect = o['symlink_effects']
+            check(effect['victim_sha256'] == sha(old), 'symlink target modified')
+            check(effect['temporary_names'] == [], 'temporary file left')
+            if plan == 'baseline':
+                check(effect['history_is_symlink'] is False, 'successful rename followed symlink')
+                check(effect['history_mode'] == 0o600, 'new history not private')
+            else:
+                check(effect['history_is_symlink'] is True, 'failed rename replaced symlink')
+                check(effect['hit_sha256'] == sha(b'hit\n'), 'rename fault missed')
+        if retained is not None:
+            observe(name, None, verify_symlink)
+            continue
         try:
             with tempfile.TemporaryDirectory(prefix='rless-history-link-') as directory:
                 work = Path(directory)
@@ -217,10 +233,17 @@ def run(binary, output):
                 else:
                     check((work / 'history').is_symlink(), 'failed rename replaced symlink')
                     check((work / 'hit').read_bytes() == b'hit\n', 'rename fault missed')
+                o['symlink_effects'] = dict(victim_sha256=sha((work / 'victim').read_bytes()),
+                    temporary_names=sorted(x.name for x in work.iterdir() if x.name.startswith('history.')),
+                    history_is_symlink=(work / 'history').is_symlink(),
+                    history_mode=(work / 'history').stat().st_mode & 0o777,
+                    hit_sha256=sha((work / 'hit').read_bytes()))
+                verify_symlink(o)
                 results[name] = dict(passed=True, observed=o)
         except Exception as error:
             results[name] = dict(passed=False, error=f'{type(error).__name__}: {error}')
-        (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
+        if retained is None:
+            (output / 'results.json').write_text(json.dumps(results, indent=2) + '\n')
 
     summary = dict(executed=len(results), passed=sum(v['passed'] for v in results.values()),
                    failed=[k for k, v in results.items() if not v['passed']],
@@ -231,8 +254,11 @@ def run(binary, output):
                                   for name in ('src/ch.rs', 'src/cmdbuf.rs', 'src/lsystem.rs',
                                                'src/pager.rs', 'src/position.rs', 'src/screen.rs')},
                    asan_environment=bool(os.environ.get('RLESS_SAFETY_ENV')))
-    (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
-    print(json.dumps(summary))
+    if retained is not None:
+        check(set(retained) == set(results) and len(results) == 30, 'missing or extra boundary cases')
+    else:
+        (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+        print(json.dumps(summary))
     return not summary['failed']
 
 

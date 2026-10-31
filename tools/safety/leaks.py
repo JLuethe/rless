@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 from common import Evidence, PINS, ROOT, environment, sha, write_json
-from run import check_tools, nightly_environment
+from safety_runner import check_tools, nightly_environment
 
 
 def cases():

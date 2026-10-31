@@ -274,7 +274,7 @@ class EvidenceGate(unittest.TestCase):
         selector = 'ActualFaultPaths.' + name
         declaration = contracts()[name]
         oracle = self.directory / 'oracle.json'
-        write_json(oracle, {'repetitions': 1})
+        write_json(oracle, {'repetitions': 1, 'records': []})
         observed = [dict(site='read', ordinal=1, magic='RLF1')]
         item = dict(command=['fixture', selector], scenario_id=declaration['scenario_id'],
             variant=declaration['variant'], finding_ids=declaration['finding_ids'],
@@ -286,6 +286,14 @@ class EvidenceGate(unittest.TestCase):
         # of its rederived output to the common evidence record.
         with patch('test_fault_paths.validate_oracle_report', return_value={selector: observed}):
             self.assertEqual(validate_fault_oracle_evidence(item, self.root), observed)
+            # Even with the marker parser isolated, the retained report must
+            # satisfy the native callback report schema; no optional fallback.
+            write_json(oracle, {'repetitions': 1})
+            item['oracle_report']['sha256'] = sha(oracle)
+            with self.assertRaisesRegex(ValueError, 'records'):
+                validate_fault_oracle_evidence(item, self.root)
+            write_json(oracle, {'repetitions': 1, 'records': []})
+            item['oracle_report']['sha256'] = sha(oracle)
             item['observed_hooks'] = [dict(site='read', ordinal=2, magic='RLF1')]
             with self.assertRaisesRegex(ValueError, 'retained marker bytes'):
                 validate_fault_oracle_evidence(item, self.root)

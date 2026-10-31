@@ -53,6 +53,26 @@ class ReviewControls(unittest.TestCase):
         self.assertEqual(len(self.review['entries']),5)
         self.complete();self.assertEqual(self.check()['status'],'reviewed')
 
+    def test_regenerated_inventory_storage_does_not_invalidate_source_review(self):
+        from ownership import inventory_digest
+        self.inventory.update(recorded_at_utc='first',raw_inventory={'path':'/old/raw','sha256':'a'*64})
+        self.review=seed(self.inventory,self.regions,self.root)
+        self.complete()
+        first=inventory_digest(self.inventory)
+        self.inventory['recorded_at_utc']='second'
+        self.inventory['raw_inventory']['path']='/new/raw'
+        self.assertEqual(first,inventory_digest(self.inventory))
+        self.assertEqual(self.check()['status'],'reviewed')
+        self.inventory['raw_inventory']['sha256']='b'*64
+        with self.assertRaisesRegex(ValueError,'stale review inventory_sha256'):
+            self.check()
+
+    def test_unmigrated_review_cannot_gain_content_binding_implicitly(self):
+        self.complete()
+        self.review.pop('inventory_binding')
+        with self.assertRaisesRegex(ValueError,'explicit migration'):
+            self.check()
+
     def test_historical_inventory_cannot_approve_complete_review(self):
         self.inventory['schema_version']=1
         self.review=seed(self.inventory,self.regions,self.root)
