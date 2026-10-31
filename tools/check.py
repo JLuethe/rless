@@ -101,7 +101,7 @@ def main():
         else:
             report['reference_checks'] = 'Not requested; supply --reference for differential integration/stress tests.'
         if args.install_check:
-            run('clean-install', ['cargo', 'install', '--path', ROOT, '--locked',
+            run('clean-install', ['cargo', 'install', '--path', ROOT, '--locked', '--offline',
                 '--target-dir', directory/'clean-target', '--root', directory/'installed'])
             run('acceptance-installed', [python, 'tools/compat/check_candidate.py',
                 '--binary', directory/'installed/bin/rless', '--results-dir', directory/'acceptance-installed'])
