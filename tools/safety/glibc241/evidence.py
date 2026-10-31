@@ -204,6 +204,8 @@ def validate_asan_report(path, root=ROOT):
     oracle_path = checked(work / 'report/fault-oracles.json', inner['oracle_report_sha256'])
     alloc_binary=validate_allocation_binding(inner,work,root,'asan')
     fault_oracles=json.loads(oracle_path.read_text())
+    from native_callback import validate_observations
+    validate_observations(fault_oracles, lambda binary: work_path(binary, work))
     allowed_binaries={'/work/normal/'+PINS['target']+'/debug/rless',
                       '/work/injected/'+PINS['target']+'/debug/rless','/reference/less',alloc_binary}
     require(all(observation['binary'] in allowed_binaries for row in fault_oracles['records']
@@ -402,6 +404,8 @@ def validate_native_report(path, root=ROOT):
                             '/work/cleanup.so','/work/short-write.so','/work/native-io.so',alloc_binary,'/work/alloc-fault.o'}
     require(set(inner['test_binaries'])==expected_test_binaries,'native fault binary manifest incomplete')
     fault_oracles=json.loads((work/'report/fault-oracles.json').read_text())
+    from native_callback import validate_observations
+    validate_observations(fault_oracles, lambda binary: work_path(binary, work))
     require(all(observation['binary'] in {'/work/source/target/debug/rless','/work/injected/debug/rless','/reference/less',alloc_binary}
                 for row in fault_oracles['records'] for observation in row['observations']),
             'native fault oracle selected an unexpected binary')

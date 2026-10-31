@@ -193,6 +193,7 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
 
 
 def pty_run(binary, case, plan=None, native=False, native_plan=None):
+    callback_binding = None
     with trace_channel() as (reader, writer):
         write_fd = writer.fileno()
         case = copy.deepcopy(case)
@@ -214,9 +215,14 @@ def pty_run(binary, case, plan=None, native=False, native_plan=None):
             site, ordinal = native_plan.split(':')
             env.update(LD_PRELOAD=str(IO_SHIM), RLESS_NATIVE_IO_SITE=site,
                        RLESS_NATIVE_IO_ORDINAL=ordinal, RLESS_NATIVE_IO_FD=str(write_fd))
+            if site == 'callback':
+                from native_callback import bind
+                callback_binding = bind(binary)
+                env['RLESS_NATIVE_CALLBACK_OFFSET'] = str(callback_binding['offset'])
         observed = run_case(binary, case)
         trace = read_trace(reader, writer)
     OBSERVATIONS.append(dict(kind='pty', binary=str(binary), plan=plan, native_plan=native_plan,
+                             native_callback_binding=callback_binding,
                              trace_hex=trace.hex(), status=observed['status'],
                              termios_restored=observed['termios_restored'],
                              resources=observed.get('resource_checkpoints', []),
@@ -1125,6 +1131,11 @@ def validate_oracle_report(report, expected_selectors=None):
                 if magic not in (b'RLF1', b'RNT1') or site_id not in names or not ordinal:
                     raise ValueError('unknown, exhausted or malformed actual event')
                 site = names[site_id]
+                if magic == b'RNT1' and site == 'callback':
+                    from native_callback import validate_shape
+                    validate_shape(observation.get('native_callback_binding'))
+                    if observation.get('native_plan') != f'callback:{ordinal}':
+                        raise ValueError('native callback event differs from bound plan')
                 if site not in contract['hook_sites'] or ordinal not in contract['hook_ordinals']:
                     raise ValueError('actual hook differs from executed selector')
                 observed.add((site, ordinal, magic.decode('ascii')))

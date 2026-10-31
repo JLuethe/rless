@@ -128,6 +128,9 @@ def validate_fault_oracle_evidence(item, root=ROOT, *, external=False):
     from test_fault_paths import contracts, validate_oracle_report
     report = json.loads(path.read_text())
     validated = validate_oracle_report(report, expected_selectors=None if external else [selector])
+    if not external:
+        from native_callback import validate_observations
+        validate_observations(report)
     if selector not in validated:
         raise ValueError('selected fault oracle was not executed')
     declaration = contracts().get(selector.removeprefix('ActualFaultPaths.'))

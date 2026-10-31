@@ -7,6 +7,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <link.h>
 #include <regex.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -17,6 +18,41 @@
 static unsigned long long attempts;
 static int input_fds[1024];
 static int (*current_putc)(int);
+
+struct callback_target { uintptr_t offset, address; int found; };
+
+static int main_callback(struct dl_phdr_info *info, size_t size, void *data)
+{
+    (void)size;
+    struct callback_target *target = data;
+    if (info->dlpi_name && *info->dlpi_name) return 0;
+    if (UINTPTR_MAX - info->dlpi_addr < target->offset) _exit(122);
+    for (unsigned i = 0; i < info->dlpi_phnum; ++i) {
+        const ElfW(Phdr) *segment = &info->dlpi_phdr[i];
+        if (segment->p_type == PT_LOAD && (segment->p_flags & PF_X) &&
+            target->offset >= segment->p_vaddr &&
+            target->offset - segment->p_vaddr < segment->p_memsz) {
+            target->address = info->dlpi_addr + target->offset;
+            target->found = 1;
+            return 1;
+        }
+    }
+    _exit(122);
+}
+
+static int selected_callback(int (*putc_fn)(int))
+{
+    const char *text = getenv("RLESS_NATIVE_CALLBACK_OFFSET");
+    if (!text || !*text || *text < '0' || *text > '9') _exit(122);
+    char *end;
+    errno = 0;
+    unsigned long long offset = strtoull(text, &end, 10);
+    if (*end || errno || !offset || offset > UINTPTR_MAX) _exit(122);
+    struct callback_target target = {(uintptr_t)offset, 0, 0};
+    dl_iterate_phdr(main_callback, &target);
+    if (!target.found) _exit(122);
+    return (uintptr_t)putc_fn == target.address;
+}
 
 static void event(unsigned site, unsigned long long ordinal)
 {
@@ -119,13 +155,18 @@ static int native_putc(int character)
 
 int tputs(const char *capability, int affected, int (*putc_fn)(int))
 {
+    int saved_errno = errno;
     int (*real_call)(const char *, int, int (*)(int)) = dlsym(RTLD_NEXT, "tputs");
     if (!real_call) _exit(125);
     const char *plan = getenv("RLESS_NATIVE_IO_SITE");
-    if (!plan || strcmp(plan, "callback")) return real_call(capability, affected, putc_fn);
+    if (!plan || strcmp(plan, "callback") || !selected_callback(putc_fn)) {
+        errno = saved_errno;
+        return real_call(capability, affected, putc_fn);
+    }
     /* Nested callback registration is rejected, never silently overwritten. */
     if (current_putc) _exit(122);
     current_putc = putc_fn;
+    errno = saved_errno;
     int result = real_call(capability, affected, native_putc);
     current_putc = NULL;
     return result;
