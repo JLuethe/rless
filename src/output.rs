@@ -2,6 +2,8 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
 extern "C" {
     fn write(__fd: ::core::ffi::c_int, __buf: *const ::core::ffi::c_void, __n: size_t) -> ssize_t;
     fn strcpy(
@@ -485,12 +487,40 @@ pub unsafe extern "C" fn put_line(mut forw_scroll: lbool) {
 static mut obuf: [::core::ffi::c_char; 1024] = [0; 1024];
 static mut ob: *mut ::core::ffi::c_char = unsafe { &raw const obuf as *mut ::core::ffi::c_char };
 static mut outfd: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
+// Sticky process failure is separate from screen recovery: terminal teardown
+// must still attempt its output even after a previous write failed.
+static OUTPUT_FAILED: AtomicBool = AtomicBool::new(false);
+
+pub fn output_failed() -> bool {
+    OUTPUT_FAILED.load(Ordering::Relaxed)
+}
+
+// Do not enter error()/putstr()/flush() here: their output may be the failing
+// stream. This allocation-free, best-effort stderr path cannot recurse.
+pub fn io_error_diagnostic(message: &[u8]) {
+    let mut remaining = message;
+    while !remaining.is_empty() {
+        let result = unsafe { libc::write(2, remaining.as_ptr().cast(), remaining.len()) };
+        if result > 0 {
+            remaining = &remaining[result as usize..];
+        } else if result < 0 && unsafe { *libc::__errno_location() } == libc::EINTR {
+            continue;
+        } else {
+            break;
+        }
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn flush() {
+    flush_buffer();
+}
+
+unsafe fn flush_buffer() -> bool {
     let mut n: size_t = 0;
     n = ob.offset_from(&raw mut obuf as *mut ::core::ffi::c_char) as size_t;
     if n == 0 as size_t {
-        return;
+        return true;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
     let mut written = 0;
@@ -521,12 +551,14 @@ pub unsafe extern "C" fn flush() {
         } else if result < 0 && *libc::__errno_location() == libc::EINTR {
             continue;
         } else {
-            // A permanent error still needs the legacy screen recovery path.
-            // Short successful writes must not discard the unconsumed suffix.
+            if !OUTPUT_FAILED.swap(true, Ordering::Relaxed) {
+                io_error_diagnostic(b"rless: write error\n");
+            }
             screen_trashed();
-            break;
+            return false;
         }
     }
+    true
 }
 #[no_mangle]
 pub unsafe extern "C" fn set_output(mut fd: ::core::ffi::c_int, mut no_term_init: lbool) {
@@ -556,7 +588,9 @@ pub unsafe extern "C" fn putchr(mut ch: ::core::ffi::c_int) -> ::core::ffi::c_in
             ::core::mem::size_of::<[::core::ffi::c_char; 1024]>().wrapping_sub(1usize) as isize,
         )
     {
-        flush();
+        if !flush_buffer() {
+            return -1;
+        }
     }
     let c2rust_fresh0 = ob;
     ob = ob.offset(1);

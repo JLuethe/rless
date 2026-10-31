@@ -270,7 +270,7 @@ class EvidenceGate(unittest.TestCase):
 
     def test_fault_reference_and_copied_marker_claims_are_checked(self):
         from test_fault_paths import contracts
-        name = 'test_diagnostic_read_error_reproduces_unreported_legacy_failure'
+        name = 'test_read_error_reports_failure_without_discarding_status'
         selector = 'ActualFaultPaths.' + name
         declaration = contracts()[name]
         oracle = self.directory / 'oracle.json'

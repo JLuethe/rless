@@ -755,13 +755,24 @@ unsafe fn main_0(
             quit(1 as ::core::ffi::c_int);
         }
         set_output(1 as ::core::ffi::c_int, lbool::LTRUE);
+        let mut copy_status = 0;
         loop {
             cat_file();
+            // Keep a sticky copy result but consume each file's read-error flag
+            // once. Noninteractive edit_next does not clear that flag.
+            if crate::ch::read_error.0 != 0 {
+                copy_status = 1;
+                crate::output::io_error_diagnostic(b"rless: read error\n");
+                crate::ch::read_error = crate::ch::lbool::LFALSE;
+            }
+            if crate::output::output_failed() {
+                break;
+            }
             if edit_next(1 as ::core::ffi::c_int) != 0 as ::core::ffi::c_int {
                 break;
             }
         }
-        quit(0 as ::core::ffi::c_int);
+        quit(copy_status);
     }
     if missing_cap.0 != 0 && know_dumb == 0 {
         error(
@@ -834,7 +845,10 @@ pub unsafe extern "C" fn saven(
         n.wrapping_add(1 as size_t),
         ::core::mem::size_of::<::core::ffi::c_char>(),
     ) as *mut ::core::ffi::c_char;
-    strncpy(p, s, n);
+    // Empty xbuffers may lend a null data pointer; do not pass it to C.
+    if n != 0 {
+        strncpy(p, s, n);
+    }
     *p.offset(n as isize) = '\0' as ::core::ffi::c_char;
     return p;
 }
@@ -954,6 +968,11 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
     save_cmdhist();
     raw_mode(lbool::LFALSE);
     close_getchr();
+    // Include failures from the final flush/terminal teardown, without hiding
+    // a more specific primary error (for example SIGTERM's status 15).
+    if status == 0 && crate::output::output_failed() {
+        status = 1;
+    }
     exit(status);
 }
 #[no_mangle]

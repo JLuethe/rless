@@ -204,12 +204,14 @@
         "compat/.runs/resume-fault-paths-native-4/summary.json",
         "compat/.runs/resume-fault-paths-asan-2/summary.json",
         "docs/verification/claude-m0-probes-2026-10-30.json",
-        "docs/safety/claude-m0-review-2026-10-30.md"
+        "docs/safety/claude-m0-review-2026-10-30.md",
+        "tools/safety/test_fault_paths.py:test_read_error_reports_failure_without_discarding_status"
       ],
       "blocks_final_safety_gate": true,
       "fix_commit": null,
-      "regression": "test_diagnostic_read_error_reproduces_unreported_legacy_failure",
-      "rerun_evidence": null
+      "regression": "test_read_error_reports_failure_without_discarding_status",
+      "rerun_evidence": null,
+      "candidate_status": "Candidate reports permanent I/O failure and preserves nonzero status; independent native/ASan/reference-ABI regression and full qualification pending. Historical C divergence evidence retained; finding remains open."
     },
     {
       "id": "M0-IO-002",
@@ -226,12 +228,14 @@
         "compat/.runs/resume-fault-paths-native-4/summary.json",
         "compat/.runs/resume-fault-paths-asan-2/summary.json",
         "docs/verification/claude-m0-probes-2026-10-30.json",
-        "docs/safety/claude-m0-review-2026-10-30.md"
+        "docs/safety/claude-m0-review-2026-10-30.md",
+        "tools/safety/test_fault_paths.py:test_write_error_reports_failure_without_discarding_status"
       ],
       "blocks_final_safety_gate": true,
       "fix_commit": null,
-      "regression": "test_diagnostic_write_error_reproduces_unreported_legacy_failure",
-      "rerun_evidence": null
+      "regression": "test_write_error_reports_failure_without_discarding_status",
+      "rerun_evidence": null,
+      "candidate_status": "Candidate reports permanent I/O failure and preserves nonzero status; independent native/ASan/reference-ABI regression and full qualification pending. Historical C divergence evidence retained; finding remains open."
     },
     {
       "id": "M0-LEAK-003",
@@ -359,6 +363,53 @@
       "blocks_final_safety_gate": true,
       "fix_commit": null,
       "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_duplicate_startup_options_release_previous_saved_strings and ActualFaultPaths.test_stdin_tags_reset_releases_saved_filename",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-COV-002",
+      "title": "PTY descriptor and exit-leak observations do not prove live heap conservation",
+      "status": "open",
+      "classification": "Independent mutation control skipped filter candidate cleanup; pinned LSAN missed the fully retained candidate via conservative stack roots. An in-process allocation balance/growth oracle and retained mutation controls are required.",
+      "severity": "evidence coverage gap; not exploit-assessed",
+      "delivery_packet": "M0.3",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-VER-006"
+      ],
+      "evidence_refs": [
+        "docs/safety/claude-hook-review-2026-10-31.md",
+        "compat/.runs/claude-hook-review-20261031/logs/p5c_filter_leak_roots.log"
+      ],
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-FFI-002",
+      "title": "Saving an empty unallocated message buffer passes null to strncpy",
+      "status": "open",
+      "classification": "Independent source/header review confirms a reachable empty-message path violates the native nonnull precondition even with n=0; candidate skips the C copy for zero length.",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.1",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "evidence_refs": [
+        "src/lmsg.rs:lmsg_line",
+        "src/pager.rs:saven",
+        "compat/.runs/native-inventory-review-20261031",
+        "compat/.runs/ownership-audit-20261030/source-review.md"
+      ],
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "source_files_sha256": {
+        "src/lmsg.rs": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+        "src/pager.rs": "286fdc420007c27e5c35f1b53a6729125c5926b79dab436887029706a43c5542"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "ActualFaultPaths.test_duplicate_message_and_help_definitions_release_previous_overrides (empty message/help cases)",
       "rerun_evidence": null
     }
   ]

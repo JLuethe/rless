@@ -17,7 +17,7 @@ from test_fault_paths import INTERNAL_REPEAT_METHODS, SITE_IDS, contracts, finis
 class RepetitionExecutionControls(unittest.TestCase):
     def test_noncycle_selector_is_actually_invoked_for_every_repetition(self):
         class Fixture(unittest.TestCase):
-            def test_diagnostic_read_error_reproduces_unreported_legacy_failure(self):
+            def test_read_error_reports_failure_without_discarding_status(self):
                 faults.OBSERVATIONS.append(dict(kind='pipe', status=0, trace_hex=marker(2).hex()))
         with patch.object(faults, 'REPETITIONS', 3):
             runner = faults.RepeatingOracleRunner(stream=io.StringIO(), verbosity=0, resultclass=faults.OracleResult)
@@ -71,7 +71,7 @@ class RetainedFaultOracleControls(unittest.TestCase):
                 self.assertTrue({'NATIVE', 'ASAN'} <= set(scenario['required_profiles']))
 
     def setUp(self):
-        self.method = 'test_diagnostic_read_error_reproduces_unreported_legacy_failure'
+        self.method = 'test_read_error_reports_failure_without_discarding_status'
         self.selector = 'ActualFaultPaths.' + self.method
         self.report = dict(schema_version=2, passed=True, repetitions=1, tests_run=1,
             records=[dict(test_selector=self.selector, passed=True,
@@ -95,6 +95,31 @@ class RetainedFaultOracleControls(unittest.TestCase):
         self.report['tests_run'] = 1
         with self.assertRaisesRegex(ValueError, 'repetitions were not executed'):
             self.validate()
+
+    def test_unbounded_write_evidence_cannot_substitute_a_finite_or_live_producer(self):
+        name = 'test_write_failure_stops_unbounded_input_and_broken_stderr'
+        selector = 'ActualFaultPaths.' + name
+        observations = [dict(kind='pipe', status=1, process_reaped=True, process_group_empty=True,
+            input_kind='unbounded-pipe', producer_stopped=True, producer_broken_pipe=True,
+            producer_bytes=8192, stdout_full=i >= 2, stderr_full=i == 3,
+            trace_hex=(marker(4, magic=b'RLF1' if i == 0 else b'RNT1').hex() if i < 2 else ''))
+            for i in range(4)]
+        report = dict(schema_version=2, passed=True, repetitions=1, tests_run=1,
+            records=[dict(test_selector=selector, passed=True, contract=contracts()[name],
+                repetition_mode='test-invocations', invocation_observation_counts=[4], observations=observations)])
+        validate_oracle_report(report, [selector])
+        for field, value in [('input_kind', 'pipe'), ('producer_stopped', False),
+                             ('producer_broken_pipe', False), ('producer_bytes', 0),
+                             ('producer_bytes', True), ('producer_bytes', 1024 * 1024),
+                             ('status', 0), ('stdout_full', True)]:
+            changed = copy.deepcopy(report)
+            changed['records'][0]['observations'][0][field] = value
+            with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                validate_oracle_report(changed, [selector])
+        changed = copy.deepcopy(report)
+        changed['records'][0]['observations'][-1]['stderr_full'] = False
+        with self.assertRaises(ValueError):
+            validate_oracle_report(changed, [selector])
 
     def test_missing_false_or_inconsistent_invocation_counts_reject(self):
         for counts in (None, [], [True], [0], [2], [1, 1]):
@@ -145,7 +170,7 @@ class RetainedFaultOracleControls(unittest.TestCase):
             report = {**self.report, 'records': records}
             with self.subTest(records=len(records)), self.assertRaises(ValueError):
                 self.validate(report)
-        other = 'ActualFaultPaths.test_diagnostic_write_error_reproduces_unreported_legacy_failure'
+        other = 'ActualFaultPaths.test_write_error_reports_failure_without_discarding_status'
         report = copy.deepcopy(self.report)
         report.update(tests_run=2, records=report['records'] * 2)
         with self.assertRaises(ValueError):

@@ -131,5 +131,10 @@ fn a_closed_output_pipe_preserves_default_sigpipe() {
 
 #[test]
 fn an_inherited_ignored_sigpipe_stays_ignored() {
-    assert!(broken_pipe(true).status.success());
+    let result = broken_pipe(true);
+    // Ignore remains inherited; the resulting EPIPE is now an ordinary I/O
+    // failure rather than being silently reported as successful output.
+    assert_eq!(result.status.signal(), None);
+    assert_eq!(result.status.code(), Some(1));
+    assert_eq!(result.stderr, b"rless: write error\n");
 }

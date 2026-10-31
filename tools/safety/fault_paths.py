@@ -184,8 +184,8 @@ def main():
     if capture_reference_bundle(reference, ROOT) != bundle:
         raise ValueError('reference bundle changed during fault campaign')
     evidence.report['findings'].extend([
-        dict(id='M0-IO-001', status='open', reason='Injected read EIO loses input without diagnostic and returns zero.'),
-        dict(id='M0-IO-002', status='open', reason='Injected write EIO loses output without diagnostic and returns zero.')])
+        dict(id='M0-IO-001', status='open', reason='Historical silent read EIO; corrected candidate remains pending independent qualification.'),
+        dict(id='M0-IO-002', status='open', reason='Historical silent write EIO; corrected candidate remains pending independent qualification.')])
     reports = [dict(path=str(p), sha256=sha(p)) for p in sorted(diagnostics.iterdir())]
     evidence.report['sanitizer_reports'] = reports
     if reports:

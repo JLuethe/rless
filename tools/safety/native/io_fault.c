@@ -59,6 +59,7 @@ ssize_t write(int fd, const void *buffer, size_t count)
     ssize_t (*real_call)(int, const void *, size_t) = dlsym(RTLD_NEXT, "write");
     if (!real_call) _exit(125);
     if (fd == STDOUT_FILENO && selected("write", 4)) { errno = EIO; return -1; }
+    if (fd == STDOUT_FILENO && selected("write-eintr", 4)) { errno = EINTR; return -1; }
     return real_call(fd, buffer, count);
 }
 

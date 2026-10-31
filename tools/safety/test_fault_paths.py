@@ -11,6 +11,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 
@@ -77,7 +78,8 @@ def finish_process_group(pid, grace_seconds=1.0):
 
 def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, native_short=False,
              unreadable=False, native_plan=None, native_alloc_plan=None, seekable_stdin=False,
-             lesskey_env=None, message_content=None, more_mode=False):
+             lesskey_env=None, message_content=None, more_mode=False,
+             unbounded_stdin=False, stdout_full=False, stderr_full=False):
     with ExitStack() as handles, trace_channel() as (reader, writer), tempfile.TemporaryDirectory(prefix='rless-fault-') as directory:
         write_fd = writer.fileno()
         for name, value in (files or {}).items():
@@ -119,11 +121,37 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
             input_file = handles.enter_context(tempfile.TemporaryFile())
             input_file.write(payload)
             input_file.seek(0)
+        if unbounded_stdin and (seekable_stdin or not payload):
+            raise ValueError('unbounded input needs a nonempty pipe payload')
+        full_output = handles.enter_context(open('/dev/full', 'wb', buffering=0)) if stdout_full else None
+        full_error = handles.enter_context(open('/dev/full', 'wb', buffering=0)) if stderr_full else None
         process = subprocess.Popen(command, env=env, cwd=directory,
             stdin=input_file if seekable_stdin else subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, pass_fds=[write_fd], start_new_session=True)
+            stdout=full_output or subprocess.PIPE, stderr=full_error or subprocess.PIPE,
+            pass_fds=[write_fd], start_new_session=True)
+        produced = [0]
+        producer_broken_pipe = [False]
+        producer = None
+        if unbounded_stdin:
+            # This producer never sends EOF voluntarily. Pager failure must close
+            # its input; a finite communicate(payload) could hide an endless read.
+            def produce():
+                try:
+                    with process.stdin:
+                        while True:
+                            produced[0] += os.write(process.stdin.fileno(), payload)
+                except BrokenPipeError:
+                    producer_broken_pipe[0] = True
+            producer = threading.Thread(target=produce, daemon=True)
+            producer.start()
         try:
-            stdout, stderr = process.communicate(None if seekable_stdin else payload, timeout=5)
+            if producer is not None:
+                process.wait(timeout=5)
+                producer.join(timeout=2)
+                if producer.is_alive():
+                    raise ValueError('unbounded input producer survived pager exit')
+                process.stdin = None
+            stdout, stderr = process.communicate(None if seekable_stdin or unbounded_stdin else payload, timeout=5)
         except subprocess.TimeoutExpired:
             try:
                 os.killpg(process.pid, signal.SIGKILL)
@@ -131,6 +159,9 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
                 pass
             if process.poll() is None:
                 process.kill()
+            if producer is not None:
+                producer.join(timeout=2)
+                process.stdin = None
             try:
                 process.communicate(timeout=2)
             except subprocess.TimeoutExpired:
@@ -140,7 +171,7 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
                         stream.close()
                 process.wait(timeout=2)
             raise
-        result = subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+        result = subprocess.CompletedProcess(command, process.returncode, stdout or b'', stderr or b'')
         finish_process_group(process.pid)
         group_empty = True
         trace = read_trace(reader, writer)
@@ -149,7 +180,10 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
                              lesskey_env=lesskey_env or {}, more_mode=more_mode,
                              message_content_sha256=(hashlib.sha256(message_content.encode()).hexdigest()
                                                      if message_content is not None else None),
-                             input_kind='seekable-stdin' if seekable_stdin else 'pipe',
+                             input_kind='unbounded-pipe' if unbounded_stdin else ('seekable-stdin' if seekable_stdin else 'pipe'),
+                             producer_bytes=produced[0], producer_stopped=producer is not None and not producer.is_alive(),
+                             producer_broken_pipe=producer_broken_pipe[0],
+                             stdout_full=stdout_full, stderr_full=stderr_full,
                              trace_hex=trace.hex(), status=result.returncode,
                              process_reaped=process.returncode is not None, process_group_empty=group_empty,
                              input_sha256=hashlib.sha256(payload).hexdigest(),
@@ -222,16 +256,13 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertEqual(native_trace, marker(site_id, ordinal, b'RNT1'))
                 self.assertEqual((native.returncode, native.stdout, native.stderr), (0, payload, b''))
 
-    def test_diagnostic_read_error_reproduces_unreported_legacy_failure(self):
+    def test_read_error_reports_failure_without_discarding_status(self):
         result, trace = pipe_run(INJECTED, 'read:1')
         self.assertEqual(trace, marker(2))
         self.assertEqual(result.stdout, b'')
-        self.assertEqual((result.returncode, result.stderr), (0, b''))
-        # This test reproduces a finding. It must never bind to a complete
-        # read-error safety acceptance row or turn status zero into acceptance.
-        print('FINDING M0-IO-001: read EIO silently exits 0 with unread data', flush=True)
+        self.assertEqual((result.returncode, result.stderr), (1, b'rless: read error\n'))
 
-    def test_native_read_and_write_errors_match_reference_and_retain_findings(self):
+    def test_native_io_errors_match_rust_hooks_and_document_legacy_divergence(self):
         if REFERENCE is None:
             self.fail('native error oracle requires --reference')
         for site, site_id in [('read', 2), ('write', 4)]:
@@ -243,8 +274,8 @@ class ActualFaultPaths(unittest.TestCase):
                 failed, trace = pipe_run(binary, native_plan=f'{site}:1')
                 self.assertEqual(trace, marker(site_id, magic=b'RNT1'))
                 observed.append((failed.returncode, failed.stdout, failed.stderr))
-            self.assertEqual(observed[0], observed[1])
-            self.assertEqual(observed[0], (0, b'', b''))
+            self.assertEqual(observed[1], (0, b'', b''))  # retained C defect
+            self.assertEqual(observed[0], (1, b'', f'rless: {site} error\n'.encode()))
             injected, trace = pipe_run(INJECTED, f'{site}:1')
             self.assertEqual(trace, marker(site_id))
             self.assertEqual((injected.returncode, injected.stdout, injected.stderr), observed[0])
@@ -263,14 +294,68 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertEqual(native_trace, marker(site_id, ordinal, b'RNT1'))
                 self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
                                  (native.returncode, native.stdout, native.stderr))
-                self.assertEqual((actual.returncode, actual.stderr), (0, b''))
-                self.assertLess(len(actual.stdout), len(payload))
+                self.assertEqual((actual.returncode, actual.stderr),
+                                 (1, f'rless: {site} error\n'.encode()))
+                width = 8192 if site == 'read' else 1023
+                self.assertEqual(actual.stdout, payload[:width * (ordinal - 1)])
 
-    def test_diagnostic_write_error_reproduces_unreported_legacy_failure(self):
+    def test_write_error_reports_failure_without_discarding_status(self):
         result, trace = pipe_run(INJECTED, 'write:1')
         self.assertEqual(trace, marker(4))
-        self.assertEqual((result.returncode, result.stdout, result.stderr), (0, b'', b''))
-        print('FINDING M0-IO-002: write EIO silently exits 0 with lost output', flush=True)
+        self.assertEqual((result.returncode, result.stdout, result.stderr),
+                         (1, b'', b'rless: write error\n'))
+
+    def test_read_failure_survives_later_successful_file(self):
+        for binary, plan, native in ((INJECTED, 'read:1', None), (NORMAL, None, 'read:1')):
+            actual, trace = pipe_run(binary, plan, native_plan=native,
+                argv=['-', 'j'], payload=b'first input\n', files={'j': b'later input\n'}, seekable_stdin=True)
+            self.assertEqual(trace, marker(2, magic=b'RNT1' if native else b'RLF1'))
+            self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
+                             (1, b'later input\n', b'rless: read error\n'))
+
+    def test_write_failure_stops_unbounded_input_and_broken_stderr(self):
+        for binary, plan, native in ((INJECTED, 'write:1', None), (NORMAL, None, 'write:1')):
+            actual, trace = pipe_run(binary, plan, native_plan=native,
+                                    payload=b'x' * 4096, unbounded_stdin=True)
+            self.assertEqual(trace, marker(4, magic=b'RNT1' if native else b'RLF1'))
+            self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
+                             (1, b'', b'rless: write error\n'))
+            self.assertTrue(OBSERVATIONS[-1]['producer_stopped'])
+            self.assertLess(OBSERVATIONS[-1]['producer_bytes'], 1024 * 1024)
+        # Natural permanent ENOSPC, including an independently broken diagnostic
+        # stream. Neither case relies on a one-shot injection becoming writable.
+        for broken_stderr in (False, True):
+            actual, trace = pipe_run(NORMAL, payload=b'x' * 4096, unbounded_stdin=True,
+                                    stdout_full=True, stderr_full=broken_stderr)
+            self.assertEqual(trace, b'')
+            self.assertEqual(actual.returncode, 1)
+            self.assertEqual(actual.stderr, b'' if broken_stderr else b'rless: write error\n')
+            self.assertTrue(OBSERVATIONS[-1]['producer_stopped'])
+            self.assertLess(OBSERVATIONS[-1]['producer_bytes'], 1024 * 1024)
+
+    def test_final_flush_failure_changes_success_and_preserves_primary_status(self):
+        # --version buffers less than 1023 bytes then calls quit(0); its first
+        # actual write is quit's flush, with no cat_file loop to propagate it.
+        control, trace = pipe_run(NORMAL, argv=['--version'], payload=b'')
+        self.assertEqual((control.returncode, control.stderr, trace), (0, b'', b''))
+        self.assertLess(len(control.stdout), 1023)
+        self.assertGreater(len(control.stdout), 0)
+        for binary, plan, native in ((INJECTED, 'write:1', None), (NORMAL, None, 'write:1')):
+            actual, trace = pipe_run(binary, plan, native_plan=native, argv=['--version'], payload=b'')
+            self.assertEqual(trace, marker(4, magic=b'RNT1' if native else b'RLF1'))
+            self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
+                             (1, b'', b'rless: write error\n'))
+        # The initial prompt flush succeeds. The next nonempty flush is terminal
+        # teardown; verify both the primary status and real termios restoration.
+        case = pager([{'await': ['READY'], 'snapshot': True}, {'signal': 'SIGTERM'}])
+        baseline, trace = pty_run(NORMAL, case)
+        self.assertEqual((baseline['status'], trace), (15, b''))
+        for binary, plan, native in ((INJECTED, 'write:2', None), (NORMAL, None, 'write:2')):
+            actual, trace = pty_run(binary, case, plan, native_plan=native)
+            self.assertEqual(trace, marker(4, 2, b'RNT1' if native else b'RLF1'))
+            self.assertEqual(actual['status'], 15)
+            self.assertTrue(actual['termios_restored'])
+            self.assertEqual(actual['checkpoints'][0], baseline['checkpoints'][0])
 
     def test_pipe_failure_termination_reaps_process_and_child_group(self):
         payload = b'payload\n' * 4096
@@ -290,10 +375,18 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertEqual(native_trace, marker(site_id, magic=b'RNT1'))
                 self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
                                  (native.returncode, native.stdout, native.stderr))
-                self.assertEqual((actual.returncode, actual.stderr), (0, b''))
+                self.assertEqual((actual.returncode, actual.stderr),
+                                 (1, f'rless: {site} error\n'.encode()))
                 self.assertLess(len(actual.stdout), len(payload))
             else:
                 self.assertEqual((actual.returncode, actual.stdout, actual.stderr), (0, payload, b''))
+
+    def test_native_write_eintr_retries_exact_remaining_bytes(self):
+        payload = b'interrupted output\n' * 8192
+        for ordinal in (1, 2):
+            actual, trace = pipe_run(NORMAL, native_plan=f'write-eintr:{ordinal}', payload=payload)
+            self.assertEqual(trace, marker(4, ordinal, b'RNT1'))
+            self.assertEqual((actual.returncode, actual.stdout, actual.stderr), (0, payload, b''))
 
     def test_short_write_retries_the_exact_remaining_bytes(self):
         payload = b'payload\n' * 16384
@@ -388,13 +481,17 @@ class ActualFaultPaths(unittest.TestCase):
 
     def test_duplicate_message_and_help_definitions_release_previous_overrides(self):
         for content, argv in (
+            ('No_such_file \n', []),
             ('No_such_file FIRST\n', []),
             ('No_such_file FIRST\nNo_such_file SECOND\n', []),
+            ('HELP \n', ['--help']),
             ('HELP FIRST\nHELP SECOND\n', ['--help']),
         ):
             baseline, trace = pipe_run(REFERENCE, argv=argv, message_content=content)
             self.assertEqual((baseline.returncode, baseline.stderr, trace), (0, b'', b''))
-            if argv:
+            if content == 'HELP \n':
+                self.assertEqual(baseline.stdout, b'')
+            elif argv:
                 self.assertIn(b'SECOND', baseline.stdout)
                 self.assertNotIn(b'FIRST', baseline.stdout)
             for binary in (NORMAL, INJECTED):
@@ -502,6 +599,20 @@ class ActualFaultPaths(unittest.TestCase):
             self.assertEqual(trace, b'')
             self.assertEqual((result.returncode, result.stdout), (0, b'payload\n'))
             self.assertIn(b'Error in lesskey content', result.stderr)
+
+        # Make non-publication and the later valid parse observable in the same
+        # live pager. Rejected z->quit must be inert; accepted x->quit must work.
+        rejected_pty = ('z quit\n#line-edit\n\\b backspace\n#env\nLESS=-N\n'
+                        '#command\nq nonexistent-rless-test-action\n')
+        case = pager([{'await': ['Press RETURN']},
+            {'send': '\n', 'await': ['READY'], 'snapshot': True},
+            {'send': 'z', 'await': ['READY'], 'snapshot': True}, {'send': 'x'}],
+            options=['--lesskey-content=' + rejected_pty, '--lesskey-content=x quit\n'])
+        for binary in (NORMAL, INJECTED):
+            actual, trace = pty_run(binary, case)
+            self.assertEqual((actual['status'], actual['termios_restored'], trace), (0, True, b''))
+            self.assertEqual(len(actual['checkpoints']), 2)
+            self.assertTrue(actual['checkpoints'][0]['rows'][0].startswith('keep 000'))
 
     def test_parser_preinit_failure_preserves_previously_published_buffers(self):
         # The later expand_cmd_tables traverses the first published buffer.
@@ -795,6 +906,12 @@ class ActualFaultPaths(unittest.TestCase):
         # a separate lifetime oracle; a post-close event alone cannot prove it.
 
     def test_filter_failure_before_and_after_commit_has_distinct_state(self):
+        natural = pager([{'await': ['READY']}, {'send': '&keep\n', 'await': ['READY']},
+            {'send': 'g', 'await': ['READY'], 'snapshot': True},
+            {'send': '&\n', 'await': ['READY']},
+            {'send': 'g', 'await': ['READY'], 'snapshot': True}, {'send': 'q'}])
+        baseline, absent = pty_run(NORMAL, natural)
+        self.assertEqual((baseline['status'], baseline['termios_restored'], absent), (0, True, b''))
         for site, site_id, message, committed in (
             ('filter-before', 7, 'Injected filter commit failure', False),
             ('filter-after', 8, 'Injected post-commit failure', True),
@@ -810,6 +927,9 @@ class ActualFaultPaths(unittest.TestCase):
             self.assertIn('keep 000', first)
             self.assertEqual('DROP 000' not in first, committed)
             self.assertIn('DROP 000', recovered)
+            expected_first = baseline['checkpoints'][0 if committed else 1]['rows'][:-1]
+            self.assertEqual(actual['checkpoints'][0]['rows'][:-1], expected_first)
+            self.assertEqual(actual['checkpoints'][1]['rows'][:-1], baseline['checkpoints'][1]['rows'][:-1])
             self.assertEqual(actual['status'], 0)
             self.assertTrue(actual['termios_restored'])
 
@@ -846,11 +966,15 @@ def contracts():
                     hook_ordinals=list(ordinals), m0_controls=list(controls), finding_ids=list(findings))
     return {
         'test_read_eintr_and_short_reads_recover_exact_bytes': entry(('read-eintr', 'read-short'), (1, 2), ('fired', 'ordinal-separation', 'native-counterpart')),
-        'test_diagnostic_read_error_reproduces_unreported_legacy_failure': entry(('read',), findings=('M0-IO-001',), controls=('fired',)),
-        'test_diagnostic_write_error_reproduces_unreported_legacy_failure': entry(('write',), findings=('M0-IO-002',), controls=('fired',)),
+        'test_read_error_reports_failure_without_discarding_status': entry(('read',), findings=('M0-IO-001',), controls=('fired',)),
+        'test_write_error_reports_failure_without_discarding_status': entry(('write',), findings=('M0-IO-002',), controls=('fired',)),
         'test_pipe_failure_termination_reaps_process_and_child_group': entry(('alloc', 'read', 'write', 'reserve', 'read-eintr', 'read-short', 'write-short'), controls=('fired', 'termination-cleanup'), findings=('M0-IO-001', 'M0-IO-002')),
-        'test_native_read_and_write_errors_match_reference_and_retain_findings': entry(('read', 'write'), controls=('fired', 'native-counterpart', 'unfaulted'), findings=('M0-IO-001', 'M0-IO-002')),
+        'test_native_io_errors_match_rust_hooks_and_document_legacy_divergence': entry(('read', 'write'), controls=('fired', 'native-counterpart', 'unfaulted'), findings=('M0-IO-001', 'M0-IO-002')),
         'test_second_read_and_write_ordinals_are_distinct_native_errors': entry(('read', 'write'), (1, 2), ('fired', 'native-counterpart', 'ordinal-separation'), findings=('M0-IO-001', 'M0-IO-002')),
+        'test_read_failure_survives_later_successful_file': entry(('read',), controls=('fired', 'native-counterpart'), findings=('M0-IO-001',)),
+        'test_write_failure_stops_unbounded_input_and_broken_stderr': entry(('write',), controls=('fired', 'native-counterpart', 'termination-cleanup'), findings=('M0-IO-002',)),
+        'test_final_flush_failure_changes_success_and_preserves_primary_status': entry(('write',), (1, 2), ('fired', 'native-counterpart'), findings=('M0-IO-002',)),
+        'test_native_write_eintr_retries_exact_remaining_bytes': entry(('write',), (1, 2)),
         'test_short_write_retries_the_exact_remaining_bytes': entry(('write-short',), (1, 2), ('fired', 'native-counterpart', 'ordinal-separation')),
         'test_saved_command_allocation_failures_have_exact_hit_and_status': entry(('alloc',), tuple(range(1, 25)), ('fired', 'ordinal-separation')),
         'test_scoped_native_allocation_and_growth_failures_match_pager_oom': entry(('alloc', 'reserve'), (1, 2), ('fired', 'native-counterpart', 'ordinal-separation', 'unfaulted', 'termination-cleanup')),
@@ -866,7 +990,7 @@ def contracts():
         'test_parser_partial_staging_failure_releases_each_table_before_retry': entry(('parser',), (2, 4, 6), ('fired', 'ordinal-separation'), scenario='SAFECASE-MEM-007', variant='failure before and after commit staging'),
         'test_natural_parser_rejection_after_staging_then_valid_retry': entry(('parser',), (), ('natural-parser-rejection',), scenario='SAFECASE-MEM-007', variant='failure before and after commit staging'),
         'test_parser_preinit_failure_preserves_previously_published_buffers': entry(('parser',), controls=('early-parser-owner-regression',), scenario='SAFECASE-MEM-007', variant='failure before and after commit staging'),
-        'test_natural_filter_rejection_preserves_committed_filter_then_clear': entry(('filter-before', 'filter-after'), (), ('natural-filter-rejection', 'committed-filter-recovery', 'resource-conservation')),
+        'test_natural_filter_rejection_preserves_committed_filter_then_clear': entry(('filter-before', 'filter-after'), (), ('natural-filter-rejection', 'resource-conservation')),
         'test_repeated_file_and_child_failures_conserve_live_process_resources': entry(('open', 'handoff'), (), ('resource-conservation',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_injected_recovery_conserves_descriptors_and_children_in_live_pager': entry(('regex', 'filter-before', 'filter-after', 'handoff', 'cleanup', 'close'), controls=('fired', 'resource-conservation'), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_callback_startup_failure_preserves_later_session_lifecycle': entry(('callback',), controls=('fired', 'callback-startup-lifecycle')),
@@ -881,7 +1005,7 @@ def contracts():
         'test_real_cleanup_oracle_rejects_hit_status_screen_mode_bell_and_file_mutations': entry(('cleanup',), controls=('fired',), scenario='SAFECASE-VER-010', variant='wrong screen/mode/status/bell/effect/helper output'),
         'test_regex_compile_failure_retains_recovery_behavior': entry(('regex',), controls=('fired', 'native-counterpart')),
         'test_close_failure_is_after_real_release_and_preserves_terminal': entry(('close',), controls=('fired', 'unfaulted')),
-        'test_filter_failure_before_and_after_commit_has_distinct_state': entry(('filter-before', 'filter-after'), controls=('fired',)),
+        'test_filter_failure_before_and_after_commit_has_distinct_state': entry(('filter-before', 'filter-after'), controls=('fired', 'committed-filter-recovery')),
         'test_handoff_failure_skips_child_then_recovers_and_closes_trace_on_exec': entry(('handoff',), controls=('fired',)),
         'test_callback_reachability_is_not_native_error_propagation': entry(('callback',), controls=('fired', 'unfaulted')),
     }
@@ -949,6 +1073,20 @@ def validate_oracle_report(report, expected_selectors=None):
                         minimum = 2 * report['repetitions'] + 1
                     if not isinstance(checkpoints, list) or len(checkpoints) < minimum:
                         raise ValueError('lifecycle repetitions lack actual resource checkpoints')
+        if method == 'test_write_failure_stops_unbounded_input_and_broken_stderr':
+            if any(count != 4 for count in counts):
+                raise ValueError('unbounded-write oracle lacks all four executed shapes')
+            for index, observation in enumerate(observations):
+                natural = index % 4 >= 2
+                if (observation.get('kind') != 'pipe' or observation.get('input_kind') != 'unbounded-pipe'
+                        or observation.get('status') != 1 or observation.get('producer_stopped') is not True
+                        or observation.get('producer_broken_pipe') is not True
+                        or type(observation.get('producer_bytes')) is not int
+                        or not 0 < observation['producer_bytes'] < 1024 * 1024
+                        or observation.get('stdout_full') is not natural
+                        or observation.get('stderr_full') is not (index % 4 == 3)
+                        or (natural and observation.get('trace_hex') != '')):
+                    raise ValueError('unbounded-write oracle lacks bounded producer/stream evidence')
         observed = set()
         for observation in observations:
             if observation.get('kind') not in ('pipe', 'pty') or type(observation.get('status')) is not int:

@@ -1365,7 +1365,7 @@ pub unsafe extern "C" fn edit_stdin() -> ::core::ffi::c_int {
 #[no_mangle]
 pub unsafe extern "C" fn cat_file() {
     let mut c: ::core::ffi::c_int = 0;
-    loop {
+    while !crate::output::output_failed() {
         c = ch_forw_get();
         if c == -1 as ::core::ffi::c_int {
             break;
