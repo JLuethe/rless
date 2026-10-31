@@ -5,6 +5,7 @@ Receipt paths refer to retained evidence. No status boolean supplied by a caller
 can substitute for a current source inventory, a completed review or an oracle.
 """
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -115,6 +116,13 @@ def validated_evidence(path, root):
     raise ValueError('unknown M0 evidence report format')
 
 
+def candidate_inputs_sha256(candidate):
+    """Bind the exact receipt being reviewed without a self-referential hash."""
+    inputs = {key: value for key, value in candidate.items() if key != 'independent_review'}
+    return hashlib.sha256(json.dumps(inputs, sort_keys=True, separators=(',', ':'),
+                                     allow_nan=False).encode()).hexdigest()
+
+
 def validate_candidate(candidate, root=ROOT):
     root = root.resolve()
     current = fingerprint(root)
@@ -125,6 +133,9 @@ def validate_candidate(candidate, root=ROOT):
         raise ValueError('candidate commit changed')
     if candidate.get('input_fingerprints') != current:
         raise ValueError('M0 candidate inputs changed')
+    findings_path = checked_ref(candidate['ownership']['findings'], root)
+    if findings_path != (root / 'docs/safety/findings.json').resolve():
+        raise ValueError('M0 findings must use the authoritative maintained register')
     own = {name: json.loads(checked_ref(candidate['ownership'][name], root).read_text())
            for name in ('inventory', 'regions', 'review', 'findings')}
     if own['inventory'].get('schema_version', 0) < 2:
@@ -281,6 +292,8 @@ def validate_candidate(candidate, root=ROOT):
                 raise ValueError('executed acceptance oracle is not bound to an exact row')
 
     review = candidate['independent_review']
+    if review.get('candidate_inputs_sha256') != candidate_inputs_sha256(candidate):
+        raise ValueError('independent review does not bind the current candidate receipt')
     source_bound_review(review, current['files'], root, decision='approve-m0-infrastructure')
     if review['source_files_sha256'] != current['files']:
         raise ValueError('M0 closure review does not cover all current inputs')

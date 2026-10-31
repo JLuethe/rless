@@ -11,6 +11,12 @@ actual reference-ABI evidence, disposition of remaining legacy application
 findings, and an independent source-bound M0 closure review. A supplied status
 boolean never substitutes for those inputs.
 
+The findings reference must resolve to the maintained
+`docs/safety/findings.json` register, which is included in the input fingerprint.
+An alternate file cannot omit live infrastructure or legacy blockers. Changing
+the maintained register invalidates earlier receipts rather than silently changing
+what their review covered.
+
 Generate the current required control identities with:
 
 ```sh
@@ -115,7 +121,13 @@ The candidate receipt has the following fields:
   finding.
 - `independent_review`: named `reviewer`, distinct `implementation_author`, all
   current `source_files_sha256`, retained review `evidence`, and
-  `decision: "approve-m0-infrastructure"`. This receipt must originate from an
+  `decision: "approve-m0-infrastructure"`, plus `candidate_inputs_sha256` computed
+  by `m0_gate.candidate_inputs_sha256(candidate)` after all candidate inputs are
+  final. The digest covers the entire canonical candidate JSON except the
+  `independent_review` object, including private ledger/report references and
+  hashes, selectors, applicability and dispositions. Any later receipt change
+  requires another independent review. This binding is not reviewer identity
+  authentication. The receipt must originate from an
   actual independent review; the gate does not manufacture reviewer approval.
 
 ```sh

@@ -21,6 +21,8 @@ class M0GateControls(unittest.TestCase):
         (self.root / 'src').mkdir(parents=True)
         (self.root / 'compat').mkdir()
         (self.root / 'spec/safety').mkdir(parents=True)
+        (self.root / 'docs/safety').mkdir(parents=True)
+        write_json(self.root / 'docs/safety/findings.json', {'findings': []})
         (self.root / 'src/fault.rs').write_text('\n'.join(
             f'b"{site}" => Site::Fixture,' for site in sorted(m0_gate.MINIMUM_SITES)))
         (self.root / 'compat/corpus.json').write_text('{}')
@@ -55,7 +57,8 @@ class M0GateControls(unittest.TestCase):
         own = {}
         for name, data in [('inventory', {'schema_version': 2}), ('regions', {}),
                            ('review', {'entries': []}), ('findings', {'findings': []})]:
-            path = self.directory / (name + '.json')
+            path = (self.root / 'docs/safety/findings.json' if name == 'findings'
+                    else self.directory / (name + '.json'))
             write_json(path, data)
             own[name] = self.ref(path)
         bindings = self.directory / 'bindings.json'
@@ -90,6 +93,7 @@ class M0GateControls(unittest.TestCase):
             for name in self.names.values()}
         self.evidence_patch = patch('m0_gate.validated_evidence', side_effect=self.fixture_evidence)
         self.evidence_patch.start()
+        self.seal_fixture_review()
 
     def tearDown(self):
         self.evidence_patch.stop()
@@ -116,6 +120,55 @@ class M0GateControls(unittest.TestCase):
     def refresh_report(self):
         self.evidence.save()
         self.candidate['reports'] = [self.ref(self.report)]
+        self.seal_fixture_review()
+
+    def seal_fixture_review(self):
+        # A synthetic reviewer approves this fixture's exact inputs only.
+        self.candidate['independent_review']['candidate_inputs_sha256'] = m0_gate.candidate_inputs_sha256(self.candidate)
+
+    def test_review_digest_rejects_post_review_equivalent_selector_or_findings_ref(self):
+        original = copy.deepcopy(self.candidate)
+        key = next(iter(self.candidate['selectors']))
+        self.candidate['selectors'][key] = [self.candidate['selectors'][key]]
+        with self.assertRaisesRegex(ValueError, 'current candidate receipt'):
+            self.check()
+        self.candidate = original
+        self.candidate['ownership']['findings']['path'] = 'docs/safety/findings.json'
+        with self.assertRaisesRegex(ValueError, 'current candidate receipt'):
+            self.check()
+
+    def test_review_digest_is_required(self):
+        del self.candidate['independent_review']['candidate_inputs_sha256']
+        with self.assertRaisesRegex(ValueError, 'current candidate receipt'):
+            self.check()
+
+    def rebind_fixture_inputs(self):
+        # Synthetic composition fixtures only; real execution receipts must
+        # never be rewritten to conceal changed inputs.
+        current = fingerprint(self.root)
+        self.candidate['input_fingerprints'] = current
+        self.candidate['independent_review']['source_files_sha256'] = current['files']
+        self.evidence.report['input_fingerprints'] = current
+        self.refresh_report()
+
+    def test_substitute_findings_file_cannot_hide_authoritative_blockers(self):
+        authoritative = self.root / 'docs/safety/findings.json'
+        write_json(authoritative, {'findings': [dict(id='M0-COV-001', status='open',
+            delivery_packet='M0.1', blocks_final_safety_gate=True)]})
+        self.rebind_fixture_inputs()
+        alternate = self.directory / 'omitted-findings.json'
+        write_json(alternate, {'findings': []})
+        self.candidate['ownership']['findings'] = self.ref(alternate)
+        with self.assertRaisesRegex(ValueError, 'authoritative maintained register'):
+            self.check()
+
+    def test_maintained_findings_change_invalidates_existing_receipts(self):
+        authoritative = self.root / 'docs/safety/findings.json'
+        self.assertIn('docs/safety/findings.json', self.candidate['input_fingerprints']['files'])
+        write_json(authoritative, {'findings': [dict(id='M0-NEW', status='open')]})
+        self.candidate['ownership']['findings'] = self.ref(authoritative)
+        with self.assertRaisesRegex(ValueError, 'inputs changed'):
+            self.check()
 
     def test_m0_positive_fixture_does_not_close_final_acceptance(self):
         result = self.check()
@@ -234,6 +287,7 @@ class M0GateControls(unittest.TestCase):
             source_files_sha256={'src/fault.rs': sha(self.root / 'src/fault.rs')},
             evidence=self.ref(self.note), alternative_control='termination-cleanup',
             alternative_selectors=[original])
+        self.seal_fixture_review()
         self.assertEqual(self.check()['alternate_obligations'], 1)
         self.candidate['applicability'][key]['alternative_selectors'] = []
         with self.assertRaisesRegex(ValueError, 'executed alternate'):
@@ -278,15 +332,21 @@ class M0GateControls(unittest.TestCase):
         write_json(finding_path, {'findings': [dict(id='M0-IO-001', status='open',
             delivery_packet='M3.2', blocks_final_safety_gate=True)]})
         self.candidate['ownership']['findings'] = self.ref(finding_path)
+        self.rebind_fixture_inputs()
         self.candidate['legacy_dispositions'] = [dict(finding_id='M0-IO-001', owner='Codex',
             delivery_packet='M3.2', reason='Inherited reference behavior reproduced.',
             regression='Fixture.test_native_read_error',
             source_files_sha256={'src/fault.rs': sha(self.root / 'src/fault.rs')}, evidence=self.ref(self.note))]
+        self.seal_fixture_review()
         self.assertEqual(self.check()['legacy_findings'], ['M0-IO-001'])
+        self.candidate['legacy_dispositions'][0]['reason'] = 'Changed after review.'
+        with self.assertRaisesRegex(ValueError, 'current candidate receipt'):
+            self.check()
         finding = json.loads(finding_path.read_text())
         finding['findings'][0]['delivery_packet'] = 'M0.4'
         write_json(finding_path, finding)
         self.candidate['ownership']['findings'] = self.ref(finding_path)
+        self.rebind_fixture_inputs()
         self.candidate['legacy_dispositions'][0]['delivery_packet'] = 'M0.4'
         with self.assertRaisesRegex(ValueError, 'infrastructure gap'):
             self.check()

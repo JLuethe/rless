@@ -51,7 +51,8 @@ def fingerprint(root=ROOT):
         if name in ('spec/safety/validation.json', 'spec/safety/github-tracking.json'):
             continue  # Generated structure report and external tracking references.
         if not (name.startswith(('src/', 'tests/', 'tools/', 'vendor/', 'compat/', 'spec/'))
-                or name in ('.gitignore', 'Cargo.toml', 'Cargo.lock', 'build.rs')):
+                or name in ('.gitignore', 'Cargo.toml', 'Cargo.lock', 'build.rs',
+                            'docs/safety/findings.json')):
             continue
         path = root / name
         if path.is_file():
