@@ -554,6 +554,17 @@ pub struct csl_bitmap_def {
 }
 #[no_mangle]
 pub static mut tagoption: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
+// Startup options own their saved strings; a later option replaces that owner.
+// Copy first so callers may lend a slice of the previous string. The caller must
+// have exclusive access and pass either null or a live allocation from save().
+unsafe fn replace_saved_option(
+    previous: *mut ::core::ffi::c_char,
+    value: *const ::core::ffi::c_char,
+) -> *mut ::core::ffi::c_char {
+    let replacement = save(value);
+    free(previous.cast());
+    replacement
+}
 #[no_mangle]
 pub unsafe extern "C" fn opt_o(mut r#type: ::core::ffi::c_int, mut s: *const ::core::ffi::c_char) {
     let mut parg: PARG = parg {
@@ -571,7 +582,7 @@ pub unsafe extern "C" fn opt_o(mut r#type: ::core::ffi::c_int, mut s: *const ::c
     }
     match r#type {
         0 => {
-            namelogfile = save(s);
+            namelogfile = replace_saved_option(namelogfile, s);
         }
         2 => {
             if ch_getflags() & 0o1 as ::core::ffi::c_int != 0 {
@@ -828,7 +839,7 @@ pub unsafe extern "C" fn opt_t(mut r#type: ::core::ffi::c_int, mut s: *const ::c
     }
     match r#type {
         0 => {
-            tagoption = save(s);
+            tagoption = replace_saved_option(tagoption, s);
         }
         2 => {
             findtag(skipspc(s));
@@ -854,7 +865,13 @@ pub unsafe extern "C" fn opt__T(mut r#type: ::core::ffi::c_int, mut s: *const ::
     let mut filename: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     match r#type {
         0 => {
-            tags = save(s);
+            // ztags is the borrowed default; all other nonnull values are saved.
+            let previous = if tags == &raw mut ztags as *mut ::core::ffi::c_char {
+                ::core::ptr::null_mut()
+            } else {
+                tags
+            };
+            tags = replace_saved_option(previous, s);
         }
         2 => {
             s = skipspc(s);
@@ -877,7 +894,7 @@ pub unsafe extern "C" fn opt_p(mut r#type: ::core::ffi::c_int, mut s: *const ::c
     match r#type {
         0 => {
             if less_is_more.0 != 0 {
-                every_first_cmd = save(s);
+                every_first_cmd = replace_saved_option(every_first_cmd, s);
             } else {
                 plusoption = lbool::LTRUE;
                 ungetsc(b"/\0".as_ptr() as *const ::core::ffi::c_char);
@@ -1888,7 +1905,7 @@ pub unsafe extern "C" fn opt_header(
 ) {
     match r#type {
         0 => {
-            init_header = save(s);
+            init_header = replace_saved_option(init_header, s);
         }
         2 => {
             let mut lines: ::core::ffi::c_int = header_lines;

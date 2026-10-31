@@ -52,7 +52,7 @@ def fingerprint(root=ROOT):
             continue  # Generated structure report and external tracking references.
         if not (name.startswith(('src/', 'tests/', 'tools/', 'vendor/', 'compat/', 'spec/'))
                 or name in ('.gitignore', 'Cargo.toml', 'Cargo.lock', 'build.rs',
-                            'docs/safety/findings.json')):
+                            'docs/safety/findings.json', 'docs/safety/ownership-register.json')):
             continue
         path = root / name
         if path.is_file():
@@ -277,7 +277,9 @@ class Evidence:
 
     def finish(self):
         records = self.report['records']
-        passed = bool(records) and all(x['status'] == 'passed' for x in records)
+        reports = self.report.get('sanitizer_reports', [])
+        passed = (bool(records) and all(x['status'] == 'passed' for x in records)
+                  and isinstance(reports, list) and not reports)
         if fingerprint(self.root) != self.report['input_fingerprints']:
             passed = False
             self.report['input_change_error'] = 'source/tool/spec changed during campaign'
@@ -290,6 +292,9 @@ class Evidence:
 def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=False):
     """Re-derive a gate from logs, statuses, selections, artifacts and current inputs."""
     report = json.loads(Path(path).read_text())
+    reports = report.get('sanitizer_reports', [])
+    if not isinstance(reports, list) or reports:
+        raise ValueError('unexpected report-level sanitizer diagnostics')
     external = is_external_report(report)
     if external:
         # Container evidence has separate pipe/PTY observations and offline raw

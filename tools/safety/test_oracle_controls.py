@@ -1,5 +1,6 @@
 """Mutation controls for retained oracle parsing; fixtures are not product evidence."""
 import copy
+import io
 import json
 from pathlib import Path
 import signal
@@ -9,7 +10,35 @@ from unittest.mock import call, patch
 
 from common import ROOT, sha
 from harness_controls import validate_capture
-from test_fault_paths import SITE_IDS, contracts, finish_process_group, marker, validate_oracle_report
+import test_fault_paths as faults
+from test_fault_paths import INTERNAL_REPEAT_METHODS, SITE_IDS, contracts, finish_process_group, marker, validate_oracle_report
+
+
+class RepetitionExecutionControls(unittest.TestCase):
+    def test_noncycle_selector_is_actually_invoked_for_every_repetition(self):
+        class Fixture(unittest.TestCase):
+            def test_diagnostic_read_error_reproduces_unreported_legacy_failure(self):
+                faults.OBSERVATIONS.append(dict(kind='pipe', status=0, trace_hex=marker(2).hex()))
+        with patch.object(faults, 'REPETITIONS', 3):
+            runner = faults.RepeatingOracleRunner(stream=io.StringIO(), verbosity=0, resultclass=faults.OracleResult)
+            result = runner.run(unittest.defaultTestLoader.loadTestsFromTestCase(Fixture))
+        self.assertEqual(result.testsRun, 3)
+        self.assertEqual(len(result.oracles), 1)
+        self.assertEqual(result.oracles[0]['invocation_observation_counts'], [1, 1, 1])
+        report = dict(schema_version=2, repetitions=3, tests_run=result.testsRun,
+                      passed=result.wasSuccessful(), records=result.oracles)
+        validate_oracle_report(report, [result.oracles[0]['test_selector']])
+
+    def test_internal_cycle_selector_is_not_multiplied_twice(self):
+        class Fixture(unittest.TestCase):
+            def test_callback_startup_failure_preserves_later_session_lifecycle(self):
+                faults.OBSERVATIONS.append({'fixture': 'internal cycle body owns its repetition'})
+        with patch.object(faults, 'REPETITIONS', 3):
+            runner = faults.RepeatingOracleRunner(stream=io.StringIO(), verbosity=0, resultclass=faults.OracleResult)
+            result = runner.run(unittest.defaultTestLoader.loadTestsFromTestCase(Fixture))
+        self.assertEqual(result.testsRun, 1)
+        self.assertEqual(result.oracles[0]['invocation_observation_counts'], [1])
+        self.assertEqual(result.oracles[0]['repetition_mode'], 'internal-cycles')
 
 
 class ProcessGroupControls(unittest.TestCase):
@@ -44,8 +73,9 @@ class RetainedFaultOracleControls(unittest.TestCase):
     def setUp(self):
         self.method = 'test_diagnostic_read_error_reproduces_unreported_legacy_failure'
         self.selector = 'ActualFaultPaths.' + self.method
-        self.report = dict(schema_version=1, passed=True, repetitions=1, tests_run=1,
+        self.report = dict(schema_version=2, passed=True, repetitions=1, tests_run=1,
             records=[dict(test_selector=self.selector, passed=True,
+                repetition_mode='test-invocations', invocation_observation_counts=[1],
                 contract=contracts()[self.method], observations=[dict(kind='pipe', status=0,
                     trace_hex=marker(SITE_IDS['read']).hex())])])
 
@@ -57,6 +87,21 @@ class RetainedFaultOracleControls(unittest.TestCase):
         self.assertEqual(self.validate(), {self.selector: [dict(site='read', ordinal=1, magic='RLF1')]})
         self.report['records'][0]['observations'][0]['trace_hex'] = marker(SITE_IDS['read'], magic=b'RNT1').hex()
         self.assertEqual(self.validate()[self.selector][0]['magic'], 'RNT1')
+
+    def test_declared_repetition_count_cannot_replace_executed_invocations(self):
+        self.report.update(repetitions=3, tests_run=3)
+        with self.assertRaisesRegex(ValueError, 'invocation observations'):
+            self.validate()
+        self.report['tests_run'] = 1
+        with self.assertRaisesRegex(ValueError, 'repetitions were not executed'):
+            self.validate()
+
+    def test_missing_false_or_inconsistent_invocation_counts_reject(self):
+        for counts in (None, [], [True], [0], [2], [1, 1]):
+            report = copy.deepcopy(self.report)
+            report['records'][0]['invocation_observation_counts'] = counts
+            with self.subTest(counts=counts), self.assertRaises(ValueError):
+                self.validate(report)
 
     def test_empty_trace_and_a_declared_plan_supply_no_hit_credit(self):
         observation = self.report['records'][0]['observations'][0]
@@ -123,9 +168,12 @@ class RetainedFaultOracleControls(unittest.TestCase):
 
     def retained_control(self, method, observation):
         selector = 'ActualFaultPaths.' + method
-        report = dict(schema_version=1, passed=True, repetitions=1, tests_run=1,
+        internal = method in INTERNAL_REPEAT_METHODS
+        observations = [observation, copy.deepcopy(observation)] if internal else [observation]
+        report = dict(schema_version=2, passed=True, repetitions=1, tests_run=1,
             records=[dict(test_selector=selector, passed=True, contract=contracts()[method],
-                          observations=[observation])])
+                          repetition_mode='internal-cycles' if internal else 'test-invocations',
+                          invocation_observation_counts=[len(observations)], observations=observations)])
         return report, selector
 
     def test_termination_requires_actual_pipe_reaping_and_empty_group(self):
@@ -174,7 +222,7 @@ class RetainedFaultOracleControls(unittest.TestCase):
             'test_repeated_file_and_child_failures_conserve_live_process_resources', good)
         bad = copy.deepcopy(good)
         bad['resources'][-1]['children'] = ['12345']
-        report['records'][0]['observations'].append(bad)
+        report['records'][0]['observations'][1] = bad
         with self.assertRaises(ValueError):
             self.validate(report, [selector])
 

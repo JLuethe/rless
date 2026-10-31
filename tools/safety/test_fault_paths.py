@@ -21,6 +21,14 @@ NORMAL = INJECTED = SHIM = SHORT_SHIM = IO_SHIM = REFERENCE = ALLOC_BINDING = No
 REPETITIONS = 1
 INSTRUMENTATION = {}
 OBSERVATIONS = []
+# These methods repeat recovery inside their own session/lifetime oracle.
+# Every other method is invoked once per requested repetition.
+INTERNAL_REPEAT_METHODS = {
+    'test_repeated_file_and_child_failures_conserve_live_process_resources',
+    'test_injected_recovery_conserves_descriptors_and_children_in_live_pager',
+    'test_callback_startup_failure_preserves_later_session_lifecycle',
+    'test_cleanup_retries_injected_and_native_eintr_and_restores_terminal',
+}
 
 
 def marker(site, ordinal=1, magic=b'RLF1'):
@@ -69,7 +77,7 @@ def finish_process_group(pid, grace_seconds=1.0):
 
 def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, native_short=False,
              unreadable=False, native_plan=None, native_alloc_plan=None, seekable_stdin=False,
-             lesskey_env=None, message_content=None):
+             lesskey_env=None, message_content=None, more_mode=False):
     with ExitStack() as handles, trace_channel() as (reader, writer), tempfile.TemporaryDirectory(prefix='rless-fault-') as directory:
         write_fd = writer.fileno()
         for name, value in (files or {}).items():
@@ -81,6 +89,8 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
         if set(lesskey_env or {}) - {'LESSKEY_CONTENT', 'LESSKEY_CONTENT_SYSTEM'}:
             raise ValueError('unexpected lesskey environment input')
         env.update(lesskey_env or {})
+        if more_mode:
+            env['LESS_IS_MORE'] = '1'
         if message_content is not None:
             message_path = Path(directory) / 'messages'
             message_path.write_text(message_content)
@@ -136,7 +146,7 @@ def pipe_run(binary, plan=None, argv=(), payload=b'payload\n', files=None, nativ
         trace = read_trace(reader, writer)
     OBSERVATIONS.append(dict(kind='pipe', binary=str(binary), plan=plan, native_plan=native_plan,
                              native_alloc_plan=native_alloc_plan,
-                             lesskey_env=lesskey_env or {},
+                             lesskey_env=lesskey_env or {}, more_mode=more_mode,
                              message_content_sha256=(hashlib.sha256(message_content.encode()).hexdigest()
                                                      if message_content is not None else None),
                              input_kind='seekable-stdin' if seekable_stdin else 'pipe',
@@ -389,6 +399,25 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertNotIn(b'FIRST', baseline.stdout)
             for binary in (NORMAL, INJECTED):
                 actual, trace = pipe_run(binary, argv=argv, message_content=content)
+                self.assertEqual(trace, b'')
+                self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
+                                 (baseline.returncode, baseline.stdout, baseline.stderr))
+
+    def test_duplicate_startup_options_release_previous_saved_strings(self):
+        cases = [
+            (False, ['-oone']), (False, ['-oone', '-otwo']),
+            (False, ['-tone']), (False, ['-tone', '-ttwo']),
+            (False, ['-Tone']), (False, ['-Tone', '-Ttwo']),
+            (False, ['--header=1']), (False, ['--header=1', '--header=2']),
+            (True, ['-pone']), (True, ['-pone', '-ptwo']),
+            (True, ['++one', '-ptwo']), (True, ['-pone', '++two']),
+        ]
+        for more_mode, argv in cases:
+            baseline, trace = pipe_run(REFERENCE, argv=argv, more_mode=more_mode)
+            self.assertEqual((baseline.returncode, baseline.stdout, baseline.stderr, trace),
+                             (0, b'payload\n', b'', b''))
+            for binary in (NORMAL, INJECTED):
+                actual, trace = pipe_run(binary, argv=argv, more_mode=more_mode)
                 self.assertEqual(trace, b'')
                 self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
                                  (baseline.returncode, baseline.stdout, baseline.stderr))
@@ -818,6 +847,7 @@ def contracts():
         'test_native_regex_and_callback_counterparts_preserve_observation': entry(('regex', 'callback'), (1, 2), ('fired', 'native-counterpart')),
         'test_native_handoff_failure_skips_exact_child_and_recovers': entry(('handoff',), (1, 2), ('fired', 'native-counterpart', 'resource-conservation', 'ordinal-separation')),
         'test_parser_failure_then_valid_content_is_usable': entry(('parser',), controls=('fired',)),
+        'test_duplicate_startup_options_release_previous_saved_strings': entry((), (), ('startup-option-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_stop_directive_releases_discarded_command_table_owners': entry((), (), ('command-table-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_duplicate_message_and_help_definitions_release_previous_overrides': entry((), (), ('message-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_parser_partial_staging_failure_releases_each_table_before_retry': entry(('parser',), (2, 4, 6), ('fired', 'ordinal-separation'), scenario='SAFECASE-MEM-007', variant='failure before and after commit staging'),
@@ -862,11 +892,15 @@ def validate_oracle_report(report, expected_selectors=None):
     if expected_selectors is not None and len(expected) != len(expected_selectors):
         raise ValueError('duplicate expected oracle selector')
     records = report.get('records')
-    if (type(report.get('schema_version')) is not int or report.get('schema_version') != 1 or report.get('passed') is not True
+    if (type(report.get('schema_version')) is not int or report.get('schema_version') != 2 or report.get('passed') is not True
             or type(report.get('repetitions')) is not int or report['repetitions'] < 1
-            or not isinstance(records, list) or type(report.get('tests_run')) is not int or report.get('tests_run') != len(expected)
+            or not isinstance(records, list) or type(report.get('tests_run')) is not int
             or len(records) != len(expected)):
         raise ValueError('failed or incomplete actual oracle report')
+    expected_runs = sum(1 if selector.split('.')[-1] in INTERNAL_REPEAT_METHODS else report['repetitions']
+                        for selector in expected)
+    if report['tests_run'] != expected_runs:
+        raise ValueError('requested repetitions were not executed')
     result = {}
     names = {value: name for name, value in SITE_IDS.items()}
     for record in records:
@@ -879,6 +913,29 @@ def validate_oracle_report(report, expected_selectors=None):
         observations = record.get('observations')
         if not isinstance(observations, list) or not observations:
             raise ValueError('test has no executed process observations')
+        internal = selector.split('.')[-1] in INTERNAL_REPEAT_METHODS
+        counts = record.get('invocation_observation_counts')
+        if (record.get('repetition_mode') != ('internal-cycles' if internal else 'test-invocations')
+                or not isinstance(counts, list) or len(counts) != (1 if internal else report['repetitions'])
+                or any(type(count) is not int or count < 1 for count in counts)
+                or sum(counts) != len(observations)):
+            raise ValueError('missing or inconsistent executed invocation observations')
+        method = selector.split('.')[-1]
+        if internal:
+            if method == 'test_cleanup_retries_injected_and_native_eintr_and_restores_terminal':
+                if len(observations) != 1 + 2 * report['repetitions']:
+                    raise ValueError('cleanup repetitions lack actual process observations')
+            else:
+                expected_observations = 12 if method == 'test_injected_recovery_conserves_descriptors_and_children_in_live_pager' else 2
+                if len(observations) != expected_observations:
+                    raise ValueError('lifecycle control has incomplete process observations')
+                for observation in observations:
+                    checkpoints = observation.get('resources', [])
+                    minimum = report['repetitions'] + 1
+                    if method == 'test_repeated_file_and_child_failures_conserve_live_process_resources':
+                        minimum = 2 * report['repetitions'] + 1
+                    if not isinstance(checkpoints, list) or len(checkpoints) < minimum:
+                        raise ValueError('lifecycle repetitions lack actual resource checkpoints')
         observed = set()
         for observation in observations:
             if observation.get('kind') not in ('pipe', 'pty') or type(observation.get('status')) is not int:
@@ -939,10 +996,30 @@ class OracleResult(unittest.TextTestResult):
     def stopTest(self, test):
         name = test._testMethodName
         bad = {item.id() for item, _ in [*self.failures, *self.errors, *self.skipped]}
-        self.oracles.append(dict(test_selector='ActualFaultPaths.' + name,
-            passed=test.id() not in bad, contract=contracts().get(name),
-            observations=copy.deepcopy(OBSERVATIONS)))
+        selector = 'ActualFaultPaths.' + name
+        record = next((item for item in self.oracles if item['test_selector'] == selector), None)
+        if record is None:
+            record = dict(test_selector=selector, passed=True, contract=contracts().get(name),
+                repetition_mode='internal-cycles' if name in INTERNAL_REPEAT_METHODS else 'test-invocations',
+                invocation_observation_counts=[], observations=[])
+            self.oracles.append(record)
+        record['passed'] &= test.id() not in bad
+        record['invocation_observation_counts'].append(len(OBSERVATIONS))
+        record['observations'].extend(copy.deepcopy(OBSERVATIONS))
         super().stopTest(test)
+
+
+class RepeatingOracleRunner(unittest.TextTestRunner):
+    def run(self, test):
+        def repetitions(suite):
+            for selected in suite:
+                if isinstance(selected, unittest.TestSuite):
+                    yield from repetitions(selected)
+                else:
+                    count = 1 if selected._testMethodName in INTERNAL_REPEAT_METHODS else REPETITIONS
+                    for _ in range(count):
+                        yield type(selected)(selected._testMethodName)
+        return super().run(unittest.TestSuite(repetitions(test)))
 
 
 if __name__ == '__main__':
@@ -972,11 +1049,11 @@ if __name__ == '__main__':
         INSTRUMENTATION = json.loads(args.instrumentation_env.read_text())
         if set(INSTRUMENTATION) - {'ASAN_OPTIONS', 'LSAN_OPTIONS', 'ASAN_SYMBOLIZER_PATH'}:
             parser.error('unsupported instrumentation variable')
-    runner = unittest.TextTestRunner(verbosity=2, resultclass=OracleResult)
+    runner = RepeatingOracleRunner(verbosity=2, resultclass=OracleResult)
     program = unittest.main(argv=[sys.argv[0], *remaining], testRunner=runner, exit=False)
     if args.oracle_report:
         args.oracle_report.parent.mkdir(parents=True, exist_ok=True)
-        args.oracle_report.write_text(json.dumps(dict(schema_version=1, repetitions=REPETITIONS,
+        args.oracle_report.write_text(json.dumps(dict(schema_version=2, repetitions=REPETITIONS,
             tests_run=program.result.testsRun, passed=program.result.wasSuccessful(),
             records=program.result.oracles), indent=2) + '\n')
     raise SystemExit(0 if program.result.wasSuccessful() else 1)

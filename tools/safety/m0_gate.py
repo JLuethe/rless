@@ -136,6 +136,9 @@ def validate_candidate(candidate, root=ROOT):
     findings_path = checked_ref(candidate['ownership']['findings'], root)
     if findings_path != (root / 'docs/safety/findings.json').resolve():
         raise ValueError('M0 findings must use the authoritative maintained register')
+    regions_path = checked_ref(candidate['ownership']['regions'], root)
+    if regions_path != (root / 'docs/safety/ownership-register.json').resolve():
+        raise ValueError('M0 ownership regions must use the authoritative maintained register')
     own = {name: json.loads(checked_ref(candidate['ownership'][name], root).read_text())
            for name in ('inventory', 'regions', 'review', 'findings')}
     if own['inventory'].get('schema_version', 0) < 2:

@@ -333,6 +333,30 @@
       "fix_commit": null,
       "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_duplicate_message_and_help_definitions_release_previous_overrides",
       "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-006",
+      "title": "Repeated startup options overwrite saved strings without releasing previous owners",
+      "status": "open",
+      "classification": "Independent single/duplicate ASan leak comparisons confirm log filename, tag, tags file, header and MORE initial command overwrites; Codex candidate fix awaits independent qualification",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "evidence_refs": [
+        "docs/safety/reproducers/m0-leak-startup-options/manifest.json",
+        "compat/.runs/ownership-audit-20261030/source-review.md"
+      ],
+      "source_commit": "73c641151dcb998c9714163d095493aa56bc14fb",
+      "source_files_sha256": {
+        "src/optfunc.rs": "4c2fa37a21f8b5cb5c384fd58fcef8e28cb4f24d2f058bb180a55c2f92959d8b"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_duplicate_startup_options_release_previous_saved_strings",
+      "rerun_evidence": null
     }
   ]
 }

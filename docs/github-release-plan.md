@@ -284,3 +284,31 @@ The current candidate must be frozen, committed and independently qualified
 before its artifacts can be released. M0 and the full safety migration remain
 open. No package, publication or independent phase approval is declared here;
 historical results retain their original source scope.
+
+
+## October 31 review corrections
+
+Claude resumed after its quota reset and identified missing authority/completeness
+checks in M0 evidence. The candidate now binds maintained findings and ownership
+regions, independently rebuilds the raw and six expanded inventories, and binds
+review approval to the complete evidence selection. Independent fresh positive
+and omission controls pass. The ownership review itself remains incomplete:
+127 of 720 obligations were reviewed at `73c6411`, with 593 pending.
+
+The independent repetition audit invalidated any interpretation of old schema-1
+fault reports as 100 runs of every selector. Only four lifecycle test bodies
+repeated; other selectors ran once. Schema 2 records actual repeated invocations;
+native and ASan three-repetition smoke runs passed 103 invocations across the
+then-current 37 selectors. Current-source full campaigns remain required.
+
+The clean-commit host baseline passed 19 steps, including 809-case debug, release
+and reference acceptance and all four 100-round stress seeds, then failed at the
+clean installation step because Cargo attempted a network update. An independent
+locked/offline installation probe passed; the runner now requests offline mode.
+The original failed baseline is retained and does not qualify a release.
+
+Further independent review reproduced five repeated startup-option owner leaks.
+Codex added copy-before-release replacements and a source-bound regression. These
+fixes need current-source sanitizer qualification. Reference selection is also
+being bound to the maintained less 712 bundle rather than accepting any mutually
+consistent binary hash. No publication or M0 approval is implied by these fixes.

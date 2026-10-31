@@ -4,10 +4,11 @@ import copy
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from common import sha
 from inventory_format import (EXPANDED_CONFIGURATIONS, all_statics, boundary_comparison,
-                              expanded_review_sites, source_inputs)
+                              expanded_review_sites, source_inputs, REGION_REGISTER)
 from ownership import CHECKLIST, seed, validate
 from run import source_file_summaries
 
@@ -92,6 +93,22 @@ class InventoryV2Controls(unittest.TestCase):
             candidate_external_symbols=[], indirect_call_sites=[], expanded_configurations=configurations)
         self.regions = dict(regions=[dict(id='OWN-FIXTURE', current_paths=['src/lib.rs'], delivery_packet='M0.2')])
         self.findings = dict(findings=[])
+        canonical=self.root/REGION_REGISTER
+        canonical.parent.mkdir(parents=True)
+        canonical.write_text(json.dumps(self.regions))
+        self.inventory.update(manual_register=REGION_REGISTER, manual_register_sha256=sha(canonical),
+                              derivation_inputs_sha256='1'*64)
+        # Pure review-map fixtures mock the compiler boundary explicitly. These
+        # facts are frozen from the original fixture, not the submitted AST that
+        # mutation controls edit. Independent integration must also run the real
+        # pinned rebuild and compiler expansion on maintained project sources.
+        derived=dict(source_records=copy.deepcopy(self.records), derivation_inputs_sha256='1'*64,
+            expanded={name:dict(source=Path(config['source']['path']).read_text(),
+                records=[{k:v for k,v in row.items() if k!='file'} for row in self.static_records('unused')])
+                for name,config in configurations.items()})
+        self.deriver=patch('ownership.derive_current_inventory', side_effect=lambda root:copy.deepcopy(derived))
+        self.deriver.start()
+        self.addCleanup(self.deriver.stop)
 
     @staticmethod
     def static_records(path):
@@ -181,6 +198,57 @@ class InventoryV2Controls(unittest.TestCase):
         item['evidence_sha256'][path.name] = sha(path)
         with self.assertRaisesRegex(ValueError, 'unreviewed expanded'):
             self.check(review)
+
+    def test_self_consistent_truncated_raw_ast_and_indexes_are_rejected(self):
+        raw=Path(self.inventory['raw_inventory']['path'])
+        raw.write_text('[]')
+        self.inventory['raw_inventory']['sha256']=sha(raw)
+        self.inventory['static_definitions']=[]
+        self.inventory['mutable_static_definitions']=[]
+        self.inventory['candidate_external_symbols']=[]
+        self.inventory['indirect_call_sites']=[]
+        self.inventory['files']=source_file_summaries([],['src/lib.rs'],self.root)
+        with self.assertRaisesRegex(ValueError,'complete current-source AST'):
+            seed(self.inventory,self.regions,self.root)
+
+    def test_self_consistent_expanded_ast_and_review_site_omission_is_rejected(self):
+        config=self.inventory['expanded_configurations']['lib']
+        syntax=Path(config['syntax']['path'])
+        syntax.write_text('')
+        config['syntax']['sha256']=sha(syntax)
+        config['review_sites']=[]
+        feature=self.inventory['expanded_configurations']['lib-safety-injection']
+        feature['boundary_comparison']=boundary_comparison([],feature['review_sites'])
+        with self.assertRaisesRegex(ValueError,'complete current compiler output'):
+            seed(self.inventory,self.regions,self.root)
+
+    def test_coedited_expansion_ast_and_summary_cannot_remove_boundary(self):
+        config=self.inventory['expanded_configurations']['lib']
+        source,syntax=Path(config['source']['path']),Path(config['syntax']['path'])
+        source.write_text('// replaced actual compiler output\n')
+        syntax.write_text('')
+        config['source']['sha256']=sha(source)
+        config['syntax']['sha256']=sha(syntax)
+        config['review_sites']=[]
+        with self.assertRaisesRegex(ValueError,'current compiler/configuration'):
+            seed(self.inventory,self.regions,self.root)
+
+    def test_empty_alternate_and_historical_region_registers_are_rejected(self):
+        for regions in ({'regions':[]},{'regions':[dict(id='OWN-OLD',current_paths=['src/lib.rs'],delivery_packet='M0.2')]}):
+            with self.assertRaisesRegex(ValueError,'alternate region register'):
+                seed(self.inventory,regions,self.root)
+        self.inventory['manual_register']='docs/safety/historical-register.json'
+        with self.assertRaisesRegex(ValueError,'canonical current region register'):
+            seed(self.inventory,self.regions,self.root)
+
+    def test_canonical_region_digest_and_build_input_digest_are_required(self):
+        self.inventory['manual_register_sha256']='0'*64
+        with self.assertRaisesRegex(ValueError,'stale canonical'):
+            seed(self.inventory,self.regions,self.root)
+        self.inventory['manual_register_sha256']=sha(self.root/REGION_REGISTER)
+        self.inventory['derivation_inputs_sha256']='0'*64
+        with self.assertRaisesRegex(ValueError,'derivation inputs'):
+            seed(self.inventory,self.regions,self.root)
 
     def test_feature_comparison_tracks_added_removed_and_matching_boundaries(self):
         base = expanded_review_sites(self.records)

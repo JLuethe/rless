@@ -42,6 +42,19 @@ class EvidenceGate(unittest.TestCase):
         self.assertTrue(self.evidence.finish())
         validate_report(self.evidence.directory / 'summary.json', self.root)
 
+    def test_report_level_sanitizer_diagnostics_cannot_hide_behind_passed_records(self):
+        self.run_python('print("safe")')
+        diagnostic = self.directory / 'late-sanitizer.log'
+        diagnostic.write_text('ERROR: AddressSanitizer: heap-use-after-free\n')
+        self.evidence.report['sanitizer_reports'] = [dict(path=str(diagnostic), sha256=sha(diagnostic))]
+        self.assertFalse(self.evidence.finish())
+        # Even a manually promoted aggregate and permission for assigned legacy
+        # findings cannot hide these unclassified application diagnostics.
+        self.evidence.report['status'] = 'passed'
+        self.evidence.save()
+        with self.assertRaisesRegex(ValueError, 'report-level sanitizer'):
+            validate_report(self.evidence.directory / 'summary.json', self.root, allow_open_findings=True)
+
     def test_empty_selection_cannot_pass(self):
         self.assertFalse(self.evidence.finish())
         self.evidence.report['status'] = 'passed'

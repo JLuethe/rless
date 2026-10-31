@@ -6,10 +6,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from common import Evidence, sha
 from coverage import bind, matrix
 from ownership import CHECKLIST, seed, validate
+from inventory_format import REGION_REGISTER
 
 
 class ReviewControls(unittest.TestCase):
@@ -21,7 +23,19 @@ class ReviewControls(unittest.TestCase):
             mutable_static_definitions=[dict(file='src/fixture.rs',context='',symbol='OBJECT')],
             candidate_external_symbols=['free'],
             indirect_call_sites=[dict(file='src/fixture.rs',context='callback',line=1,column=1,symbol='callback')])
+        # These fixtures test review metadata only. Source completeness has its
+        # own unmocked integration and mutation tests in test_inventory_coverage.
+        self.inventory.update(schema_version=2,expanded_configurations={},
+            static_definitions=[dict(**row,declared_type='i32',binding_mutability='mutable')
+                                for row in self.inventory['mutable_static_definitions']])
+        completeness=patch('ownership.validate_inventory_v2',return_value=None)
+        completeness.start()
+        self.addCleanup(completeness.stop)
         self.regions={'regions':[dict(id='OWN-TST',current_paths=['src/fixture.rs'],delivery_packet='M0.2')]}
+        canonical=self.root/REGION_REGISTER
+        canonical.parent.mkdir(parents=True)
+        canonical.write_text(json.dumps(self.regions))
+        self.inventory.update(manual_register=REGION_REGISTER,manual_register_sha256=sha(canonical))
         self.findings={'findings':[dict(id='FINDING-TST',status='open')]}
         self.review=seed(self.inventory,self.regions,self.root)
 
@@ -38,6 +52,15 @@ class ReviewControls(unittest.TestCase):
         with self.assertRaises(ValueError):self.check()
         self.assertEqual(len(self.review['entries']),5)
         self.complete();self.assertEqual(self.check()['status'],'reviewed')
+
+    def test_historical_inventory_cannot_approve_complete_review(self):
+        self.inventory['schema_version']=1
+        self.review=seed(self.inventory,self.regions,self.root)
+        self.complete()
+        with self.assertRaisesRegex(ValueError,'source-derived schema-2'):
+            self.check()
+        result=validate(self.review,self.inventory,self.regions,self.findings,self.root,complete=False)
+        self.assertEqual(result['status'],'not-verified')
 
     def test_omitted_or_duplicated_entry_rejects(self):
         self.complete();original=copy.deepcopy(self.review)

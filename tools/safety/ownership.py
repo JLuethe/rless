@@ -7,7 +7,7 @@ from pathlib import Path
 
 from common import ROOT, sha, write_json
 from inventory_format import (EXPANDED_CONFIGURATIONS, all_statics, boundary_comparison, expanded_review_sites,
-                              native_candidates, parse_records, source_inputs)
+                              native_candidates, parse_records, source_inputs, derive_current_inventory, REGION_REGISTER)
 
 CHECKLIST = ('owner_creation', 'aliases_escapes', 'callback_targets', 'invalidation',
              'mutation_commit', 'release_pair', 'error_cleanup', 'signals_handoff')
@@ -25,7 +25,15 @@ def validate_inventory_v2(inventory, root):
     """Derive coverage from retained syntax, not editable summary counts."""
     if set(inventory['files']) != set(source_inputs(root)):
         raise ValueError('missing or extra maintained source input')
+    # A retained JSON/TSV artifact and an index derived from that SAME artifact
+    # can both omit a site consistently. Rebuild the maintained parser and derive
+    # the expected source facts without passing it any submitted artifact.
+    current = derive_current_inventory(root)
+    if inventory.get('derivation_inputs_sha256') != current['derivation_inputs_sha256']:
+        raise ValueError('stale inventory derivation inputs')
     records = json.loads(checked_artifact(inventory['raw_inventory'], root).read_text())
+    if records != current['source_records']:
+        raise ValueError('raw inventory is not the complete current-source AST')
     if not {item['file'] for item in records} <= set(inventory['files']):
         raise ValueError('syntax record outside inventoried source inputs')
     if inventory['static_definitions'] != all_statics(records):
@@ -46,6 +54,11 @@ def validate_inventory_v2(inventory, root):
         source = checked_artifact(configuration['source'], root)
         syntax = checked_artifact(configuration['syntax'], root)
         expanded = parse_records(syntax.read_text())
+        expected = current['expanded'][name]
+        if source.read_text() != expected['source']:
+            raise ValueError('expanded source does not match current compiler/configuration: ' + name)
+        if [{k:v for k,v in item.items() if k != 'file'} for item in expanded] != expected['records']:
+            raise ValueError('expanded AST is not the complete current compiler output: ' + name)
         if any((root / item['file']).resolve() != source.resolve() for item in expanded):
             raise ValueError('expanded syntax belongs to a different artifact')
         if configuration['review_sites'] != expanded_review_sites(expanded):
@@ -57,11 +70,40 @@ def validate_inventory_v2(inventory, root):
                 raise ValueError('changed feature boundary comparison: ' + name)
 
 
+def validate_region_register(inventory, regions, root=ROOT):
+    """Review input must be the current canonical register, not an alternate set."""
+    path = Path(root) / REGION_REGISTER
+    if (inventory.get('manual_register') != REGION_REGISTER or not path.is_file() or path.is_symlink()
+            or not path.resolve().is_relative_to(Path(root).resolve())):
+        raise ValueError('inventory must bind the canonical current region register')
+    if inventory.get('manual_register_sha256') != sha(path):
+        raise ValueError('stale canonical region register binding')
+    canonical = json.loads(path.read_text())
+    if regions != canonical:
+        raise ValueError('alternate region register differs from the canonical current register')
+    rows = canonical.get('regions')
+    if not isinstance(rows, list) or not rows:
+        raise ValueError('canonical region register is empty')
+    seen = set()
+    for region in rows:
+        identity, paths = region.get('id'), region.get('current_paths')
+        if not isinstance(identity, str) or not identity or identity in seen:
+            raise ValueError('missing or duplicate canonical region identity')
+        seen.add(identity)
+        if (not isinstance(paths, list) or not paths or len(paths) != len(set(paths))
+                or any(path not in inventory['files'] for path in paths)):
+            raise ValueError('canonical region refers to missing or duplicate maintained inputs')
+        if region.get('delivery_packet') not in PACKETS:
+            raise ValueError('canonical region has no current delivery packet')
+    return canonical
+
+
 def expected_entries(inventory, regions, root=ROOT):
     """File-level review covers raw sites; objects/indirect/native entries stay distinct."""
+    validate_region_register(inventory, regions, root)
     entries = {}
     version = inventory.get('schema_version', 1)
-    if version not in (1, 2):
+    if type(version) is not int or version not in (1, 2):
         raise ValueError('unsupported inventory schema')
     if version == 2:
         validate_inventory_v2(inventory, root)
@@ -181,6 +223,8 @@ def validate_expanded_review(item, entries, configuration, root):
 
 
 def validate(review, inventory, regions, findings, root=ROOT, complete=True):
+    if complete and inventory.get('schema_version', 1) != 2:
+        raise ValueError('complete ownership review requires source-derived schema-2 inventory')
     expected = seed(inventory, regions, root)
     for field in ('inventory_sha256', 'region_register_sha256', 'source_files_sha256'):
         if review[field] != expected[field]:
@@ -218,7 +262,7 @@ def validate(review, inventory, regions, findings, root=ROOT, complete=True):
             validate_expanded_review(item, entries, inventory['expanded_configurations'][item['configuration']], root)
     if complete and missing:
         raise ValueError(f'{len(missing)} review entries remain incomplete')
-    return dict(status='not-verified' if missing else 'reviewed', entries=len(entries), pending=len(missing),
+    return dict(status='not-verified' if missing or inventory.get('schema_version', 1) != 2 else 'reviewed', entries=len(entries), pending=len(missing),
                 runtime_safety_verified=False)
 
 

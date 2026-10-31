@@ -16,6 +16,9 @@ The findings reference must resolve to the maintained
 An alternate file cannot omit live infrastructure or legacy blockers. Changing
 the maintained register invalidates earlier receipts rather than silently changing
 what their review covered.
+The same authority and freshness rules apply to the maintained
+`docs/safety/ownership-register.json`; an alternate region list cannot remove
+ownership-cycle review obligations.
 
 Generate the current required control identities with:
 
@@ -48,6 +51,12 @@ the exact current test contract. Fired controls require an actual `RLF1` marker;
 ordinal separation requires at least two observed ordinals, possibly across
 separate selected tests. Native counterparts require actual `RNT1` markers at
 the matching site. Declared selections alone do not prove a hook was reached.
+Fault oracle schema 2 records actual invocation counts and observations. Requested
+repetitions invoke every ordinary selector that many times; four lifecycle/cleanup
+selectors instead repeat within their existing recovery oracle. Those records
+identify `internal-cycles` and retain the corresponding process/checkpoint counts.
+The validator rejects a requested repetition count without matching executions.
+Older schema 1 runs remain historical and cannot supply this repetition proof.
 Host sanitizer-capture records retain `detector_capture_report: {path, sha256}`;
 the validator checks the six safe/UAF/leak pipe and PTY controls and reopens their
 hashed diagnostics. Reference ABI evidence rederives the equivalent controls

@@ -19,18 +19,36 @@ fault counterparts and separate host/reference ABI sanitizer runners. Production
 changes harden the optional fault-injection channel and make lesskey parse staging
 local, releasing unpublished buffers on rejection. Further ownership fixes release
 command tables discarded by `#stop`, preserve persistent environment tables on
-empty temporary lookup, and release duplicate message/help overrides. The previously isolated safe
-components remain **outside the production pager**; this work does not constitute
+empty temporary lookup, and release duplicate message/help overrides. Independent
+review subsequently reproduced five duplicate startup-option leaks; the candidate
+now replaces those saved-string owners after copying the new value. The previously
+isolated safe components remain **outside the production pager**; this work does not constitute
 M1–M4 migration.
 
 Independent focused Rust, component, Python tooling and native fault tests have
 passed during development. Fresh sanitizer runs, native-boundary/ownership review
 and exact-candidate release qualification remain in progress. Interim failures
 and original logs are retained under ignored `compat/.runs/`; passing a subset
-never closes M0. The first expanded inventory recorded 718 review obligations, including normal
-and injection-enabled compiler expansions; subsequent ownership fixes require a
-fresh inventory. Review remains incomplete; draft or
-mechanically generated checklist text is not accepted review evidence.
+never closes M0. The expanded inventory at commit `73c6411` contains 720 review obligations. The
+independent audit has completed 127 and leaves 593 pending at this checkpoint;
+these counts are scoped to that source, and later edits require regeneration.
+Draft or mechanically generated checklist text is not accepted review evidence.
+
+Claude's resumed adversarial review found that mutually consistent but incomplete
+inventory artifacts could hide entries, and that caller-selected findings or
+review receipts could omit obligations. The candidate now rederives the full AST
+and all six compiler expansions from actual source with the pinned tools, binds
+the maintained findings/region registers, and binds approval to the complete
+candidate evidence selection. Independent positive generation and omission probes
+passed. This verifies those controls; it does not complete the ownership review.
+
+A repetition audit also found that schema-1 fault reports only repeated four
+internal lifecycle tests; other selectors ran once despite the requested count.
+Those reports retain that limited scope. Schema 2 executes each non-cycle selector
+the requested number of times and retains invocation counts; independent native
+and ASan smoke runs verified 103 invocations across the then-current 37 selectors
+at three repetitions. Final campaigns must use the corrected runner and current
+source; old reports are not relabeled as full 100-repetition campaigns.
 
 Known permanent read/write errors still reproduce silent data loss with zero exit
 status in both this pager and the pinned C reference. These are retained findings,

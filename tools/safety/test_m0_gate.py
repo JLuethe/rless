@@ -23,6 +23,7 @@ class M0GateControls(unittest.TestCase):
         (self.root / 'spec/safety').mkdir(parents=True)
         (self.root / 'docs/safety').mkdir(parents=True)
         write_json(self.root / 'docs/safety/findings.json', {'findings': []})
+        write_json(self.root / 'docs/safety/ownership-register.json', {'regions': []})
         (self.root / 'src/fault.rs').write_text('\n'.join(
             f'b"{site}" => Site::Fixture,' for site in sorted(m0_gate.MINIMUM_SITES)))
         (self.root / 'compat/corpus.json').write_text('{}')
@@ -55,10 +56,11 @@ class M0GateControls(unittest.TestCase):
         self.evidence.finish()
         self.report = self.evidence.directory / 'summary.json'
         own = {}
-        for name, data in [('inventory', {'schema_version': 2}), ('regions', {}),
+        for name, data in [('inventory', {'schema_version': 2}), ('regions', {'regions': []}),
                            ('review', {'entries': []}), ('findings', {'findings': []})]:
-            path = (self.root / 'docs/safety/findings.json' if name == 'findings'
-                    else self.directory / (name + '.json'))
+            path = {'findings': self.root / 'docs/safety/findings.json',
+                    'regions': self.root / 'docs/safety/ownership-register.json'}.get(
+                        name, self.directory / (name + '.json'))
             write_json(path, data)
             own[name] = self.ref(path)
         bindings = self.directory / 'bindings.json'
@@ -167,6 +169,21 @@ class M0GateControls(unittest.TestCase):
         self.assertIn('docs/safety/findings.json', self.candidate['input_fingerprints']['files'])
         write_json(authoritative, {'findings': [dict(id='M0-NEW', status='open')]})
         self.candidate['ownership']['findings'] = self.ref(authoritative)
+        with self.assertRaisesRegex(ValueError, 'inputs changed'):
+            self.check()
+
+    def test_substitute_region_register_cannot_drop_owner_cycles(self):
+        alternate = self.directory / 'omitted-regions.json'
+        write_json(alternate, {'regions': []})
+        self.candidate['ownership']['regions'] = self.ref(alternate)
+        with self.assertRaisesRegex(ValueError, 'ownership regions must use the authoritative'):
+            self.check()
+
+    def test_region_register_change_invalidates_existing_receipts(self):
+        authoritative = self.root / 'docs/safety/ownership-register.json'
+        self.assertIn('docs/safety/ownership-register.json', self.candidate['input_fingerprints']['files'])
+        write_json(authoritative, {'regions': [{'id': 'OWN-NEW'}]})
+        self.candidate['ownership']['regions'] = self.ref(authoritative)
         with self.assertRaisesRegex(ValueError, 'inputs changed'):
             self.check()
 

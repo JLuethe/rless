@@ -110,7 +110,7 @@ def source_file_summaries(records, sources, root=ROOT):
 
 def inventory(args, evidence):
     from inventory_format import (EXPANDED_CONFIGURATIONS, all_statics, boundary_comparison, expanded_review_sites,
-                                  native_candidates, parse_records, source_inputs)
+                                  native_candidates, parse_records, source_inputs, derivation_inputs, REGION_REGISTER)
     env = check_tools(args, evidence)
     helper_manifest = ROOT / 'tools/safety/inventory/Cargo.toml'
     if evidence.run('build-inventory', ['cargo', 'build', '--locked', '--offline', '--manifest-path',
@@ -209,7 +209,8 @@ def inventory(args, evidence):
                    raw_inventory=dict(path=str(raw_path), sha256=sha(raw_path)),
                    indirect_call_sites=[r for r in records if r['kind'] == 'indirect_call'],
                    source_fingerprint=evidence.report['input_fingerprints']['sha256'],
-                   manual_register='docs/safety/ownership-register.json')
+                   manual_register=REGION_REGISTER, manual_register_sha256=sha(ROOT / REGION_REGISTER),
+                   derivation_inputs_sha256=hashlib.sha256(json.dumps(derivation_inputs(ROOT),sort_keys=True).encode()).hexdigest())
     write_json(args.output / 'inventory.json', summary)
     evidence.report['inventory'] = dict(path=str(args.output / 'inventory.json'), sha256=sha(args.output / 'inventory.json'))
     evidence.save()
