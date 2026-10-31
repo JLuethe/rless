@@ -21,7 +21,10 @@ local, releasing unpublished buffers on rejection. Further ownership fixes relea
 command tables discarded by `#stop`, preserve persistent environment tables on
 empty temporary lookup, and release duplicate message/help overrides. Independent
 review subsequently reproduced five duplicate startup-option leaks; the candidate
-now replaces those saved-string owners after copying the new value. The previously
+now replaces those saved-string owners after copying the new value. A sixth owner
+loss when stdin tag input resets the saved filename is also fixed. Independent
+native and sanitizer regressions pass for these paths; full-candidate qualification
+is still required. The previously
 isolated safe components remain **outside the production pager**; this work does not constitute
 M1–M4 migration.
 
@@ -30,7 +33,7 @@ passed during development. Fresh sanitizer runs, native-boundary/ownership revie
 and exact-candidate release qualification remain in progress. Interim failures
 and original logs are retained under ignored `compat/.runs/`; passing a subset
 never closes M0. The expanded inventory at commit `73c6411` contains 720 review obligations. The
-independent audit has completed 127 and leaves 593 pending at this checkpoint;
+independent audit has completed 132 and leaves 588 pending at this checkpoint;
 these counts are scoped to that source, and later edits require regeneration.
 Draft or mechanically generated checklist text is not accepted review evidence.
 

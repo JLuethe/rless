@@ -1,0 +1,47 @@
+{
+  "status": 1,
+  "checkpoints": [],
+  "final_terminal": {
+    "rows": [
+      "74 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:",
+      "590:40                                                                          ",
+      "    #18 0x56337e0548df in std::panicking::catch_unwind::hc0ebd6ee5d722ceb /rustc",
+      "/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19   ",
+      "    #19 0x56337e0548df in std::panic::catch_unwind::hc8f7f3a47dd60ea5 /rustc/464",
+      "5a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14           ",
+      "    #20 0x56337e0548df in std::rt::lang_start_internal::hb277082aa14cdf53 /rustc",
+      "/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:171:5           ",
+      "    #21 0x56337df6fedf in std::rt::lang_start::hd307e6cdf062929a /home/john/Code",
+      "/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/",
+      "lib/rustlib/src/rust/library/std/src/rt.rs:205:5                                ",
+      "    #22 0x56337df6fdd0 in main (/home/john/Code/rless/compat/.runs/ownership-aud",
+      "it-20261030/lmsg-postfix/target/x86_64-unknown-linux-gnu/debug/rless+0x227dd0) (",
+      "BuildId: 30b06534597bf7412d71a21d126253bb887364ba)                              ",
+      "    #23 0x7ff97b827780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f",
+      "4bce117fd321cbd23a2014b)                                                        ",
+      "    #24 0x7ff97b8278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildI",
+      "d: d320029ad1a23be2f4bce117fd321cbd23a2014b)                                    ",
+      "    #25 0x56337deb46b4 in _start (/home/john/Code/rless/compat/.runs/ownership-a",
+      "udit-20261030/lmsg-postfix/target/x86_64-unknown-linux-gnu/debug/rless+0x16c6b4)",
+      " (BuildId: 30b06534597bf7412d71a21d126253bb887364ba)                            ",
+      "                                                                                ",
+      "SUMMARY: AddressSanitizer: 2 byte(s) leaked in 1 allocation(s).                 ",
+      "                                                                                "
+    ],
+    "styles": [],
+    "cursor": [
+      23,
+      0,
+      false
+    ],
+    "private_modes": [],
+    "modes": [
+      224,
+      800
+    ],
+    "bells": 0,
+    "osc": []
+  },
+  "termios_restored": true,
+  "files": {}
+}

@@ -8,6 +8,9 @@ import shutil
 import subprocess
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from release import reference_policy, validate_reference_hashes
+
 from offline_symbolize import require_source, symbolize
 from snapshot import ROOT, archive, sha, validate
 
@@ -95,6 +98,8 @@ def main():
         for name in ('less', 'lessecho', 'less-osc8-open.sh'):
             shutil.copy2(args.reference_dir.resolve() / name, reference / name)
         record['references'] = {path.name: sha(path) for path in reference.iterdir()}
+        validate_reference_hashes(record['references'], ROOT)
+        record['reference_policy'] = reference_policy(ROOT)
         save(inputs / 'options.json', dict(repetitions=args.repetitions))
         command = ['podman', 'run', '--rm', '--network=none', '--read-only', '--cap-drop=all',
                    '--userns=keep-id', '--user', str(os.getuid()) + ':' + str(os.getgid()),

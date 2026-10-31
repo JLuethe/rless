@@ -422,6 +422,18 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertEqual((actual.returncode, actual.stdout, actual.stderr),
                                  (baseline.returncode, baseline.stdout, baseline.stderr))
 
+    def test_stdin_tags_reset_releases_saved_filename(self):
+        for argv in (['-tfoo'], ['-T-', '-tfoo']):
+            case = dict(id='TAGS-OWNER-RESET', mode='pty', argv=argv,
+                        stream_b64='', events=[{'close_stream': True}])
+            baseline, trace = pty_run(REFERENCE, case)
+            self.assertEqual((baseline['status'], baseline['termios_restored'], trace),
+                             (1, True, b''))
+            for binary in (NORMAL, INJECTED):
+                actual, trace = pty_run(binary, case)
+                self.assertEqual(trace, b'')
+                self.assertEqual(actual, baseline)
+
     def test_stop_directive_releases_discarded_command_table_owners(self):
         # Exercise the default borrowed table, a parsed predecessor and a
         # parsed successor to the first stop table. ASAN/LSAN diagnostics are
@@ -848,6 +860,7 @@ def contracts():
         'test_native_handoff_failure_skips_exact_child_and_recovers': entry(('handoff',), (1, 2), ('fired', 'native-counterpart', 'resource-conservation', 'ordinal-separation')),
         'test_parser_failure_then_valid_content_is_usable': entry(('parser',), controls=('fired',)),
         'test_duplicate_startup_options_release_previous_saved_strings': entry((), (), ('startup-option-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
+        'test_stdin_tags_reset_releases_saved_filename': entry((), (), ('startup-option-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_stop_directive_releases_discarded_command_table_owners': entry((), (), ('command-table-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_duplicate_message_and_help_definitions_release_previous_overrides': entry((), (), ('message-owner-regression',), scenario='SAFECASE-VER-006', variant='FD/worker/child/live allocation accounting'),
         'test_parser_partial_staging_failure_releases_each_table_before_retry': entry(('parser',), (2, 4, 6), ('fired', 'ordinal-separation'), scenario='SAFECASE-MEM-007', variant='failure before and after commit staging'),

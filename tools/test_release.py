@@ -14,7 +14,7 @@ import package
 from release import (FAMILIES, PROFILES, PROVENANCE, REQUIRED_STEPS, SEEDS, WORKING_PROVENANCE,
                      HELPER_ERRORS, HELPER_INVOCATIONS, HELPER_URIS, INTEGRATIONS,
                      commit_manifest, file_identity, source_identity, validate_verification,
-                     write_export_manifest)
+                     write_export_manifest, reference_policy, capture_reference_bundle)
 
 
 class ReleaseControls(unittest.TestCase):
@@ -34,6 +34,9 @@ class ReleaseControls(unittest.TestCase):
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content)
+        pins = self.root / 'tools/safety/profiles.json'
+        pins.parent.mkdir(parents=True, exist_ok=True)
+        pins.write_bytes((Path(__file__).resolve().parent / 'safety/profiles.json').read_bytes())
         self.git('init', '-q')
         self.git('add', '.')
         self.git('-c', 'user.name=Release Fixture', '-c', 'user.email=fixture@invalid', 'commit', '-qm', 'fixture')
@@ -56,9 +59,13 @@ class ReleaseControls(unittest.TestCase):
 
     def passing_report(self):
         digest = 'a' * 64
+        policy = reference_policy(self.root)
+        bundle = {name: dict(path='/qualified/reference/' + name, sha256=value)
+                  for name, value in policy['files_sha256'].items()}
+        reference_digest = bundle['less']['sha256']
         record = dict(schema_version=2, passed=True, source=self.source,
             selection=dict(reference=True, install_check=True, stress_rounds=100),
-            reference=dict(sha256=digest), helpers=dict(osc8_sha256=digest),
+            reference=bundle['less'], reference_policy=policy, reference_bundle=bundle, helpers=dict(osc8_sha256=digest),
             binaries={profile: dict(sha256=digest, companion_sha256=digest) for profile in PROFILES},
             installed=dict(sha256=digest, companion_sha256=digest), evidence_files={}, steps=[])
         for name in sorted(REQUIRED_STEPS):
@@ -73,7 +80,8 @@ class ReleaseControls(unittest.TestCase):
             observer_revision_sha256=self.source['files']['compat/observer-v2.json']['sha256'],
             families={name: dict(executed=count, passed=count, failed=0, errors=[]) for name, count in FAMILIES.items()})
         for lane in ('acceptance-debug', 'acceptance-release', 'reference', 'acceptance-installed'):
-            self.write_evidence(record, lane + '/summary.json', acceptance)
+            self.write_evidence(record, lane + '/summary.json',
+                dict(acceptance, sha256=reference_digest) if lane == 'reference' else acceptance)
         def terminal(row='Fixture observation', modes=None):
             return dict(rows=[row], styles=[], cursor=[0, 0, False], private_modes=modes or [],
                         modes=[], bells=0, osc=[])
@@ -106,9 +114,49 @@ class ReleaseControls(unittest.TestCase):
             self.write_evidence(record, f'job-control-{profile}.json', dict(passed=True, actual=job, reference=job))
             for seed in SEEDS:
                 self.write_evidence(record, f'stress-{profile}-{seed}.json', dict(seed=seed, rounds=100,
-                    executed=708, passed=708, failed=0, failures=[], binary_sha256=digest, reference_sha256=digest))
+                    executed=708, passed=708, failed=0, failures=[], binary_sha256=digest, reference_sha256=reference_digest))
         self.report_path.write_text(json.dumps(record))
         return record
+
+    def test_self_consistent_alternate_reference_is_not_qualified(self):
+        for name in ('less', 'lessecho', 'less-osc8-open.sh'):
+            with self.subTest(name=name):
+                record = self.passing_report()
+                alternate = 'b' * 64
+                record['reference_bundle'][name]['sha256'] = alternate
+                if name == 'less':
+                    # Keep every dependent hash consistent, including the retained
+                    # replay/stress hashes. Only maintained authority rejects this.
+                    record['reference']['sha256'] = alternate
+                    summary = json.loads((self.evidence / 'reference/summary.json').read_text())
+                    summary['sha256'] = alternate
+                    self.write_evidence(record, 'reference/summary.json', summary)
+                    for profile in PROFILES:
+                        for seed in SEEDS:
+                            filename = f'stress-{profile}-{seed}.json'
+                            stress = json.loads((self.evidence / filename).read_text())
+                            stress['reference_sha256'] = alternate
+                            self.write_evidence(record, filename, stress)
+                with self.assertRaisesRegex(ValueError, 'maintained qualification pins'):
+                    validate_verification(record, self.report_path, self.root)
+                record['reference_policy']['files_sha256'][name] = alternate
+                with self.assertRaisesRegex(ValueError, 'maintained authority'):
+                    validate_verification(record, self.report_path, self.root)
+
+    def test_reference_capture_hashes_actual_bundle_and_allows_developer_comparison(self):
+        directory = self.directory / 'reference'
+        directory.mkdir()
+        for name in reference_policy(self.root)['files_sha256']:
+            (directory / name).write_text('developer-built ' + name)
+        with self.assertRaisesRegex(ValueError, 'maintained qualification pins'):
+            capture_reference_bundle(directory / 'less', self.root)
+        captured = capture_reference_bundle(directory / 'less', self.root, require_pinned=False)
+        self.assertEqual(set(captured), {'less', 'lessecho', 'less-osc8-open.sh'})
+        for name, item in captured.items():
+            self.assertEqual(item['sha256'], hashlib.sha256((directory / name).read_bytes()).hexdigest())
+        (directory / 'lessecho').unlink()
+        with self.assertRaises(FileNotFoundError):
+            capture_reference_bundle(directory / 'less', self.root, require_pinned=False)
 
     def test_source_manifest_covers_tests_and_corpus_and_rejects_dirty_input(self):
         self.assertIn('tests/boundary.rs', self.source['files'])
@@ -139,6 +187,7 @@ class ReleaseControls(unittest.TestCase):
             tar.extractall(self.directory / 'extracted', filter='data')
         extracted = self.directory / 'extracted/fixture-source'
         self.assertEqual(source_identity(extracted, require_clean=True)['source_commit'], self.source['source_commit'])
+        self.assertEqual(reference_policy(extracted), reference_policy(self.root))
         (extracted / 'tests/boundary.rs').write_text('changed\n')
         with self.assertRaisesRegex(ValueError, 'changed since committed export'):
             source_identity(extracted, require_clean=True)

@@ -85,8 +85,12 @@ def main():
     # checkout or accept arbitrary untracked files. This manifest is emitted by
     # the trusted Git exporter after every exported byte has been compared.
     sys.path.insert(0, str(ROOT / 'tools'))
-    from release import commit_manifest, write_export_manifest, validate_verification, validate_acceptance
+    from release import (commit_manifest, write_export_manifest, validate_verification, validate_acceptance,
+                         reference_policy, capture_reference_bundle)
     manifest_path = write_export_manifest(source, commit_manifest(ROOT, commit))
+    bundle = capture_reference_bundle(reference, source)
+    if reference_policy(source) != reference_policy(ROOT):
+        raise ValueError("exported reference policy differs from maintained qualification authority")
     commands = []
     def run(command, cwd, env, log, timeout=1200):
         return invoke(command, cwd, env, log, timeout, commands)
@@ -97,7 +101,7 @@ def main():
                   source_root=str(source), source_manifest=ref(manifest_path), source_archive=ref(archive),
                   scope='Native unsafe compatibility baseline; not safety migration completion.',
                   source_files_sha256=files, source_manifest_sha256=hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest(),
-                  reference=dict(path=str(reference), sha256=sha(reference)),
+                  reference=bundle["less"], reference_bundle=bundle, reference_policy=reference_policy(source),
                   observer_sha256=sha(source / 'tools/compat/run_v2.py'),
                   frozen_corpus_sha256=sha(source / 'compat/corpus.json'),
                   permissions=dict(uid=os.getuid(), euid=os.geteuid(), gid=os.getgid(),
@@ -187,8 +191,8 @@ def main():
         record['tool_files_sha256'] = {item['path']:item['sha256'] for item in record['tools'].values()}
         record['python_dependencies'] = {name:importlib.metadata.version(name) for name in
             [line.split('==')[0] for line in (source/'tools/compat/requirements.txt').read_text().splitlines() if line.strip() and not line.startswith('#')]}
-        record['reference_bundle'] = {name:ref(reference if name == 'less' else reference.parent/name)
-                                      for name in ('less','lessecho','less-osc8-open.sh')}
+        if capture_reference_bundle(reference, source) != record['reference_bundle']:
+            raise ValueError('reference bundle changed during baseline')
         native_libraries = {}
         for name,binary in [('reference',reference),('debug',source / 'target/debug/rless'),('release',source / 'target/release/rless')]:
             text = run(['ldd',binary], source, env, out / ('ldd-' + name + '.log'))

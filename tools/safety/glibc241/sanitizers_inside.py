@@ -38,6 +38,9 @@ def main():
     from snapshot import validate
     snapshot = json.loads(Path('/input/source-manifest.json').read_text())
     validate(snapshot, SOURCE, exact=True)
+    sys.path.insert(0, str(SOURCE / 'tools'))
+    from release import capture_reference_bundle
+    capture_reference_bundle('/reference/less', SOURCE)
     pins = json.loads((SOURCE / 'tools/safety/profiles.json').read_text())
     options = json.loads(Path('/input/options.json').read_text())
     records = []

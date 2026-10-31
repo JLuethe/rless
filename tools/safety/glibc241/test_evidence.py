@@ -9,11 +9,25 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from glibc241.evidence import checked, fault_records, validate_external_report, work_path
-from common import sha
+from common import ROOT, sha
+from release import reference_policy, validate_reference_hashes
 from native_alloc import ElfTargets
 
 
 class EvidenceControls(unittest.TestCase):
+    def test_reference_qualification_rejects_self_consistent_alternate_bundle(self):
+        hashes = reference_policy(ROOT)['files_sha256']
+        validate_reference_hashes(hashes, ROOT)
+        for name in hashes:
+            with self.subTest(name=name):
+                changed = dict(hashes, **{name: 'a' * 64})
+                with self.assertRaisesRegex(ValueError, 'maintained qualification pins'):
+                    validate_reference_hashes(changed, ROOT)
+        for changed in ({}, {**hashes, 'unreviewed': 'a' * 64}):
+            with self.assertRaisesRegex(ValueError, 'maintained qualification pins'):
+                validate_reference_hashes(changed, ROOT)
+
+
     def test_unsupported_report_cannot_claim_native_pass(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/'summary.json'

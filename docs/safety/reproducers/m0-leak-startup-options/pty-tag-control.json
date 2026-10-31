@@ -1,0 +1,47 @@
+{
+  "status": 1,
+  "checkpoints": [],
+  "final_terminal": {
+    "rows": [
+      "No tags file                                                                    ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                ",
+      "                                                                                "
+    ],
+    "styles": [],
+    "cursor": [
+      1,
+      0,
+      false
+    ],
+    "private_modes": [],
+    "modes": [
+      224,
+      800
+    ],
+    "bells": 0,
+    "osc": []
+  },
+  "termios_restored": true,
+  "files": {}
+}

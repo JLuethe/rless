@@ -12,7 +12,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from common import ROOT, PINS, git, sha, utc, write_json
 from snapshot import archive as snapshot_archive, validate as validate_snapshot
-from release import commit_manifest
+from release import commit_manifest, reference_policy, validate_reference_hashes
 
 
 def main():
@@ -60,6 +60,8 @@ def main():
         source_tar_sha256=sha(inputs/'source.tar'),image_id=image_id,image_rootfs=image.get('RootFS'),
         containerfile_sha256=sha(ROOT/'tools/safety/glibc241/Containerfile'),
         references={p.name:sha(p) for p in reference.iterdir()},runtime_safety_verified=False)
+    validate_reference_hashes(record['references'], ROOT)
+    record['reference_policy']=reference_policy(ROOT)
     record['source_kind']='explicit-working-tree-snapshot' if snapshot else 'committed-source'
     if snapshot:
         record.update(source_manifest=snapshot,source_manifest_sha256=sha(inputs/'source-manifest.json'))

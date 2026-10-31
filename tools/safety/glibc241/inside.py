@@ -49,6 +49,9 @@ def main():
         sys.path.insert(0,str(SOURCE/'tools'))
         from release import write_export_manifest
         write_export_manifest(SOURCE,json.loads(Path('/input/release-source-manifest.json').read_text()))
+    sys.path.insert(0,str(SOURCE/'tools'))
+    from release import capture_reference_bundle
+    capture_reference_bundle('/reference/less', SOURCE)
     import importlib.metadata
     import pyte
     python_dependencies={}

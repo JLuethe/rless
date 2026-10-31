@@ -15,7 +15,7 @@ from common import ROOT, PINS, DIAGNOSTICS, fingerprint, sha, validate_oracle_me
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from release import (PROVENANCE, commit_manifest, integer, validate_acceptance,
                      validate_acceptance_observer as acceptance_observer,
-                     validate_verification, verify_export)
+                     validate_verification, verify_export, validate_reference_record)
 
 PROCEDURE = 'BUILDER-GLIBC-2.44-NATIVE-v1'
 ABI = 'BUILDER-GLIBC-2.44'
@@ -241,6 +241,8 @@ def validate_external_report(path, root=ROOT):
     for name, field in [('rless','sha256'),('lessecho','companion_sha256')]:
         executable(dict(path=str(native_path.parent/'installed/bin'/name),sha256=native['installed'][field]))
     require(sha(source/'vendor/less-helpers/less-osc8-open') == native['helpers']['osc8_sha256'], 'host helper changed')
+    validate_reference_record(record, root)
+    require(native['reference_bundle'] == record['reference_bundle'], 'host reference bundle selection mismatch')
     reference = executable(record['reference'])
     require(set(record['reference_bundle']) == {'less','lessecho','less-osc8-open.sh'}, 'host reference bundle incomplete')
     for name, value in record['reference_bundle'].items():

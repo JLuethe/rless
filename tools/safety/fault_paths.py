@@ -8,6 +8,9 @@ import platform
 import sys
 import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from release import capture_reference_bundle, reference_policy
+
 from common import Evidence, PINS, ROOT, environment, sha, write_json
 from run import check_tools, nightly_environment
 from native_alloc import RUSTFLAGS as ALLOC_RUSTFLAGS
@@ -39,7 +42,11 @@ def main():
         parser.error('--reference is required for native error comparison')
     reference = args.reference.resolve(strict=True)
     evidence.report['abi_profile'] = abi_profile
-    evidence.report['reference'] = dict(path=str(reference), sha256=sha(reference))
+    bundle = capture_reference_bundle(reference, ROOT)
+    evidence.report['reference_policy'] = reference_policy(ROOT)
+    evidence.report['reference_bundle'] = bundle
+    evidence.report['reference'] = bundle['less']
+    evidence.save()
     profile, target = 'NATIVE', []
     if args.profile == 'asan':
         if not args.tool_home:
@@ -156,7 +163,7 @@ def main():
             '--native-alloc-binding', alloc_binding,
             '--repetitions', str(args.repetitions), '--oracle-report', oracle, *extra,
             'ActualFaultPaths.' + name], env=environment(), profile=profile,
-            artifacts=[*bins.values(), shim, short_shim, io_shim, reference, *alloc_artifacts], timeout=max(180, args.repetitions * 5),
+            artifacts=[*bins.values(), shim, short_shim, io_shim, *[Path(item['path']) for item in bundle.values()], *alloc_artifacts], timeout=max(180, args.repetitions * 5),
             scenario_id=declaration['scenario_id'], variant=declaration['variant'],
             requirement_ids=[declaration['scenario_id'].replace('SAFECASE-', 'SAFE-')],
             coverage_scope='partial', oracle_metadata=metadata, finding_ids=declaration['finding_ids'])
@@ -174,6 +181,8 @@ def main():
         if new_reports:
             record.update(status='failed', sanitizer_reports=[dict(path=str(p), sha256=sha(p)) for p in sorted(new_reports)])
         evidence.save()
+    if capture_reference_bundle(reference, ROOT) != bundle:
+        raise ValueError('reference bundle changed during fault campaign')
     evidence.report['findings'].extend([
         dict(id='M0-IO-001', status='open', reason='Injected read EIO loses input without diagnostic and returns zero.'),
         dict(id='M0-IO-002', status='open', reason='Injected write EIO loses output without diagnostic and returns zero.')])

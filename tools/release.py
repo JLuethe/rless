@@ -145,6 +145,57 @@ def sha_file(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def reference_policy(root):
+    """Read qualification authority from this source tree/export, never a report."""
+    path=Path(root)/'tools/safety/profiles.json'
+    value=json.loads(path.read_text()).get('reference_bundle')
+    names={'less','lessecho','less-osc8-open.sh'}
+    if not isinstance(value,dict) or set(value)!={'upstream','regex','files_sha256'}:
+        raise ValueError('missing maintained reference bundle policy')
+    upstream=value['upstream']
+    if (not isinstance(upstream,dict) or set(upstream)!={'repository','version','commit'} or
+            not isinstance(upstream['repository'],str) or not upstream['repository'].startswith('https://') or
+            not isinstance(upstream['version'],str) or not upstream['version'].isdigit() or
+            not isinstance(upstream['commit'],str) or len(upstream['commit'])!=40 or
+            any(c not in '0123456789abcdef' for c in upstream['commit']) or value['regex']!='gnu'):
+        raise ValueError('invalid maintained reference source/regex policy')
+    hashes=value['files_sha256']
+    if not isinstance(hashes,dict) or set(hashes)!=names or any(
+            not isinstance(digest,str) or len(digest)!=64 or any(c not in '0123456789abcdef' for c in digest)
+            for digest in hashes.values()):
+        raise ValueError('invalid maintained reference bundle hashes')
+    return value
+
+
+def validate_reference_hashes(hashes, root):
+    if hashes != reference_policy(root)['files_sha256']:
+        raise ValueError('reference bundle differs from maintained qualification pins')
+
+
+def capture_reference_bundle(reference, root, require_pinned=True):
+    reference=Path(reference).resolve(strict=True)
+    bundle={name:dict(path=str(path.resolve(strict=True)),sha256=sha_file(path))
+            for name,path in ((name,reference if name=='less' else reference.parent/name)
+                             for name in reference_policy(root)['files_sha256'])}
+    if require_pinned:
+        validate_reference_hashes({name:item['sha256'] for name,item in bundle.items()},root)
+    return bundle
+
+
+def validate_reference_record(record, root):
+    policy=reference_policy(root)
+    if record.get('reference_policy')!=policy:
+        raise ValueError('verification reference policy differs from maintained authority')
+    bundle=record.get('reference_bundle')
+    if not isinstance(bundle,dict) or any(not isinstance(item,dict) or set(item)!={'path','sha256'}
+            or not isinstance(item['path'],str) or not item['path'] for item in bundle.values()):
+        raise ValueError('verification reference bundle identity missing')
+    validate_reference_hashes({name:item['sha256'] for name,item in bundle.items()},root)
+    if record.get('reference')!=bundle['less']:
+        raise ValueError('verification reference pager differs from qualified bundle')
+    return bundle
+
+
 def manifest_digest(files):
     return hashlib.sha256(json.dumps(files, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
@@ -319,6 +370,7 @@ def validate_verification(record, path, root, require_clean=True):
     rounds = selection.get('stress_rounds')
     if selection.get('reference') is not True or selection.get('install_check') is not True or type(rounds) is not int or rounds < 100:
         raise ValueError('release requires reference, install and at least 100 stress rounds')
+    validate_reference_record(record, root)
     identities = [record.get('reference', {}).get('sha256'), record.get('helpers', {}).get('osc8_sha256')]
     for profile in PROFILES:
         identities.extend(record.get('binaries', {}).get(profile, {}).get(field)

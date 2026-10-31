@@ -1,0 +1,69 @@
+{
+  "status": "partial; no M0 or release approval",
+  "implementation_author": "Codex",
+  "independent_reviewers": [
+    "Claude CLI",
+    "independent older-model test, ownership and release agents"
+  ],
+  "baseline_commit": "73c641151dcb998c9714163d095493aa56bc14fb",
+  "subsequent_implementation_commit": "0a620b2",
+  "qualification_scope": "Focused controls and regressions include later uncommitted fixes; a new clean exact-commit campaign is still required. Do not retag historical results.",
+  "passed_controls": {
+    "inventory_coverage": 15,
+    "closure": 16,
+    "safety_evidence": 30,
+    "m0_gate": 26,
+    "oracle_controls": 25,
+    "release_policy": 18,
+    "host_evidence": 6,
+    "glibc_evidence": 6,
+    "offline_snapshot": 6
+  },
+  "inventory": {
+    "fresh_actual_configurations": 6,
+    "generation_records_passed": 18,
+    "review_entries_at_baseline": 720,
+    "genuinely_reviewed": 132,
+    "pending": 588,
+    "mutations_rejected": [
+      "self-consistent raw AST omission",
+      "self-consistent expanded AST/site omission",
+      "alternate empty or historical ownership register"
+    ]
+  },
+  "ownership_regressions": {
+    "duplicate_options": "Five single/duplicate startup option pairs clean under independent ASan/LSan retest; native regression passed",
+    "stdin_tags_reset": "Independent six-observation PTY regression passed native and ASan/LSan, with terminal restoration and reference-equivalent behavior",
+    "findings_remain_open_pending_complete_qualification": [
+      "M0-LEAK-004",
+      "M0-MEM-002",
+      "M0-LEAK-005",
+      "M0-LEAK-006"
+    ]
+  },
+  "reference_policy": "Actual pinned three-file bundle accepted; coedited substituted digest rejected; nonrelease developer bytes remain allowed without qualification",
+  "repetition_correction": "Schema1 requested100 only repeated four lifecycle methods. Other selectors executed once. Schema2 repeats every noncycle selector and records actual invocation counts. Independent native/ASAN smoke verified103invocations over37then-current selectors atN3; later selectors require fresh campaigns.",
+  "failed_baseline": {
+    "commit": "73c6411",
+    "passed_preinstall_steps": 19,
+    "acceptance": "809 debug/release/reference cases each",
+    "stress_comparisons": 2832,
+    "failed_stage": "clean-install: attempted network update",
+    "fix": "locked offline install independently succeeds; check.py now requests --offline",
+    "status": "not-verified, preserved original failed logs"
+  },
+  "remaining": [
+    "exact clean-commit host/reference native and package qualification",
+    "actual schema2 100-repetition sanitizer/fault profiles",
+    "remaining ownership/native review and hook applicability decisions",
+    "M0 closure; M1 feasibility and subsequent production migration",
+    "explicit experimental release disposition of silent permanent I/O errors and other hazards"
+  ],
+  "private_evidence_roots": [
+    "compat/.runs/release-review-20261031",
+    "compat/.runs/ownership-audit-20261030",
+    "compat/.runs/gate-fix-worktree/compat/.runs",
+    "/tmp/rless-luna56-m0/progress.json",
+    "/tmp/rless-claude-overnight/review.md"
+  ]
+}

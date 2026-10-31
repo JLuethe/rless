@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 
-from release import source_identity, sha_file
+from release import source_identity, sha_file, reference_policy, capture_reference_bundle
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -62,6 +62,13 @@ def main():
     python = sys.executable
     try:
         report['source'] = source_identity(ROOT, require_clean=args.release)
+        if args.reference:
+            reference=args.reference.resolve(strict=True)
+            report['reference_policy']=reference_policy(ROOT)
+            report['reference_bundle']=capture_reference_bundle(reference,ROOT,require_pinned=args.release)
+            report['reference']=report['reference_bundle']['less']
+            report['reference_qualified']=({name:item['sha256'] for name,item in report['reference_bundle'].items()}
+                                           ==report['reference_policy']['files_sha256'])
         report['build_and_test_inputs_sha256'] = report['source']['manifest_sha256']
         save()
         run('format', ['cargo', 'fmt', '--all', '--', '--check'])
@@ -83,7 +90,9 @@ def main():
                 companion_sha256=hashlib.sha256((binary.parent/'lessecho').read_bytes()).hexdigest())
         if args.reference:
             reference = args.reference.resolve(strict=True)
-            report['reference'] = dict(path=str(reference), sha256=sha_file(reference))
+            current_bundle=capture_reference_bundle(reference,ROOT,require_pinned=args.release)
+            if current_bundle!=report['reference_bundle']:
+                raise ValueError('reference bundle changed during verification')
             run('reference', [python, 'tools/compat/check_candidate.py', '--binary', reference,
                              '--results-dir', directory/'reference'])
             for profile in ('debug', 'release'):
@@ -107,6 +116,8 @@ def main():
                 '--binary', directory/'installed/bin/rless', '--results-dir', directory/'acceptance-installed'])
             report['installed'] = dict(sha256=sha_file(directory/'installed/bin/rless'),
                                        companion_sha256=sha_file(directory/'installed/bin/lessecho'))
+        if args.reference and capture_reference_bundle(args.reference,ROOT,require_pinned=args.release)!=report['reference_bundle']:
+            raise ValueError('reference bundle changed during verification')
         current = source_identity(ROOT, require_clean=args.release)
         if any(current.get(field) != report['source'].get(field)
                for field in ('source_commit', 'manifest_sha256', 'files', 'clean', 'dirty_state')):
@@ -122,7 +133,7 @@ def main():
         if args.install_check:
             evidence_names += ['acceptance-installed/summary.json']
         report['evidence_files'].update({name: sha_file(directory / name) for name in evidence_names})
-        report['release_prerequisites_complete'] = bool(current['clean'] and args.reference and
+        report['release_prerequisites_complete'] = bool(current['clean'] and args.reference and report.get('reference_qualified') and
                                                        args.install_check and args.stress_rounds >= 100)
         report['passed'] = True
     except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:

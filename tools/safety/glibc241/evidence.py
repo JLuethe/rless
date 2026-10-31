@@ -4,6 +4,10 @@ import json
 from pathlib import Path
 import re
 import tarfile
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from release import reference_policy, validate_reference_hashes
 
 from common import ROOT, PINS, DIAGNOSTICS, fingerprint, sha, validate_oracle_metadata
 from .snapshot import validate, source_names
@@ -82,6 +86,8 @@ def validate_asan_report(path, root=ROOT):
             and outer['image_rootfs'] == lock['rootfs'], 'immutable image lock mismatch')
     checked(root / 'tools/safety/glibc241/Containerfile', lock['containerfile_sha256'])
     require(set(outer['references']) == {'less', 'lessecho', 'less-osc8-open.sh'}, 'incomplete reference bundle')
+    validate_reference_hashes(outer['references'], root)
+    require(outer.get('reference_policy') == reference_policy(root), 'reference qualification policy mismatch')
     for name, digest in outer['references'].items():
         checked(out / 'reference' / name, digest)
     tools = outer['tool_files_sha256']
@@ -289,6 +295,8 @@ def validate_native_report(path, root=ROOT):
         if name in lock:
             require(item.read_text() == lock[name], 'native environment changed')
     require(set(outer['references']) == {'less', 'lessecho', 'less-osc8-open.sh'}, 'incomplete native reference bundle')
+    validate_reference_hashes(outer['references'], root)
+    require(outer.get('reference_policy') == reference_policy(root), 'reference qualification policy mismatch')
     for name, digest in outer['references'].items():
         checked(out / 'reference' / name, digest)
     for flag in ('--network=none', '--read-only', '--cap-drop=all', 'CARGO_NET_OFFLINE=true'):

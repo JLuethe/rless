@@ -289,6 +289,21 @@ class Evidence:
         return passed
 
 
+def validate_fault_reference_bundle(report, root=ROOT):
+    """Ordinary fault reports must use the maintained, still-present reference bundle."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from release import capture_reference_bundle, validate_reference_record
+    if not any(item.get('oracle_report') is not None or
+               (item.get('oracle_metadata') or {}).get('test_selector', '').startswith('ActualFaultPaths.')
+               for item in report.get('records', [])):
+        return False
+    bundle = validate_reference_record(report, root)
+    if capture_reference_bundle(Path(report['reference']['path']), root) != bundle:
+        raise ValueError('reference bundle changed since fault execution')
+    return True
+
+
 def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=False):
     """Re-derive a gate from logs, statuses, selections, artifacts and current inputs."""
     report = json.loads(Path(path).read_text())
@@ -313,6 +328,8 @@ def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=F
     for tool, value in report.get('tool_files_sha256', {}).items():
         if not Path(tool).is_file() or sha(tool) != value:
             raise ValueError('stale tool or toolchain source')
+    if not external:
+        validate_fault_reference_bundle(report, root)
     records = report['records']
     if not records:
         raise ValueError('empty selection')

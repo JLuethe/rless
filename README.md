@@ -66,7 +66,17 @@ candidate with reference comparison, stress and clean-install checks:
 python tools/check.py --release --reference /absolute/path/to/less-712
 ```
 
-Use the specified less 712 reference from the compatibility specification.
+Release qualification requires all three files in the reviewed reference bundle
+(`less`, sibling `lessecho`, and sibling `less-osc8-open.sh`) to match
+[`tools/safety/profiles.json`](tools/safety/profiles.json). That policy also pins
+the upstream commit and GNU regex configuration. Updating the bundle hashes
+requires a new independent qualification review. The source archive includes
+this policy, and its rebuild reads that included copy.
+
+`tools/compat/build_reference.sh` uses the same upstream pin, but local compiler
+and library differences can produce different binary hashes. Such builds remain
+usable with ordinary `tools/check.py --reference ...` comparisons; those reports
+explicitly record whether the bundle is release qualified.
 This prints the path to its verification summary. With that summary, create
 binary and source archives and SHA-256 checksums in a fresh output directory:
 

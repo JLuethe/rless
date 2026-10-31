@@ -16,7 +16,7 @@ import tempfile
 import tomllib
 
 from release import (PROVENANCE, sha_file, source_identity, validate_acceptance,
-                     validate_acceptance_observer, validate_verification, verify_export)
+                     validate_acceptance_observer, validate_verification, verify_export, reference_policy)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -52,6 +52,7 @@ def qualify_source(archive, source_name, expected_source, output):
             tar.extractall(directory, filter='data')
         rebuilt = Path(directory) / source_name
         identity = source_identity(rebuilt, require_clean=True)
+        included_reference_policy = reference_policy(rebuilt)
         if identity['source_commit'] != expected_source['source_commit'] or identity['manifest_sha256'] != expected_source['manifest_sha256']:
             raise ValueError('source archive provenance does not match verified source')
         commands = [('source-build', ['cargo', 'build', '--release', '--locked', '--offline', '--bins']),
@@ -77,7 +78,7 @@ def qualify_source(archive, source_name, expected_source, output):
             raise ValueError('source rebuild modified approved inputs')
         result = dict(passed=True, source_commit=identity['source_commit'],
             source_manifest_sha256=identity['manifest_sha256'], source_archive_sha256=sha_file(archive),
-            records=records, acceptance=acceptance,
+            records=records, acceptance=acceptance, reference_policy=included_reference_policy,
             rebuilt_binaries={name: sha_file(rebuilt / 'target/release' / name) for name in ('rless', 'lessecho')})
         (output / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
         return result

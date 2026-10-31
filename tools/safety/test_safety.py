@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from common import (Evidence, sha, validate_detector_capture_evidence,
-                    validate_fault_oracle_evidence, validate_report, write_json)
+                    validate_fault_oracle_evidence, validate_fault_reference_bundle, validate_report, write_json)
 from fixtures import Barrier, FaultPlan, transactional_append
 
 
@@ -233,6 +233,40 @@ class EvidenceGate(unittest.TestCase):
         self.evidence.save()
         with self.assertRaisesRegex(ValueError, 'exit statuses must be integers'):
             validate_report(self.evidence.directory / 'summary.json', self.root)
+
+    def test_fault_reference_bundle_rejects_substitution_and_changed_files(self):
+        import copy
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        from release import capture_reference_bundle, reference_policy
+        bundle_dir = self.directory / 'reference'
+        bundle_dir.mkdir()
+        names = ('less', 'lessecho', 'less-osc8-open.sh')
+        for name in names:
+            (bundle_dir / name).write_text('qualified fixture ' + name)
+        policy = dict(upstream=dict(repository='https://example.invalid/less.git',
+                                   version='712', commit='a' * 40), regex='gnu',
+                      files_sha256={name: sha(bundle_dir / name) for name in names})
+        authority = self.root / 'tools/safety/profiles.json'
+        write_json(authority, dict(reference_bundle=policy))
+        bundle = capture_reference_bundle(bundle_dir / 'less', self.root)
+        report = dict(reference_policy=reference_policy(self.root), reference_bundle=bundle,
+                      reference=bundle['less'], records=[dict(oracle_metadata={
+                          'test_selector': 'ActualFaultPaths.test_fixture'})])
+        self.assertTrue(validate_fault_reference_bundle(report, self.root))
+        for field in ('reference_policy', 'reference_bundle', 'reference'):
+            incomplete = copy.deepcopy(report)
+            incomplete.pop(field)
+            with self.assertRaises(ValueError):
+                validate_fault_reference_bundle(incomplete, self.root)
+        changed = copy.deepcopy(report)
+        changed['reference_bundle']['less']['sha256'] = 'b' * 64
+        changed['reference_policy']['files_sha256']['less'] = 'b' * 64
+        with self.assertRaises(ValueError):
+            validate_fault_reference_bundle(changed, self.root)
+        (bundle_dir / 'lessecho').write_text('substituted helper')
+        with self.assertRaises(ValueError):
+            validate_fault_reference_bundle(report, self.root)
 
     def test_fault_reference_and_copied_marker_claims_are_checked(self):
         from test_fault_paths import contracts

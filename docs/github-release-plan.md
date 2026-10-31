@@ -293,7 +293,7 @@ checks in M0 evidence. The candidate now binds maintained findings and ownership
 regions, independently rebuilds the raw and six expanded inventories, and binds
 review approval to the complete evidence selection. Independent fresh positive
 and omission controls pass. The ownership review itself remains incomplete:
-127 of 720 obligations were reviewed at `73c6411`, with 593 pending.
+132 of 720 obligations were reviewed at `73c6411`, with 588 pending.
 
 The independent repetition audit invalidated any interpretation of old schema-1
 fault reports as 100 runs of every selector. Only four lifecycle test bodies
@@ -308,7 +308,9 @@ locked/offline installation probe passed; the runner now requests offline mode.
 The original failed baseline is retained and does not qualify a release.
 
 Further independent review reproduced five repeated startup-option owner leaks.
-Codex added copy-before-release replacements and a source-bound regression. These
-fixes need current-source sanitizer qualification. Reference selection is also
-being bound to the maintained less 712 bundle rather than accepting any mutually
-consistent binary hash. No publication or M0 approval is implied by these fixes.
+Codex added copy-before-release replacements and a source-bound regression. A related stdin-tags reset leak is also fixed. Independent focused native and
+ASan/LSan regressions pass; complete candidate qualification is still required.
+Reference selection is now bound to the maintained less 712 bundle. Independent
+checks reject a self-consistent substituted reference and accept the actual pinned
+three-file bundle; ordinary developer comparisons remain available without release
+qualification. No publication or M0 approval is implied by these fixes.
