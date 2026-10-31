@@ -17,7 +17,6 @@ extern "C" {
     ) -> ::core::ffi::c_int;
     fn __ctype_b_loc() -> *mut *const ::core::ffi::c_ushort;
     fn free(__ptr: *mut ::core::ffi::c_void);
-    fn abs(__x: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn strcpy(
         __dest: *mut ::core::ffi::c_char,
         __src: *const ::core::ffi::c_char,
@@ -2104,9 +2103,7 @@ unsafe extern "C" fn search_range(
             }
             return matches;
         } else {
-            if linenums != 0
-                && abs((pos - oldpos) as ::core::ffi::c_int) > 2048 as ::core::ffi::c_int
-            {
+            if linenums != 0 && should_cache_line_number(pos, oldpos) {
                 add_lnum(linenum, pos);
             }
             oldpos = pos;
@@ -2875,6 +2872,32 @@ pub unsafe extern "C" fn is_filtering() -> lbool {
 #[repr(C)]
 pub struct ansi_state_0 {
     _private: [u8; 0],
+}
+
+// Keep the full POSITION width and avoid signed subtraction/abs overflow.
+fn should_cache_line_number(position: POSITION, previous: POSITION) -> bool {
+    position.abs_diff(previous) > 2048
+}
+
+#[cfg(test)]
+mod position_tests {
+    use super::should_cache_line_number;
+
+    #[test]
+    fn cache_interval_handles_full_width_positions_in_both_directions() {
+        for (a, b, expected) in [
+            (0, 2048, false),
+            (0, 2049, true),
+            (1_i64 << 32, (1_i64 << 32) + 2048, false),
+            (0, 1_i64 << 31, true),
+            (0, 1_i64 << 32, true),
+            (i64::MIN, i64::MAX, true),
+            (i64::MAX - 2048, i64::MAX, false),
+        ] {
+            assert_eq!(should_cache_line_number(a, b), expected);
+            assert_eq!(should_cache_line_number(b, a), expected);
+        }
+    }
 }
 
 #[repr(C)]

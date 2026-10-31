@@ -411,6 +411,141 @@
       "fix_commit": null,
       "regression": "ActualFaultPaths.test_duplicate_message_and_help_definitions_release_previous_overrides (empty message/help cases)",
       "rerun_evidence": null
+    },
+    {
+      "id": "M0-NUM-001",
+      "title": "Search position delta narrows to c_int before C abs",
+      "status": "open",
+      "classification": "source-inspection undefined-behavior candidate",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M2.2",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "evidence_refs": [
+        "src/search.rs:2108",
+        "src/search.rs:556"
+      ],
+      "source_files_sha256": {
+        "src/search.rs": "2a2359d53017843a10fc59b45be3a0d0b19ac9c532dd1655fab84413698ad5bf"
+      },
+      "analysis": "In search_range, pos and oldpos have POSITION = less_off_t = c_long. After the pos == -1 branch, their difference is narrowed to c_int and passed to C abs. If the narrowed value is INT_MIN, C abs has no representable result and its behavior is undefined. Deltas beyond 32 bits also lose magnitude, so add_lnum may be skipped incorrectly. The condition is executed only when linenums != 0; file positions can exceed 32-bit range on the claimed x86_64 target. The oldpos/pos sentinel branch should be considered when replacing with full-width abs_diff.",
+      "next_step": "Root to disposition in maintained findings register, then fix with full-width difference after checking position/sentinel invariants and add a sparse >2 GiB regression where feasible.",
+      "minimal_fix": "In search.rs replace the narrowing/C abs with full-width `pos.abs_diff(oldpos) > 2048` after confirming both values are initialized valid POSITIONs; retain the existing -1 branch before this comparison.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": "search::position_tests::cache_interval_handles_full_width_positions_in_both_directions",
+      "candidate_status": "Full-width unsigned abs_diff replaces narrowed C abs; focused boundary regression pending independent execution."
+    },
+    {
+      "id": "M0-FFI-001",
+      "title": "GNU regex syntax setting is mutated globally without restore",
+      "status": "open",
+      "classification": "source-inspection native-global-state hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.2",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "evidence_refs": [
+        "src/pattern.rs:compile_pattern2",
+        "src/pattern.rs:447",
+        "src/pattern.rs:556"
+      ],
+      "source_files_sha256": {
+        "src/pattern.rs": "c885740d56800c41100eeb83c6066b61aa4a7ea7366e33dd95966e37280426eb"
+      },
+      "analysis": "compile_pattern2 calls re_set_syntax before each re_compile_pattern, discards the prior syntax returned by GNU regex, and has no restoration on success or on injected/native compile failure. re_set_syntax changes process-global native regex state; other callers could observe the changed syntax. SAFE-FFI-003 requires serialized/restored state or a documented scope proof. This record does not claim a concurrency exploit or a failed test.",
+      "next_step": "Root to disposition in maintained findings register; establish full callgraph/threading proof or scope/restore native syntax in M4.2, including error paths.",
+      "minimal_fix": "At minimum save `re_set_syntax` return and restore it after `re_compile_pattern` on both success/failure; process-global use still needs a serialized call scope or documented single-thread/no-concurrent-native-regex proof.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": "pattern::ownership_tests::fixed_registers_preserve_gnu_ranges_and_repeated_lifetimes",
+      "candidate_status": "Prior GNU syntax restored before success/error handling; focused regression pending. Serialized single-thread pager scope remains to be reviewed; no general library thread-safety claim."
+    },
+    {
+      "id": "M0-HIST-001",
+      "title": "History temp file writes proceed when privacy mode change fails",
+      "status": "open",
+      "classification": "source-inspection persistence/error-path hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "src/cmdbuf.rs:make_tempname",
+        "src/cmdbuf.rs:make_file_private",
+        "src/cmdbuf.rs:2062-2069",
+        "src/cmdbuf.rs:2105-2142"
+      ],
+      "source_files_sha256": {
+        "src/cmdbuf.rs": "a78d8d8fd859f46e004fde4a07678d391d24fe20ef70b0fedf42bde0db356df0"
+      },
+      "analysis": "save_cmdhist derives a deterministic temp path by replacing the final byte of histname, then fopen(tempname, \"w\") creates or truncates it before make_file_private. make_file_private skips chmod when fstat fails or reports non-regular, and ignores fchmod(..., 0600) failure. Regardless, save_cmdhist writes history contents, closes, and renames the temp path over the history path without checking those results. A pre-existing permissive regular temp file retains its mode until chmod succeeds; failure leaves history data under those permissions. Even when chmod succeeds there is a create/truncate-before-chmod interval. A pre-existing symlink at the deterministic temp path is followed by fopen on Linux; the code still writes through the stream. The precise operational impact depends on path permissions and external actors.",
+      "next_step": "Root to disposition in maintained findings register and decide whether this is a legacy compatibility/security issue; test with a controlled existing permissive temp file and forced chmod/fstat failure, then handle creation mode, symlink and commit/error behavior in M3.4.",
+      "minimal_fix": "Create the temp file privately before any bytes are written (open with O_CREAT|O_EXCL|O_NOFOLLOW mode 0600 then fdopen), abort and unlink on mode/setup failure; check fclose/rename as commit operations. Preserve established overwrite behavior explicitly.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": null
+    },
+    {
+      "id": "M0-IO-003",
+      "title": "Shell handoff can lose stdin when dup of fd 0 fails",
+      "status": "open",
+      "classification": "source-inspection descriptor-lifecycle hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "src/lsystem.rs:496-501",
+        "src/lsystem.rs:545-551"
+      ],
+      "source_files_sha256": {
+        "src/lsystem.rs": "0b3560e07f741d55c673fd463ac2b18769d9b1f16ffb6e00e9df694ab9a3e8be"
+      },
+      "analysis": "lsystem calls inp=dup(0) without checking -1, immediately closes fd 0 and may open the tty into fd 0. If the initial dup fails (for example descriptor exhaustion), both restoration attempts dup(inp) pass -1; the code closes fd 0 after system and continues with original stdin lost. The second restoration call return is unchecked even after successful initial duplication. This is a descriptor ownership/handoff failure; no reproducibility claim is made yet.",
+      "next_step": "Root to record/disposition, then fault-inject dup failure in an isolated helper session and require early abort or tracked restoration before closing fd 0.",
+      "minimal_fix": "Check the first dup(0) before closing fd 0; if it fails, abort helper handoff with original stdin/terminal state intact. Check restoration dup2 or equivalent and report failure before returning to pager.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": null
+    },
+    {
+      "id": "M0-IO-004",
+      "title": "Logfile sync treats short or failed write as complete",
+      "status": "open",
+      "classification": "source-inspection native-write error-path hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "src/ch.rs:sync_logfile",
+        "src/ch.rs:786-793"
+      ],
+      "source_files_sha256": {
+        "src/ch.rs": "eb1eef41e7c1c57d481b0000bbcf64c6d53dd8b4a9f790d45c77a0589ac1c696"
+      },
+      "analysis": "sync_logfile invokes write(logfile, buffer, datasize) but discards the ssize_t return, then sets wrote=true and breaks. A short successful write or -1 (EINTR/EIO/etc.) can leave the log block partially or wholly absent while the routine treats it as written. The broader M0-IO-002 finding covers src/output.rs::flush EIO, but this separate caller is not in its current evidence refs.",
+      "minimal_fix": "Loop over the remaining bytes on positive short writes, retry EINTR, and on permanent failure report/retain the incomplete log state rather than setting wrote=true.",
+      "next_step": "Root to decide whether to extend M0-IO-002 with this source path and regression or maintain this separate finding; no native-failure test has been run here.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": null
     }
   ]
 }
