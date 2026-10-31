@@ -166,6 +166,7 @@ pub unsafe extern "C" fn del_ifile(mut h: *mut ::core::ffi::c_void) {
     if h == old_ifile {
         old_ifile = ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
+    crate::ch::dispose_ifile_state(h);
     p = h as *mut ifile;
     unlink_ifile(p);
     free((*p).h_rfilename as *mut ::core::ffi::c_void);

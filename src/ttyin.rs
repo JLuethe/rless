@@ -22,8 +22,12 @@ pub static mut tty: ::core::ffi::c_int = 0;
 unsafe extern "C" fn open_tty_device(mut dev: *const ::core::ffi::c_char) -> ::core::ffi::c_int {
     return open(dev, 0 as ::core::ffi::c_int);
 }
-#[no_mangle]
-pub unsafe extern "C" fn open_tty() -> ::core::ffi::c_int {
+pub(crate) struct TtyDescriptor {
+    pub fd: ::core::ffi::c_int,
+    pub owned: bool,
+}
+
+pub(crate) unsafe fn open_tty_with_ownership() -> TtyDescriptor {
     let mut fd: ::core::ffi::c_int = -1 as ::core::ffi::c_int;
     if fd < 0 as ::core::ffi::c_int {
         fd = open_tty_device(b"/dev/tty\0".as_ptr() as *const ::core::ffi::c_char);
@@ -34,10 +38,18 @@ pub unsafe extern "C" fn open_tty() -> ::core::ffi::c_int {
             fd = open_tty_device(dev);
         }
     }
-    if fd < 0 as ::core::ffi::c_int {
-        fd = 2 as ::core::ffi::c_int;
+    if fd < 0 {
+        TtyDescriptor {
+            fd: 2,
+            owned: false,
+        }
+    } else {
+        TtyDescriptor { fd, owned: true }
     }
-    return fd;
+}
+#[no_mangle]
+pub unsafe extern "C" fn open_tty() -> ::core::ffi::c_int {
+    open_tty_with_ownership().fd
 }
 #[no_mangle]
 pub unsafe extern "C" fn open_getchr() {

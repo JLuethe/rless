@@ -3,7 +3,19 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static HISTORY_ERROR_REPORTED: AtomicBool = AtomicBool::new(false);
+use ::libc;
 extern "C" {
+    fn mkostemp(
+        __template: *mut ::core::ffi::c_char,
+        __flags: ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
+    fn fdopen(__fd: ::core::ffi::c_int, __modes: *const ::core::ffi::c_char) -> *mut FILE;
+    fn ferror(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn unlink(__name: *const ::core::ffi::c_char) -> ::core::ffi::c_int;
+    fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn rename(
         __old: *const ::core::ffi::c_char,
         __new: *const ::core::ffi::c_char,
@@ -23,7 +35,6 @@ extern "C" {
         __n: ::core::ffi::c_int,
         __stream: *mut FILE,
     ) -> *mut ::core::ffi::c_char;
-    fn fileno(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn atoi(__nptr: *const ::core::ffi::c_char) -> ::core::ffi::c_int;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn strcpy(
@@ -102,8 +113,6 @@ extern "C" {
     fn putchr(ch: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn putstr(s: *const ::core::ffi::c_char);
     fn error(fmt: *const ::core::ffi::c_char, parg: *const PARG);
-    fn fstat(__fd: ::core::ffi::c_int, __buf: *mut stat) -> ::core::ffi::c_int;
-    fn fchmod(__fd: ::core::ffi::c_int, __mode: __mode_t) -> ::core::ffi::c_int;
     static mut sc_width: ::core::ffi::c_int;
     static mut utf_mode: ::core::ffi::c_int;
     static mut no_hist_dups: ::core::ffi::c_int;
@@ -1984,23 +1993,6 @@ unsafe extern "C" fn write_mlist(mut ml: *mut mlist, mut f: *mut FILE) {
     }
     (*ml).modified = lbool::LFALSE;
 }
-unsafe extern "C" fn make_tempname(
-    mut filename: *const ::core::ffi::c_char,
-) -> *mut ::core::ffi::c_char {
-    let mut lastch: ::core::ffi::c_char = 0;
-    let mut tempname: *mut ::core::ffi::c_char =
-        ecalloc(1 as size_t, strlen(filename).wrapping_add(1 as size_t))
-            as *mut ::core::ffi::c_char;
-    strcpy(tempname, filename);
-    lastch = *tempname.offset(strlen(tempname).wrapping_sub(1 as size_t) as isize);
-    *tempname.offset(strlen(tempname).wrapping_sub(1 as size_t) as isize) =
-        (if lastch as ::core::ffi::c_int == 'Q' as ::core::ffi::c_int {
-            'Z' as ::core::ffi::c_int
-        } else {
-            'Q' as ::core::ffi::c_int
-        }) as ::core::ffi::c_char;
-    return tempname;
-}
 unsafe extern "C" fn copy_hist(
     mut uparam: *mut ::core::ffi::c_void,
     mut ml: *mut mlist,
@@ -2031,44 +2023,6 @@ unsafe extern "C" fn copy_hist(
         );
     }
 }
-unsafe extern "C" fn make_file_private(mut f: *mut FILE) {
-    let mut do_chmod: lbool = lbool::LTRUE;
-    let mut statbuf: less_stat_t = less_stat_t {
-        st_dev: 0,
-        st_ino: 0,
-        st_nlink: 0,
-        st_mode: 0,
-        st_uid: 0,
-        st_gid: 0,
-        __pad0: 0,
-        st_rdev: 0,
-        st_size: 0,
-        st_blksize: 0,
-        st_blocks: 0,
-        st_atim: timespec {
-            tv_sec: 0,
-            tv_nsec: 0,
-        },
-        st_mtim: timespec {
-            tv_sec: 0,
-            tv_nsec: 0,
-        },
-        st_ctim: timespec {
-            tv_sec: 0,
-            tv_nsec: 0,
-        },
-        __glibc_reserved: [0; 3],
-    };
-    let mut r: ::core::ffi::c_int = fstat(fileno(f), &raw mut statbuf);
-    if r < 0 as ::core::ffi::c_int
-        || !(statbuf.st_mode & 0o170000 as __mode_t == 0o100000 as __mode_t)
-    {
-        do_chmod = lbool::LFALSE;
-    }
-    if do_chmod.0 != 0 {
-        fchmod(fileno(f), 0o600 as __mode_t);
-    }
-}
 unsafe extern "C" fn histfile_modified() -> lbool {
     if mlist_search.modified.0 != 0 {
         return lbool::LTRUE;
@@ -2081,10 +2035,38 @@ unsafe extern "C" fn histfile_modified() -> lbool {
     }
     return lbool::LFALSE;
 }
+unsafe fn modified_history_entries() -> Vec<*mut mlist> {
+    let mut entries = Vec::new();
+    for head in [&raw mut mlist_search, &raw mut mlist_shell] {
+        if (*head).modified.0 != 0 {
+            entries.push(head);
+        }
+        let mut entry = (*head).next;
+        while !(*entry).string.is_null() {
+            if (*entry).modified.0 != 0 {
+                entries.push(entry);
+            }
+            entry = (*entry).next;
+        }
+    }
+    entries
+}
+
+unsafe fn history_save_error() {
+    // Preserve dirty state for retry without repeatedly overwriting the live
+    // screen. A successful save rearms reporting for a later distinct outage.
+    if HISTORY_ERROR_REPORTED.swap(true, Ordering::Relaxed) {
+        return;
+    }
+    if crate::pager::quitting.0 != 0 {
+        crate::output::io_error_diagnostic(b"rless: cannot save history\n");
+    } else {
+        error(c"rless: cannot save history".as_ptr(), std::ptr::null());
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn save_cmdhist() {
     let mut histname: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
-    let mut tempname: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut skip_search: ::core::ffi::c_int = 0;
     let mut skip_shell: ::core::ffi::c_int = 0;
     let mut ctx: save_ctx = save_ctx {
@@ -2092,7 +2074,6 @@ pub unsafe extern "C" fn save_cmdhist() {
         fout: ::core::ptr::null_mut::<FILE>(),
     };
     let mut s: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
-    let mut fout: *mut FILE = ::core::ptr::null_mut::<FILE>();
     let mut histsize: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if secure_allow(((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int) as ::core::ffi::c_uint).0
         == 0
@@ -2104,42 +2085,77 @@ pub unsafe extern "C" fn save_cmdhist() {
     if histname.is_null() {
         return;
     }
-    tempname = make_tempname(histname);
-    fout = fopen(tempname, b"w\0".as_ptr() as *const ::core::ffi::c_char);
-    if !fout.is_null() {
-        make_file_private(fout);
-        s = lgetenv(b"LESSHISTSIZE\0".as_ptr() as *const ::core::ffi::c_char);
-        if !s.is_null() {
-            histsize = atoi(s);
+    let mut template = ::std::ffi::CStr::from_ptr(histname).to_bytes().to_vec();
+    if template.is_empty() {
+        history_save_error();
+        free(histname as *mut ::core::ffi::c_void);
+        return;
+    }
+    template.extend_from_slice(b".XXXXXX\0");
+    // save() gives mkostemp a writable C-owned path; it chooses a fresh name
+    // beside the destination and atomically creates a mode-0600 regular file.
+    let tempname = save(template.as_ptr().cast());
+    let fd = mkostemp(tempname, libc::O_CLOEXEC);
+    if fd < 0 {
+        // No temp file was created: never unlink a guessed or preexisting path.
+        history_save_error();
+        free(tempname as *mut ::core::ffi::c_void);
+        free(histname as *mut ::core::ffi::c_void);
+        return;
+    }
+    let fout = fdopen(fd, b"w\0".as_ptr().cast());
+    if fout.is_null() {
+        close(fd);
+        unlink(tempname);
+        history_save_error();
+        free(tempname as *mut ::core::ffi::c_void);
+        free(histname as *mut ::core::ffi::c_void);
+        return;
+    }
+    // write_mlist clears dirty bits as it merges existing and new entries.
+    // Restore precisely those bits if the complete file cannot be committed.
+    let modified_entries = modified_history_entries();
+    s = lgetenv(b"LESSHISTSIZE\0".as_ptr() as *const ::core::ffi::c_char);
+    if !s.is_null() {
+        histsize = atoi(s);
+    }
+    if histsize <= 0 as ::core::ffi::c_int {
+        histsize = 100 as ::core::ffi::c_int;
+    }
+    skip_search = mlist_size(&raw mut mlist_search) - histsize;
+    skip_shell = mlist_size(&raw mut mlist_shell) - histsize;
+    fprintf(
+        fout,
+        b"%s\n\0".as_ptr() as *const ::core::ffi::c_char,
+        b".less-history-file:\0".as_ptr() as *const ::core::ffi::c_char,
+    );
+    ctx.fout = fout;
+    ctx.mlist = ::core::ptr::null_mut::<mlist>();
+    read_cmdhist(
+        Some(
+            copy_hist
+                as unsafe extern "C" fn(
+                    *mut ::core::ffi::c_void,
+                    *mut mlist,
+                    *const ::core::ffi::c_char,
+                ) -> (),
+        ),
+        &raw mut ctx as *mut ::core::ffi::c_void,
+        lbool(skip_search as ::core::ffi::c_uint),
+        lbool(skip_shell as ::core::ffi::c_uint),
+    );
+    save_marks(fout, b".mark\0".as_ptr() as *const ::core::ffi::c_char);
+    let stream_failed = ferror(fout) != 0;
+    let close_failed = fclose(fout) != 0;
+    let committed = !stream_failed && !close_failed && rename(tempname, histname) == 0;
+    if !committed {
+        unlink(tempname);
+        for entry in modified_entries {
+            (*entry).modified = lbool::LTRUE;
         }
-        if histsize <= 0 as ::core::ffi::c_int {
-            histsize = 100 as ::core::ffi::c_int;
-        }
-        skip_search = mlist_size(&raw mut mlist_search) - histsize;
-        skip_shell = mlist_size(&raw mut mlist_shell) - histsize;
-        fprintf(
-            fout,
-            b"%s\n\0".as_ptr() as *const ::core::ffi::c_char,
-            b".less-history-file:\0".as_ptr() as *const ::core::ffi::c_char,
-        );
-        ctx.fout = fout;
-        ctx.mlist = ::core::ptr::null_mut::<mlist>();
-        read_cmdhist(
-            Some(
-                copy_hist
-                    as unsafe extern "C" fn(
-                        *mut ::core::ffi::c_void,
-                        *mut mlist,
-                        *const ::core::ffi::c_char,
-                    ) -> (),
-            ),
-            &raw mut ctx as *mut ::core::ffi::c_void,
-            lbool(skip_search as ::core::ffi::c_uint),
-            lbool(skip_shell as ::core::ffi::c_uint),
-        );
-        save_marks(fout, b".mark\0".as_ptr() as *const ::core::ffi::c_char);
-        fclose(fout);
-        rename(tempname, histname);
+        history_save_error();
+    } else {
+        HISTORY_ERROR_REPORTED.store(false, Ordering::Relaxed);
     }
     free(tempname as *mut ::core::ffi::c_void);
     free(histname as *mut ::core::ffi::c_void);

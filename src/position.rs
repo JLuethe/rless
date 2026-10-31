@@ -49,6 +49,71 @@ pub struct scrpos {
 }
 static mut table: *mut POSITION = ::core::ptr::null_mut::<POSITION>();
 static mut table_size: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
+// Rows belonging to the last initialized geometry, independent of capacity.
+static mut table_rows: ::core::ffi::c_int = 0;
+
+#[cfg(test)]
+mod bounds_tests {
+    use super::*;
+
+    // This test exclusively owns position globals; other unit tests do not
+    // initialize the pager or its position table.
+    #[test]
+    fn small_geometry_and_growth_never_scan_outside_owned_table() {
+        unsafe {
+            let original = (table, table_size, table_rows, sc_height);
+            table = std::ptr::null_mut();
+            table_size = 0;
+            table_rows = 0;
+            sc_height = 1;
+            assert_eq!(position(0), -1);
+            pos_init();
+            assert_eq!(position(-1), -1);
+            let mut saved = scrpos { pos: 123, ln: 123 };
+            get_scrpos(&raw mut saved, 0);
+            assert_eq!((saved.pos, saved.ln), (-1, 0));
+            // Growth queries the empty old allocation with the new height.
+            sc_height = 100;
+            pos_init();
+            assert_eq!(position(99), -1);
+            assert_eq!(position(100), -1);
+            assert_eq!(position(-99), -1);
+            *table = 37;
+            sc_height = 200;
+            pos_init();
+            get_scrpos(&raw mut saved, 0);
+            assert_eq!((saved.pos, saved.ln), (37, 1));
+            assert_eq!(position(199), -1);
+            assert_eq!(position(200), -1);
+            // Shrink discards rows, including a sole saved position below
+            // the new screen. Regrowth must not resurrect it as an anchor.
+            pos_clear();
+            *table.add(150) = 900;
+            sc_height = 24;
+            pos_init();
+            let capacity = table_size;
+            assert_eq!(capacity, 200);
+            assert_eq!(position(150), -1);
+            sc_height = 180;
+            pos_init();
+            get_scrpos(&raw mut saved, 0);
+            assert_eq!((saved.pos, saved.ln), (-1, 0));
+            assert_eq!(position(150), -1);
+            sc_height = 300;
+            pos_init();
+            get_scrpos(&raw mut saved, 0);
+            assert_eq!((saved.pos, saved.ln), (-1, 0));
+            *table = 55;
+            sc_height = 24;
+            pos_init();
+            sc_height = 400;
+            pos_init();
+            assert_eq!(position(0), 55);
+            free(table.cast());
+            (table, table_size, table_rows, sc_height) = original;
+        }
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn position(mut sindex: ::core::ffi::c_int) -> POSITION {
     match sindex {
@@ -65,6 +130,9 @@ pub unsafe extern "C" fn position(mut sindex: ::core::ffi::c_int) -> POSITION {
             sindex = (sc_height - 1 as ::core::ffi::c_int) / 2 as ::core::ffi::c_int;
         }
         _ => {}
+    }
+    if table.is_null() || sindex < 0 || sindex >= sc_height.min(table_rows) {
+        return -1;
     }
     return *table.offset(sindex as isize);
 }
@@ -103,6 +171,12 @@ pub unsafe extern "C" fn pos_clear() {
 pub unsafe extern "C" fn pos_init() {
     let mut scrpos: scrpos = scrpos { pos: 0, ln: 0 };
     if sc_height <= table_size {
+        // Invalidate both removed rows and newly exposed rows. Queries made
+        // before a later growth must see only the old logical geometry.
+        for row in sc_height.min(table_rows)..sc_height.max(table_rows) {
+            *table.offset(row as isize) = -1;
+        }
+        table_rows = sc_height;
         return;
     }
     if !table.is_null() {
@@ -113,6 +187,7 @@ pub unsafe extern "C" fn pos_init() {
     }
     table = ecalloc(sc_height as size_t, ::core::mem::size_of::<POSITION>()) as *mut POSITION;
     table_size = sc_height;
+    table_rows = sc_height;
     pos_clear();
     if scrpos.pos != -1 as ::core::ffi::c_int as POSITION {
         *table.offset((scrpos.ln - 1 as ::core::ffi::c_int) as isize) = scrpos.pos;
@@ -158,6 +233,14 @@ pub unsafe extern "C" fn get_scrpos_pos(
     mut sline: ::core::ffi::c_int,
     mut pos: POSITION,
 ) {
+    // During growth, sc_height already names the NEW terminal geometry while
+    // table still owns the OLD allocation. Never scan using the new capacity.
+    let available = sc_height.min(table_rows);
+    (*scrpos).pos = -1;
+    (*scrpos).ln = 0;
+    if table.is_null() || available < 2 {
+        return;
+    }
     let mut i: ::core::ffi::c_int = 0;
     let mut dir: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut last: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
@@ -165,20 +248,23 @@ pub unsafe extern "C" fn get_scrpos_pos(
         0 => {
             i = 0 as ::core::ffi::c_int;
             dir = 1 as ::core::ffi::c_int;
-            last = sc_height - 2 as ::core::ffi::c_int;
+            last = available - 2 as ::core::ffi::c_int;
         }
         -1 | -2 => {
-            i = sc_height - 2 as ::core::ffi::c_int;
+            i = available - 2 as ::core::ffi::c_int;
             dir = -1 as ::core::ffi::c_int;
             last = 0 as ::core::ffi::c_int;
         }
         -3 => {
-            i = (sc_height - 1 as ::core::ffi::c_int) / 2 as ::core::ffi::c_int;
+            i = (available - 1 as ::core::ffi::c_int) / 2 as ::core::ffi::c_int;
             dir = -1 as ::core::ffi::c_int;
             last = 0 as ::core::ffi::c_int;
         }
         _ => {
             i = sindex_from_sline(sline);
+            if i < 0 || i >= available {
+                return;
+            }
             if *table.offset(i as isize) == -1 as ::core::ffi::c_int as POSITION {
                 (*scrpos).pos = -1 as ::core::ffi::c_int as POSITION;
                 return;

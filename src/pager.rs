@@ -970,7 +970,12 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
     close_getchr();
     // Include failures from the final flush/terminal teardown, without hiding
     // a more specific primary error (for example SIGTERM's status 15).
-    if status == 0 && crate::output::output_failed() {
+    if status == 0
+        && (crate::output::output_failed()
+            || crate::ch::logfile_failed()
+            || crate::ch::buffer_allocation_failed()
+            || crate::screen::terminal_failed())
+    {
         status = 1;
     }
     exit(status);

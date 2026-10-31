@@ -493,7 +493,8 @@
       "fix_commit": null,
       "rerun_evidence": null,
       "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
-      "regression": null
+      "regression": null,
+      "candidate_status": "Exclusive mode0600 same-directory temporary creation; check stream/close/rename, preserve previous destination and dirty state on error. Independent validation pending."
     },
     {
       "id": "M0-IO-003",
@@ -519,7 +520,8 @@
       "fix_commit": null,
       "rerun_evidence": null,
       "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
-      "regression": null
+      "regression": null,
+      "candidate_status": "Acquire CLOEXEC stdin backup before teardown; checked dup2 swaps and restores; fatal cooked-state exit if restoration impossible. Independent validation pending."
     },
     {
       "id": "M0-IO-004",
@@ -545,7 +547,221 @@
       "fix_commit": null,
       "rerun_evidence": null,
       "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
-      "regression": null
+      "regression": null,
+      "candidate_status": "Retry exact remaining log bytes on partial/EINTR; permanent write/close failure disables log, diagnoses, and upgrades eventual success exit to1. End-log drain stops on failure. Independent validation pending."
+    },
+    {
+      "id": "M0-MEM-003",
+      "title": "Position table scans use unsupported one-row geometry or new height before allocation growth",
+      "status": "open",
+      "classification": "Independent ASAN reproduction: LESS_LINES=1 plus one-row PTY overflows get_scrpos_pos on empty and small startup inputs. Additional source hazards include pre-growth scans at new capacity and negative LESS_SHELL_LINES sentinel indexing.",
+      "severity": "out-of-bounds source hazard; not exploit-assessed",
+      "delivery_packet": "M2.2",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "evidence_refs": [
+        "src/position.rs:position",
+        "src/position.rs:pos_init",
+        "src/position.rs:get_scrpos_pos",
+        "src/screen.rs:scrsize",
+        "compat/.runs/ownership-audit-20261030/source-review.md",
+        "docs/safety/reproducers/m0-mem-position/manifest.json"
+      ],
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "source_files_sha256": {
+        "src/position.rs": "86eedbe6b76173ca3efd8754438df93698dba841b0c3b778ccc1e473a6d15a63",
+        "src/screen.rs": "bed02abfb79d3d95879bb1f1a7fcb4bb828fbe9037d02804b1847dd992bcba56"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "position::bounds_tests::small_geometry_and_growth_never_scan_outside_owned_table",
+      "rerun_evidence": null,
+      "candidate_status": "Minimum logical height two, shell-lines lower bound one; query/scan bounds use actual owned capacity including growth. Independent fixed-candidate validation pending."
+    },
+    {
+      "id": "M0-TERM-001",
+      "title": "Permanent tcsetattr restoration failure is silent",
+      "status": "open",
+      "classification": "source-inspection terminal-error-path hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.3",
+      "requirement_ids": [
+        "SAFE-FFI-004",
+        "SAFE-STATE-003"
+      ],
+      "evidence_refs": [
+        "src/screen.rs:raw_mode",
+        "src/screen.rs:341-354"
+      ],
+      "source_files_sha256": {
+        "src/screen.rs": "bed02abfb79d3d95879bb1f1a7fcb4bb828fbe9037d02804b1847dd992bcba56"
+      },
+      "analysis": "raw_mode(on) retries tcsetattr after EINTR but returns immediately on any other error. During raw_mode(false), the saved termios restoration can fail permanently; caller receives no status or diagnostic, and the code leaves in_raw_mode unchanged. The source comment says reporting permanent terminal errors is a tracked legacy gap, but the maintained findings register has no precise terminal-restore ID. The exact OS mode after failure is not re-read or proven.",
+      "minimal_fix": "Give the mode transition a checked result (or explicit recorded terminal-error state), preserve the prior saved mode until a verified successful tcsetattr, and report a permanent restore failure through the owning terminal/session cleanup path.",
+      "next_step": "Root to record/disposition; add an isolated PTY tcsetattr permanent-error fault oracle and verify primary error plus cleanup behavior without claiming mode restored.",
+      "blocks_final_safety_gate": true,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null,
+      "candidate_status": "Record and diagnose permanent tcsetattr failure without claiming mode transition committed; upgrade successful quit status to1. Actual unsuccessful termios restore remains failure. Independent validation pending."
+    },
+    {
+      "id": "IND-IO-F1",
+      "title": "src/cmdbuf.rs:history_save_error/save_cmdhist",
+      "status": "closed",
+      "classification": "observed, corrected and independently retested",
+      "severity": "P2",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/claude-probe-replay.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/autosave-f1f2-oracle.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/autosave-f1f2-asan-oracle.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": false,
+      "fix_commit": null,
+      "rerun_evidence": "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/review.md",
+      "candidate_status": "Corrected and independently retested on the F1/F2 candidate: native and pinned ASAN, 29/29 each, normal and safety-injection Cargo suites. Evidence predates the memory/F3/F4 corrections; fresh whole-candidate retest pending."
+    },
+    {
+      "id": "IND-TERM-F2",
+      "title": "src/screen.rs:raw_mode; src/pager.rs:quit",
+      "status": "closed",
+      "classification": "observed, corrected and independently retested",
+      "severity": "P2",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/term-results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/term-f1f2-oracle.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/term-f1f2-asan-oracle.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/claude-probe-f1f2.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": false,
+      "fix_commit": null,
+      "rerun_evidence": "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/review.md",
+      "candidate_status": "Corrected and independently retested on the F1/F2 candidate: native and pinned ASAN, 29/29 each, normal and safety-injection Cargo suites. Evidence predates the memory/F3/F4 corrections; fresh whole-candidate retest pending."
+    },
+    {
+      "id": "IND-MEM-FIRSTBUF",
+      "title": "src/ch.rs:ch_get/ch_addbuf lines 585-592",
+      "status": "open",
+      "classification": "observed, open",
+      "severity": "P1",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-native-results/results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-native-results/hit.stderr",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-asan-results/results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-asan-results/hit.stderr",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-native-build.log",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-asan/build.log"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "IND-MEM-STDIN-DELETE",
+      "title": "src/ch.rs:ch_close; src/ifile.rs:del_ifile; src/command.rs:delete-file command",
+      "status": "open",
+      "classification": "observed, open",
+      "severity": "P1",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/stdin-delete-results/results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/stdin-delete-results/retain.raw",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/stdin-delete-results/delete.raw"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "IND-FD-F3",
+      "title": "src/lsystem.rs:lsystem; src/ttyin.rs:open_tty",
+      "status": "open",
+      "classification": "source-only, no observed normal-startup defect",
+      "severity": "P3",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/f1f2-29-native/summary.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "IND-POS-F4",
+      "title": "src/position.rs:pos_init/get_scrpos after shrink",
+      "status": "open",
+      "classification": "source-only semantic hazard",
+      "severity": "P3",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/f1f2-29-native/summary.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
     }
   ]
 }

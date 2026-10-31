@@ -18,7 +18,6 @@ extern "C" {
         __modes: *const ::core::ffi::c_char,
     ) -> *mut FILE;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn dup(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn system(__command: *const ::core::ffi::c_char) -> ::core::ffi::c_int;
     fn strlen(__s: *const ::core::ffi::c_char) -> size_t;
@@ -46,7 +45,6 @@ extern "C" {
     fn position(sindex: ::core::ffi::c_int) -> POSITION;
     fn lwinch(r#type: ::core::ffi::c_int);
     fn init_signals(on: lbool);
-    fn open_tty() -> ::core::ffi::c_int;
     fn signal(__sig: ::core::ffi::c_int, __handler: __sighandler_t) -> __sighandler_t;
     static mut sigs: ::core::ffi::c_int;
 }
@@ -471,12 +469,48 @@ unsafe extern "C" fn print_done_msg(mut donemsg: *const ::core::ffi::c_char) {
     putchr('\n' as ::core::ffi::c_int);
     flush();
 }
+// An interrupted dup2 has not established which descriptor is in fd 0.
+// Retry before the pager uses stdin again.
+unsafe fn replace_stdin(from: ::core::ffi::c_int) -> bool {
+    loop {
+        if ::libc::dup2(from, 0) == 0 {
+            return true;
+        }
+        if *::libc::__errno_location() != ::libc::EINTR {
+            return false;
+        }
+    }
+}
+
+unsafe fn handoff_error(message: &'static [u8]) {
+    // This can run while the pager terminal is deinitialized. Keep the
+    // diagnostic independent of pager output and allocation.
+    crate::output::io_error_diagnostic(message);
+}
+
+unsafe fn resume_after_handoff(save_ifile: *mut ::core::ffi::c_void) {
+    init_signals(lbool::LTRUE);
+    raw_mode(lbool::LTRUE);
+    term_init();
+    screen_trashed();
+    reedit_ifile(save_ifile);
+    sigs |= (1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int;
+}
 #[no_mangle]
 pub unsafe extern "C" fn lsystem(
     mut cmd: *const ::core::ffi::c_char,
     mut donemsg: *const ::core::ffi::c_char,
 ) {
-    let mut inp: ::core::ffi::c_int = 0;
+    let inp: ::core::ffi::c_int = loop {
+        let fd = ::libc::fcntl(0, ::libc::F_DUPFD_CLOEXEC, 3);
+        if fd >= 0 || *::libc::__errno_location() != ::libc::EINTR {
+            break fd;
+        }
+    };
+    if inp < 0 {
+        handoff_error(b"rless: cannot preserve standard input for shell\n");
+        return;
+    }
     let mut shell: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut p: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut save_ifile: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
@@ -494,10 +528,26 @@ pub unsafe extern "C" fn lsystem(
     flush();
     raw_mode(lbool::LFALSE);
     init_signals(lbool::LFALSE);
-    inp = dup(0 as ::core::ffi::c_int);
-    close(0 as ::core::ffi::c_int);
-    if open_tty() < 0 as ::core::ffi::c_int {
-        dup(inp);
+    let tty = crate::ttyin::open_tty_with_ownership();
+    let tty_fd = tty.fd;
+    if tty_fd < 0 || !replace_stdin(tty_fd) {
+        // Restore from the backup even if dup2 reported failure: an EINTR
+        // retry may have left the result of the first attempt ambiguous.
+        if tty.owned {
+            close(tty_fd);
+        }
+        if !replace_stdin(inp) {
+            handoff_error(b"rless: cannot restore standard input after shell\n");
+            ::libc::_exit(1);
+        }
+        close(inp);
+        resume_after_handoff(save_ifile);
+        handoff_error(b"rless: cannot set standard input for shell\n");
+        return;
+    }
+    // An opened tty is owned even if open reused a vacant standard slot.
+    if tty.owned {
+        close(tty_fd);
     }
     p = ::core::ptr::null_mut::<::core::ffi::c_char>();
     shell = lgetenv(b"SHELL\0".as_ptr() as *const ::core::ffi::c_char);
@@ -545,8 +595,13 @@ pub unsafe extern "C" fn lsystem(
         system(p);
     }
     free(p as *mut ::core::ffi::c_void);
-    close(0 as ::core::ffi::c_int);
-    dup(inp);
+    if !replace_stdin(inp) {
+        // Do not resume a pager whose stdin still names the shell terminal.
+        // Terminal raw mode is already off; quit() would run pager cleanup
+        // against the wrong input descriptor.
+        handoff_error(b"rless: cannot restore standard input after shell\n");
+        ::libc::_exit(1);
+    }
     close(inp);
     init_signals(lbool::LTRUE);
     raw_mode(lbool::LTRUE);
