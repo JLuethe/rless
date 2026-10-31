@@ -213,6 +213,8 @@ def validate_asan_report(path, root=ROOT):
     require(json.loads(oracle_path.read_text())['repetitions']==outer['repetitions'],
             'executed fault repetitions differ from selected campaign')
     records.extend(fault_records(oracle_path, work / 'report/fault-path-tests.log', root, 'ASAN'))
+    from .boundary_receipts import rederive as rederive_boundaries
+    records.extend(rederive_boundaries(outer,inner,work,'ASAN',root))
     for record in records:
         record['_validated_m0_controls']=list(record['oracle_metadata']['m0_controls'])
     return dict(schema_version=1, source_commit=outer['source_commit'], input_fingerprints=fingerprint(root),
@@ -412,6 +414,8 @@ def validate_native_report(path, root=ROOT):
     require(fault_oracles['repetitions']==100,
             'native actual fault suite did not run the declared 100 repetitions')
     records.extend(fault_records(work / 'report/fault-oracles.json', work / 'report/fault-path-tests.log', root, 'NATIVE'))
+    from .boundary_receipts import rederive as rederive_boundaries
+    records.extend(rederive_boundaries(outer,inner,work,'NATIVE',root))
     for record in records:
         record['_validated_m0_controls']=list(record['oracle_metadata']['m0_controls'])
     return dict(schema_version=1, source_commit=outer['source_commit'], input_fingerprints=fingerprint(root),

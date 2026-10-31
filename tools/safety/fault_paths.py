@@ -30,6 +30,7 @@ def main():
     if args.output.exists() or args.repetitions < 1:
         parser.error('choose a fresh output directory and positive repetition count')
     evidence = Evidence(args.output)
+    evidence.report['report_kind'] = 'fault-campaign'
     evidence.report['scope'] = 'Partial real cleanup/read/regex/close/allocation regressions; not complete site/variant/profile acceptance or independent review.'
     env = environment()
     abi_profile = args.abi_profile or {'2.44': 'BUILDER-GLIBC-2.44', '2.41': 'REFERENCE-GLIBC-2.41'}.get(platform.libc_ver()[1])
@@ -206,7 +207,7 @@ def main():
         evidence.finish()
         return 1
     boundary_summary = boundary_output / 'summary.json'
-    validate_boundary(boundary_summary)
+    validate_boundary(boundary_summary,tool_home=args.tool_home)
     boundary_record['boundary_controls_report'] = boundary_ref(boundary_summary)
     boundary_record['artifact_hashes'][str(boundary_summary)] = sha(boundary_summary)
     evidence.save()

@@ -224,8 +224,8 @@ def derive_current_inventory(root):
             (cargo_home / 'registry').symlink_to(cache / 'registry', target_is_directory=True)
             env = dict(environment, HOME=str(home), CARGO_HOME=str(cargo_home),
                        CARGO_TARGET_DIR=str(work / 'target'))
-            def execute(command):
-                result = subprocess.run([str(value) for value in command], cwd=root, env=env,
+            def execute(command, *, cwd=root):
+                result = subprocess.run([str(value) for value in command], cwd=cwd, env=env,
                                         text=True, capture_output=True, timeout=600)
                 if result.returncode:
                     raise ValueError('fresh inventory derivation failed: ' + ' '.join(map(str, command)) + '\n' + result.stderr[-4000:])
@@ -239,9 +239,9 @@ def derive_current_inventory(root):
                 feature = ['--features', ','.join(configuration['features'])] if configuration['features'] else []
                 text = execute([cargo, 'rustc', '--locked', '--offline', *configuration['target'], *feature,
                                 '--', '-Zunpretty=expanded'])
-                path = work / (name + '.rs')
+                path = work / ('expanded-' + name + '.rs')
                 path.write_text(text)
-                records = parse_records(execute([helper, path]))
+                records = parse_records(execute([helper, path.name], cwd=work))
                 # The parser's input path is incidental; all other syntax fields
                 # and expanded bytes are exact and must match the submitted data.
                 expanded[name] = dict(source=text, records=[{k:v for k,v in item.items() if k != 'file'} for item in records])

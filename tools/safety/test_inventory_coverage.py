@@ -73,7 +73,7 @@ class InventoryV2Controls(unittest.TestCase):
             source = self.root / (name + '.rs')
             source.write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n')
             syntax = self.root / (name + '.tsv')
-            records = self.static_records(str(source))
+            records = self.static_records(source.name)
             syntax.write_text('\n'.join('\t'.join(str(record[key]) for key in (
                 'kind', 'file', 'line', 'column', 'context', 'symbol')) for record in records) + '\n')
             configurations[name] = dict(**copy.deepcopy(parameters),
@@ -139,6 +139,8 @@ class InventoryV2Controls(unittest.TestCase):
                 item['expanded_review_map'] = dict(path=path.name, sha256=sha(path))
                 item['evidence_paths'].append(path.name)
                 item['evidence_sha256'][path.name] = sha(path)
+            from ownership_fixtures import packet
+            packet(item,review,self.inventory,self.root)
         return review
 
     def test_shared_static_has_review_row_and_omission_is_rejected(self):

@@ -38,6 +38,7 @@ def main():
     from snapshot import validate
     snapshot = json.loads(Path('/input/source-manifest.json').read_text())
     validate(snapshot, SOURCE, exact=True)
+    shutil.copyfile('/input/source-manifest.json',SOURCE/'.rless-working-tree.json')
     sys.path.insert(0, str(SOURCE / 'tools'))
     from release import capture_reference_bundle
     capture_reference_bundle('/reference/less', SOURCE)
@@ -234,6 +235,11 @@ def main():
         if reports:
             raise RuntimeError('unexpected sanitizer reports retained; fault lane is failed')
         result['oracle_report_sha256'] = sha(REPORT / 'fault-oracles.json')
+        run('supplemental-boundary-controls',['python3','tools/safety/boundary_controls.py',
+            '--profile','asan','--output','/work/report/supplemental-boundaries','--reference-runtime','--tool-home','/opt/rust'],timeout=2400)
+        boundary_summary=REPORT/'supplemental-boundaries/summary.json'
+        result['boundary_controls']=dict(path=str(boundary_summary),sha256=sha(boundary_summary))
+
         validate(snapshot, SOURCE)
         result.update(status='passed', infrastructure_scope='Declared fault regression and detector controls only',
                       remaining_final_acceptance='Not inferred from this lane; inspect M0 bindings and final matrix.')

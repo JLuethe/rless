@@ -19,8 +19,8 @@ from common import Evidence, PINS, ROOT, environment, fingerprint, git, sha, val
 from linked_object import verify
 from live_heap import Samples, require_balance
 from native_alloc import CFLAGS, RUSTFLAGS as ALLOC_FLAGS
-from test_first_buffer import validate as validate_first
-from test_stdin_delete import validate as validate_stdin
+from test_first_buffer import validate as validate_first, validate_expected_failure as validate_first_failure
+from test_stdin_delete import validate as validate_stdin, validate_expected_failure as validate_stdin_failure
 from test_io_boundaries import run as replay_boundaries
 
 PROCEDURE = 'SUPPLEMENTAL-BOUNDARY-CONTROLS-v1'
@@ -178,6 +178,7 @@ def validate_steps(outer, steps, output, root):
         expected['compile-' + name] = ['cc', *CFLAGS, '-c', str(root / 'tools/safety/native' / sources[name]), '-o', str(path)]
     def script(name, file, arguments):
         expected[name] = [str(root / 'tools/safety' / file), *[str(x) for x in arguments]]
+    script('runtime-identity', 'runtime_identity.py', ['--binary', binaries['normal'], '--output', output/'runtime-identity'])
     script('linked-object-mutations', 'linked_controls.py', ['--binary', binaries['allocation'], '--object', objects['allocation'], '--anchor', '__wrap_calloc'])
     script('first-buffer', 'test_first_buffer.py', [binaries['first-buffer'], output/'first-buffer', objects['first-buffer']])
     script('stdin-delete', 'test_stdin_delete.py', [binaries['normal'], output/'stdin-delete'])
@@ -211,7 +212,7 @@ def validate_steps(outer, steps, output, root):
             if profile == 'ASAN':
                 require(flags.get('RUSTUP_TOOLCHAIN') == PINS['nightly'], 'boundary compiler toolchain changed')
         if profile == 'ASAN' and not name.startswith('compile-'):
-            require(record['build_flags'].get('ASAN_OPTIONS') == PINS['asan_options']
+            require(record['build_flags'].get('ASAN_OPTIONS') == PINS['asan_options']+(':symbolize=0' if outer['abi_profile']=='REFERENCE-GLIBC-2.41' else '')
                     and record['build_flags'].get('LSAN_OPTIONS') == PINS['lsan_options'], 'boundary detector options changed')
     for name, reference in outer['binaries'].items():
         require(checked(reference) == binaries[name], 'boundary binary path not bound to build')
@@ -221,7 +222,7 @@ def validate_steps(outer, steps, output, root):
         require(checked(mutation['binary']) == binaries['mutant-'+name], 'mutant binary not bound to mutated build')
 
 
-def validate_external_report(path, root=ROOT):
+def validate_external_report(path, root=ROOT, *, reference_context=None, tool_home=None):
     path, root = Path(path).resolve(), Path(root).resolve()
     outer = json.loads(path.read_text())
     require(outer.get('report_kind') == 'boundary-controls' and outer.get('procedure') == PROCEDURE
@@ -234,11 +235,18 @@ def validate_external_report(path, root=ROOT):
     require(execution['source_commit'] == outer['source_commit'], 'boundary execution commit differs')
     steps = {x['name']: x for x in execution['records']}
     validate_steps(outer, steps, path.parent, root)
+    if profile == 'ASAN' and tool_home is None:
+        tool_home = Path(steps['build-normal']['build_flags']['RUSTUP_HOME']).parent.resolve()
+        require(not tool_home.is_relative_to(path.parent) and not tool_home.is_relative_to(root),
+                'compiler installation cannot be supplied by the retained receipt')
     abi_log = Path(steps['observed-host-abi']['log']).read_text().strip()
     require(steps['observed-host-abi']['command'] == ['getconf','GNU_LIBC_VERSION']
             and abi_log == 'glibc ' + ('2.41' if abi == 'REFERENCE-GLIBC-2.41' else '2.44'), 'boundary ABI not observed')
     binaries = {name: checked(value) for name,value in outer['binaries'].items()}
     objects = {name: checked(value) for name,value in outer['objects'].items()}
+    from runtime_identity import validate as validate_runtime
+    runtime_path=checked(outer['runtime_identity'])
+    validate_runtime(json.loads(runtime_path.read_text()),runtime_path.parent,binaries['normal'],abi_profile=abi,reference_context=reference_context)
     required_pairs = {'allocation','first-buffer'} | ({'live-heap'} if profile == 'ASAN' else set())
     require(set(outer['linked_pairs']) == required_pairs, 'required linked counterpart pair missing')
     for name, reference in outer['linked_pairs'].items():
@@ -272,29 +280,15 @@ def validate_external_report(path, root=ROOT):
     for name, mutation in outer['mutants'].items():
         validate_mutant(mutation, root)
         binary = checked(mutation['binary']); result_path = checked(mutation['result']); result = json.loads(result_path.read_text())
+        require(result.get('binary_sha256') == sha(binary), 'mutant result belongs to a different binary')
         if name == 'heap-leak':
             validate_heap(result,result_path.parent,binary,objects['live-heap'],mutant=True)
-            continue
-        if name == 'firstbuf':
-            require(result['allocator_proof'] == verify(binary,objects['first-buffer'],'__wrap_calloc'), 'mutant allocator identity changed')
-            raw = (result_path.parent/'hit.stderr').read_bytes()
-            require(result['cases']['control']['status'] == 0 and result['cases']['miss']['status'] == 0
-                    and re.search(rb'panicked|AddressSanitizer',raw) is not None, 'first-buffer pre-fix mutation not observed')
-            validator = lambda: validate_first(result,result_path.parent,binary,objects['first-buffer'])
+        elif name == 'firstbuf':
+            validate_first_failure(result,result_path.parent,binary,objects['first-buffer'])
         else:
-            trace = (result_path.parent/'delete.close-trace').read_bytes()
-            raw = (result_path.parent/'delete.raw').read_bytes()
-            require(result['cases']['retain']['status'] == 0, 'stdin mutant control failed')
-            require(b'close 0\n' in trace if name == 'stdin-close' else
-                    result['cases']['delete']['status'] == 87 and b'LeakSanitizer' in raw,
-                    'stdin mutation did not reproduce intended failure')
-            validator = lambda: validate_stdin(result,result_path.parent,binary)
-        try:
-            validator()
-        except ValueError:
-            pass
-        else:
-            raise ValueError('pre-fix mutation accepted: '+name)
+            validate_stdin_failure(result,result_path.parent,binary,name)
+        from mutation_provenance import validate as validate_mutant_binary
+        validate_mutant_binary(mutation,profile,objects,binary,root=root,tool_home=tool_home)
     if profile == 'ASAN':
         require(set(outer['heaps']) == {'none','filter-before','filter-after','regex'}, 'heap session missing')
         for name,value in outer['heaps'].items():
@@ -302,8 +296,8 @@ def validate_external_report(path, root=ROOT):
             require(report['site'] == (None if name == 'none' else name), 'heap session identity changed')
             validate_heap(report,checked(value).parent,binaries['live-heap'],objects['live-heap'])
         require(load(outer['detector_environment']) == {k: stdin['safety_environment'][k]
-                for k in ('ASAN_OPTIONS','LSAN_OPTIONS','ASAN_SYMBOLIZER_PATH')}, 'detector environment differs')
-        require(stdin['safety_environment']['ASAN_OPTIONS'] == PINS['asan_options']
+                for k in ('ASAN_OPTIONS','LSAN_OPTIONS','ASAN_SYMBOLIZER_PATH') if k in stdin['safety_environment']}, 'detector environment differs')
+        require(stdin['safety_environment']['ASAN_OPTIONS'] == PINS['asan_options']+(':symbolize=0' if abi=='REFERENCE-GLIBC-2.41' else '')
                 and stdin['safety_environment']['LSAN_OPTIONS'] == PINS['lsan_options'], 'detector settings weakened')
     normalized = []
     mapping = {'boundary-suite':'boundary-suite','first-buffer':'first-buffer','stdin-delete':'stdin-delete',
@@ -327,16 +321,24 @@ def run_campaign(args):
     require(platform.libc_ver()[0] == 'glibc' and abi is not None,'unsupported boundary execution ABI')
     execution = Evidence(args.output/'execution')
     env = environment(profile == 'ASAN', args.tool_home)
+    reference=None
+    if abi=='REFERENCE-GLIBC-2.41':
+        require(args.reference_runtime,'reference campaign requires the pinned runtime context')
+        from runtime_identity import reference_context as observed_reference
+        reference=observed_reference()
     if profile == 'ASAN':
-        symbolizer = shutil.which(PINS['symbolizer']['name'])
-        require(symbolizer is not None and sha(symbolizer) == PINS['symbolizer']['sha256'], 'symbolizer does not match pin')
-        env.update(RUSTFLAGS=PINS['asan_rustflags'], ASAN_OPTIONS=PINS['asan_options'],
-                   LSAN_OPTIONS=PINS['lsan_options'], ASAN_SYMBOLIZER_PATH=symbolizer)
+        env.update(RUSTFLAGS=PINS['asan_rustflags'],ASAN_OPTIONS=PINS['asan_options']+(':symbolize=0' if reference else ''),LSAN_OPTIONS=PINS['lsan_options'])
+        if reference is None:
+            symbolizer=shutil.which(PINS['symbolizer']['name'])
+            require(symbolizer is not None and sha(symbolizer)==PINS['symbolizer']['sha256'],'symbolizer does not match pin')
+            env['ASAN_SYMBOLIZER_PATH']=symbolizer
+        else:
+            env.pop('ASAN_SYMBOLIZER_PATH',None)
     env['RUSTFLAGS'] = (env.get('RUSTFLAGS','')+' '+ALLOC_FLAGS).strip()
     config = args.output/'detector-environment.json'
     if profile == 'ASAN':
-        write_json(config,{k:env[k] for k in ('ASAN_OPTIONS','LSAN_OPTIONS','ASAN_SYMBOLIZER_PATH')})
-    tests_env = {**environment(), **({k:env[k] for k in ('ASAN_OPTIONS','LSAN_OPTIONS','ASAN_SYMBOLIZER_PATH')} if profile=='ASAN' else {})}
+        write_json(config,{k:env[k] for k in ('ASAN_OPTIONS','LSAN_OPTIONS','ASAN_SYMBOLIZER_PATH') if k in env})
+    tests_env = {**environment(), **({k:env[k] for k in ('ASAN_OPTIONS','LSAN_OPTIONS','ASAN_SYMBOLIZER_PATH') if k in env} if profile=='ASAN' else {})}
     if profile == 'ASAN': tests_env['RLESS_SAFETY_ENV'] = str(config)
     outer = dict(schema_version=1,report_kind='boundary-controls',procedure=PROCEDURE,profile=profile,abi_profile=abi,
         source_commit=execution.report['source_commit'],input_fingerprints=fingerprint(),
@@ -372,6 +374,9 @@ def run_campaign(args):
         return output/'results.json'
     invoke('observed-host-abi',['getconf','GNU_LIBC_VERSION'])
     normal=build('normal'); outer['binaries']['normal']=ref(normal)
+    runtime=args.output/'runtime-identity'
+    invoke('runtime-identity',[sys.executable,ROOT/'tools/safety/runtime_identity.py','--binary',normal,'--output',runtime],artifacts=(normal,))
+    outer['runtime_identity']=ref(runtime/'result.json')
     alloc=compile_object('allocation',ROOT/'tools/safety/native/alloc_fault.c')
     first=compile_object('first-buffer',ROOT/'tools/safety/native/first_buffer_fault.c')
     objects={'allocation':alloc,'first-buffer':first}
@@ -418,7 +423,7 @@ def run_campaign(args):
     require(execution.finish(),'boundary execution report failed')
     outer['execution']=ref(execution.directory/'summary.json')
     summary=args.output/'summary.json';write_json(summary,outer)
-    validate_external_report(summary)
+    validate_external_report(summary,tool_home=args.tool_home,reference_context=reference)
     print(json.dumps(dict(passed=True,controls=controls(profile),report=str(summary))))
     return 0
 
@@ -429,9 +434,18 @@ def main():
     parser.add_argument('--tool-home',type=Path)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--verify',action='store_true')
+    parser.add_argument('--reference-runtime',action='store_true')
+    parser.add_argument('--normalized-output',type=Path)
     args=parser.parse_args();os.umask(0o077)
     if args.verify:
-        validate_report(args.output);print('Supplemental controls rederived; M0 ownership review remains separate.');return 0
+        if args.tool_home is not None:os.environ['RLESS_SAFETY_TOOL_HOME']=str(args.tool_home.resolve())
+        if args.reference_runtime:
+            from runtime_identity import reference_context as observed_reference
+            result=validate_external_report(args.output,reference_context=observed_reference(),tool_home=args.tool_home)
+        else:
+            result=validate_report(args.output)
+        if args.normalized_output is not None:write_json(args.normalized_output,result)
+        print('Supplemental controls rederived; M0 ownership review remains separate.');return 0
     if args.profile is None or args.profile=='asan' and args.tool_home is None:
         parser.error('--profile and ASAN --tool-home are required')
     return run_campaign(args)

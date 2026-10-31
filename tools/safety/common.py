@@ -37,6 +37,22 @@ def utc():
 
 
 def git(*args, root=ROOT):
+    root = Path(root)
+    if not (root / '.git').exists() and any((root / name).is_file() for name in ('.rless-source.json', '.rless-working-tree.json')):
+        # Source exporters are already used by the reference/release runners.
+        # Validate actual bytes/modes and exact membership before exposing only
+        # the three read-only queries used by evidence identity/fingerprinting.
+        import sys
+        sys.path.insert(0, str(ROOT / 'tools'))
+        from release import source_identity
+        identity = source_identity(root)
+        if args == ('rev-parse', 'HEAD'):
+            return (identity['source_commit'] + '\n').encode()
+        if args == ('status', '--porcelain'):
+            return identity.get('dirty_state', '').encode()
+        if args == ('ls-files', '-z', '--cached', '--others', '--exclude-standard'):
+            return b'\0'.join(os.fsencode(name) for name in sorted(identity['files'])) + b'\0'
+        raise ValueError('source export does not support this Git query')
     return subprocess.check_output(['git', '-C', str(root), *args])
 
 
@@ -176,7 +192,7 @@ def validate_detector_capture_evidence(item, root=ROOT):
 
 
 def is_external_report(report):
-    if report.get('report_kind') in ('m0-controls', 'host-native-baseline', 'boundary-controls'):
+    if report.get('report_kind') in ('m0-controls', 'host-native-baseline', 'boundary-controls', 'reference-boundary-controls'):
         return True
     return ('input_fingerprints' not in report and (
         report.get('source_kind') == 'explicit-working-tree-snapshot' or
@@ -307,6 +323,27 @@ def validate_fault_reference_bundle(report, root=ROOT):
     return True
 
 
+def validate_fault_supplement(report, root=ROOT):
+    records = report.get('records', [])
+    ordinary = (report.get('report_kind') == 'fault-campaign'
+                or 'native_allocation_binding' in report
+                or any((item.get('oracle_metadata') or {}).get('test_selector', '').startswith('ActualFaultPaths.')
+                       for item in records))
+    if not ordinary:
+        return
+    selected = [item for item in records if item.get('name') == 'supplemental-boundary-controls']
+    if len(selected) != 1 or selected[0].get('boundary_controls_report') is None:
+        raise ValueError('fault campaign requires exactly one retained supplemental-controls record')
+    from boundary_controls import checked, validate_external_report as validate_boundary
+    reference = selected[0]['boundary_controls_report']
+    raw = json.loads(checked(reference).read_text())
+    boundary = validate_boundary(checked(reference), root)
+    if (boundary['source_commit'] != report['source_commit']
+            or raw['profile'] != selected[0]['profile']
+            or raw['abi_profile'] != report.get('abi_profile')):
+        raise ValueError('fault campaign supplemental source/profile/ABI mismatch')
+
+
 def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=False):
     """Re-derive a gate from logs, statuses, selections, artifacts and current inputs."""
     report = json.loads(Path(path).read_text())
@@ -323,6 +360,8 @@ def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=F
             from host_evidence import validate_external_report
         elif report.get('report_kind') == 'boundary-controls':
             from boundary_controls import validate_external_report
+        elif report.get('report_kind') == 'reference-boundary-controls':
+            from glibc241.boundaries import validate_external_report
         else:
             from glibc241.evidence import validate_external_report
         report = validate_external_report(Path(path), root=root)
@@ -341,6 +380,8 @@ def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=F
     names = [item['name'] for item in records]
     if len(set(names)) != len(names):
         raise ValueError('duplicate record')
+    if not external:
+        validate_fault_supplement(report, root)
     if record_names is not None:
         record_names = list(record_names)
         if not record_names or len(set(record_names)) != len(record_names) or not set(record_names) <= set(names):
@@ -367,13 +408,6 @@ def validate_report(path, root=ROOT, *, record_names=None, allow_open_findings=F
             if not corpus.is_file() or sha(corpus) != metadata['corpus_sha256']:
                 raise ValueError('changed executed corpus')
         validate_fault_oracle_evidence(item, root, external=external)
-        if not external and item.get('boundary_controls_report') is not None:
-            from boundary_controls import checked, validate_external_report as validate_boundary
-            boundary = validate_boundary(checked(item['boundary_controls_report']), root)
-            if boundary['source_commit'] != report['source_commit']:
-                raise ValueError('supplemental boundary commit differs from fault runner')
-            item['_validated_boundary_controls'] = [x['name'] for x in boundary['records']]
-
         # Host JSON cannot supply a trusted proof bit. External normalized values
         # originate only from the specialized validator above, which rederives all
         # six detector controls and their retained observations/diagnostics.

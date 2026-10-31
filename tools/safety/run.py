@@ -150,7 +150,7 @@ def inventory(args, evidence):
         with source.open('wb') as out:
             subprocess.run(['cargo', 'rustc', '--locked', '--offline', *target, *feature_args, '--', '-Zunpretty=expanded'],
                            cwd=ROOT, env=env, stdout=out, stderr=subprocess.DEVNULL, check=True)
-        parsed = evidence.run('expanded-ast-' + name, [helper, source], env=env,
+        parsed = evidence.run('expanded-ast-' + name, [helper, source.name], env=env, cwd=args.output,
                               profile='STATIC', artifacts=[helper, source])
         if parsed['status'] != 'passed':
             continue

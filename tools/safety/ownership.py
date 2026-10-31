@@ -60,7 +60,7 @@ def validate_inventory_v2(inventory, root):
             raise ValueError('expanded source does not match current compiler/configuration: ' + name)
         if [{k:v for k,v in item.items() if k != 'file'} for item in expanded] != expected['records']:
             raise ValueError('expanded AST is not the complete current compiler output: ' + name)
-        if any((root / item['file']).resolve() != source.resolve() for item in expanded):
+        if any(item['file'] != source.name for item in expanded):
             raise ValueError('expanded syntax belongs to a different artifact')
         if configuration['review_sites'] != expanded_review_sites(expanded):
             raise ValueError('missing, extra or changed expanded review site: ' + name)
@@ -244,6 +244,78 @@ def validate_expanded_review(item, entries, configuration, root):
         raise ValueError('unreviewed expanded sites remain')
 
 
+REVIEW_PACKET_KIND = 'entry-specific-ownership-v1'
+TARGET_FIELDS = ('id', 'kind', 'paths', 'symbol', 'context', 'configuration', 'declared_type',
+                 'binding_mutability', 'site_ids', 'review_sites_sha256')
+
+
+def review_target(item):
+    return {key: item[key] for key in TARGET_FIELDS if key in item}
+
+
+def validate_review_packet(item, review, inventory, root):
+    reference = item.get('review_packet')
+    if not isinstance(reference, dict) or set(reference) != {'path', 'sha256'}:
+        raise ValueError('reviewed entry needs an entry-specific review packet')
+    name = reference['path']; path = (root / name).resolve()
+    if (not name.startswith('docs/safety/ownership-evidence/') or not name.endswith('.json')
+            or not path.is_relative_to(root.resolve()) or not path.is_file()
+            or path.is_symlink() or sha(path) != reference['sha256']
+            or name not in item['evidence_paths']):
+        raise ValueError('missing, escaping or unbound ownership review packet')
+    packet = json.loads(path.read_text())
+    if (packet.get('schema_version') != 1 or packet.get('review_kind') != REVIEW_PACKET_KIND
+            or packet.get('target') != review_target(item)
+            or packet.get('inventory_sha256') != review['inventory_sha256']
+            or packet.get('reviewer') != item['reviewer']
+            or packet.get('checklist') != item['checklist']):
+        raise ValueError('ownership packet target/reviewer/inventory/checklist mismatch')
+    if set(item['checklist']) != set(CHECKLIST):
+        raise ValueError('ownership packet checklist incomplete')
+    scoped = set(item['paths'])
+    source_targets = set(inventory['files'])
+    target_name = item.get('symbol') or item['id']
+    for topic in CHECKLIST:
+        analysis = item['checklist'][topic]
+        if (not isinstance(analysis, dict) or set(analysis) != {'analysis', 'invariant', 'source_refs', 'limitations'}
+                or not isinstance(analysis['analysis'], str) or len(analysis['analysis'].strip()) < 40
+                or target_name not in analysis['analysis']
+                or not isinstance(analysis['invariant'], str) or len(analysis['invariant'].strip()) < 24
+                or not isinstance(analysis['limitations'], list)
+                or any(not isinstance(x, str) or len(x.strip()) < 12 for x in analysis['limitations'])
+                or not isinstance(analysis['source_refs'], list) or not analysis['source_refs']):
+            raise ValueError('missing structured ownership analysis: ' + topic)
+        for citation in analysis['source_refs']:
+            if not isinstance(citation, dict) or set(citation) != {'target', 'sha256', 'start_line', 'end_line', 'excerpt_sha256'}:
+                raise ValueError('invalid ownership source citation')
+            target = citation['target']
+            if target.startswith('source:'):
+                name = target.removeprefix('source:')
+                if name not in source_targets or scoped and name not in scoped:
+                    raise ValueError('ownership source citation is unrelated to target')
+                source = root / name
+            elif target.startswith('expanded:') and item['kind'] == 'expanded-source':
+                configuration = target.removeprefix('expanded:')
+                if configuration != item['configuration']:
+                    raise ValueError('ownership expanded citation has wrong configuration')
+                source = checked_artifact(inventory['expanded_configurations'][configuration]['source'], root)
+            else:
+                raise ValueError('ownership evidence must cite maintained source or exact expansion')
+            if not source.is_file() or sha(source) != citation['sha256']:
+                raise ValueError('ownership source citation changed')
+            lines = source.read_text().splitlines(keepends=True)
+            a, b = citation['start_line'], citation['end_line']
+            if type(a) is not int or type(b) is not int or not 1 <= a <= b <= len(lines):
+                raise ValueError('ownership source citation has invalid extent')
+            excerpt = ''.join(lines[a-1:b]).encode()
+            if hashlib.sha256(excerpt).hexdigest() != citation['excerpt_sha256']:
+                raise ValueError('ownership source excerpt changed')
+            if item.get('symbol') and item['kind'] != 'expanded-source':
+                symbol = item['symbol'].split('::')[-1]
+                if symbol not in excerpt.decode():
+                    raise ValueError('ownership source excerpt does not name the reviewed symbol')
+
+
 def validate(review, inventory, regions, findings, root=ROOT, complete=True):
     if complete and inventory.get('schema_version', 1) != 2:
         raise ValueError('complete ownership review requires source-derived schema-2 inventory')
@@ -271,9 +343,7 @@ def validate(review, inventory, regions, findings, root=ROOT, complete=True):
             continue
         if item.get('packet') not in PACKETS or not item.get('reviewer') or not item.get('evidence_paths'):
             raise ValueError('review metadata/evidence missing')
-        for field in CHECKLIST:
-            if not isinstance(item['checklist'].get(field), str) or not item['checklist'][field].strip():
-                raise ValueError('missing owner/alias/callback/release analysis')
+        validate_review_packet(item, review, inventory, root)
         for path in item['evidence_paths']:
             resolved = (root / path).resolve()
             if not resolved.is_relative_to(root.resolve()) or not resolved.is_file():

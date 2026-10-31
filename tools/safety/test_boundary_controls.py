@@ -13,7 +13,7 @@ from common import PINS, ROOT, sha
 from live_heap import Samples, scenario
 import m0_gate
 from test_stdin_delete import validate as validate_stdin
-from test_first_buffer import validate as validate_first
+from test_first_buffer import validate_allocator
 
 
 class SupplementalControls(unittest.TestCase):
@@ -47,7 +47,7 @@ class SupplementalControls(unittest.TestCase):
     def test_first_buffer_requires_actual_allocator_object_not_symbol_claim(self):
         with patch('test_first_buffer.verify',side_effect=ValueError('wrong linked allocator')) as verify:
             with self.assertRaisesRegex(ValueError,'linked allocator'):
-                validate_first({'oracle':{'passed':True}},Path('/result'),Path('/binary'),Path('/object'))
+                validate_allocator({'oracle':{'passed':True}},Path('/binary'),Path('/object'))
             verify.assert_called_once_with(Path('/binary'),Path('/object'),'__wrap_calloc')
 
     def test_stdin_witness_rejects_closed_or_replaced_borrowed_pipe(self):
@@ -56,7 +56,7 @@ class SupplementalControls(unittest.TestCase):
             out=Path(directory);binary=out/'binary';binary.write_bytes(b'synthetic')
             (out/'positive.trace').write_bytes(b'ready\nclose 0\n')
             identity=dict(target='pipe:[123]',dev=1,ino=123,mode=stat.S_IFIFO|0o600)
-            result=dict(binary_sha256=sha(binary),positive_status=0,cases={})
+            result=dict(binary_sha256=sha(binary),positive_status=0,positive_trace_sha256=digest(b'ready\nclose 0\n'),cases={})
             for name in ('retain','delete'):
                 (out/(name+'.raw')).write_bytes(b'')
                 (out/(name+'.close-trace')).write_bytes(b'ready\n')

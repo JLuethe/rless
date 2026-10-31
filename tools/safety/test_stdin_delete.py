@@ -20,39 +20,60 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def validate(result, output, binary):
+def validate_evidence(result, output, binary, *, expected=None):
     output, binary = Path(output), Path(binary)
     if result.get('binary_sha256') != sha(binary.read_bytes()):
         raise ValueError('changed stdin regression binary')
-    if (output / 'positive.trace').read_bytes() != b'ready\nclose 0\n' or result.get('positive_status') != 0:
+    positive = (output/'positive.trace').read_bytes()
+    if (positive != b'ready\nclose 0\n' or result.get('positive_status') != 0
+            or result.get('positive_trace_sha256') != sha(positive)):
         raise ValueError('stdin close witness positive control did not detect close(0)')
     cases = result.get('cases', {})
     if set(cases) != {'retain', 'delete'}:
         raise ValueError('stdin ownership cases missing')
     for name, case in cases.items():
-        raw = (output / (name + '.raw')).read_bytes()
-        trace = (output / (name + '.close-trace')).read_bytes()
+        raw = (output/(name+'.raw')).read_bytes(); trace = (output/(name+'.close-trace')).read_bytes()
         if case.get('raw_sha256') != sha(raw) or case.get('close_trace_sha256') != sha(trace):
             raise ValueError('stdin witness differs from retained raw bytes')
-        if trace != b'ready\n':
-            raise ValueError('borrowed standard descriptor was closed')
-        if case.get('status') != 0 or case.get('termios_restored') is not True:
+        closed = expected == 'stdin-close' and name == 'delete'
+        leaked = expected == 'stdin-leak' and name == 'delete'
+        if trace != (b'ready\nclose 0\n' if closed else b'ready\n'):
+            raise ValueError('borrowed standard descriptor was closed' if not closed else 'stdin-close mutant did not close exactly fd0')
+        if case.get('status') != (87 if leaked else 0) or case.get('termios_restored') is not True:
             raise ValueError('stdin deletion status or terminal restoration failed')
-        if re.search(rb'AddressSanitizer|LeakSanitizer|panicked|runtime error:', raw):
+        if leaked:
+            if (b'ERROR: LeakSanitizer: detected memory leaks' not in raw
+                    or re.search(rb'41088 byte\(s\) leaked in 2 allocation\(s\)', raw) is None
+                    or re.search(rb'heap-buffer-overflow|heap-use-after-free|panicked|runtime error:',raw)):
+                raise ValueError('stdin-leak mutant lacks the intended retained-state LSAN report')
+        elif re.search(rb'AddressSanitizer|LeakSanitizer|panicked|runtime error:',raw):
             raise ValueError('stdin ownership sanitizer diagnostic')
-        if case.get('screens') != ['stdin', 'file']:
+        if case.get('screens') != ['stdin','file']:
             raise ValueError('stdin/file screen transition missing')
-        checkpoints = case.get('fd0_checkpoints')
-        if (not isinstance(checkpoints, list) or len(checkpoints) != 2
-                or [x.get('label') for x in checkpoints] != ['before', 'after']):
+        points = case.get('fd0_checkpoints')
+        if (not isinstance(points,list) or len(points)!=2
+                or [x.get('label') for x in points] != ['before','after']):
             raise ValueError('stdin descriptor checkpoints missing')
-        first, second = checkpoints
-        identity = ('target', 'dev', 'ino', 'mode')
-        if (not re.fullmatch(r'pipe:\[\d+\]', first.get('target', ''))
-                or not stat.S_ISFIFO(first.get('mode', 0))
-                or any(first.get(key) != second.get(key) for key in identity)):
+        first, second = points
+        if not re.fullmatch(r'pipe:\[\d+\]',first.get('target','')) or not stat.S_ISFIFO(first.get('mode',0)):
+            raise ValueError('stdin initial borrowed pipe identity missing')
+        if closed:
+            if second != dict(label='after',target='missing',dev=0,ino=0,mode=0):
+                raise ValueError('stdin-close mutant does not show fd0 absent at the next input barrier')
+        elif any(first.get(key)!=second.get(key) for key in ('target','dev','ino','mode')):
             raise ValueError('borrowed stdin pipe identity changed after navigation/deletion')
     return True
+
+
+def validate(result, output, binary):
+    return validate_evidence(result, output, binary)
+
+
+def validate_expected_failure(result, output, binary, kind):
+    if kind not in ('stdin-close','stdin-leak'):
+        raise ValueError('unknown stdin mutation failure')
+    validate_evidence(result, output, binary, expected=kind)
+    return {'reason':kind,'status':87 if kind=='stdin-leak' else 0}
 
 
 def run(binary, output):
