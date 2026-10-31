@@ -76,7 +76,7 @@ def rederive(outer,inner,work,profile,root=ROOT):
     if not link.exists() and not link.is_symlink():link.symlink_to('/cache/registry',target_is_directory=True)
     require(link.is_symlink() and os.readlink(link)=='/cache/registry','reference verifier registry mount changed')
     name='normalized-'+str(time.time_ns())+'.json';normalized=cache/name
-    command=['podman','run','--rm','--network=none','--read-only','--cap-drop=all',
+    command=['podman','run','--rm','--network=none','--read-only','--cap-drop=all', '--ulimit', 'core=0:0',
         '--userns=keep-id','--user',str(os.getuid())+':'+str(os.getgid()),'--tmpfs','/tmp:rw,nosuid,nodev',
         '-v',str(work)+':/work:ro','-v',str(cache)+':/verify-cache:rw','-v',str(cargo)+':/work/cargo:rw',
         '-v',str(toolchain)+':/opt/rust:ro','-v',str(registry)+':/cache/registry:ro',

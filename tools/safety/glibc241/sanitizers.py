@@ -101,7 +101,7 @@ def main():
         validate_reference_hashes(record['references'], ROOT)
         record['reference_policy'] = reference_policy(ROOT)
         save(inputs / 'options.json', dict(repetitions=args.repetitions))
-        command = ['podman', 'run', '--rm', '--network=none', '--read-only', '--cap-drop=all',
+        command = ['podman', 'run', '--rm', '--network=none', '--read-only', '--cap-drop=all', '--ulimit', 'core=0:0',
                    '--userns=keep-id', '--user', str(os.getuid()) + ':' + str(os.getgid()),
                    '--tmpfs', '/tmp:rw,nosuid,nodev',
                    '-v', str(inputs) + ':/input:ro', '-v', str(work) + ':/work:rw',

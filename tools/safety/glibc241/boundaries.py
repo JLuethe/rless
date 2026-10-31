@@ -73,7 +73,7 @@ def main():
     toolchain=args.rust_toolchain.resolve(strict=True);registry=args.registry_cache.resolve(strict=True)
     tool_files=[toolchain/'bin/rustc',toolchain/'bin/cargo']+sorted((toolchain/'lib').glob('*.so*'))
     tool_files+=sorted((toolchain/'lib/rustlib'/PINS['target']/'lib').glob('librustc-nightly_rt.asan.a'))
-    command=['podman','run','--rm','--network=none','--read-only','--cap-drop=all','--userns=keep-id',
+    command=['podman','run','--rm','--network=none','--read-only','--cap-drop=all', '--ulimit', 'core=0:0','--userns=keep-id',
         '--user',str(os.getuid())+':'+str(os.getgid()),'--tmpfs','/tmp:rw,nosuid,nodev',
         '-v',str(inputs)+':/input:ro','-v',str(work)+':/work:rw','-v',str(toolchain)+':/opt/rust:ro',
         '-v',str(registry)+':/cache/registry:ro','--env','PATH=/opt/rless-python/bin:/opt/rust/bin:/usr/bin:/bin',
