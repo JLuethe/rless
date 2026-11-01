@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/linenum.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/linenum.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/linenum.rs owns a static 1024-node pool and anchor/freelist/spare pointers into that pool. Cached positions and line numbers are metadata for the current input, not owners of input bytes.",
+      "invariant": "Pool nodes remain image storage even while list membership changes.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 427,
+          "end_line": 442,
+          "excerpt_sha256": "5af51ba9fa477f9c6eb1687dc8cf1ac3fe16b6c2d0abc4fda89f4d90aaa22f0b"
+        }
+      ],
+      "limitations": [
+        "No malloc/free lifecycle applies to an individual linenum_info pool element."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/linenum.rs lookup walks raw next/prev links and retains a selected node while scanning input; delayed_msg borrows message text and keeps only a timestamp/type alongside it.",
+      "invariant": "A selected node and message borrow must remain valid until their use ends.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 574,
+          "end_line": 586,
+          "excerpt_sha256": "913dc57da0f9176402a389d906e3457fa2cb863aeaffa68b181b9126a94631bf"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 519,
+          "end_line": 538,
+          "excerpt_sha256": "cf4ea3de24d9bb13ebd2ae48f4e39fc3e8c6547bbe25ba3263e17059fccc3a80"
+        }
+      ],
+      "limitations": [
+        "A numeric file position carries no file-generation identity."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/linenum.rs invokes raw-line scanning and diagnostic functions directly; delayed_msg calls ierror with borrowed text and then clears its own message pointer rather than registering a callback.",
+      "invariant": "Diagnostics must not assume ownership of borrowed delayed-message text.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 528,
+          "end_line": 539,
+          "excerpt_sha256": "3e9a8601a79fedb8bd8260bca06da352f461a096ed40f73979b8b1605c387e7c"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 595,
+          "end_line": 611,
+          "excerpt_sha256": "c6a82201207352bdbc96cea1d1d5622c6aea121a10926582804779349141123f"
+        }
+      ],
+      "limitations": [
+        "Other modules still own input and message allocation lifetimes."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/linenum.rs clr_linenum rebuilds freelist and anchor state, while add_lnum recycles a spare node by unlinking it. A raw pointer can remain address-valid but refer to a different cached record afterward.",
+      "invariant": "Logical pool-node identity expires when the cache recycles membership.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 446,
+          "end_line": 465,
+          "excerpt_sha256": "a9491d59fd9f182b9992d69e0ac3ecb412d8440381cad7aa41eac11521962460"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 505,
+          "end_line": 517,
+          "excerpt_sha256": "c96beb656ebee9f6827b1cc3fbe8ee7096d65048641d95b0f01d037e7cbf3f98"
+        }
+      ],
+      "limitations": [
+        "Static storage alone does not establish semantic alias validity."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/linenum.rs add_lnum fills a node, links it between neighbors and recalculates gaps through separate writes before selecting a new spare. This is not a staged linked-list transaction.",
+      "invariant": "List neighbors, ordering and cache gaps must describe the same commit.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 487,
+          "end_line": 517,
+          "excerpt_sha256": "2653af60a6abbb3cb367851275d8090eb71a95c9a0542e0dd1d9f92bb172f036"
+        }
+      ],
+      "limitations": [
+        "M0-MEM-001 covers raw metadata coordination without a newly reproduced list defect."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/linenum.rs returns nodes to internal pool membership rather than freeing them; delayed_msg clears its borrowed pointer after output without freeing message storage. No cached node owns a descriptor.",
+      "invariant": "Pool retirement is logical unlink/reuse, never allocator release.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 505,
+          "end_line": 517,
+          "excerpt_sha256": "c96beb656ebee9f6827b1cc3fbe8ee7096d65048641d95b0f01d037e7cbf3f98"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 528,
+          "end_line": 539,
+          "excerpt_sha256": "3e9a8601a79fedb8bd8260bca06da352f461a096ed40f73979b8b1605c387e7c"
+        }
+      ],
+      "limitations": [
+        "The active input descriptor remains owned by the input subsystem."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/linenum.rs failed seek, raw-line sentinel or signal abort returns line number zero; abort_delayed_msg can also disable line numbers and report a message. No local heap allocation is abandoned by those exits.",
+      "invariant": "A zero result must be treated as an unavailable mapping, not a valid cached line.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 595,
+          "end_line": 620,
+          "excerpt_sha256": "203fe78e006d5af650c0b21c76d3be57ea32c761b988697d3388b9f4cae81afe"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 630,
+          "end_line": 647,
+          "excerpt_sha256": "406b64d064289ab6b712ee3c7e6eca75e64e99c0040805ee57e132b760597d65"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 541,
+          "end_line": 554,
+          "excerpt_sha256": "651c185e11c492db42f065394749e51f0564cabba933c88a1fd3a30a64a83656"
+        }
+      ],
+      "limitations": [
+        "This review does not classify every lower-layer input sentinel by cause."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/linenum.rs scans poll sigs but still mutate ordinary static pool links and global linenums. Serialized cache use remains an owner precondition, linked to M0-MEM-001.",
+      "invariant": "Polling cannot make a half-updated raw list safe for another entry.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 599,
+          "end_line": 607,
+          "excerpt_sha256": "9accff2ad87f2aa09c19278eb193bc73665cd86ac584571ce7af35b33f7c3b7e"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 630,
+          "end_line": 645,
+          "excerpt_sha256": "6570e7a3c6947dbf6ec0078211f77e0c785cabc16d7087d74504c64edfb4a19f"
+        }
+      ],
+      "limitations": [
+        "No handler-to-cache mutation trace is asserted by these polling branches."
+      ]
+    }
+  }
+}

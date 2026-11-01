@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-04",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/line.rs",
+      "src/cvt.rs",
+      "src/forwback.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-04 owns parallel rendered byte/attribute allocations plus ANSI xbuffers; conversion separately returns an allocated chpos map. forw/back consume those owners through rendering APIs.",
+      "invariant": "Rendered bytes, attributes and source maps have distinct owners.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 207,
+          "end_line": 238,
+          "excerpt_sha256": "803ed22c0e461e40c43990dec685d7f846193142020c5d8d6aba9766741f5338"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 464,
+          "end_line": 478,
+          "excerpt_sha256": "2a5f95cd37ccc9469f904ea0d0b10d27b22d6c6ecaa8a8f72e4e85dacc24cb95"
+        },
+        {
+          "target": "source:src/cvt.rs",
+          "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+          "start_line": 65,
+          "end_line": 75,
+          "excerpt_sha256": "8f38e30d3bdc0859366656089febf12a43de5be7de2318610a6230c0010451e8"
+        }
+      ],
+      "limitations": [
+        "The source map is not owned by an offset into linebuf."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-04 forw_raw_line_len returns a borrowed linebuf address and length, while cvt_text walks raw source/destination/map cursors supplied by callers.",
+      "invariant": "A returned line borrow must not survive owner replacement.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2194,
+          "end_line": 2201,
+          "excerpt_sha256": "a9f7d59afd41b3bb1a78cc1fa53e12f3c2952957fbd461ce82167d68c1798a77"
+        },
+        {
+          "target": "source:src/cvt.rs",
+          "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+          "start_line": 77,
+          "end_line": 95,
+          "excerpt_sha256": "eb928956329bbd65bd72900bb3dd238e8cd2db4feb98870759b759f6a0f71832"
+        }
+      ],
+      "limitations": [
+        "Length arguments do not encode a Rust borrow or source generation."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-04 overlay_header calls forw_line and put_line directly for each header row; conversion synchronously creates, steps and releases ANSI state rather than retaining a callback.",
+      "invariant": "Rendering callees must preserve active conversion owner contracts.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 528,
+          "end_line": 545,
+          "excerpt_sha256": "d5d4690e3f66b0dd3edea9ae2329193e2d31eeca9dbbf82dcdd526708e361ca6"
+        },
+        {
+          "target": "source:src/cvt.rs",
+          "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+          "start_line": 116,
+          "end_line": 128,
+          "excerpt_sha256": "94092cd2b06734f4470fef67b188de6aa1778ffdd4a985cb77d7a02968c82ae0"
+        }
+      ],
+      "limitations": [
+        "Direct calls can still mutate shared rendering globals."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-04 expand_linebuf frees both old arrays before publishing replacement pointers; prewind clears logical content and saved rendering state even without moving the allocation.",
+      "invariant": "Old pointers and old logical content expire at different transitions.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 495,
+          "end_line": 510,
+          "excerpt_sha256": "9667dcee4097bd4a46df03ee6e75458d8f5ef6d4f520f91148f22674ffee3dca"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 547,
+          "end_line": 565,
+          "excerpt_sha256": "3d2f9c887fbd1f67e2a39a2423831a3dbb9726c9e2c887b130cca35cb8f44a52"
+        }
+      ],
+      "limitations": [
+        "No generation token accompanies a borrowed raw line."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-04 stages both grown arrays before changing linebuf, but cvt_length still uses wrapping sizing and cvt_text writes narrowed source offsets incrementally.",
+      "invariant": "Successful allocation staging does not prove numeric capacity bounds.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 480,
+          "end_line": 494,
+          "excerpt_sha256": "3d7731b903e50b8fbe3c6ebe9089e34c1a139300eb9e1d619bc7dc3f3f920581"
+        },
+        {
+          "target": "source:src/cvt.rs",
+          "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+          "start_line": 58,
+          "end_line": 62,
+          "excerpt_sha256": "6f5dd9705a336e4cbf89d460a017b300437ed25eec8d7dff90d926de79dea825"
+        },
+        {
+          "target": "source:src/cvt.rs",
+          "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+          "start_line": 146,
+          "end_line": 156,
+          "excerpt_sha256": "0bce6f2f091a4bd965314ab4771d04d13d4ade76db043d32f6b46a4ebaea6da8"
+        }
+      ],
+      "limitations": [
+        "The c_int source map requires a separate representability contract."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-04 frees replaced line arrays in expand_linebuf and pairs ansi_start allocation with ansi_done free. A returned chpos map remains the caller allocation responsibility.",
+      "invariant": "Temporary ANSI state and persistent render arrays use separate release paths.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 505,
+          "end_line": 509,
+          "excerpt_sha256": "5ab553829f9e407e1d241b58ddbbfbb755e1f2bb83c9466d34c46a80b9cea455"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 913,
+          "end_line": 925,
+          "excerpt_sha256": "3cb5ee5fe5ce8abc951d1bb9f0a16b308095fa5957b9da515d571c148733f1bf"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 1124,
+          "end_line": 1126,
+          "excerpt_sha256": "a8fc369fcb841e8e8de061c930d84f6381dc3413a9011f797363ed94deadc4c5"
+        }
+      ],
+      "limitations": [
+        "This review does not infer an exit-time free for every retained global buffer."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-04 failed dual-array growth frees whichever candidate succeeded, retains old arrays and returns failure. Raw-line scanning then returns a bounded partial line rather than a typed complete-read result.",
+      "invariant": "Failure must preserve old storage while reporting partial content honestly.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 480,
+          "end_line": 494,
+          "excerpt_sha256": "3d7731b903e50b8fbe3c6ebe9089e34c1a139300eb9e1d619bc7dc3f3f920581"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2174,
+          "end_line": 2178,
+          "excerpt_sha256": "7327f12229b32e6de50bd468d536d57d44d263f237ca42bd87a81bbb0943e0a1"
+        }
+      ],
+      "limitations": [
+        "Partial-line behavior is not a fresh compatibility campaign result."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-04 forw/back poll sigs around rendering, but linebuf and source-map cursors still rely on serialized use of mutable application state. M0-MEM-001 stays open for that owner contract.",
+      "invariant": "Polling alone does not create exclusive rendering ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 591,
+          "end_line": 598,
+          "excerpt_sha256": "853f4eb3fcb6b9ffc88f6bd2ccb4c060821723481be2707985cb68f1f8368071"
+        },
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 735,
+          "end_line": 743,
+          "excerpt_sha256": "ebab9b6c9a58448aefa1f4dad0f9be6dd979f92225699566f2d2dc512ee9fbc3"
+        },
+        {
+          "target": "source:src/cvt.rs",
+          "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
+          "start_line": 77,
+          "end_line": 95,
+          "excerpt_sha256": "eb928956329bbd65bd72900bb3dd238e8cd2db4feb98870759b759f6a0f71832"
+        }
+      ],
+      "limitations": [
+        "No specific handler-to-linebuf replacement route is established here."
+      ]
+    }
+  }
+}

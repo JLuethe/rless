@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/filename.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/filename.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/filename.rs returns allocated quoted/path strings and readfd xbuffer data; open_altfile can also transfer a popen FILE and its FD through caller output slots. Those outputs are different resource owners.",
+      "invariant": "A returned filename allocation is distinct from a retained process stream.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 641,
+          "end_line": 652,
+          "excerpt_sha256": "6debee58d3ae6c2099f296e6c8135b20055b4a217901322530099c80e5f4126b"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 953,
+          "end_line": 970,
+          "excerpt_sha256": "3f105996a7d41c3222708c8f7762061f4f639eb7a13179565e5c53a3087538e9"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1190,
+          "end_line": 1205,
+          "excerpt_sha256": "e4d097915bb4d04e29d1a5e22b97db35b89fde867b54c6b200233938a7f602f3"
+        }
+      ],
+      "limitations": [
+        "An FD obtained with fileno borrows its FILE rather than duplicating it."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/filename.rs quotes through raw input and environment escape pointers while constructing independent output bytes. open_altfile stores a FILE and fileno FD together, so closing the stream invalidates that FD view.",
+      "invariant": "Input/escape borrows and transferred pipe aliases need matched lifetimes.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 641,
+          "end_line": 670,
+          "excerpt_sha256": "de757291a2f523335047f79d5aaf177d18f9a775ea5e59cd16b6a4518e7c4453"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1190,
+          "end_line": 1205,
+          "excerpt_sha256": "e4d097915bb4d04e29d1a5e22b97db35b89fde867b54c6b200233938a7f602f3"
+        }
+      ],
+      "limitations": [
+        "Pointer types do not encode whether a returned value is borrowed or newly allocated."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/filename.rs shellcmd invokes popen directly after building shell text and frees temporary quoted command strings after the native call. The returned FILE remains a process-stream owner, not a callback context.",
+      "invariant": "Native command execution must not retain caller temporary string storage.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 972,
+          "end_line": 1012,
+          "excerpt_sha256": "904ad3c77659e4fcb48951490cc063b06ec81ffb53ad692a1fc63242fd3317ad"
+        }
+      ],
+      "limitations": [
+        "The source call signature alone does not certify all native ABI assumptions."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/filename.rs pclose consumes pipe streams on empty/error outcomes; successful pipe mode instead publishes pfd/pf and returns a new saved dash-name. The caller must distinguish those ownership outcomes.",
+      "invariant": "A consumed FILE must not remain a live descriptor alias.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1190,
+          "end_line": 1213,
+          "excerpt_sha256": "9e94ac2bdfb0b0488b2f58cb13d3c84765e0f4ce3ef8f9cb08e34c5e85755be1"
+        }
+      ],
+      "limitations": [
+        "No atomic owner aggregate enforces agreement between pfd, pf and returned name."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/filename.rs computes quoting and shell command sizes with wrapping additions, then writes native strings into allocated storage. Separate length, pointer and output-slot writes require caller and arithmetic invariants.",
+      "invariant": "Allocated capacity must cover every encoded output byte and NUL.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 649,
+          "end_line": 670,
+          "excerpt_sha256": "31466c15488bbe708944b5a7655c1785f54beda45002499579577ffc69f275b4"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 989,
+          "end_line": 1006,
+          "excerpt_sha256": "e0991c3ef1657465517158782fd2eb9b91617c4a3a9403c8e9c3af4f9ec1fbf3"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1251,
+          "end_line": 1260,
+          "excerpt_sha256": "84a001c49b9f4956d681eb39f0aa497cb21a2a3da0bae808b78f41a360b11f7d"
+        }
+      ],
+      "limitations": [
+        "No new overflow or capacity failure is reproduced by this source review."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/filename.rs frees shellcmd scratch strings after popen, frees quoted close-command inputs after formatting and pclose consumes the child stream. Returned readfd data is intentionally transferred to its caller.",
+      "invariant": "Transferred strings require caller free; process streams require pclose.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 953,
+          "end_line": 970,
+          "excerpt_sha256": "3f105996a7d41c3222708c8f7762061f4f639eb7a13179565e5c53a3087538e9"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1004,
+          "end_line": 1006,
+          "excerpt_sha256": "ffb0e8663c8475ca817af81ce9b571f430e3ba4ac9d5baf26dfe90d522b6a8b7"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1242,
+          "end_line": 1263,
+          "excerpt_sha256": "3448222d26306265a594543ee33cb2fb81e8d93642375bea040279a1217f6e51"
+        }
+      ],
+      "limitations": [
+        "freeing a fileno integer is never a substitute for the FILE counterpart."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/filename.rs close_altfile frees the first quoted filename if quoting the second fails, and shellcmd returns null on failed command quoting. Other partial construction paths rely on fatal allocator handling.",
+      "invariant": "Failure cleanup must follow only owners already acquired on that branch.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 981,
+          "end_line": 987,
+          "excerpt_sha256": "892e4e4a714189578a0b6701610361af39cca329142d85d2ba0489e0826cc103"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1242,
+          "end_line": 1249,
+          "excerpt_sha256": "3ecbace6aea102698f31a5e6ebf3f8837d218dee4a58203fd570879062e68f14"
+        }
+      ],
+      "limitations": [
+        "No whole-module failure-transaction guarantee is inferred from these local exits."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/filename.rs retains raw environment and active-input relationships while allocating strings and handing off child streams. M0-MEM-001 remains open; the file registers no exclusion or deferred mutation protocol.",
+      "invariant": "Path and pipe owner mutation belongs to ordinary serialized execution.",
+      "source_refs": [
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 972,
+          "end_line": 1012,
+          "excerpt_sha256": "904ad3c77659e4fcb48951490cc063b06ec81ffb53ad692a1fc63242fd3317ad"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1130,
+          "end_line": 1153,
+          "excerpt_sha256": "8e20fed9b016b4179780eafb591b436b97a7688f16987fcb4da55c3d02134658"
+        }
+      ],
+      "limitations": [
+        "This packet establishes no specific asynchronous call route into filename expansion."
+      ]
+    }
+  }
+}

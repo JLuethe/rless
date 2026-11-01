@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/lsystem.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/lsystem.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/lsystem.rs acquires a CLOEXEC duplicate of stdin before tearing down the pager; shell commands and quoted strings are separate heap owners, while save_ifile holds the selected input across handoff.",
+      "invariant": "A stdin backup must exist before changing the active descriptor.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 500,
+          "end_line": 529,
+          "excerpt_sha256": "149dbe6cb18848a854dc3a63da9b945cc8370054e4ccafee456c2f6c3ff80036"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 553,
+          "end_line": 578,
+          "excerpt_sha256": "a3512a3ff922f910caa1c5fff5e34b67a57016216c9302ee07b01e258be499af"
+        }
+      ],
+      "limitations": [
+        "Saved input ownership is separate from temporary shell-command bytes."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/lsystem.rs borrows cmd/donemsg through synchronous execution, keeps an IFILE hold through reopen and distinguishes opened tty ownership from borrowed fallback. Only tty.owned permits closing the temporary tty FD.",
+      "invariant": "A numeric descriptor slot does not establish close ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 500,
+          "end_line": 503,
+          "excerpt_sha256": "b3f66fcbe23f6b1df10dfbcb2e2eec5a61ac393a981ac8876704aa92d337f1be"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 525,
+          "end_line": 550,
+          "excerpt_sha256": "d8ec8140d7786b34afccba788218cdababec8b3206eee9ce523e4c610ea4229b"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 605,
+          "end_line": 612,
+          "excerpt_sha256": "61d737dc0f50cc155cdcfddaf22e802ca3939e2a6ff9bb02c2013ecb18aac207"
+        }
+      ],
+      "limitations": [
+        "The raw saved IFILE still depends on edit-side hold and list discipline."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/lsystem.rs calls system and popen directly and switches signal dispositions around pipe output. The SIGPIPE ignore integer is still transmuted to a Rust handler representation, linked to M0-SIG-004.",
+      "invariant": "Native process and signal targets must use valid callable/sentinel representations.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 594,
+          "end_line": 596,
+          "excerpt_sha256": "fb82c80a41271ae4a97a2c89fe71b7e0ce40a3fa764d91beff99b4f542e7c4ff"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 629,
+          "end_line": 635,
+          "excerpt_sha256": "ddc8d89d22139125f3b9004983531015dd305f11ff2e5ce4a826678b05414aa1"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 644,
+          "end_line": 650,
+          "excerpt_sha256": "ecfeee1167a92772996baab5c81887fc621c8f799b6bfd4898636e23886578a5"
+        }
+      ],
+      "limitations": [
+        "No general signal ABI approval follows from successful stdin restoration."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/lsystem.rs dup2 replaces fd 0 without closing its backup, then closes only an owned tty duplicate. Restoration uses the independent saved FD before the pager can resume input.",
+      "invariant": "The backup remains valid until all descriptor swaps are finished.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 474,
+          "end_line": 482,
+          "excerpt_sha256": "318818461253691c599571f6b3872ba6667fbda3a827ace8166abcfcbea8dfda"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 531,
+          "end_line": 550,
+          "excerpt_sha256": "a27879bcb06ea5061c642516def0dcae30823426bebb2c2ec75d43501cd3564d"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 597,
+          "end_line": 605,
+          "excerpt_sha256": "9e3763bf510c7c836aef90c3133649c18f795f36eb0d1c519e8c2947318293be"
+        }
+      ],
+      "limitations": [
+        "Current ownership fixes do not close IND-FD-F3 by source review alone."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/lsystem.rs checks backup acquisition before any terminal teardown, retries interrupted dup2 and resumes only after restoring stdin. The current source repairs the historical M0-IO-003 teardown ordering.",
+      "invariant": "Commit to shell mode requires a recoverable original input owner.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 500,
+          "end_line": 513,
+          "excerpt_sha256": "7fcbcfb01fa5b53e2b5239dc6e522b4063882e23c39990d17c3c7639a38d90ef"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 525,
+          "end_line": 546,
+          "excerpt_sha256": "fd77082b70e5ba1d4c751a48edc98947ade9fa4273433f0e291d84a5ac635bed"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 597,
+          "end_line": 612,
+          "excerpt_sha256": "77f4601723ea7cc5810a55a3a4154fc004dcee5ef67da51c461d2e8d4dccaffe"
+        }
+      ],
+      "limitations": [
+        "Terminal state and saved IFILE restoration remain separate coordinated transitions."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/lsystem.rs frees the constructed command after system and closes its stdin backup after restoration; pipe_data consumes its popen stream with pclose and restores signal/terminal state afterward.",
+      "invariant": "Heap command, backup FD and process FILE need their distinct counterparts.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 594,
+          "end_line": 605,
+          "excerpt_sha256": "0cb3709ec340a4ba75d378f859417d94326e8a27a9d8ce8753a3dcfdaf14ee0e"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 674,
+          "end_line": 682,
+          "excerpt_sha256": "41382ac07f316ac732524a37cb0ef9c1fae46d5cd8639e0478aa2d9845fb1be5"
+        }
+      ],
+      "limitations": [
+        "The pclose result is not checked as a complete child-success proof."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/lsystem.rs backup failure diagnoses and returns untouched; failed tty setup restores from backup or exits cooked if restoration fails. That exit avoids running pager cleanup against the wrong input descriptor.",
+      "invariant": "Do not resume or run ordinary quit cleanup with un-restored stdin.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 504,
+          "end_line": 513,
+          "excerpt_sha256": "e1cc8f0f49735256786e1ac6a3a99bd2d582c244eeed38b968d809d5ca018391"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 531,
+          "end_line": 546,
+          "excerpt_sha256": "efcc93ebb52e041485f24d671385785a9e49849848635c9f358056bf004d5de8"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 597,
+          "end_line": 605,
+          "excerpt_sha256": "9e3763bf510c7c836aef90c3133649c18f795f36eb0d1c519e8c2947318293be"
+        }
+      ],
+      "limitations": [
+        "No independent descriptor-exhaustion campaign was run for this packet."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/lsystem.rs disables and reenables handlers around external execution but still shares raw input, screen and signal state. Pipe SIGPIPE sentinel conversion remains open under M0-SIG-004, separate from resource provenance.",
+      "invariant": "Signal disposition changes must not imply an exclusive owner handoff.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 525,
+          "end_line": 531,
+          "excerpt_sha256": "2b42b7c77148ffa608a2d88d869687dcd882c619573b768225a329c52e4a309e"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 644,
+          "end_line": 650,
+          "excerpt_sha256": "ecfeee1167a92772996baab5c81887fc621c8f799b6bfd4898636e23886578a5"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 674,
+          "end_line": 681,
+          "excerpt_sha256": "ca6c35ab65873fc1ba46b3c17574cc0992e8ebb1b2ea21d458a37c9a4a005113"
+        }
+      ],
+      "limitations": [
+        "M0-MEM-001 retains the broader raw cross-module handoff obligation."
+      ]
+    }
+  }
+}

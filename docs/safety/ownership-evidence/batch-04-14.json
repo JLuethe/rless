@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/decode.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/decode.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/decode.rs owns tablelist nodes, selectively owned command/variable bytes and an environment-cache chain of copied names/values. add_cmd_table consumes an owned buffer even for empty input or failed node allocation.",
+      "invariant": "Each node must retain whether its buffer is owned or borrowed.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2028,
+          "end_line": 2053,
+          "excerpt_sha256": "1669d1c2d8ac4b8952725a9fd1c2ef0979da531d278968b32e747d41e0c8c77b"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2811,
+          "end_line": 2821,
+          "excerpt_sha256": "bee1a9b9663e50a2b2b05d045791125791b3dcf04ddb94df0c98bbbfdd9088a2"
+        }
+      ],
+      "limitations": [
+        "Static default command tables are not heap buffers to release."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/decode.rs lgetenv returns raw pointers from variable tables, cached copies or libc environment storage. lgetenv_ext lends caller env_buf through a temporary non-owning node that is removed before return.",
+      "invariant": "A returned value must outlive removal of its temporary descriptor.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2837,
+          "end_line": 2862,
+          "excerpt_sha256": "f749c6c5d4cda4299de5c82a37fa46554074480d6dc4931aa74e30f7cba84f9a"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2865,
+          "end_line": 2873,
+          "excerpt_sha256": "47ea859333922766f6a99589a03259670ec90ce3b55affa1c5d252d6ac42e36f"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2900,
+          "end_line": 2907,
+          "excerpt_sha256": "160bd25eceafd0252a4ac3b92f67299eb6208deca8f8d7f96670d7fea51da3c6"
+        }
+      ],
+      "limitations": [
+        "Removing a borrowed node does not free the caller env_buf backing bytes."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/decode.rs is reached by sigusr lgetenv lookup, which can call addenv_cache and allocate copied strings before returning to the handler queue producer.",
+      "invariant": "Configuration lookup allocation must remain outside asynchronous handlers.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2812,
+          "end_line": 2821,
+          "excerpt_sha256": "ab2706b3779981fd955b8bf4ad2f16ec1f6e336f54e40f66abb04cb96a349403"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2849,
+          "end_line": 2856,
+          "excerpt_sha256": "8c8860982c79e3da9ce60548c71a022a7dadd94135acc84a4dfde64872125461"
+        }
+      ],
+      "limitations": [
+        "M0-SIG-002 remains open for this concrete caller route."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/decode.rs retain_cmd_table saves successors before freeing discarded nodes, nulls the retained tail and republishes the selected root. Its stated initialization-only scope must precede any table-byte borrower.",
+      "invariant": "Published table aliases cannot survive table-list pruning.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2173,
+          "end_line": 2193,
+          "excerpt_sha256": "1318a7d37655d302568f91523e258beefe8b401abe9dcdc8203e9cc6d4f91c21"
+        }
+      ],
+      "limitations": [
+        "Current owns_buffer release code does not close historical M0-LEAK-004."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/decode.rs lesskey_text uses a fresh parser descriptor, publishes command/edit buffers and releases copied variable input afterward. The repaired transfer avoids resetting a descriptor still owning published bytes (M0-LEAK-003).",
+      "invariant": "Staging descriptors must never remain allocation owners after transfer.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2921,
+          "end_line": 2958,
+          "excerpt_sha256": "c1f7b8c0b1c7ed9ef665854d953762535027d152346dba7aef487b5f3685fd66"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2979,
+          "end_line": 2991,
+          "excerpt_sha256": "341b577f87682dd6be3304a19e71e32cdd174cd54376b148963715115f245ed8"
+        }
+      ],
+      "limitations": [
+        "Whole configuration precedence and concurrent lookup are separate obligations."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/decode.rs release_cmd_table frees t_start only when owns_buffer, then frees the node; pop detaches the selected tail before invoking that release. Borrowed default and temporary bytes survive node destruction.",
+      "invariant": "Descriptor lifetime must not be confused with borrowed byte lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2173,
+          "end_line": 2178,
+          "excerpt_sha256": "79efea84ea7c0068d7df4bdbe5787953862a1a1685c64e78e8cf4ccc1b13adf8"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2195,
+          "end_line": 2213,
+          "excerpt_sha256": "25d5307fe65a334036ccda3420df9534ff924275478d92d36c5aeaa13f600717"
+        }
+      ],
+      "limitations": [
+        "Cached environment allocations have their own persistent lifetime beyond table pop."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/decode.rs now skips pop when no temporary node was added, preserving persistent tables on empty input or allocation failure (M0-MEM-002). Failed parsing deinitializes all staged table buffers before return.",
+      "invariant": "Rollback must remove only a node that this operation actually inserted.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2900,
+          "end_line": 2907,
+          "excerpt_sha256": "160bd25eceafd0252a4ac3b92f67299eb6208deca8f8d7f96670d7fea51da3c6"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2970,
+          "end_line": 2977,
+          "excerpt_sha256": "45d94606fdf8232b4607825259fe276b7e5835d45a284fcaec09447655a98de5"
+        }
+      ],
+      "limitations": [
+        "The maintained repaired findings remain open pending independent disposition."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/decode.rs table/cache roots are mutable raw globals; sigusr invokes lookup while ordinary code can borrow them. Ownership flags fix local frees but provide no asynchronous configuration handoff.",
+      "invariant": "Lookup and table retirement must obey one serialized owner protocol.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2811,
+          "end_line": 2821,
+          "excerpt_sha256": "bee1a9b9663e50a2b2b05d045791125791b3dcf04ddb94df0c98bbbfdd9088a2"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        }
+      ],
+      "limitations": [
+        "No new table-race runtime result is claimed from raw structure alone."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "sigusr at src/signal.rs:86-100 invokes lgetenv before queue creation; decode.rs can traverse raw table roots or allocate environment-cache records during that asynchronous lookup."
+    }
+  }
+}

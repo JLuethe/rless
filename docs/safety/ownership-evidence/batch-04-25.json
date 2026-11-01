@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/mark.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/mark.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/mark.rs owns static mark/file_mark arrays; each record borrows an IFILE handle and can separately own a saved filename. cmarkf first retires previous record filename state, then saves a new filename copy.",
+      "invariant": "Static mark storage and allocated filename fields have different ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 479,
+          "end_line": 503,
+          "excerpt_sha256": "b7b37d2228a1e9a9d0baabeb10700f359c653fad0ee005db9a24fecf118c6eb0"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 875,
+          "end_line": 888,
+          "excerpt_sha256": "17a7d54b79f643191ca607d77c924d676d39286d2705d7f4d5e7177e483ac62d"
+        }
+      ],
+      "limitations": [
+        "Neither array owns the underlying input file bytes or descriptor."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/mark.rs returns interior mark pointers and retains raw IFILE addresses with copied screen positions. mark_get_ifile converts a retained filename into a selected raw handle and releases the stored filename.",
+      "invariant": "A raw file handle requires current-file/list lifetime validation.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 534,
+          "end_line": 550,
+          "excerpt_sha256": "dd11331bb06cb0e107797f492fed0addfaf3318d164dbb77d2850aa1044b1c85"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 700,
+          "end_line": 733,
+          "excerpt_sha256": "c851805dcbfb2bd3505ff94379c1cb6212406872b3449ce056bde7a9c81a44c6"
+        }
+      ],
+      "limitations": [
+        "The copied POSITION has no file-generation token."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/mark.rs setmark directly asks position/line services for coordinates and may call save_cmdhist after publishing the mark. These calls cross owners without a retained callback context.",
+      "invariant": "Position lookup and history save must preserve the selected record contract.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 708,
+          "end_line": 737,
+          "excerpt_sha256": "1292ccdb8a5ecba7c6f587431619c8bb76c8bbc8fcda01d1f79882d9348697c1"
+        }
+      ],
+      "limitations": [
+        "Ordinary direct calls do not provide a Rust exclusive borrow of the mark array."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/mark.rs unmark invalidates matching mark positions and last-search position but does not free the static record or replace it with a typed retired handle. File association changes separately free saved names.",
+      "invariant": "Logical mark invalidation must precede reuse of its stale file identity.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 844,
+          "end_line": 855,
+          "excerpt_sha256": "a9616bd6eea8699189fb68561b4df9147b473a81eb83fc1bf184c55270c8fb85"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 534,
+          "end_line": 538,
+          "excerpt_sha256": "dad40cc1b83cf8543f5aaecdeb277e094fb60605088bccea134d16315b5f8e1a"
+        }
+      ],
+      "limitations": [
+        "An address-valid static record can still represent an invalid position."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/mark.rs cmark assigns IFILE and screen coordinates before freeing/nulling a previous filename; setmark later sets marks_modified and may autosave. These are separate shared-state writes.",
+      "invariant": "File identity, position and persistence state require a coherent completed mark.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 491,
+          "end_line": 503,
+          "excerpt_sha256": "30e72f48573829559572b5fb98947280dbb0b9e70c271ef5ff74c5a2ecaec8bc"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 731,
+          "end_line": 737,
+          "excerpt_sha256": "ad7f27c075e252c00f34a015018d4f49c3fd4e05f0165a7a80a985b591ecaf8b"
+        }
+      ],
+      "limitations": [
+        "No staged aggregate guarantees rollback across a later history-save call."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/mark.rs cmark frees only the previous saved filename, and mark_check_ifile frees its temporary canonical path after matching. The image arrays and borrowed IFILE must never take that free counterpart.",
+      "invariant": "Only saved or canonicalized filename allocations are allocator-owned here.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 491,
+          "end_line": 503,
+          "excerpt_sha256": "30e72f48573829559572b5fb98947280dbb0b9e70c271ef5ff74c5a2ecaec8bc"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 858,
+          "end_line": 873,
+          "excerpt_sha256": "511d91664cbe374cdcc3bb57f3c134339ec78c4f3829debda9d1407c667b9ff1"
+        }
+      ],
+      "limitations": [
+        "Mark invalidation alone neither closes the file nor frees a mark array element."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/mark.rs malformed restored mark text returns before cmarkf publication, while failed position lookup reports and leaves the selected mark unmodified. Fatal save allocation has no local rollback Result.",
+      "invariant": "Input validation must precede replacing a stored mark owner.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 941,
+          "end_line": 968,
+          "excerpt_sha256": "97f2b88429792ab3e9b1b33c5b6fac8bd48e502e98edf3cbde180fa37b5b58e1"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 708,
+          "end_line": 731,
+          "excerpt_sha256": "abe478ee31ef504761f1e9d006c033f9e224a615d397890dfb0f0082c4e283c2"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 875,
+          "end_line": 887,
+          "excerpt_sha256": "bae869d36a872f1f190e1d9172f0b6e59cf38f7fa60b6d22678e25b3067ed22e"
+        }
+      ],
+      "limitations": [
+        "No fresh persistent-mark parser campaign accompanies this source review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/mark.rs mutates ordinary static records and a global dirty flag without an encoded handler-exclusion or file-generation protocol. M0-MEM-001 stays open for that shared raw owner coordination.",
+      "invariant": "Mark operations require serialized access to stable file/navigation state.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 491,
+          "end_line": 503,
+          "excerpt_sha256": "30e72f48573829559572b5fb98947280dbb0b9e70c271ef5ff74c5a2ecaec8bc"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 731,
+          "end_line": 737,
+          "excerpt_sha256": "ad7f27c075e252c00f34a015018d4f49c3fd4e05f0165a7a80a985b591ecaf8b"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 844,
+          "end_line": 855,
+          "excerpt_sha256": "a9616bd6eea8699189fb68561b4df9147b473a81eb83fc1bf184c55270c8fb85"
+        }
+      ],
+      "limitations": [
+        "No specific handler-to-mark mutation route is established in this file."
+      ]
+    }
+  }
+}

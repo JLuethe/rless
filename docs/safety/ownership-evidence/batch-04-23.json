@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/lmsg.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/lmsg.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/lmsg.rs mixes borrowed default message/help pointers with individually allocated replacements, tracked by owned_messages and owned_help. lmsg_line stages a saved replacement before publishing the selected entry.",
+      "invariant": "Ownership flags must identify exactly which selected pointers may be freed.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2378,
+          "end_line": 2379,
+          "excerpt_sha256": "40b9890d9b7fdb5cec3457e07659cba04b729efd3c8afd4e18d2584ac0465954"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2553,
+          "end_line": 2566,
+          "excerpt_sha256": "31111c01490088dc8441d8690ebeafc0d3bfd363f3bfdd063077e5a2a7ff93bb"
+        }
+      ],
+      "limitations": [
+        "Default help image storage remains a separate owner from selected help_data."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/lmsg.rs lmsg returns a borrowed pointer from lmsgs, and lmsg_init documents that replacements invalidate earlier message/help aliases. Consumers cannot treat returned C strings as independent saved owners.",
+      "invariant": "A borrowed message must not survive replacement of its selected entry.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2571,
+          "end_line": 2573,
+          "excerpt_sha256": "7021ed6f60d0a915c4c8ea0d4aa642d0ef1bba16ef342906f33b56560664ed5a"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2628,
+          "end_line": 2645,
+          "excerpt_sha256": "3be2ba25a4e60fd9f7d70581933941f090558c34f24b79a7dc6e61a2abbff8bd"
+        }
+      ],
+      "limitations": [
+        "The raw return type contains no borrow lifetime or replacement generation."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/lmsg.rs lmsg_line directly invokes parsing, xbuffer and saven helpers while borrowing a caller FILE/line buffer. It retains copied text rather than storing a parser callback or stack-line pointer.",
+      "invariant": "Published message bytes must be independent of parser scratch lifetimes.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2505,
+          "end_line": 2516,
+          "excerpt_sha256": "dfc8b581b5a95f34799d2ff15cdb18f7d78c00e689e6df5104bb7bb412e2e86b"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2545,
+          "end_line": 2553,
+          "excerpt_sha256": "1f5288d8ccca4b4b22372f1d7363fbcb820fa0e26320ea3846857a143803c6aa"
+        }
+      ],
+      "limitations": [
+        "Direct native calls still carry their declared C ABI contracts."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/lmsg.rs frees prior owned help before restoring the static fallback at initialization, and frees a previously owned message before installing its replacement. Both transitions expire earlier raw string aliases.",
+      "invariant": "Replacement must not leave outside borrowers using retired message bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2553,
+          "end_line": 2566,
+          "excerpt_sha256": "31111c01490088dc8441d8690ebeafc0d3bfd363f3bfdd063077e5a2a7ff93bb"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2571,
+          "end_line": 2594,
+          "excerpt_sha256": "f43c16c25982c8c664d52cb76b6443b2d6f972ae86d9615a8982418125c92a17"
+        }
+      ],
+      "limitations": [
+        "The startup-only contract is a precondition rather than a type-enforced exclusion."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/lmsg.rs saves candidate bytes before freeing an existing entry, then updates pointer, ownership flag and optional help length separately. This repairs prior owner orphaning but is not a whole-file atomic language switch.",
+      "invariant": "Pointer, length and ownership flag must agree after each entry commit.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2553,
+          "end_line": 2568,
+          "excerpt_sha256": "96de510acdb946cb6ca49bdce0cfd81b6b5063c450714211af2912aa5223f1bb"
+        }
+      ],
+      "limitations": [
+        "M0-LEAK-005 remains open for maintained independent disposition."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/lmsg.rs frees only flag-owned replacements; lmsg_init deinitializes its temporary xbuffer and closes the file after reading. Borrowed defaults and the caller-supplied language path are not freed here.",
+      "invariant": "A free counterpart must follow ownership flags rather than pointer nonnull alone.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2554,
+          "end_line": 2566,
+          "excerpt_sha256": "b44b936973560f417100010dc9d4df1d2cc19989e109a70ac6edc354ea25c478"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2592,
+          "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2624,
+          "end_line": 2625,
+          "excerpt_sha256": "fd4c4e985430f90a7868d0d636bf3bc9b6cb703e1ad3d7495b375a5eeed77850"
+        }
+      ],
+      "limitations": [
+        "A persistent selected message is intentionally retained after parser scratch cleanup."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/lmsg.rs missing file or invalid entry reports and returns without a transactional rollback of earlier language entries. Empty text reaches saven with length zero; its current guard avoids strncpy on that null input, addressing the historical M0-FFI-002 mechanism.",
+      "invariant": "An empty allocation result must not imply a valid source pointer for native copy.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2536,
+          "end_line": 2553,
+          "excerpt_sha256": "1416475ffaf6544172333b0ca3f44bd05752940572e605822b3c4cb3b1158b2d"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2596,
+          "end_line": 2604,
+          "excerpt_sha256": "54b70cf2d82dbd61a8d202db27a3941475b3954c63508ba712624ad9586dfe6a"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 840,
+          "end_line": 854,
+          "excerpt_sha256": "51eac8600cf6b5f50c651e88187ad92efd101fbdcd1bc4308ca9de904b410d65"
+        }
+      ],
+      "limitations": [
+        "The repaired helper is source-inspected; the maintained finding is not closed."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/lmsg.rs requires initialization before retained command-loop message/help borrows and has no handler-safe replacement protocol. M0-MEM-001 remains open for raw consumer lifetimes across updates.",
+      "invariant": "Message replacement belongs to ordinary serialized startup/configuration work.",
+      "source_refs": [
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2571,
+          "end_line": 2594,
+          "excerpt_sha256": "f43c16c25982c8c664d52cb76b6443b2d6f972ae86d9615a8982418125c92a17"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2553,
+          "end_line": 2566,
+          "excerpt_sha256": "31111c01490088dc8441d8690ebeafc0d3bfd363f3bfdd063077e5a2a7ff93bb"
+        }
+      ],
+      "limitations": [
+        "This packet establishes no direct handler route into lmsg_init."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "saven at src/pager.rs:840-854 handles zero length before invoking native copy, bounding the historical empty-message source-pointer concern reached from lmsg_line."
+    }
+  }
+}

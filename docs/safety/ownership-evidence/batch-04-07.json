@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-09",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/screen.rs",
+      "src/output.rs",
+      "src/ttyin.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-09 retains saved termios state, native capability pointers, a shared output buffer and a tty descriptor. open_tty_with_ownership distinguishes an opened FD from borrowed fallback fd 2.",
+      "invariant": "Terminal value snapshots and descriptor provenance are separate owners.",
+      "source_refs": [
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 307,
+          "end_line": 329,
+          "excerpt_sha256": "beda7d78b2cbd0b4c54c32103d0f6c74025d5ac18482a6c21536cae19210643b"
+        },
+        {
+          "target": "source:src/ttyin.rs",
+          "sha256": "40ff7391229bf830a9d858d23beabc958dfbf8868e10da9d0b849b2880a0b1f8",
+          "start_line": 25,
+          "end_line": 53,
+          "excerpt_sha256": "57b7f414557f6894823ca29130dac13e9633bbe0db76918938bd52661d36f4d6"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 519,
+          "end_line": 525,
+          "excerpt_sha256": "29aab38f028a09654ae20adf398f366eaea8b27ae6a26c2126074d4e06f6a577"
+        }
+      ],
+      "limitations": [
+        "The legacy open_tty wrapper returns only the integer and drops provenance metadata."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-09 tparm returns native scratch storage, while ltputs can lend a local 64-byte string to tputs synchronously. Neither result is an application allocation to retain or free arbitrarily.",
+      "invariant": "Native scratch and stack text must obey the provider call lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 983,
+          "end_line": 989,
+          "excerpt_sha256": "8a5025e3a46cafcc2d6353cd5bf4376ae688876901ac5d36871a333bb7945809"
+        },
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 1436,
+          "end_line": 1451,
+          "excerpt_sha256": "9953ea477ff7b8d1330fe1c3c943efb4e257af56beef35482c8c2564e558b124"
+        }
+      ],
+      "limitations": [
+        "Provider storage lifetime is not established by the Rust pointer type."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-09 cost passes inc_costcount to tputs with a C int-to-int signature; do_tputs forwards the selected callback and text directly to the provider.",
+      "invariant": "Native output callbacks require correct ABI and scoped execution.",
+      "source_refs": [
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 990,
+          "end_line": 1006,
+          "excerpt_sha256": "59847277f4af5e972a186ba2861ec75db09b50cecfd598ef0638b5e690f741c2"
+        },
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 1424,
+          "end_line": 1429,
+          "excerpt_sha256": "376ceacc7d3cbc649d9c562206757cadff5e592ef4e0a306acea22683e77edb8"
+        }
+      ],
+      "limitations": [
+        "M0-ABI-001 remains open beyond matching this local signature."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-09 saved termios survives attempted restoration, and native capability output reuses mutable provider/application context. Borrowed tty fallback remains owned by its original standard stream.",
+      "invariant": "A failed mode change must not retire the saved snapshot.",
+      "source_refs": [
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 342,
+          "end_line": 369,
+          "excerpt_sha256": "1d763856359b779df920e139d494fd70d18cac341b4eee1e9bb8ee2be1e48b70"
+        },
+        {
+          "target": "source:src/ttyin.rs",
+          "sha256": "40ff7391229bf830a9d858d23beabc958dfbf8868e10da9d0b849b2880a0b1f8",
+          "start_line": 35,
+          "end_line": 48,
+          "excerpt_sha256": "54ed9a7aa4cf2be141a79f08cecfe5cbbd831169c04cb39550f3a4bebd99df74"
+        }
+      ],
+      "limitations": [
+        "Source review gives no independent native-provider lifetime proof."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-09 commits in_raw_mode only after successful tcsetattr; buffered output advances written on positive writes and retries EINTR. Current code repairs the silent-error mechanisms of M0-TERM-001 and M0-IO-002.",
+      "invariant": "A failed native operation must not be recorded as a successful transition.",
+      "source_refs": [
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 345,
+          "end_line": 369,
+          "excerpt_sha256": "6f0534bf8079dd568a1644dcd2598e558bb5c34895f1818d58b25234af5ebbfb"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 543,
+          "end_line": 560,
+          "excerpt_sha256": "7e055f58525d3e4f64b352de17c576c9105ade1c4acc792f0d3d3788560da97b"
+        }
+      ],
+      "limitations": [
+        "The maintained historical findings remain open despite these current checks."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-09 terminal teardown includes mode restoration, while close_getchr is currently empty. A static termios snapshot and provider scratch are not heap allocations that can be freed by terminal cleanup.",
+      "invariant": "Descriptor release must follow provenance rather than numeric slot alone.",
+      "source_refs": [
+        {
+          "target": "source:src/ttyin.rs",
+          "sha256": "40ff7391229bf830a9d858d23beabc958dfbf8868e10da9d0b849b2880a0b1f8",
+          "start_line": 51,
+          "end_line": 59,
+          "excerpt_sha256": "b8f0b1bac18a1086b6c6ab09298ee5e7292cb40fc8388072b1a38d32b7d4c72a"
+        },
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 342,
+          "end_line": 369,
+          "excerpt_sha256": "1d763856359b779df920e139d494fd70d18cac341b4eee1e9bb8ee2be1e48b70"
+        }
+      ],
+      "limitations": [
+        "This packet does not claim a final close for the persistent tty descriptor."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-09 output failure sets a sticky flag and returns false; permanent restore failure diagnoses without changing in_raw_mode. quit later upgrades a successful status if either failure remains recorded.",
+      "invariant": "Cleanup must preserve failure status without inventing mode restoration.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 549,
+          "end_line": 558,
+          "excerpt_sha256": "7c76d01935561877c495f4ab26f203ee7c97c5d99994c3d1b10e5f1112a363e9"
+        },
+        {
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 361,
+          "end_line": 369,
+          "excerpt_sha256": "e9824dd9067ed4d9d30bfded495e9cfc7ae95676b78b4ff22db959a82aa6ce97"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 967,
+          "end_line": 981,
+          "excerpt_sha256": "e7cc187e37349e3d52478ed4a5a41a436480dd3eec7152bd75bd709d76cd0d18"
+        }
+      ],
+      "limitations": [
+        "A diagnostic cannot guarantee the OS accepted the requested terminal mode."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-09 can be entered by terminate -> quit, which performs terminal teardown, output flush and raw-mode restoration. M0-SIG-003 remains open because that work runs from the asynchronous handler path.",
+      "invariant": "Terminal session ownership requires ordinary serialized cleanup.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 970,
+          "excerpt_sha256": "be698da9f996e117200a623f143fd9ef154142002c550549c44e380f24dbb25f"
+        }
+      ],
+      "limitations": [
+        "The traced handler path is not an independent execution result."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "quit at src/pager.rs:948-970 invokes terminal teardown, output flush and raw_mode(false); src/pager.rs:967-981 consumes sticky terminal/output failures for exit status."
+    },
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "terminate at src/signal.rs:83-85 calls quit directly, establishing asynchronous entry into the terminal/output cleanup examined by OWN-09."
+    }
+  }
+}

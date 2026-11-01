@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/charset.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/charset.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/charset.rs owns static classification tables and xbuffers for user-defined ranges; wchar_range_table views borrow the corresponding xbuffer data and count rather than duplicate ownership.",
+      "invariant": "Each published range-table view must match its backing xbuffer.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 831,
+          "end_line": 837,
+          "excerpt_sha256": "aa15cd0ff5488072b1a3619ba4f40ce0f8293c68e57267a1318f129263fefa2f"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 863,
+          "end_line": 868,
+          "excerpt_sha256": "a670bfc7308add497abeae55c8bcc357645a60f15e69fc606c1818b543bc4fe5"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 942,
+          "end_line": 946,
+          "excerpt_sha256": "d7a76189f46a493b6497f49eee4ade8b3e2b78d1309032c15296d60ef6ea1114"
+        }
+      ],
+      "limitations": [
+        "Image literal ranges and allocated user ranges have different release rules."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/charset.rs prchar and prutfchar return pointers into separate static 32-byte scratch buffers. setfmt also retains an interior pointer into caller/environment format text without copying it.",
+      "invariant": "Scratch results expire logically on the next formatter use.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1224,
+          "end_line": 1233,
+          "excerpt_sha256": "0ce0abe5e6bd9714c94f3529b85843c248e8414a4fc45419023454ad6c4941fe"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1254,
+          "end_line": 1258,
+          "excerpt_sha256": "e7d9569ec53670505fac4138766e8f6f154085284b5d9c6cf24a7b0816d77323"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1130,
+          "end_line": 1133,
+          "excerpt_sha256": "00eb3d48d91c5a078b0ad3824109e28a4c5a97e793059ff94bc3899aca58e5af"
+        }
+      ],
+      "limitations": [
+        "A stable static address is not stable formatted content."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/charset.rs calls setlocale and formatting functions directly; init_charset obtains format strings from lgetenv and passes them to setfmt. It stores format text, not a function callback.",
+      "invariant": "Retained format text needs a lifetime compatible with global use.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1176,
+          "end_line": 1198,
+          "excerpt_sha256": "dfada88f0d571a62c3b8f6d235b9691b961aa9a4020677cb233560036b7a5427"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1246,
+          "end_line": 1254,
+          "excerpt_sha256": "598278cb9479e7fddf34093df8b3592876e8d2d211792e8118c410a4ad35821a"
+        }
+      ],
+      "limitations": [
+        "This review does not rederive native variadic-format ABI correctness."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/charset.rs publishes user range-table views only after appending ranges, while scratch printers overwrite their static arrays on each call. Reinitializing backing xbuffers would invalidate earlier range views.",
+      "invariant": "Readers must not retain a view across backing reinitialization.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 863,
+          "end_line": 868,
+          "excerpt_sha256": "a670bfc7308add497abeae55c8bcc357645a60f15e69fc606c1818b543bc4fe5"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 891,
+          "end_line": 929,
+          "excerpt_sha256": "4b82ec5669baabaebac5f2ca4bc8bd0dfc91d92a1dfe6982bc814ab0bb8b8fc0"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 942,
+          "end_line": 946,
+          "excerpt_sha256": "d7a76189f46a493b6497f49eee4ade8b3e2b78d1309032c15296d60ef6ea1114"
+        }
+      ],
+      "limitations": [
+        "Repeated initialization is a conditional contract concern, not a newly observed leak."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/charset.rs changes attribute and format-pointer outputs separately in setfmt, and user range parsing appends one range at a time before final view publication. This is not a transactional configuration owner.",
+      "invariant": "Format attributes and text must describe the same completed configuration.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1094,
+          "end_line": 1109,
+          "excerpt_sha256": "b60264007924e99df00c484333748bbc42f398fd57148bae8e43db7da0608941"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1110,
+          "end_line": 1133,
+          "excerpt_sha256": "60b304fc99e608f05b79dc587b8a3a6f638ce61c9f65c8d7117059e18f679c32"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 942,
+          "end_line": 946,
+          "excerpt_sha256": "d7a76189f46a493b6497f49eee4ade8b3e2b78d1309032c15296d60ef6ea1114"
+        }
+      ],
+      "limitations": [
+        "Default-format validation does not provide owner exclusion."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/charset.rs range descriptors borrow xbuffer storage and cannot free it themselves; static printer arrays likewise must never be allocator-released. init resets descriptors without an in-file retirement transaction.",
+      "invariant": "Only the backing xbuffer owner can release allocated range bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 831,
+          "end_line": 837,
+          "excerpt_sha256": "aa15cd0ff5488072b1a3619ba4f40ce0f8293c68e57267a1318f129263fefa2f"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 863,
+          "end_line": 868,
+          "excerpt_sha256": "a670bfc7308add497abeae55c8bcc357645a60f15e69fc606c1818b543bc4fe5"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1224,
+          "end_line": 1226,
+          "excerpt_sha256": "d376dd0d4a1d6c38f5866d8d4684e5493c95673ebb7511a7ee3d9c9eb87faaab"
+        }
+      ],
+      "limitations": [
+        "No final free or safe repeated-init lifecycle is inferred for global user ranges."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/charset.rs malformed UTF range syntax reports an error and quits after already initialized buffers or earlier appended ranges. The routine offers no local rollback object for those partial owners.",
+      "invariant": "A fatal parse path is distinct from a recoverable staged configuration result.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 863,
+          "end_line": 888,
+          "excerpt_sha256": "ce723645684c499672fffbd91514e95f82207c10be96ca0eae257f63110e3d1f"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 891,
+          "end_line": 918,
+          "excerpt_sha256": "de815d9c704e3923bdcbac3992298c75e55231cc9ea92974b4dcab85e799e76d"
+        }
+      ],
+      "limitations": [
+        "No allocation-failure execution was performed for these initialization branches."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/charset.rs shared formatting arrays, format pointers and range views rely on ordinary serialized configuration/use. M0-MEM-001 remains open; there is no handler registration or exclusion token in these APIs.",
+      "invariant": "A formatter borrow must not overlap another write to its scratch owner.",
+      "source_refs": [
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1087,
+          "end_line": 1093,
+          "excerpt_sha256": "7a45c20a7243fe980e351c17ebc3ee2c023307f4ca5e04e801dac357e3057bb7"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1224,
+          "end_line": 1254,
+          "excerpt_sha256": "95a096b7626c3eb87d5cfb2ad52f51b2903b4509575479b1a7ea3eb185ef63db"
+        },
+        {
+          "target": "source:src/charset.rs",
+          "sha256": "d7928695169b8fc1d913b167957879b7d7977433e6f7e5263a3f351276a4977d",
+          "start_line": 1257,
+          "end_line": 1295,
+          "excerpt_sha256": "4869d727e51c8a74777fa442d451fa0de1f32432747d55866c2fc84452574ace"
+        }
+      ],
+      "limitations": [
+        "No specific signal route into range reconfiguration is established here."
+      ]
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/jump.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/jump.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/jump.rs owns stack navigation counters and copied positions, while input, position table and rendering allocations remain external owners. jump_loc coordinates those APIs rather than acquiring a separate table.",
+      "invariant": "A copied jump destination carries no backing-storage lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 597,
+          "end_line": 609,
+          "excerpt_sha256": "600432f1b005ca06d084e6213055362414e8c18bc28804517d05740ebaa5f49b"
+        }
+      ],
+      "limitations": [
+        "No heap owner is created by the local POSITION variables."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/jump.rs combines next_unfiltered, screen index conversion and current on-screen position before scrolling. The same active file and geometry must remain selected throughout that composite operation.",
+      "invariant": "A destination must be revalidated against current file and screen state.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 602,
+          "end_line": 635,
+          "excerpt_sha256": "86ba790e9274c6a11a50e6126480053cd491edf2901151eb0b677e57f234f1d4"
+        }
+      ],
+      "limitations": [
+        "The raw/scalar interfaces carry no file-generation proof."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/jump.rs directly invokes forw/back, repaint_hilite and input seek APIs; jump_line_loc finds a raw line boundary with ch_back_get before handing the position to jump_loc.",
+      "invariant": "Navigation callees must not invalidate active input assumptions mid-call.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 560,
+          "end_line": 578,
+          "excerpt_sha256": "84f04080541eaae4f9c0f69c59d07b921a494d5f479df1f895e001f9b304c25d"
+        },
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 609,
+          "end_line": 635,
+          "excerpt_sha256": "82191c9edb7ef75d607f23f5cb70c2894f9fd965f3034f64c3453f511419f03b"
+        }
+      ],
+      "limitations": [
+        "There is no retained callback context providing an owner guard."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/jump.rs jump_forw calls lastmark and pos_clear before rebuilding the bottom-of-file view. Old screen positions are logically invalid even though their scalar values and table address can remain unchanged.",
+      "invariant": "Clearing a screen view retires its old coordinate interpretation.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 456,
+          "end_line": 476,
+          "excerpt_sha256": "d0a52caeeddcf5396603f86ed17e08a491670d55a1e1a62913f845665ddcfa5c"
+        }
+      ],
+      "limitations": [
+        "The backing table lifecycle is reviewed separately in OWN-07."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/jump.rs can clear positions and the screen before deciding which scrolling path to use. It then updates display/navigation state through separate calls with no rollback frame object.",
+      "invariant": "A jump commit must preserve coherence across position and displayed content.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 602,
+          "end_line": 620,
+          "excerpt_sha256": "a1ae461cb90fd5ce1c61945956d9d6950ac3d74141aeb2b232c7bd78f9e41a46"
+        }
+      ],
+      "limitations": [
+        "M0-MEM-001 records this shared-state contract without a new failure reproduction."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/jump.rs borrows input and position services and contains no local free/close in these navigation paths. lastmark stores navigation metadata through another owner rather than transferring an allocation here.",
+      "invariant": "Borrowed position and input resources must remain with their owners.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 445,
+          "end_line": 476,
+          "excerpt_sha256": "dad6191b109300a29b47963c20681729f193b91ef0b85b31a1e24447880039c6"
+        },
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 560,
+          "end_line": 578,
+          "excerpt_sha256": "84f04080541eaae4f9c0f69c59d07b921a494d5f479df1f895e001f9b304c25d"
+        }
+      ],
+      "limitations": [
+        "A completed jump does not prove process-level release of those resources."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/jump.rs reports failed end seek or destination seek and returns; it does not locally restore every earlier screen or position mutation performed by the composite jump.",
+      "invariant": "Failed navigation must not be described as an untouched owner transaction.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 449,
+          "end_line": 455,
+          "excerpt_sha256": "a8d8811efe4a1d6d5c7c63a59c40e2748178efd746f8f19dce8f9ed86b5fd797"
+        },
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 637,
+          "end_line": 645,
+          "excerpt_sha256": "c6944478dd03bcb64ce5fdf8447b41ae0aef104f5f9073afbe93a09d27c72451"
+        }
+      ],
+      "limitations": [
+        "No extra heap rollback is needed for its own stack values."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/jump.rs relies on serialized calls into mutable navigation, filter and render state. It registers no handler and encodes no exclusive handoff; M0-MEM-001 stays open for these cross-owner assumptions.",
+      "invariant": "Input identity and navigation geometry must remain coherent until return.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 597,
+          "end_line": 635,
+          "excerpt_sha256": "b320b58d8ef70b77566a287182c06a1e5bf0c8fbf0a1015649c02b442b2f8fe6"
+        }
+      ],
+      "limitations": [
+        "This review does not trace an asynchronous route into jump_loc itself."
+      ]
+    }
+  }
+}

@@ -28,7 +28,7 @@
         }
       ],
       "limitations": [
-        "cmdbuf owns the base command allocation; cp is an interior alias."
+        "cmdbuf is image-owned static array storage; completion and history allocate separate heap objects."
       ]
     },
     "aliases_escapes": {
@@ -51,7 +51,7 @@
         }
       ],
       "limitations": [
-        "Reallocation invalidates raw cursor and offset-derived addresses."
+        "The fixed array address survives edits, but reset or insertion invalidates saved text interpretation and cursor assumptions."
       ]
     },
     "callback_targets": {
@@ -118,7 +118,7 @@
         }
       ],
       "limitations": [
-        "Only the allocation base may be freed, never a retained cp alias."
+        "Neither cmdbuf nor any interior cp address may be freed; only separate history/completion allocations take heap release."
       ]
     },
     "error_cleanup": {

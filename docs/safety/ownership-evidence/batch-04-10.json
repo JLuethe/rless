@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/brac.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/brac.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/brac.rs owns only match_brac stack scalars and a temporary function selector. It borrows the active input position through ch_seek/ch_get and allocates no local heap or descriptor.",
+      "invariant": "The bracket scanner acquires no independent input owner.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 383,
+          "end_line": 398,
+          "excerpt_sha256": "041eaea6fe546cfd93ee45b21768119aa6c8f17a3ad23ed77ea8837ab9be10fe"
+        }
+      ],
+      "limitations": [
+        "The local clear disposition does not approve the active input subsystem."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/brac.rs passes no retained data pointer to its reader selector; ch_tell returns a copied POSITION used by jump_line_loc. The selector carries no captured owner context.",
+      "invariant": "A copied position does not become a reference to cached bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 438,
+          "end_line": 445,
+          "excerpt_sha256": "8af097fec484da0465b471644d9b231d892cd0c513a98b41fd745aad1d78bf97"
+        },
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 458,
+          "end_line": 465,
+          "excerpt_sha256": "49dff78df29e6142c67082bb36028e7f5970d152129c612ffeeaf5a58175e948"
+        }
+      ],
+      "limitations": [
+        "Input/file stability remains a callee contract during this synchronous scan."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/brac.rs assigns chget only ch_forw_get or ch_back_get, both with unsafe extern C fn()->c_int signature, before invoking it inside the scan loop.",
+      "invariant": "The indirect target set is exactly the two named image functions.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 438,
+          "end_line": 445,
+          "excerpt_sha256": "8af097fec484da0465b471644d9b231d892cd0c513a98b41fd745aad1d78bf97"
+        }
+      ],
+      "limitations": [
+        "This local target proof does not establish the native/provider contracts of other modules."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/brac.rs reads a fresh ch_tell coordinate for the successful bracket jump instead of retaining a buffer address across scanning. Failed endpoint lookup returns before reader selection.",
+      "invariant": "The scanner retains no byte pointer to invalidate after a seek.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 393,
+          "end_line": 411,
+          "excerpt_sha256": "201ea8e93016b1d807b7969dec654f91df9fbff684c34d1f167c3fef1506bdfb"
+        },
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 454,
+          "end_line": 465,
+          "excerpt_sha256": "00228f7459508e0182031f9d639f9525cc9c83537793d155fe5933dfa9cde212"
+        }
+      ],
+      "limitations": [
+        "Changing the active input outside this call is outside its local storage analysis."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/brac.rs updates only local nesting/count state, guards nesting increment at INT_MAX and calls navigation only after finding the matching close bracket.",
+      "invariant": "No partial heap-owner commit exists inside match_brac.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 449,
+          "end_line": 466,
+          "excerpt_sha256": "60065b83b401e43752092d14bb35d1a8c182c9887fc5655bd612027680395fb3"
+        }
+      ],
+      "limitations": [
+        "The public count argument and external navigation semantics are not requalified here."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/brac.rs must neither free input bytes nor close their descriptor: its interface exposes reader/seek/navigation calls and its return paths release only stack state.",
+      "invariant": "Borrowed input remains owned by the caller subsystem.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 5,
+          "end_line": 14,
+          "excerpt_sha256": "bff4e008f0a2df40a219649109c9c2d8b0958f6682595807739119d757344a5e"
+        },
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 458,
+          "end_line": 473,
+          "excerpt_sha256": "60c6ac91598938b072115c03133db2112fe65a82166aba9b16881e1dda5eaa97"
+        }
+      ],
+      "limitations": [
+        "No source allocator pair is implied by the reader function pointer."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/brac.rs reports seek, missing-bracket and scan-end conditions then returns; there is no abandoned local allocation or callback context on those exits.",
+      "invariant": "Every local early return ends only stack lifetimes.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 398,
+          "end_line": 426,
+          "excerpt_sha256": "678fd689b2741352fd315e4e5e96307184b22c381643605a2ebede7d4c9d10f6"
+        },
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 468,
+          "end_line": 473,
+          "excerpt_sha256": "ff1e4c000d268a259bea12ee6875561b1778232e6b3603d77b0b4eb1529f32c2"
+        }
+      ],
+      "limitations": [
+        "Error rendering can have independent owner/error obligations outside this file."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/brac.rs installs no handler and retains no shared mutable object of its own. M0-MEM-001 remains open for borrowed input/navigation owners; the local clear result provides no asynchronous caller approval.",
+      "invariant": "Synchronous stack-only scanning does not authorize owner replacement during a call.",
+      "source_refs": [
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 383,
+          "end_line": 398,
+          "excerpt_sha256": "041eaea6fe546cfd93ee45b21768119aa6c8f17a3ad23ed77ea8837ab9be10fe"
+        },
+        {
+          "target": "source:src/brac.rs",
+          "sha256": "9d490b32475ee120bcc453d9741db0921033103232d49cb61ea75b6737979133",
+          "start_line": 438,
+          "end_line": 466,
+          "excerpt_sha256": "2ec8397fef3cf462c5bc9ed44f6290f450661a945d9c89ea4014dbef621e93af"
+        }
+      ],
+      "limitations": [
+        "No handler-to-bracket-scan mutation route is claimed by this record."
+      ]
+    }
+  },
+  "finding_context": {
+    "M0-MEM-001": "src/brac.rs keeps only stack scalars and a non-retained reader selector. M0-MEM-001 still governs the active input and navigation owners called by this scanner; clearing its local allocation/selector contract does not approve their raw shared state."
+  }
+}

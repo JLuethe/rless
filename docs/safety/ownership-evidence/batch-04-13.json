@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/command.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/command.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/command.rs owns the ungot linked queue and retained command-mode globals; ungetcc allocates character nodes and publishes them through the head, while curropt only borrows a static option descriptor.",
+      "invariant": "Queue node ownership is distinct from borrowed option and position values.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 616,
+          "end_line": 642,
+          "excerpt_sha256": "c7acc5a582efe846f7e846930beaaa5ea2c0e79d5f8a68da0791c43a5880acab"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1576,
+          "end_line": 1588,
+          "excerpt_sha256": "97643d3c006f6c4d2c9628d7884be205a9a31c070bdbd4b6347e6b8e835a17f1"
+        }
+      ],
+      "limitations": [
+        "This file review does not infer ownership from every global pointer type."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/command.rs tail insertion retains a raw pu node while traversing the chain; get_ungot can unlink and free the head. Option and display state also remain shared across direct calls.",
+      "invariant": "Queue traversal must not overlap an entry that retires its nodes.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1481,
+          "end_line": 1489,
+          "excerpt_sha256": "277c383085f7c97b32584c15e08dc78077725f372d2224a045982a63793fdb8a"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1589,
+          "end_line": 1596,
+          "excerpt_sha256": "3015c3a962ca43ab8786edc50c5be2116544a2745fc681bcf1bb65587efa673e"
+        }
+      ],
+      "limitations": [
+        "A byte copied out of get_ungot does not keep the consumed node alive."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/command.rs ungetsc is called directly by sigusr after environment lookup, and enters ungetcc_back for every byte. The cross-file handler path reaches allocation rather than merely setting a notification.",
+      "invariant": "The asynchronous producer must hand off work before allocating nodes.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "The concrete existing route remains M0-SIG-002."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/command.rs consumption updates ungot to its successor before freeing the old node; queued character aliases end at this free even when another command action still has a raw list cursor.",
+      "invariant": "A removed node address cannot be retained after consumption.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1481,
+          "end_line": 1489,
+          "excerpt_sha256": "277c383085f7c97b32584c15e08dc78077725f372d2224a045982a63793fdb8a"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1589,
+          "end_line": 1596,
+          "excerpt_sha256": "3015c3a962ca43ab8786edc50c5be2116544a2745fc681bcf1bb65587efa673e"
+        }
+      ],
+      "limitations": [
+        "This does not establish that all queued nodes are consumed before process exit."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/command.rs publishes head insertion after setting character/successor fields, while tail insertion updates an existing node link. These separate writes have no main-loop-only ownership token.",
+      "invariant": "Queue publication and command-mode changes require serialized access.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1576,
+          "end_line": 1596,
+          "excerpt_sha256": "5dbd5554ee8e89eb885a89e46ef3f7bae2a8546c2be489a0fd8d6ee24b8dcbd7"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "Staging one node does not make a whole command-string enqueue atomic."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/command.rs pairs ecalloc node creation with free in get_ungot; source strings passed to ungetsc remain borrowed and their bytes are copied into nodes, not retained as string owners.",
+      "invariant": "Node release must not free the borrowed producer string.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1576,
+          "end_line": 1586,
+          "excerpt_sha256": "ee80b0984063fc61a58c3a05b796f98fc1c395234cdbdd334330240dd478bcbe"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1481,
+          "end_line": 1489,
+          "excerpt_sha256": "277c383085f7c97b32584c15e08dc78077725f372d2224a045982a63793fdb8a"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "Other shell/option owners are separate from this queue release pair."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/command.rs can enqueue earlier characters before allocation of a later character fails. No local rollback returns the queue to its previous command boundary; polling elsewhere does not undo published nodes.",
+      "invariant": "Failure handling must account for already published input actions.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1582,
+          "end_line": 1596,
+          "excerpt_sha256": "53af0c34fe842fe50dd3aa0336592649dc36a62c5cd05f182b0f726361fff01f"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "This is a source transaction limitation, not a newly reproduced queue failure."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/command.rs receives SIGUSR1 producer work through sigusr, which calls ungetsc before intio. M0-SIG-002 and the broader M0-MEM-001 queue alias obligation stay open despite notification support.",
+      "invariant": "Notification after mutation is not deferred mutation ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1576,
+          "end_line": 1596,
+          "excerpt_sha256": "5dbd5554ee8e89eb885a89e46ef3f7bae2a8546c2be489a0fd8d6ee24b8dcbd7"
+        }
+      ],
+      "limitations": [
+        "No signal or command-source fix is made by this ownership batch."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "sigusr at src/signal.rs:86-100 calls ungetsc and then intio. The command queue allocates and links nodes during that direct asynchronous producer call."
+    }
+  }
+}
