@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:afa9f72c2fe7f61e5045e10f",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "LOG_FAILED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "LOG_FAILED: The AtomicBool owns a sticky log-output failure bit initialized false; it owns neither logfile nor namelogfile.",
+      "invariant": "The failure latch contains no resource pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "LOG_FAILED: logfile_failed returns a copied Boolean; record_log_failure uses swap without exposing an address or borrowing input-buffer bytes.",
+      "invariant": "Observers receive values rather than mutable aliases.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "LOG_FAILED: The first transition calls io_error_diagnostic directly with a static byte string; the flag cannot store a logging callback.",
+      "invariant": "Failure reporting does not retain a callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "invalidation": {
+      "analysis": "LOG_FAILED: The bit is never reset in maintained code, so later buffer/file replacement cannot invalidate the previously recorded failure.",
+      "invariant": "A logged failure remains sticky until process exit.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "LOG_FAILED: swap(true) precedes the diagnostic; Relaxed is sufficient because the latch does not publish any accompanying owned payload.",
+      "invariant": "The first reporter records failure before emitting output.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "release_pair": {
+      "analysis": "LOG_FAILED: No free or close belongs to AtomicBool; write_log_buffer/end_logfile separately retire the actual FD and saved filename.",
+      "invariant": "Resource cleanup is separate from the failure bit.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "LOG_FAILED: Failure reporting borrows fixed diagnostic bytes and does not require an allocation; a failed diagnostic cannot erase the sticky result.",
+      "invariant": "Reporting failure cannot reset the recorded log error.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "LOG_FAILED: Atomic accesses protect this bit only; they do not make input lists, log descriptor teardown or asynchronous quit safe.",
+      "invariant": "Latch review does not approve surrounding handler reentry.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    }
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:9afcbf4c01306a8a95a252cc",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "pasting",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "pasting: The exported lbool records bracketed-paste suppression state; cmd_edit sets it for a paste-start action when no_paste is enabled.",
+      "invariant": "Paste suppression owns no clipboard or command bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "pasting: command.rs:1239 reads it and command.rs:1744 clears it for a new command; its Boolean value carries no input-source identity.",
+      "invariant": "Paste state is not an owning token for a byte stream.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "pasting: A paste-end action calls stop_ignoring_input directly; the mode stores neither that function address nor a retained callback context.",
+      "invariant": "Paste termination dispatch has a fixed direct target.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "invalidation": {
+      "analysis": "pasting: The command loop resets it separately from command text and other mode flags; stale mode state must not be reused for a different command input.",
+      "invariant": "New-command setup must retire prior paste interpretation.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "pasting: The mode change and any discarded input occur in different functions; no owned event binds the bracket marker, command buffer and suppression decision.",
+      "invariant": "Paste state is not an atomic editor-state transition.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "release_pair": {
+      "analysis": "pasting: Clearing the flag releases no source FD, clipboard storage or command buffer; those have separate owners and lifetimes.",
+      "invariant": "Ending paste suppression does not release input ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "pasting: A Boolean cannot report truncated input, absent end markers or underlying read errors; it must not be treated as an I/O completion receipt.",
+      "invariant": "Paste mode conveys policy rather than read success.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "pasting: This exported mutable state can be observed across command/editor boundaries without exclusive typed ownership.",
+      "invariant": "Suppression-state coupling remains a raw-core constraint.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1220,
+          "end_line": 1263,
+          "excerpt_sha256": "103160794104ba5c4eef05cd2b560a78e775941ff01f8276ef81749e06ca7b7e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-01",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/ch.rs",
+      "src/input.rs",
+      "src/ifile.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-01: Each ifile owns names and retained filestate; filestate owns its node lists and ordinary FD, while the renderer temporarily borrows bytes and copied positions.",
+      "invariant": "File identity anchors retained input lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-01: curr/old ifile aliases, thisfile, hash/LRU nodes and render cursors span modules; h_hold is numeric rather than a typed stable handle with generation validation.",
+      "invariant": "Raw retained aliases cannot be justified by a count alone.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-01: File creation/deletion invoke mark and ch disposal hooks directly, and input invokes render/filter operations; those calls must not retire owners still used by another stage.",
+      "invariant": "Cross-module calls require explicit alias retirement order.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-01: Deleting a file clears marks/current/old state and permanently disposes cached nonseekable storage; ordinary navigation may retain that same cache for revisit.",
+      "invariant": "A navigation lifetime is longer than the active-file selection.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-01: New filestate list/hash initialization precedes attachment; list/index updates and render positions still commit separately across raw structures.",
+      "invariant": "Publication must keep file and buffer identity coherent.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-01: del_ifile frees nodes/names after ch disposal; stdin is lent rather than closed, and pipes/help data keep separate release contracts.",
+      "invariant": "One resource must have one designated close/free owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-01: First-buffer ENOMEM and stdin deletion now have local fixes; retained findings stay open until maintained gate evidence and independent disposition exist.",
+      "invariant": "Source analysis cannot replace regression-based closure.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-01: Asynchronous quit or handler mutation can cross active aliases and partial list updates; the cycle remains hazard-recorded under M0-MEM-001.",
+      "invariant": "Owner retirement belongs to controlled command-loop execution.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 766,
+          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1267,
+          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 174,
+          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    }
+  }
+}

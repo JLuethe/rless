@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:2e63e89e9d58fb4b83b15582",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "tried",
+    "context": "end_logfile",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "tried: The function-local static lbool owns whether an unknown-length log drain was attempted; it starts false and persists across calls.",
+      "invariant": "Drain-attempt state is process-lifetime metadata.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "tried: The bit retains no pointer, but end_logfile dereferences thisfile while interpreting it and drains the current log/input owner.",
+      "invariant": "Attempt state cannot keep the current filestate live.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "tried: The first drain calls ierror and ch_forw_get directly; those calls can cross display/input state while this one-shot guard remains set.",
+      "invariant": "Drain callbacks still require stable external owners.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "invalidation": {
+      "analysis": "tried: Once true the guard is not reset for another log stream, so it does not carry identity for the specific FD, filename or ifile it first guarded.",
+      "invariant": "A process guard is not a stream-generation identity.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "tried: It is set before draining; log close and filename retirement occur later and are not committed atomically with this flag.",
+      "invariant": "Attempt publication precedes stream-resource retirement.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "release_pair": {
+      "analysis": "tried: end_logfile closes a still-open log FD once, sets -1 and frees/nulls namelogfile; the Boolean itself is static and never freed.",
+      "invariant": "One-shot state does not own the log descriptor.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "tried: write/close failure uses the sticky log latch; this attempt bit cannot establish successful synchronization or finding closure.",
+      "invariant": "An attempted drain is not a successful log-write receipt.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "tried: Cleanup and signal polling run inside the drain; raw active-file/log relationships still need the owning main-loop contract.",
+      "invariant": "M0-MEM-001 remains recorded for drain reentry.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "M0-IO-004 remains open; this guard review does not label the improved short-write handling as an unresolved observed failure."
+      ]
+    }
+  }
+}

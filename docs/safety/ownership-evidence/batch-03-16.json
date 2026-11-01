@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:8f20d6d0278343393ad3a8da",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/signal.rs"
+    ],
+    "symbol": "sigs",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "sigs: The exported c_int owns pending signal-notification bits; handlers OR in event flags and psignals copies them for later work.",
+      "invariant": "Event metadata owns no screen, filter or queue memory.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "sigs: Ordinary input/output code reads the integer by value, but its bits provide no lifetime protection for the shared owners that handlers also mutate.",
+      "invariant": "Notification observation is not a borrow-retirement proof.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "sigs: Handler code updates the value directly and psignals dispatches fixed branches; the mask is not itself a stored function pointer table.",
+      "invariant": "Event bits must be kept distinct from callback ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "invalidation": {
+      "analysis": "sigs: psignals sets sigs to zero after its snapshot; nested delivery can modify a shared raw value independently of the processing snapshot.",
+      "invariant": "Clearing notifications requires a coherent delivery protocol.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "sigs: The OR/snapshot/clear sequence is not atomic Rust event extraction; no owner-wide commit includes direct handler filter or queue effects.",
+      "invariant": "Raw notification updates are not a transactional queue.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "release_pair": {
+      "analysis": "sigs: Clearing a bit releases no external resource; the dispatched code may separately clean terminal or filter state and must own that action.",
+      "invariant": "Notification consumption cannot release arbitrary owner data.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "sigs: A zero mask does not prove no handler-side mutation happened or no callback error occurred; it cannot serve as a cleanup-success receipt.",
+      "invariant": "Missing bits are not evidence of completed owner recovery.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "sigs: The representation is a mutable translated global with cross-handler/main access, retained under M0-MEM-001 alongside the separate signal findings.",
+      "invariant": "A raw signal mask is not an approved event-loop handoff.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This records notification ownership/ordering concerns without claiming a new observed signal-loss failure or changing handler source."
+      ]
+    }
+  }
+}

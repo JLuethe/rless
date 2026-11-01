@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:6bc38ac7fb82ec2e15fde6c3",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "HISTORY_ERROR_REPORTED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "HISTORY_ERROR_REPORTED: The AtomicBool owns whether the current history-save outage was already reported, with false initial state and no retained error-string allocation.",
+      "invariant": "The reporting latch owns a Boolean, not history bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "HISTORY_ERROR_REPORTED: swap/store operate on copied values; they lend neither modified history entries nor FILE pointers to an outside observer.",
+      "invariant": "The latch creates no alias into the history list.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "HISTORY_ERROR_REPORTED: history_save_error directly selects error rendering or an allocation-free quitting diagnostic; no function address is stored in this flag.",
+      "invariant": "Error-report selection retains no callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "invalidation": {
+      "analysis": "HISTORY_ERROR_REPORTED: A successful save resets the latch for a later distinct outage; clearing it does not retire or replace any history-node owner.",
+      "invariant": "Rearming a diagnostic does not mutate list lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "HISTORY_ERROR_REPORTED: swap(true) commits suppression before reporting; successful save rearms only after the save path reports success, independently of dirty-state ownership.",
+      "invariant": "One outage can be reported once without owning its data.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "release_pair": {
+      "analysis": "HISTORY_ERROR_REPORTED: No free/close is needed for AtomicBool; save_cmdhist separately closes files and frees temporary filenames.",
+      "invariant": "Reporting-state release cannot replace resource cleanup.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "HISTORY_ERROR_REPORTED: During quit the diagnostic uses fixed bytes instead of recursive screen error handling; failure to write that diagnostic leaves the latch set.",
+      "invariant": "Diagnostic failure does not erase the recorded outage.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "HISTORY_ERROR_REPORTED: Atomic access protects suppression only; save_cmdhist list walks and asynchronous cleanup retain their own pending ownership contracts.",
+      "invariant": "A clear latch review is not history-save approval.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 8,
+          "end_line": 8,
+          "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2055,
+          "end_line": 2067,
+          "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2154,
+          "end_line": 2160,
+          "excerpt_sha256": "5315171d5e10520e6ada4b25ce9e1770fdbe5b2166fc32eb8fbc85d60147ac9b"
+        }
+      ],
+      "limitations": [
+        "Only the reporting atomic is clear. No existing history/privacy or asynchronous cleanup finding is resolved by this packet."
+      ]
+    }
+  }
+}

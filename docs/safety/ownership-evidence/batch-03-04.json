@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:f86bd4ec3b52a6658c4dfd39",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "read_error",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "read_error: The exported lbool owns the current read-error indication, initially false and set when iread returns a negative hard error.",
+      "invariant": "Read status contains no buffer allocation owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "read_error: edit.rs:1155 and command.rs:1358 clear the copied status for new operations; no returned pointer ties it to the exact read request or ifile.",
+      "invariant": "A global error bit does not brand its input owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "read_error: The flag is set after the direct iread call; native I/O error/cause handling belongs to that call and its callers, not a callback stored here.",
+      "invariant": "Error status does not retain the I/O callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "invalidation": {
+      "analysis": "read_error: Switching files or clearing the bit can discard the earlier indication while cached bytes remain separately owned; callers must consume it at the right boundary.",
+      "invariant": "Resetting status is distinct from retiring input state.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "read_error: ch_get sets it before returning -1 without publishing new bytes; error, EOF and interruption still require caller-side interpretation of other state.",
+      "invariant": "Failed reads must not commit a new initialized-byte count.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "release_pair": {
+      "analysis": "read_error: The status has no free/close pair; a failed read leaves the existing file and cache owners for their normal cleanup paths.",
+      "invariant": "Read failure alone does not transfer FD ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "read_error: The maintained M0-IO-001 remains open; reviewing this assignment does not independently prove every upstream diagnostic and process exit path.",
+      "invariant": "Error-bit presence cannot substitute for read failure evidence.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "read_error: The flag is non-atomic global metadata, without per-operation identity or exclusion against handler-driven owner changes.",
+      "invariant": "Raw read status remains a coupled state hazard.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    }
+  }
+}

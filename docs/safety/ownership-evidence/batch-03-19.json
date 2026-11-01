@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:c13207fabc32b5f947566d8e",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "cp",
+    "context": "",
+    "declared_type": "* mut :: core :: ffi :: c_char",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "cp: The pointer is a non-owning cursor into cmdbuf, initially null and set to the array base by cmd_reset before editing.",
+      "invariant": "Cursor validity depends on the static command owner.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "cp: Step/repaint helpers copy cp into raw np/save_cp/old_cp aliases and update through pointer arguments; none retains ownership of command bytes.",
+      "invariant": "Cursor aliases do not keep old command text unchanged.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "cp: Character stepping returns borrowed printable representations and repaint calls terminal output directly; those calls occur while raw cursor aliases are active.",
+      "invariant": "Formatting calls require the command cursor to remain valid.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "invalidation": {
+      "analysis": "cp: Insertion/erasure and scrolling change which byte a saved address denotes; cmd_reset repositions cp without tracking outstanding borrowed cursor values.",
+      "invariant": "A stable address can still identify changed logical content.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "cp: Cursor, text, display column and offset are assigned in several steps; bounds depend on callers honoring the initialized NUL string and same-array pointer relations.",
+      "invariant": "Cursor publication requires coherent byte and column state.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "release_pair": {
+      "analysis": "cp: cp is never freed; moving it does not move or release cmdbuf, and copied cursor values must not be passed to free.",
+      "invariant": "A cursor is always a borrow, never an allocation base owner.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "cp: Boundary checks return at start/end and insertion may reject capacity, but no typed error carries a validated cursor generation after reentry or failed rendering.",
+      "invariant": "Error returns do not certify saved raw cursors.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "cp: No exclusive Rust borrow guards the shared pointer across exported editor calls and asynchronous terminal activity.",
+      "invariant": "Cursor lifecycle remains a raw-core alias constraint.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  }
+}

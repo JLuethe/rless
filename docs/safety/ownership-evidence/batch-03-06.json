@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:55c415b572a5469891d3e686",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "ch_ungotchar",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_uchar",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "ch_ungotchar: The private c_uchar owns one pending pushback byte; ch_have_ungotchar separately determines whether that byte is meaningful.",
+      "invariant": "Pushback payload is one inline byte, not an allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "ch_ungotchar: ch_ungetchar copies its argument and ch_get copies the byte into a cache buffer; no pointer to the payload escapes.",
+      "invariant": "Pushback transfers a value rather than a borrowed address.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "ch_ungotchar: An overrun calls error directly before replacing the value; diagnostics may reenter shared screen state but no function pointer is stored in the byte.",
+      "invariant": "Overrun reporting is separate from byte storage.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "invalidation": {
+      "analysis": "ch_ungotchar: Consumption clears the availability flag, and file-state replacement does not by itself encode which input the global byte belongs to.",
+      "invariant": "Pushback validity requires the matching active input.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "ch_ungotchar: Producer writes payload then sets the validity flag; consumer writes the cached byte then clears it, with no atomic pair or input identity.",
+      "invariant": "Payload and validity must be interpreted as one state.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "release_pair": {
+      "analysis": "ch_ungotchar: The byte is never freed; consumption retires its logical validity without releasing the destination cache buffer.",
+      "invariant": "Consuming pushback does not release cache ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "ch_ungotchar: The overrun path reports and then overwrites the payload; no typed error result preserves the previous logical pushback transaction.",
+      "invariant": "Pushback replacement has no failure-preserving result.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "ch_ungotchar: Raw paired globals can be observed amid reentry or file transitions, leaving their owner relation in M0-MEM-001.",
+      "invariant": "Global payload lifetime is not an input-generation proof.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    }
+  }
+}

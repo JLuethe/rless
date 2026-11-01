@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/input.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/input.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/input.rs: The file owns stack positions and render-decision scalars while borrowing ch input/cache state, line rendering owners and optional caller output slots.",
+      "invariant": "Render cursors do not own the retained input bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/input.rs: p_linepos/p_newline borrow caller storage and receive copies; pappend/prewind/loadc/savec mutate separate global line owners that cannot be replaced during the segment operation.",
+      "invariant": "Output-slot writes require live caller storage throughout.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/input.rs: prep_hilite/is_filtered and line/status operations are direct calls with no retained function pointer; they cross filter/render owners also touched by handlers.",
+      "invariant": "Direct filter calls still require stable pattern owners.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/input.rs: Seek, prewind and replay can change cached/current line content; raw positions and saved rendering state must be revalidated when the input or line owner changes.",
+      "invariant": "A source offset is not a retained-buffer lifetime token.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/input.rs: Sentinel outputs are installed early and final positions are written after rendering; the many line/cache/filter mutations are not a staged all-or-nothing owner transaction.",
+      "invariant": "Partial rendering does not commit a complete line owner.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/input.rs: No heap or FD is acquired in these function bodies; line/cache/ANSI owners are released by their own modules, never by freeing p_linepos/p_newline.",
+      "invariant": "Borrowed output arguments must not be deallocated here.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/input.rs: Invalid positions, seek failure or missing bytes return -1 and null_line; these exits do not themselves prove all lower read errors were diagnosed correctly.",
+      "invariant": "Render failure cannot substitute for read-error evidence.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/input.rs: SIGINT can mutate filter storage during prep/filter use, and asynchronous cleanup can retire input state; the source review retains the existing signal/raw-owner findings.",
+      "invariant": "Filter and input aliases are not yet signal-dispatch protected.",
+      "source_refs": [
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 58,
+          "end_line": 119,
+          "excerpt_sha256": "69f60aafb3e98b1f87b820fb08fc8fc07e7a2a11b845d53eea1080d7acfff897"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 121,
+          "end_line": 359,
+          "excerpt_sha256": "867e3a5219418dacd21aadd546044d1d55e206bfaca451c1ba12b09149716c05"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 382,
+          "end_line": 605,
+          "excerpt_sha256": "a1a52cc08bc3db7dd4d1c46b3eb440d99564f0784acba40ebd498069b0d53122"
+        }
+      ],
+      "limitations": [
+        "This reviews segment assembly and borrowed outputs only; it does not independently approve line.rs, search.rs or the complete compatibility/read campaign."
+      ]
+    }
+  }
+}

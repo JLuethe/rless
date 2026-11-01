@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:4d231085d16a986ec4edd0c8",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "cmd_col",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "cmd_col: The c_int owns the displayed cursor column; reset/clear initialize it and character output advances it by measured display width.",
+      "invariant": "Cursor columns describe display state rather than byte storage.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "cmd_col: Width helpers and motion paths read/copy the scalar while cp points into command bytes; the number does not own that cursor or the prompt string.",
+      "invariant": "A display column cannot validate a byte pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "cmd_col: putchr/putstr/putbs and Unicode width classification are direct calls within updates; terminal output can fail without any callback context retained in the column.",
+      "invariant": "Rendering calls do not transfer column ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "invalidation": {
+      "analysis": "cmd_col: Repaint, horizontal scrolling and prompt changes can make saved columns stale even though cmdbuf has a stable address.",
+      "invariant": "Display metadata must be refreshed after layout changes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "cmd_col: Motion updates cp and cmd_col separately and uses signed arithmetic around sc_width/prompt_col; no transaction rolls all values back after rendering errors.",
+      "invariant": "Cursor and column updates lack a joint typed commit.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "release_pair": {
+      "analysis": "cmd_col: The scalar needs no free; consuming backspace output changes the logical column, not the allocation or lifetime of command text.",
+      "invariant": "Column movement does not retire the command owner.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "cmd_col: Output failure and invalid geometry cannot be represented by the count alone; checks in cmd_right/left rely on valid surrounding editor state.",
+      "invariant": "A plausible column is not a successful-output receipt.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "cmd_col: Shared translated display globals lack an exclusive editor owner across calls; broad M0-MEM-001 stays attached without claiming a reproduced arithmetic failure.",
+      "invariant": "Column state is reviewed with its coupled raw cursor.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 1086,
+          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  }
+}

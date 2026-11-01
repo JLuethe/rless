@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/signal.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/signal.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/signal.rs: The module owns sigs and registers image-lifetime handler code; handlers borrow screen/filter/command state owned elsewhere rather than acquiring independent snapshots.",
+      "invariant": "Registered code lifetime is separate from application state.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/signal.rs: u_interrupt may retire filter aliases, sigusr1 borrows configuration text then mutates the command queue, and terminate can free owners active on interrupted stacks.",
+      "invariant": "A handler cannot assume interrupted owner borrows ended.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/signal.rs: init_signals names u_interrupt, stop, lwinch, terminate, sigalarm and sigusr1; ignored/default/error values still cross Option function-pointer representations.",
+      "invariant": "Signal sentinels are not ordinary Rust function targets.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/signal.rs: Handoff replaces dispositions but active handler work can already have changed filters or queue state; there is no typed retirement token for the registered application context.",
+      "invariant": "Disposition replacement does not restore retired data aliases.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/signal.rs: sigs uses read/modify/write and psignals snapshots then clears it; some resize work is deferred, while direct filter/queue/quit effects remain outside that commit.",
+      "invariant": "Notification bits do not make handler effects transactional.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/signal.rs: set_filter_pattern and quit invoke external owner release; the handlers have no local owning value whose Drop can coordinate those interrupted resources.",
+      "invariant": "Async release must not invalidate suspended ordinary callers.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/signal.rs: Registration results are mostly ignored and sentinels are transmuted; fatal handler cleanup can enter an already partial application transaction.",
+      "invariant": "Signal error paths lack an independently validated owner state.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/signal.rs: The four maintained M0-SIG findings describe the direct filter mutation, async lookup/queue work, termination cleanup and sentinel representation still left open.",
+      "invariant": "Handler review records hazards rather than approving safety.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This file review reuses current source facts, not a new job-control or signal campaign; no M0-SIG finding is resolved."
+      ]
+    }
+  }
+}

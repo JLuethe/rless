@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:79b3134255a294064e216636",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "literal",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "literal: The private lbool owns the one-shot request to insert the next character literally; cmd_reset clears it and editor action 19 sets it.",
+      "invariant": "Literal mode is one pending input interpretation decision.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "literal: It retains no character pointer; cmd_char2 consumes completed bytes from the separate multibyte staging buffer before insertion.",
+      "invariant": "Mode state does not own staged character bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "literal: When true, cmd_char2 skips normal edit-command decoding and directly calls cmd_ichar; no function pointer is stored in the mode bit.",
+      "invariant": "Literal interpretation selects data flow, not a callback.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "invalidation": {
+      "analysis": "literal: Reset or consumption clears it, but the bit has no generation tying it to a particular command or partially assembled UTF character.",
+      "invariant": "Mode validity depends on the active editing operation.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "literal: cmd_char2 clears the flag before cmd_ichar may reject a full buffer, so literal intent can be consumed without a committed text insertion.",
+      "invariant": "Consuming a mode is distinct from committing command bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "release_pair": {
+      "analysis": "literal: The Boolean owns no heap or FD; clearing it must not release the multibyte array or command buffer used by the next stage.",
+      "invariant": "Literal-mode retirement releases no byte storage.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "literal: Insertion capacity failure returns an action after mode consumption; this is not a typed retryable command-owner transaction.",
+      "invariant": "A failed insertion does not restore literal intent automatically.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "literal: As raw shared editor state, the bit relies on ordinary command sequencing and does not authorize nested handler-time command editing.",
+      "invariant": "Interpretation state remains under M0-MEM-001.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 663,
+          "excerpt_sha256": "21357eee7b1e8a1f935ba6ac08df5f70b5e1f654089baf30b1260fdebf93078e"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1375,
+          "excerpt_sha256": "47e2d977e6c0c385b08f938496a24402e9fb07b1317ef3e7a5f5051563f2b466"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  }
+}

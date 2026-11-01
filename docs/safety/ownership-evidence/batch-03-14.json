@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-06",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/pattern.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-06: The regex cycle owns compiled GNU state through a raw caller slot and uses local full-match registers; caller text/line storage is borrowed for each operation.",
+      "invariant": "Native compiled state has one designated caller slot.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-06: Raw compiled pointers and match endpoints can be retained externally without a Rust lifetime; byte offsets/line aliases are not an owning regex result.",
+      "invariant": "Native results must remain tied to live line storage.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-06: The cycle invokes re_compile_pattern/re_search/regfree and temporarily re_set_syntax; provider ABI and asynchronous pattern release cannot be inferred from direct dispatch.",
+      "invariant": "Native call identity does not establish owner exclusion.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-06: Recompilation retires old compiled state only after staging success; line replacement retires returned endpoints independently of compiled-pattern reuse.",
+      "invariant": "Pattern and source-line invalidation are distinct events.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-06: Previous GNU syntax is restored before failure or pointer replacement, while raw layout fields and offset casts still require canonical checked boundaries.",
+      "invariant": "Global syntax recovery is not complete ABI migration.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-06: regfree handles native internals and free handles the outer object; stack match arrays stay caller-owned with REGS_FIXED rather than returned allocation ownership.",
+      "invariant": "Regex internals and outer-object releases must pair correctly.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-06: Failure retains the prior compiled slot and frees the candidate; this review does not close the historical leak/syntax findings through source inspection alone.",
+      "invariant": "Failed replacement must not retire the prior valid owner.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-06: Signal-side clear_pattern can free native compiled data during interrupted search, so the cycle keeps the existing open filter/ownership hazards.",
+      "invariant": "Regex lifetime must be controlled outside the handler.",
+      "source_refs": [
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 404,
+          "end_line": 448,
+          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 552,
+          "end_line": 611,
+          "excerpt_sha256": "980e574e7c7b18572d7361b24ebc4908117d346eb4a56608d998190d2a5473ed"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 666,
+          "end_line": 802,
+          "excerpt_sha256": "df560ab358cba1fba2f23559a217cca55bd22aa9d522190d904cb05fb0dafb8f"
+        }
+      ],
+      "limitations": [
+        "Source-bound author review only; no canonical ABI or independent native-boundary approval is asserted, and existing GNU findings remain open."
+      ]
+    }
+  }
+}

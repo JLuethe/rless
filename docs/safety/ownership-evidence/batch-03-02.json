@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:12a36cce3167c9188c0297f2",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "BUFFER_ALLOCATION_FAILED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: The AtomicBool owns a process failure latch for the first empty-cache allocation failure; it holds no buf pointer or allocation extent.",
+      "invariant": "The latch is initialized without creating a buffer owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: buffer_allocation_failed exports a Boolean; ch_get checks it before touching cache state and records it when only the list sentinel remains.",
+      "invariant": "A failure value cannot alias an input buffer.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: The first failed transition calls a fixed diagnostic directly; no indirect target or allocator callback is retained by the flag.",
+      "invariant": "Allocation failure reporting stores no callable state.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "invalidation": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: It remains set even after navigation or buffer changes; failed first allocation is not hidden by a later state replacement.",
+      "invariant": "Failure state survives changes of active input.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: The empty-list guard sets the bit before returning -1 and avoids casting the sentinel to buf; later ch_get calls short-circuit.",
+      "invariant": "No absent buffer payload is published as initialized.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "release_pair": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: This Boolean requires no free; the absence of a new allocation leaves buffer/list owners unchanged and no payload needs releasing.",
+      "invariant": "Allocation failure creates no latch-owned heap object.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: The error propagates to pager quit status through buffer_allocation_failed; ownership/finding closure still depends on maintained gate evidence.",
+      "invariant": "Error observation cannot count as finding resolution.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "BUFFER_ALLOCATION_FAILED: The atomic latch tolerates concurrent value access, but it grants no right to mutate the surrounding filestate during a handler.",
+      "invariant": "Atomic failure state does not protect cache pointers.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 13,
+          "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 613,
+          "excerpt_sha256": "14878df02c8c975f85bb9a97c42025611b31293eb954b21a3f03b29eb81e102b"
+        }
+      ],
+      "limitations": [
+        "This reviews the current guard/latch; IND-MEM-FIRSTBUF remains open pending the maintained closure process."
+      ]
+    }
+  }
+}

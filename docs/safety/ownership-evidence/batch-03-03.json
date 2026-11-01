@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:bdc3263b9cb0367972cccdad",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "ignore_eoi",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "ignore_eoi: The exported lbool owns the follow-mode policy that treats end-of-input as temporary; it does not own the file or its cached bytes.",
+      "invariant": "Follow policy is distinct from input ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "ignore_eoi: command.rs saves/restores this global around following and ch_length/ch_get read it by value; copied policy does not keep thisfile live.",
+      "invariant": "Policy readers still require a valid filestate owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "ignore_eoi: A true policy enables waiting and direct wait_message/ixerror/sleep calls, which may reenter display state; the bit stores no callback itself.",
+      "invariant": "Follow waiting crosses display owners through direct calls.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "invalidation": {
+      "analysis": "ignore_eoi: Changing policy alters whether known fsize is exposed; positions and retained cache aliases are not retired by the scalar assignment.",
+      "invariant": "Toggling follow does not validate retained positions.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "ignore_eoi: The policy update is not jointly committed with file selection, cached EOF or pending signal state; readers rely on command-loop sequencing.",
+      "invariant": "Follow policy and active-file state lack a typed joint owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "release_pair": {
+      "analysis": "ignore_eoi: No free applies to the policy; stopping follow mode does not itself close the file, free cache nodes or end an ifile lifetime.",
+      "invariant": "Leaving follow mode cannot release borrowed storage.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "ignore_eoi: ch_get distinguishes read errors through read_error and still returns -1 at several exits; the open read-error contract cannot be closed by a policy review.",
+      "invariant": "Follow policy does not establish correct I/O failure status.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "ignore_eoi: The translated mutable global is read amid signal polling and command changes; its lifecycle remains within the broad raw-core ownership finding.",
+      "invariant": "M0-MEM-001 remains recorded for coupled follow state.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 766,
+          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved."
+      ]
+    }
+  }
+}
