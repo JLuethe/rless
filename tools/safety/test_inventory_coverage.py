@@ -63,7 +63,7 @@ class InventoryV2Controls(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         (self.root / 'src').mkdir()
-        (self.root / 'src/lib.rs').write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n')
+        (self.root / 'src/lib.rs').write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n' + '// Synthetic topic extent.\n'*8)
         (self.root / 'review.txt').write_text('Independently reviewed fixture owner and expanded boundary.')
         self.records = self.static_records('src/lib.rs')
         raw = self.root / 'syntax.json'
@@ -71,7 +71,7 @@ class InventoryV2Controls(unittest.TestCase):
         configurations = {}
         for name, parameters in EXPANDED_CONFIGURATIONS.items():
             source = self.root / (name + '.rs')
-            source.write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n')
+            source.write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n' + '// Synthetic topic extent.\n'*8)
             syntax = self.root / (name + '.tsv')
             records = self.static_records(source.name)
             syntax.write_text('\n'.join('\t'.join(str(record[key]) for key in (

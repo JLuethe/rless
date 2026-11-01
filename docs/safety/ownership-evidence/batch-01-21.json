@@ -12,7 +12,7 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): This executable wrapper creates no owned heap or raw state; it invokes process initialization then pager::main.",
+      "analysis": "In src/bin/rless.rs, this executable wrapper creates no owned heap or raw state; it invokes process initialization then pager::main.",
       "invariant": "The wrapper owns no retained application data.",
       "source_refs": [
         {
@@ -23,44 +23,38 @@
           "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): No parameters or local references are lent across either call; pager::main owns any later argument storage itself.",
+      "analysis": "In src/bin/rless.rs, no parameters or local references are lent across either call; pager::main owns any later argument storage itself.",
       "invariant": "No wrapper-local alias can escape delegation.",
       "source_refs": [
         {
           "target": "source:src/bin/rless.rs",
           "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
           "start_line": 1,
-          "end_line": 4,
-          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+          "end_line": 3,
+          "excerpt_sha256": "9cbeeb99c762cf22e51f03ab638a10ae7d0d2586290a58c58aade27692b83de9"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): Both call targets are statically named Rust functions, not callbacks chosen from a pointer table.",
+      "analysis": "In src/bin/rless.rs, both call targets are statically named Rust functions, not callbacks chosen from a pointer table.",
       "invariant": "Entry dispatch uses fixed Rust call targets.",
       "source_refs": [
         {
           "target": "source:src/bin/rless.rs",
           "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
-          "start_line": 1,
-          "end_line": 4,
-          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+          "start_line": 2,
+          "end_line": 3,
+          "excerpt_sha256": "50ee2820cd010ef0f46f9f9cab5cb934f084591b7cbfab0e194d511bf342c28f"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): The wrapper has no local storage that can be invalidated while pager::main runs or exits.",
+      "analysis": "In src/bin/rless.rs, the wrapper has no local storage that can be invalidated while pager::main runs or exits.",
       "invariant": "Delegation cannot outlive wrapper-owned buffers.",
       "source_refs": [
         {
@@ -71,28 +65,24 @@
           "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): process::init runs before pager::main, restoring inherited SIGPIPE before translated application processing.",
+      "analysis": "In src/bin/rless.rs, process::init runs before pager::main, restoring inherited SIGPIPE before translated application processing.",
       "invariant": "Signal startup ordering precedes pager delegation.",
       "source_refs": [
         {
           "target": "source:src/bin/rless.rs",
           "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
-          "start_line": 1,
-          "end_line": 4,
-          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+          "start_line": 2,
+          "end_line": 3,
+          "excerpt_sha256": "50ee2820cd010ef0f46f9f9cab5cb934f084591b7cbfab0e194d511bf342c28f"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): No resource is acquired here and no manual release is required by a return or pager process exit.",
+      "analysis": "In src/bin/rless.rs, no resource is acquired here and no manual release is required by a return or pager process exit.",
       "invariant": "Wrapper exit cannot abandon a locally owned resource.",
       "source_refs": [
         {
@@ -103,41 +93,39 @@
           "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): This wrapper has no local fallible commit or cleanup block; failure/exit behavior belongs to the named callees reviewed separately.",
+      "analysis": "In src/bin/rless.rs, this wrapper has no local fallible commit or cleanup block; failure/exit behavior belongs to the named callees reviewed separately.",
       "invariant": "Callee failures leave no wrapper owner to retire.",
       "source_refs": [
         {
           "target": "source:src/bin/rless.rs",
           "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
-          "start_line": 1,
+          "start_line": 2,
           "end_line": 4,
-          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+          "excerpt_sha256": "c8d6f2680ef1bdea462f759745ae9bcc6b07914cb0449592eb37c33582492cb1"
         }
       ],
-      "limitations": [
-        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/bin/rless.rs (src/bin/rless.rs:1-4): There is no handler installed in this file; the first direct call restores disposition and the second enters ordinary startup.",
+      "analysis": "In src/bin/rless.rs, there is no handler installed in this file; the first direct call restores disposition and the second enters ordinary startup.",
       "invariant": "The wrapper never transfers data to a signal handler.",
       "source_refs": [
         {
           "target": "source:src/bin/rless.rs",
           "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
-          "start_line": 1,
-          "end_line": 4,
-          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+          "start_line": 2,
+          "end_line": 3,
+          "excerpt_sha256": "50ee2820cd010ef0f46f9f9cab5cb934f084591b7cbfab0e194d511bf342c28f"
         }
       ],
       "limitations": [
         "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

@@ -16,7 +16,7 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "prompting: The exported lbool owns whether a prompt is currently displayed; command.rs:1451 sets it after prompt rendering, and putchr clears it on subsequent output.",
+      "analysis": "The prompting exported lbool owns whether a prompt is currently displayed; command.rs:1451 sets it after prompt rendering, and putchr clears it on subsequent output.",
       "invariant": "Prompt state owns a Boolean, not prompt text storage.",
       "source_refs": [
         {
@@ -27,111 +27,87 @@
           "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
         },
         {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
-          "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1444,
+          "end_line": 1452,
+          "excerpt_sha256": "27a3d1b7d59721fda90e0b311a065f7629121a8baf3f7676b6c4b537c70e06d5"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1451,
+          "end_line": 1451,
+          "excerpt_sha256": "315f810ecc2577b121b0dba82a9bbeb4f8780ccb23fbfa9c799d3dce8f5f4002"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "prompting: putchr borrows end_pr_string data after checking the flag; the flag itself provides no lifetime guarantee for that separate prompt buffer.",
+      "analysis": "putchr borrows end_pr_string data after checking the prompting flag; the flag itself provides no lifetime guarantee for that separate prompt buffer.",
       "invariant": "A prompt-state bit cannot keep prompt bytes alive.",
       "source_refs": [
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 421,
-          "end_line": 426,
-          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
-        },
-        {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
-          "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "start_line": 578,
+          "end_line": 585,
+          "excerpt_sha256": "948a58bff6305526ace075bc5281c17a5a4c7ec48fbf6babb201d85285a4b5d5"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "prompting: screen output can reach putchr through the tputs callback, while command rendering calls it directly; the Boolean stores no callback context.",
+      "analysis": "screen output can reach putchr through the tputs callback, while command rendering calls it directly; the prompting Boolean stores no callback context.",
       "invariant": "Callback output shares the same prompt-state protocol.",
       "source_refs": [
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 421,
-          "end_line": 426,
-          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+          "start_line": 578,
+          "end_line": 585,
+          "excerpt_sha256": "948a58bff6305526ace075bc5281c17a5a4c7ec48fbf6babb201d85285a4b5d5"
         },
         {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
-          "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "target": "source:src/screen.rs",
+          "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+          "start_line": 1685,
+          "end_line": 1694,
+          "excerpt_sha256": "b2bf8bc850c2dcced1ede83760c26727df6b2aed1cc4f34d635ec4cf58c26264"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "prompting: putchr clears the bit before recursively calling putstr on end_pr_string, preventing repeated end-prompt emission on that normal path.",
+      "analysis": "putchr clears the prompting bit before recursively calling putstr on end_pr_string, preventing repeated end-prompt emission on that normal path.",
       "invariant": "Prompt state is retired before recursive string output.",
       "source_refs": [
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 421,
-          "end_line": 426,
-          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
-        },
-        {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
-          "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "start_line": 578,
+          "end_line": 585,
+          "excerpt_sha256": "948a58bff6305526ace075bc5281c17a5a4c7ec48fbf6babb201d85285a4b5d5"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "prompting: The prompt writer sets the bit only after drawing; putchr clears it before other screen/buffer work, but no owner-wide guard spans these updates.",
+      "analysis": "The prompt writer sets the prompting bit only after drawing; putchr clears it before other screen/buffer work, but no owner-wide guard spans these updates.",
       "invariant": "Scalar updates do not atomically commit the whole display.",
       "source_refs": [
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 421,
-          "end_line": 426,
-          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
-        },
-        {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
+          "start_line": 578,
           "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "excerpt_sha256": "f45846ea4229fedfd53ec2cc66f74751df544540bba23103c287510d5e17c453"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "prompting: Clearing prompting releases no heap object; end_pr_string remains borrowed and the command/prompt owner must handle replacement and destruction.",
+      "analysis": "Clearing prompting releases no heap object; end_pr_string remains borrowed and the command/prompt owner must handle replacement and destruction.",
       "invariant": "Retiring a prompt bit is distinct from retiring its text.",
       "source_refs": [
         {
@@ -144,60 +120,64 @@
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
-          "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "start_line": 578,
+          "end_line": 585,
+          "excerpt_sha256": "948a58bff6305526ace075bc5281c17a5a4c7ec48fbf6babb201d85285a4b5d5"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "prompting: If terminal/output operations fail after the bit changes, the display and state may diverge; the sticky failure owner is separate and cannot validate prompt aliases.",
+      "analysis": "If terminal/output operations fail after the prompting bit changes, the display and state may diverge; the sticky failure owner is separate and cannot validate prompt aliases.",
       "invariant": "Failure state cannot be inferred from the prompt Boolean.",
       "source_refs": [
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 421,
-          "end_line": 426,
-          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
-        },
-        {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
+          "start_line": 578,
           "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "excerpt_sha256": "f45846ea4229fedfd53ec2cc66f74751df544540bba23103c287510d5e17c453"
         }
       ],
-      "limitations": [
-        "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "prompting: Asynchronous termination calls terminal cleanup and can enter output during interrupted prompt work; M0-SIG-003 and raw-core ownership remain open.",
+      "analysis": "Asynchronous quit can enter terminal output while prompting and its text/display owners are mid-update; M0-SIG-003 remains open.",
       "invariant": "Prompt state is not an approved handler handoff mechanism.",
       "source_refs": [
         {
           "target": "source:src/output.rs",
           "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 421,
-          "end_line": 426,
-          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+          "start_line": 578,
+          "end_line": 599,
+          "excerpt_sha256": "f45846ea4229fedfd53ec2cc66f74751df544540bba23103c287510d5e17c453"
         },
         {
-          "target": "source:src/output.rs",
-          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
-          "start_line": 571,
-          "end_line": 599,
-          "excerpt_sha256": "eb91a42ff9f5662b6bfb094c35fe1600a0f74238902c316ce6d2c5c0e45fe173"
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
         }
       ],
       "limitations": [
         "This entry does not approve prompt text owners or tputs provider ABI; asynchronous cleanup and display mutation remain separate gates."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "Command dispatch/display selects, consumes or reads this reviewed state outside its definition module. Target: STATIC:4381f1b566810f2c1c50250b."
+    },
+    "src/screen.rs": {
+      "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+      "relationship": "Terminal-provider output can call putchr and therefore consumes the reviewed prompt/display state. Target: STATIC:4381f1b566810f2c1c50250b."
+    },
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:4381f1b566810f2c1c50250b."
+    }
+  },
+  "finding_context": {}
 }

@@ -16,47 +16,43 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): The static stores one typed unsafe extern C fn() value with used and init_array attributes; its owner is the executable image.",
+      "analysis": "The static stores one typed unsafe extern C fn() value with used and init_array attributes; REMEMBER_SIGPIPE's owner is the executable image.",
       "invariant": "The constructor pointer has zero-argument C ABI.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 13,
+          "end_line": 17,
+          "excerpt_sha256": "059ad576fcf87723550ecc4098b03daa34ee9c72c55e2f945e2eff92bf93bf84"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): The linker retains a copy of the code address in init_array; no caller receives ownership of the code or its saved scalar state.",
+      "analysis": "The loader retains the REMEMBER_SIGPIPE code address; neither the callback code nor the separate INHERITED_SIGPIPE atomic is transferred to a caller.",
       "invariant": "Loader retention is a borrowed code reference.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 6,
+          "end_line": 17,
+          "excerpt_sha256": "191b4500443d5dc479f9505274c90567b2d5525166b97f2a3115b7ba27afc9ae"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): The sole initializer is remember_sigpipe, whose body queries libc::sigaction and writes INHERITED_SIGPIPE without application dispatch.",
+      "analysis": "REMEMBER_SIGPIPE stores exactly remember_sigpipe with unsafe extern C fn() ABI; that function queries sigaction without pager dispatch.",
       "invariant": "The constructor target cannot vary at runtime.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 6,
+          "end_line": 17,
+          "excerpt_sha256": "191b4500443d5dc479f9505274c90567b2d5525166b97f2a3115b7ba27afc9ae"
         }
       ],
       "limitations": [
@@ -64,84 +60,76 @@
       ]
     },
     "invalidation": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): The entry is immutable and code remains loaded for process lifetime; no callback context or temporary capture can expire.",
+      "analysis": "The REMEMBER_SIGPIPE entry is immutable and code remains loaded for process lifetime; no callback context or temporary capture can expire.",
       "invariant": "Constructor invocation cannot refer to stack captures.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
+          "start_line": 13,
           "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "excerpt_sha256": "5db8cc9da8632718b1ecf0e67ba47a81bb28646aaad5b8076336e2466b3123a1"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): Link-time initialization fixes the entry before loader traversal; there is no dynamic registration or replacement step.",
+      "analysis": "Link-time initialization fixes the REMEMBER_SIGPIPE entry before loader traversal; there is no dynamic registration or replacement step.",
       "invariant": "Callback target is complete before constructor dispatch.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 13,
+          "end_line": 21,
+          "excerpt_sha256": "f05b9f47a7f503a319ae6624ecc8f21d1acf2ff185b628aa2606eac9cea69d45"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): No unregister or free operation applies to the ELF startup entry; process image destruction ends both pointer and code lifetime.",
+      "analysis": "REMEMBER_SIGPIPE is loader-retained image storage; no unregister/free applies and its code remains live until image destruction.",
       "invariant": "Loader constructor entries are not allocator-owned.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 13,
+          "end_line": 17,
+          "excerpt_sha256": "059ad576fcf87723550ecc4098b03daa34ee9c72c55e2f945e2eff92bf93bf84"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): The target checks sigaction success before reading the returned field; failure leaves the initial saved disposition untouched.",
+      "analysis": "The REMEMBER_SIGPIPE target reads the queried action only on sigaction success, preserving the default saved value on failure.",
       "invariant": "Failed queries do not commit invalid callback data.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 6,
+          "end_line": 11,
+          "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "REMEMBER_SIGPIPE (src/process.rs:1-23): Invocation happens before Rust main rather than from an application signal handler, so it does not interrupt a pager owner mutation.",
+      "analysis": "Invocation happens before Rust main rather than from an application signal handler, so REMEMBER_SIGPIPE does not interrupt a pager owner mutation.",
       "invariant": "The constructor runs before application state exists.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
+          "start_line": 6,
           "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "excerpt_sha256": "393cfbd06afd894938a17f2c8ff614c0e77d4f19c61b6fa57eb72b4219232177"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

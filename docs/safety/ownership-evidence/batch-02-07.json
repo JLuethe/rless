@@ -12,188 +12,188 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/fault.rs: Five static atomics own the parsed site/ordinal/count/latch and borrowed trace FD number; initialization owns temporary OsStrings and stack libc metadata.",
+      "analysis": "In src/fault.rs, five static atomics own the parsed site/ordinal/count/latch and borrowed trace FD number; initialization owns temporary OsStrings and stack libc metadata.",
       "invariant": "Hook state retains values rather than environment pointers.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 16,
+          "end_line": 20,
+          "excerpt_sha256": "660031c3fc1f1b6837b076611e84b916fd29c08bd16d7f3e4f176cc808ac33b4"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 99,
+          "end_line": 149,
+          "excerpt_sha256": "3058d27566623cb3d00d3d7d39cfe7ae8f48e0b1e1d1106d8257becd17be1544"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/fault.rs: The sixteen-byte marker stays on the hit stack and is lent only during write_marker; the harness must keep its dedicated inherited pipe live until child exit.",
+      "analysis": "In src/fault.rs, the sixteen-byte marker stays on the hit stack and is lent only during write_marker; the harness must keep its dedicated inherited pipe live until child exit.",
       "invariant": "Marker bytes cannot escape their synchronous write.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 162,
+          "end_line": 176,
+          "excerpt_sha256": "1984820ac5377c74e1453ceda63a248e7d45b3c78dbd4632bd78d84ddc6cf412"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 195,
+          "end_line": 229,
+          "excerpt_sha256": "884f230b8ac7c5e0d1f6744e7a1e8d3719d2f9ce9a293446c746bd9176f430fc"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/fault.rs: Hook calls are direct libc operations plus local checked closures; no application callback is stored. Callers may still enter allocation from SIGUSR1 queue work (M0-SIG-002).",
+      "analysis": "In src/fault.rs, hook calls are direct libc operations plus local checked closures; no application callback is stored. Callers may still enter allocation from SIGUSR1 queue work (M0-SIG-002).",
       "invariant": "Hook-local callback safety cannot approve its caller.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 178,
+          "end_line": 204,
+          "excerpt_sha256": "ae16c00a7846337538a3ada1d7c5ff1ab01eb55821e8e434539087d867b42437"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 211,
+          "end_line": 251,
+          "excerpt_sha256": "bc49342f3f06091e88089117d4c4e4ef964c268f8c1d0b3daa2f01d0bb088145"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/fault.rs: initialize resets once before handlers; FD_CLOEXEC retires the child descriptor during exec and environment removal prevents inherited plan reuse.",
+      "analysis": "In src/fault.rs, initialize resets once before handlers; FD_CLOEXEC retires the child descriptor during exec and environment removal prevents inherited plan reuse.",
       "invariant": "A live hook plan must retain its validated pipe identity.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
-        },
-        {
-          "target": "source:src/fault.rs",
-          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 99,
+          "end_line": 149,
+          "excerpt_sha256": "3058d27566623cb3d00d3d7d39cfe7ae8f48e0b1e1d1106d8257becd17be1544"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/fault.rs: Plan parsing and FD checks finish before FAIL_AT/TRACE_FD stores and Release publication of FAIL_SITE; hit uses Acquire before reading configuration.",
+      "analysis": "In src/fault.rs, plan parsing and FD checks finish before FAIL_AT/TRACE_FD stores and Release publication of FAIL_SITE; hit uses Acquire before reading configuration.",
       "invariant": "Enabling a site follows complete plan validation.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 111,
+          "end_line": 149,
+          "excerpt_sha256": "4c284c66dda08e3e7bd9ef4524942e9d56f5dcde021b622b45179daa7c9b143b"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/fault.rs: Temporary environment strings drop normally; atomics own no heap memory, and the inherited child pipe is retired by CLOEXEC or process exit rather than a hook close.",
+      "analysis": "In src/fault.rs, temporary environment strings drop normally; atomics own no heap memory, and the inherited child pipe is retired by CLOEXEC or process exit rather than a hook close.",
       "invariant": "Hook release does not close pager-owned descriptors.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 118,
+          "end_line": 139,
+          "excerpt_sha256": "c7d72b3547871895f9d96a9a25e39e3901bcdc9bc2e0cbf5b4cd0c636ff78f0b"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 144,
+          "end_line": 149,
+          "excerpt_sha256": "0c0276c17acd0ba0e55b1f51ca2a88e886b423317fa9439a9743fa29c56df85c"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/fault.rs: Malformed plans fail before pager mutation; trace writes are bounded, nonblocking, preserve errno and reject absent/invalid marker evidence.",
+      "analysis": "In src/fault.rs, malformed plans fail before pager mutation; trace writes are bounded, nonblocking, preserve errno and reject absent/invalid marker evidence.",
       "invariant": "Trace failure cannot fabricate a successful observation.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 55,
+          "end_line": 96,
+          "excerpt_sha256": "180dc952be8e3824dc95f2fded8db00858a2460420df13a7a5580e0654644a7b"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 112,
+          "end_line": 139,
+          "excerpt_sha256": "475bad44dd23c37742f52726a3eef4c8b7b0df40af6c9a07a4e9b664a4e772eb"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 225,
+          "end_line": 251,
+          "excerpt_sha256": "3a890b65d26b5190701c9655920c4dfa4ad2727abcfe298f4afeeb0a973450ec"
         }
       ],
-      "limitations": [
-        "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/fault.rs: write_marker restores the prior mask and preserves existing SIGPIPE; lock-free hook mechanics do not repair asynchronous caller lookup/allocation.",
+      "analysis": "In src/fault.rs, write_marker restores the prior mask and preserves existing SIGPIPE; lock-free hook mechanics do not repair asynchronous caller lookup/allocation.",
       "invariant": "M0-SIG-002 remains an open caller-context hazard.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 1,
-          "end_line": 252,
-          "excerpt_sha256": "61ad9540ca7e3edd12801fc9a3134d2814bbd6d486817f30710fa621309a3342"
+          "start_line": 178,
+          "end_line": 204,
+          "excerpt_sha256": "ae16c00a7846337538a3ada1d7c5ff1ab01eb55821e8e434539087d867b42437"
         },
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 254,
-          "end_line": 357,
-          "excerpt_sha256": "df168d24369449500a001cae4ca90dfeccadfa84e41b7cc8ae83e5fbe174686b"
+          "start_line": 211,
+          "end_line": 251,
+          "excerpt_sha256": "bc49342f3f06091e88089117d4c4e4ef964c268f8c1d0b3daa2f01d0bb088145"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
         }
       ],
       "limitations": [
         "Author review includes feature and test code; M0-SIG-002 is retained for caller context, without claiming the local hook itself allocates."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/fault.rs."
+    }
+  },
+  "finding_context": {}
 }

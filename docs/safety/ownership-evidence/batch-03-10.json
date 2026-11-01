@@ -12,356 +12,195 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/ch.rs: filestate owns cache nodes and optional ordinary FDs; ifile retains its state. The test at 1290-1334 temporarily owns two pipe FDs and allocated states, lending the read FD to CH_KEEPOPEN.",
+      "analysis": "In src/ch.rs, filestate owns cache nodes and optional ordinary FDs; ifile retains its state. The test at 1290-1334 temporarily owns two pipe FDs and allocated states, lending the read FD to CH_KEEPOPEN.",
       "invariant": "Cache memory and borrowed stream ownership stay distinct.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
+          "end_line": 530,
+          "excerpt_sha256": "0df9e376d4b9739721cdbadf97f84358209b86546585efd9cb76c970bf6ed7d0"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
+          "start_line": 1170,
+          "end_line": 1205,
+          "excerpt_sha256": "6d1568cf139931002b166f79c142b694b324cf540b45bebc9a11838cbf0f9e89"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
-          "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
+          "start_line": 1290,
           "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "excerpt_sha256": "3425928d99889af11b9d4a521fecca48e758495eb5640b1c0f32344b6367c744"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/ch.rs: Raw LRU/hash links, active thisfile and cache data pointers cross native reads and display calls; no borrow checker or generation retires every outside alias.",
+      "analysis": "In src/ch.rs, raw LRU/hash links, active thisfile and cache data pointers cross native reads and display calls; no borrow checker or generation retires every outside alias.",
       "invariant": "Cache-node aliases require stable filestate lifetime.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
+          "start_line": 534,
+          "end_line": 565,
+          "excerpt_sha256": "9479721b22fdcb93198fe6a32104c876221c3af532d81c60671daab822d337a8"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
-          "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
-          "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "start_line": 660,
+          "end_line": 684,
+          "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/ch.rs: Input, log, diagnostic and close paths call named functions directly; a fatal allocator/display path or handler cleanup can revisit shared state without a retained callback object.",
+      "analysis": "In src/ch.rs, input, log, diagnostic and close paths call named functions directly; a fatal allocator/display path or handler cleanup can revisit shared state without a retained callback object.",
       "invariant": "Direct call dispatch does not prevent owner reentry.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
+          "start_line": 660,
+          "end_line": 684,
+          "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
-          "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
-          "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/ch.rs: Flush marks seekable buffers invalid, navigation can retain nonseekable state, and permanent dispose clears attachments before freeing nodes/state.",
+      "analysis": "In src/ch.rs, flush marks seekable buffers invalid, navigation can retain nonseekable state, and permanent dispose clears attachments before freeing nodes/state.",
       "invariant": "Flush, navigation-close and permanent deletion differ.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
+          "start_line": 1069,
+          "end_line": 1107,
+          "excerpt_sha256": "5c15c9ad13c6c10a0587259b83e21c5afdcb6e05b22f6181d149d1078ba401d6"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
+          "start_line": 1207,
           "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
-          "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/ch.rs: ch_addbuf initializes and links a calloc node; first-buffer failure stops before casting the sentinel. Raw multi-link updates still lack one owning transaction.",
+      "analysis": "In src/ch.rs, ch_addbuf initializes and links a calloc node; first-buffer failure stops before casting the sentinel. Raw multi-link updates still lack one owning transaction.",
       "invariant": "An empty sentinel cannot be published as a buf payload.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
+          "start_line": 590,
+          "end_line": 620,
+          "excerpt_sha256": "31f29a10f7ee9172ddd0efa49edb968549536abd5d9d887f4408068cd4afe122"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 1108,
-          "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
-          "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "end_line": 1127,
+          "excerpt_sha256": "af119ec9588f12d19780e369bc025be40bee38f0c52d2f9d07dcbbd84b7f5b81"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/ch.rs: calloc/free retire nodes; owned FD close occurs once while borrowed stdin/pipe/help have separate owners. The test frees states through disposal, closes both pipe ends on success and restores thisfile.",
+      "analysis": "In src/ch.rs, calloc/free retire nodes; owned FD close occurs once while borrowed stdin/pipe/help have separate owners. The test frees states through disposal, closes both pipe ends on success and restores thisfile.",
       "invariant": "Input cleanup must not close borrowed standard streams.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
+          "start_line": 1207,
           "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
+          "start_line": 1290,
           "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "excerpt_sha256": "3425928d99889af11b9d4a521fecca48e758495eb5640b1c0f32344b6367c744"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/ch.rs: Read/log/allocation failures have separate state and sticky latches; passing guards alone cannot establish every caller diagnostic, exit status or reentrant cleanup contract.",
+      "analysis": "In src/ch.rs, read/log/allocation failures have separate state and sticky latches; passing guards alone cannot establish every caller diagnostic, exit status or reentrant cleanup contract.",
       "invariant": "Local error guards cannot close end-to-end findings.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
+          "start_line": 590,
+          "end_line": 610,
+          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 679,
+          "end_line": 684,
+          "excerpt_sha256": "f59e7554f68fdb426cb5c866371ebd4275f1597140bfe506148a1ca6bfe01d2e"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 28,
           "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
-          "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
-          "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "excerpt_sha256": "6845c381a0daa89581ad649b661b13e3882ae41ddf54daa5820248bc8d661b12"
         }
       ],
-      "limitations": [
-        "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/ch.rs: Signal polling does not exclude a handler that enters allocator, output or cleanup during linked-state mutation; broad core ownership remains open.",
+      "analysis": "In src/ch.rs, signal polling does not exclude a handler that enters allocator, output or cleanup during linked-state mutation; broad core ownership remains open.",
       "invariant": "Cache lifetime still needs ordinary owner-controlled dispatch.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 8,
-          "end_line": 47,
-          "excerpt_sha256": "813962f14eb3696ecb1fe0fddc8fae59b27660891bdfd4aa425dbff1ee294ed8"
+          "start_line": 590,
+          "end_line": 610,
+          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
         },
         {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 495,
-          "end_line": 766,
-          "excerpt_sha256": "0f9f9a35124afc321d6e18de7459ac09f834e5cb00f9b50a89b86c7dcdf9fdc3"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 855,
-          "excerpt_sha256": "4e296a26eac35e12c1834f2b1c44d79a22b9c72205e2ea1c71039cd8caa3d76f"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
-          "end_line": 1267,
-          "excerpt_sha256": "2ea91d12fb34dd5246da097c25a45fd165b902e581ab19cebe1cfcefb1ff16c7"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1289,
-          "end_line": 1334,
-          "excerpt_sha256": "b604e8ad69ffc1ef5b572af45f150560ceae66da92415446777a33f55347c5ed"
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
         }
       ],
       "limitations": [
         "Current first-buffer, stdin-disposal and log-write fixes remain improvements, not closed findings. The unit test closes its manual FD resources only on its successful path; assertion failure lacks RAII FD rollback."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/ch.rs."
+    }
+  },
+  "finding_context": {}
 }

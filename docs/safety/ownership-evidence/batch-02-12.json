@@ -12,53 +12,49 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/cvt.rs: cvt_alloc_chpos returns a newly ecalloc-owned integer map; cvt_text borrows caller source, destination, optional map and length, and temporarily owns an ANSI parser state.",
+      "analysis": "In src/cvt.rs, cvt_alloc_chpos returns a newly ecalloc-owned integer map; cvt_text borrows caller source, destination, optional map and length, and temporarily owns an ANSI parser state.",
       "invariant": "Returned maps and caller buffers have different owners.",
       "source_refs": [
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 5,
-          "end_line": 21,
-          "excerpt_sha256": "31d24e851f03775046a4a841dce36142823aa54820d986742281257d6d5e97cf"
+          "start_line": 65,
+          "end_line": 75,
+          "excerpt_sha256": "8f38e30d3bdc0859366656089febf12a43de5be7de2318610a6230c0010451e8"
         },
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 77,
+          "end_line": 100,
+          "excerpt_sha256": "731ddca1b20f3b73087cc8c4ae0fb35fa995be7944e3e66a36b5ea621f9a35a4"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/cvt.rs: Source/destination/map cursors are raw interior aliases; no slice length proves that caller-provided output or map storage covers all writes.",
+      "analysis": "In src/cvt.rs, source/destination/map cursors are raw interior aliases; no slice length proves that caller-provided output or map storage covers all writes.",
       "invariant": "Conversion requires independently valid buffer extents.",
       "source_refs": [
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 5,
-          "end_line": 21,
-          "excerpt_sha256": "31d24e851f03775046a4a841dce36142823aa54820d986742281257d6d5e97cf"
+          "start_line": 77,
+          "end_line": 99,
+          "excerpt_sha256": "e1994d2fb6f746f7512d0ba7fa464490bafac9a0cea197369d3838dcc15ea354"
         },
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 100,
+          "end_line": 173,
+          "excerpt_sha256": "d663fd63aee56d99d7e072ff22b00549e1e04fe1d284e1bc2fc19e6e34593b1c"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/cvt.rs: step_charc, put_wchar, ansi_start/step/done and ctype operations are direct calls; no callback context is retained beyond conversion.",
+      "analysis": "In src/cvt.rs, step_charc, put_wchar, ansi_start/step/done and ctype operations are direct calls; no callback context is retained beyond conversion.",
       "invariant": "Parser-state lifetime ends at its matching ansi_done.",
       "source_refs": [
         {
@@ -71,109 +67,99 @@
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 99,
+          "end_line": 129,
+          "excerpt_sha256": "5a15c0543a2609bbddec9e986920fbbcb38b7371a0a635dff4c6483c1a8827b0"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/cvt.rs: Backspace and CR operations move cursors inside retained output; external replacement of source or map while conversion runs would invalidate those aliases.",
+      "analysis": "In src/cvt.rs, backspace and CR operations move cursors inside retained output; external replacement of source or map while conversion runs would invalidate those aliases.",
       "invariant": "Conversion borrows must remain stable through the call.",
       "source_refs": [
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 5,
-          "end_line": 21,
-          "excerpt_sha256": "31d24e851f03775046a4a841dce36142823aa54820d986742281257d6d5e97cf"
+          "start_line": 99,
+          "end_line": 115,
+          "excerpt_sha256": "1dfbc8af5f960cf2c2235faea6fc4f776d5685a76cbc50c17b7c1b69666daed7"
         },
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 130,
+          "end_line": 173,
+          "excerpt_sha256": "20d0e2736950fc997d79e7e5a96af5988786f3d4fb247c78a43170df7053531b"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/cvt.rs: cvt_length uses wrapping multiply/add and writes output incrementally; allocation sizing and final lenp assignment do not establish a checked all-or-nothing commit.",
+      "analysis": "In src/cvt.rs, cvt_length uses wrapping multiply/add and writes output incrementally; allocation sizing and final lenp assignment do not establish a checked all-or-nothing commit.",
       "invariant": "Wrapped sizing cannot prove destination capacity.",
       "source_refs": [
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 5,
-          "end_line": 21,
-          "excerpt_sha256": "31d24e851f03775046a4a841dce36142823aa54820d986742281257d6d5e97cf"
+          "start_line": 57,
+          "end_line": 63,
+          "excerpt_sha256": "8a4588ffc1b58536f1dd77827e8e07e89953ebea4d122454cd6f5ce86d714125"
         },
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 130,
+          "end_line": 173,
+          "excerpt_sha256": "20d0e2736950fc997d79e7e5a96af5988786f3d4fb247c78a43170df7053531b"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/cvt.rs: Caller must free the chpos map with the matching allocator; each nonnull ansi_start branch calls ansi_done, while cvt_text must never free borrowed osrc/odst.",
+      "analysis": "In src/cvt.rs, caller must free the chpos map with the matching allocator; each nonnull ansi_start branch calls ansi_done, while cvt_text must never free borrowed osrc/odst.",
       "invariant": "Temporary parser state and returned maps release separately.",
       "source_refs": [
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 5,
-          "end_line": 21,
-          "excerpt_sha256": "31d24e851f03775046a4a841dce36142823aa54820d986742281257d6d5e97cf"
+          "start_line": 65,
+          "end_line": 75,
+          "excerpt_sha256": "8f38e30d3bdc0859366656089febf12a43de5be7de2318610a6230c0010451e8"
         },
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 116,
+          "end_line": 129,
+          "excerpt_sha256": "afcd93c232857cee59c5d3cdee9a827e0ecd4d3649dd9b22b21241f704dca262"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/cvt.rs: There is no typed capacity error or rollback after partial output; ecalloc failure exits through pager cleanup, and wide src_pos narrows into c_int map entries.",
+      "analysis": "In src/cvt.rs, there is no typed capacity error or rollback after partial output; ecalloc failure exits through pager cleanup, and wide src_pos narrows into c_int map entries.",
       "invariant": "Failure and narrowing remain explicit raw-core risks.",
       "source_refs": [
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 5,
-          "end_line": 21,
-          "excerpt_sha256": "31d24e851f03775046a4a841dce36142823aa54820d986742281257d6d5e97cf"
+          "start_line": 57,
+          "end_line": 75,
+          "excerpt_sha256": "f72ecf3ae69d1dc71e9b1cfb0e5fdb71151ee5e933da5690fb1fb8ad0c057ff0"
         },
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 130,
+          "end_line": 173,
+          "excerpt_sha256": "20d0e2736950fc997d79e7e5a96af5988786f3d4fb247c78a43170df7053531b"
         }
       ],
-      "limitations": [
-        "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/cvt.rs: utf_mode is a shared translated global and the conversion uses raw cursor state; no signal callback is installed here or allowed to replace active buffers.",
+      "analysis": "In src/cvt.rs, utf_mode is a shared translated global and the conversion uses raw cursor state; no signal callback is installed here or allowed to replace active buffers.",
       "invariant": "Caller-controlled conversion is not asynchronous owner-safe.",
       "source_refs": [
         {
@@ -186,14 +172,16 @@
         {
           "target": "source:src/cvt.rs",
           "sha256": "d13f4965b92ee1a57ef20dff1a893202e7068815edfddde0ad2e0d7e7da75831",
-          "start_line": 57,
-          "end_line": 179,
-          "excerpt_sha256": "a9b5b203859bd46cc1d0c3caccb0616cb2c25b650bb690da7de72540dc01a4f3"
+          "start_line": 77,
+          "end_line": 115,
+          "excerpt_sha256": "f730e86465db5058b7ef8da6c8c4479d8fdb44e120fadce4ff6a81bb28d4dbd4"
         }
       ],
       "limitations": [
         "Source inspection under M0-MEM-001 only; current call sites and character encoders need their separate full owner/range reviews."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

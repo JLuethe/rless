@@ -12,188 +12,169 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/ifile.rs: Each allocated ifile owns saved filename/realpath strings, copied screen position and links; filestate and alternate-stream fields connect to separate ch/edit owners.",
+      "analysis": "In src/ifile.rs, each allocated ifile owns saved filename/realpath strings, copied screen position and links; filestate and alternate-stream fields connect to separate ch/edit owners.",
       "invariant": "List nodes distinguish owned strings from attached resources.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
           "start_line": 80,
-          "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "end_line": 113,
+          "excerpt_sha256": "1107fc18bee2e19acd8561595a9b8056f9df96922c7c7679c960d569f8b4fb79"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "start_line": 145,
+          "end_line": 174,
+          "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/ifile.rs: get_ifile and accessors return raw node/string/state pointers; h_hold is only an integer count, and del_ifile itself does not enforce that borrowed handles have retired.",
+      "analysis": "In src/ifile.rs, get_ifile and accessors return raw node/string/state pointers; h_hold is only an integer count, and del_ifile itself does not enforce that borrowed handles have retired.",
       "invariant": "Node deletion requires all outside aliases to be retired.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
-          "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "start_line": 175,
+          "end_line": 219,
+          "excerpt_sha256": "7a0d9b2343bbca56f649bf7a9d113a2963cfd2af37dc1805de7273857484dff6"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "start_line": 255,
+          "end_line": 282,
+          "excerpt_sha256": "e9a63b40ec852386d2725a74f754e9c98b54514cbab526de956a612e3dd2cd1c"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 293,
+          "end_line": 307,
+          "excerpt_sha256": "12e5988ec2bfe316790fe4b91e68999a671020617bcd6c26ef95ae0356f0029d"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/ifile.rs: mark_check_ifile, unmark and dispose_ifile_state are direct calls; they can mutate related mark/input state before a node is unlinked.",
+      "analysis": "In src/ifile.rs, mark_check_ifile, unmark and dispose_ifile_state are direct calls; they can mutate related mark/input state before a node is unlinked.",
       "invariant": "Cross-module hooks must respect list mutation order.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 145,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/ifile.rs: find_ifile can free/replace h_filename for a shorter alias; del_ifile retires current/old aliases, marks and filestate before freeing node/name storage.",
+      "analysis": "In src/ifile.rs, find_ifile can free/replace h_filename for a shorter alias; del_ifile retires current/old aliases, marks and filestate before freeing node/name storage.",
       "invariant": "Filename and node borrowers must not span replacement.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 154,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "start_line": 221,
+          "end_line": 240,
+          "excerpt_sha256": "9e00f00009c30f03667e1e721fb5836c6e35583add88562355db37a44f35a578"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/ifile.rs: new_ifile allocates node/names before linking, while find_ifile frees an old name before save allocates the replacement; metadata is raw and not failure-transactional.",
+      "analysis": "In src/ifile.rs, new_ifile allocates node/names before linking, while find_ifile frees an old name before save allocates the replacement; metadata is raw and not failure-transactional.",
       "invariant": "Linked and replaced owners need separate commit contracts.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 122,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "excerpt_sha256": "ce7fa969aef5fa83723d61cf3b55591e894e04dd44e14dfb59348e2af504cb6c"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "start_line": 221,
+          "end_line": 240,
+          "excerpt_sha256": "9e00f00009c30f03667e1e721fb5836c6e35583add88562355db37a44f35a578"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/ifile.rs: Deletion frees h_rfilename, h_filename and p after disposal/unlink; altpipe and altfilename need their edit-side cleanup and cannot be assumed released by these three frees.",
+      "analysis": "In src/ifile.rs, deletion frees h_rfilename, h_filename and p after disposal/unlink; altpipe and altfilename need their edit-side cleanup and cannot be assumed released by these three frees.",
       "invariant": "Every attached owner needs its own release path.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 154,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
+          "start_line": 325,
           "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "excerpt_sha256": "d9efd0b5e68c44c1eeda420c747cecc49187069f38b9d565d1e340a57a306181"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/ifile.rs: Fatal allocation during partial node/name construction or name replacement may enter cleanup with incomplete owners; no RAII rollback exists in this C-shaped descriptor.",
+      "analysis": "In src/ifile.rs, fatal allocation during partial node/name construction or name replacement may enter cleanup with incomplete owners; no RAII rollback exists in this C-shaped descriptor.",
       "invariant": "Allocation failure cannot be assumed to retire all aliases.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 145,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "start_line": 221,
+          "end_line": 240,
+          "excerpt_sha256": "9e00f00009c30f03667e1e721fb5836c6e35583add88562355db37a44f35a578"
         }
       ],
-      "limitations": [
-        "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/ifile.rs: List/count/index mutations are ordinary raw global writes; asynchronous quit or other handlers have no exclusion protocol around them.",
+      "analysis": "In src/ifile.rs, list/count/index mutations are ordinary raw global writes; asynchronous quit or other handlers have no exclusion protocol around them.",
       "invariant": "M0-MEM-001 keeps the whole file hazard-recorded.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 122,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 339,
-          "excerpt_sha256": "ed94b39ed0b398e5f4fa828fc536568dd6442ea14125b514f6ec17fb53c3da82"
+          "excerpt_sha256": "ce7fa969aef5fa83723d61cf3b55591e894e04dd44e14dfb59348e2af504cb6c"
         }
       ],
       "limitations": [
         "The retained stdin disposal fix is preserved and its findings remain open; this is not a full ch/edit/mark lifetime qualification."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

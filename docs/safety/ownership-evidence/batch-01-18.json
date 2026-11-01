@@ -16,31 +16,43 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): The pointer initially borrows the static backslash string; -e chooses a static empty string or argument tail, and -f selects meta_escape_buf.",
+      "analysis": "The meta_escape pointer initially borrows the static backslash string; -e chooses a static empty string or argument tail, and -f selects meta_escape_buf.",
       "invariant": "Escape storage is borrowed from one of three live owners.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "start_line": 92,
+          "end_line": 94,
+          "excerpt_sha256": "769ee2f1b94a33fcc2e155b42d7683d0ab72d97ce9c75d882fdef9b1800bddb6"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): main owns args_strings until process exit after main_0 returns; the selected argv tail, literal and static two-byte buffer stay valid during printf and strlen.",
+      "analysis": "meta_escape borrows a static literal, the two-byte static array or an argv tail owned by args_strings throughout main_0.",
       "invariant": "Escape borrows remain inside the argument owner lifetime.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
           "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
       "limitations": [
@@ -48,100 +60,118 @@
       ]
     },
     "callback_targets": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): strlen and printf consume string data directly; this raw pointer is never registered or called as code.",
+      "analysis": "strlen and printf read meta_escape synchronously as string data; the pointer is never registered as executable code.",
       "invariant": "Escape strings cannot act as callback addresses.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "start_line": 381,
+          "end_line": 396,
+          "excerpt_sha256": "8d65df6b9a3c1245986ba0550b829402336a81aa67e6e0c85ec13f1443480e13"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): Later options may replace the pointer before output; no code retains an earlier escape alias and the backing argv Vecs are not resized in main_0.",
+      "analysis": "Later options may replace the meta_escape pointer before output; no code retains an earlier escape alias and the backing argv Vecs are not resized in main_0.",
       "invariant": "Pointer replacement occurs before escape readers run.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): For -f the character and trailing NUL are written before the pointer is assigned; -e selects an already terminated argv tail or literal.",
+      "analysis": "For -f the character and trailing NUL are written before the meta_escape pointer is assigned; -e selects an already terminated argv tail or literal.",
       "invariant": "The escape pointer always selects a terminated string.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): The pointer is non-owning and never freed; args_strings owns argv storage while literals and meta_escape_buf have image lifetime.",
+      "analysis": "The meta_escape pointer is non-owning and never freed; args_strings owns argv storage while literals and meta_escape_buf have image lifetime.",
       "invariant": "Escape pointers must not be passed to free.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
+          "start_line": 92,
+          "end_line": 94,
+          "excerpt_sha256": "769ee2f1b94a33fcc2e155b42d7683d0ab72d97ce9c75d882fdef9b1800bddb6"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
           "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): A missing -f number exits before output, so partially changed option state is not consumed; other parse errors do not transfer its owner.",
+      "analysis": "A missing -f number exits before output, so partially changed option state is not consumed; other parse errors do not transfer meta_escape's owner.",
       "invariant": "Option failure cannot publish a dangling escape borrow.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 132,
+          "end_line": 135,
+          "excerpt_sha256": "ab1d81051ffb5edddc6366c5ffc16af0a75988e9000c149ef0aac614dd792c19"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "meta_escape (src/bin/lessecho.rs:87-426): The helper invokes main_0 once and installs no signal callback that writes escape state; SIGPIPE only terminates output.",
+      "analysis": "The single helper invocation has no signal handler that changes meta_escape; SIGPIPE may terminate output without replacing its owner.",
       "invariant": "Escape configuration is stable during output.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
           "end_line": 426,
-          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

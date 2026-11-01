@@ -762,6 +762,35 @@
       "fix_commit": null,
       "rerun_evidence": null,
       "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "M0-MEM-004",
+      "title": "Position growth leaves a freed table pointer visible to fatal allocation cleanup",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "medium; conditional source concern, not runtime reproduced",
+      "delivery_packet": "M3.2",
+      "requirement_ids": [
+        "SAFE-MEM-006",
+        "SAFE-STATE-003"
+      ],
+      "blocks_final_safety_gate": true,
+      "evidence_refs": [
+        "src/position.rs:182-190: free(table) precedes the RHS ecalloc call; table is not cleared before that call",
+        "src/pager.rs:860-887: null allocation calls out_of_memory then quit",
+        "src/pager.rs:948-969: quit calls edit(NULL)",
+        "src/edit.rs:924-927 and 1078-1083: edit(NULL) enters edit_ifile and closes an existing current file",
+        "src/edit.rs:899-907: with is_tty, close_file calls get_scrpos",
+        "src/position.rs:238-244 and 274-282: nonnull table with available rows >=2 is dereferenced"
+      ],
+      "conditions": [
+        "Replacement allocation fails during position-table growth.",
+        "Cleanup has a current file, is_tty is set and min(sc_height, table_rows) is at least two."
+      ],
+      "mechanism": "The previous array is freed without clearing table. Assignment occurs only after ecalloc returns; fatal cleanup during a failed RHS allocation can read the stale global pointer.",
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
     }
   ]
 }

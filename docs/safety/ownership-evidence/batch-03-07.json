@@ -16,15 +16,15 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "ch_have_ungotchar: The private lbool owns validity of ch_ungotchar, initially false; a nonnegative pushback call sets it only after copying the byte.",
+      "analysis": "The ch_have_ungotchar private lbool owns validity of ch_ungotchar, initially false; a nonnegative pushback call sets it only after copying the byte.",
       "invariant": "Validity refers to one initialized pushback payload.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 528,
+          "end_line": 529,
+          "excerpt_sha256": "d39387f9eef19c33039bc4202327266d2a49b77c670f584501306a897ee26c2d"
         },
         {
           "target": "source:src/ch.rs",
@@ -34,66 +34,46 @@
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "ch_have_ungotchar: ch_get reads the flag and copies the payload; neither value keeps the active filestate alive or records the input generation.",
+      "analysis": "ch_get reads the ch_have_ungotchar flag and copies the payload; neither value keeps the active filestate alive or records the input generation.",
       "invariant": "Availability does not extend input-state lifetime.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 780,
-          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+          "start_line": 650,
+          "end_line": 658,
+          "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
         }
       ],
-      "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "ch_have_ungotchar: The flag gates data selection, not indirect dispatch; overrun diagnostics call error and can cross display owners before replacement completes.",
+      "analysis": "The ch_have_ungotchar flag gates data selection, not indirect dispatch; overrun diagnostics call error and can cross display owners before replacement completes.",
       "invariant": "A validity bit does not protect diagnostic reentry.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 767,
           "end_line": 780,
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "ch_have_ungotchar: Negative ch_ungetchar input cancels validity and ch_get consumes it once; the Boolean does not itself invalidate any stale active-file alias.",
+      "analysis": "Negative ch_ungetchar input cancels validity and ch_get consumes it once; the ch_have_ungotchar Boolean does not itself invalidate any stale active-file alias.",
       "invariant": "Cancelling pushback and deleting an ifile are distinct actions.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 650,
+          "end_line": 658,
+          "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
         },
         {
           "target": "source:src/ch.rs",
@@ -103,89 +83,62 @@
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "ch_have_ungotchar: Producer payload/flag and consumer cache-write/flag-clear are multi-step raw operations, not an atomic state-machine commit.",
+      "analysis": "ch_have_ungotchar is set after producer payload write and cleared after consumer cache write; the paired state has no atomic commit.",
       "invariant": "Payload publication relies on normal command sequencing.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 767,
           "end_line": 780,
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
       "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
+        "The concern is a mismatched payload/validity/input selection during reentry; no concrete runtime failure is claimed for this Boolean."
       ]
     },
     "release_pair": {
-      "analysis": "ch_have_ungotchar: Clearing the bit releases no memory or FD; it only discards a logical pending byte.",
+      "analysis": "Clearing the ch_have_ungotchar bit releases no memory or FD; it only discards a logical pending byte.",
       "invariant": "Pushback validity owns no external release pair.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 767,
-          "end_line": 780,
-          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+          "start_line": 528,
+          "end_line": 529,
+          "excerpt_sha256": "d39387f9eef19c33039bc4202327266d2a49b77c670f584501306a897ee26c2d"
         }
       ],
-      "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "ch_have_ungotchar: An already-valid slot reports an overrun but subsequently replaces its payload; callers must not mistake the bit for a retained error receipt.",
+      "analysis": "An already-valid slot reports an overrun but subsequently replaces its payload; callers must not mistake the ch_have_ungotchar bit for a retained error receipt.",
       "invariant": "Availability is not an error-result object.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 767,
           "end_line": 780,
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": [
-        "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "ch_have_ungotchar: No owner generation, mutex or event-loop-exclusive type encodes the input relationship; retain the broad raw-global ownership finding.",
+      "analysis": "ch_have_ungotchar lacks an input-generation identity or exclusive owner protocol, so validity cannot prove the matching filestate is still selected.",
       "invariant": "The validity pair remains under M0-MEM-001.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "end_line": 530,
+          "excerpt_sha256": "68a778617e4ea627e62ad253ebf7e6c942d58def237643e76c96cd620209310b"
         },
         {
           "target": "source:src/ch.rs",
@@ -199,5 +152,7 @@
         "Reviewed as coupled pushback state; this does not assert a newly reproduced reentry or file-switch defect."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

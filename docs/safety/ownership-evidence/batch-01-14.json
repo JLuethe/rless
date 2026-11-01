@@ -16,31 +16,29 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): The private pointer is initialized to the static Revision 1.15 byte literal, not malloc storage; pr_version only reads this fixed revision.",
+      "analysis": "The version private pointer is initialized to the static Revision 1.15 byte literal, not malloc storage; pr_version only reads this fixed revision.",
       "invariant": "The revision pointer borrows a static NUL literal.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
           "start_line": 87,
-          "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "end_line": 88,
+          "excerpt_sha256": "2d803720e6a1d042e211d06f693ff58939f282da74856f94937fbe9b7a43651a"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): pr_version copies the pointer into local p and extracts the known short 1.15 text into a ten-byte stack buffer; neither alias escapes printf.",
+      "analysis": "pr_version copies the version pointer into local p and extracts the known short 1.15 text into a ten-byte stack buffer; neither alias escapes printf.",
       "invariant": "Revision aliases remain within the display call.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
+          "start_line": 105,
           "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "excerpt_sha256": "9bdbd64dd597285f90fcdff7274d7e77ee7b2dee1b8c4ac9e047c95e7ac1318f"
         }
       ],
       "limitations": [
@@ -48,100 +46,111 @@
       ]
     },
     "callback_targets": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): pr_version calls printf directly; the pointer is string data and never converted into a function pointer.",
+      "analysis": "pr_version calls printf directly; the version pointer is string data and never converted into a function pointer.",
       "invariant": "The revision field cannot dispatch code.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
+          "start_line": 127,
           "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "excerpt_sha256": "83160041a051da9b764d13e4de002819f526510d5b82ef49d264aaced8ccd54a"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): No maintained assignment replaces this private pointer after static initialization; its literal outlives the local scan.",
+      "analysis": "No maintained assignment replaces this version private pointer after static initialization; its literal outlives the local scan.",
       "invariant": "The displayed revision cannot outlive its literal.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
           "start_line": 87,
-          "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "end_line": 88,
+          "excerpt_sha256": "2d803720e6a1d042e211d06f693ff58939f282da74856f94937fbe9b7a43651a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 105,
+          "end_line": 125,
+          "excerpt_sha256": "e18ac806a20a63fe4b94b0b2c03b8aa7529d68b9f5e59955988cf13f36f09a7b"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): The initializer supplies the entire terminated revision before helper main; extraction commits a local terminator before printf.",
+      "analysis": "The version initializer supplies the entire terminated revision before helper main; extraction commits a local terminator before printf.",
       "invariant": "The printed stack buffer is terminated before use.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
           "start_line": 87,
+          "end_line": 88,
+          "excerpt_sha256": "2d803720e6a1d042e211d06f693ff58939f282da74856f94937fbe9b7a43651a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 117,
           "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "excerpt_sha256": "bd0fd4fbeaea37047bfc207be9b46e20fba8dc548b20021cd1e303efcf0a4f9b"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): The literal must not be passed to free; the local extraction buffer dies on return without a manual release.",
+      "analysis": "The lessecho version pointer borrows a literal and must not be freed; the extraction array is a local stack value.",
       "invariant": "Borrowed revision bytes have no allocator pair.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
           "start_line": 87,
-          "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "end_line": 88,
+          "excerpt_sha256": "2d803720e6a1d042e211d06f693ff58939f282da74856f94937fbe9b7a43651a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 106,
+          "end_line": 109,
+          "excerpt_sha256": "313f00feed8e8be631d889196e485ce6afdde7352470575d4db6f316e6892c92"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): The scan returns at NUL if no space exists; the maintained fixed literal fits the ten-byte output buffer.",
+      "analysis": "pr_version stops at NUL if no space exists; the fixed version literal bounds the extracted revision to fit its ten-byte array.",
       "invariant": "The reviewed literal bounds the extraction length.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "start_line": 109,
+          "end_line": 125,
+          "excerpt_sha256": "b9bd52ea75f2faf4828028ce788f21f53948397dd5aeff46d34d536c4047a34f"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "version (src/bin/lessecho.rs:87-130): The helper installs no application signal handler that edits this private version pointer; SIGPIPE can terminate output but not replace the owner.",
+      "analysis": "The helper installs no application signal handler that edits this private version pointer; SIGPIPE can terminate output but not replace the owner.",
       "invariant": "Helper signals do not write revision state.",
       "source_refs": [
         {
           "target": "source:src/bin/lessecho.rs",
           "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-          "start_line": 87,
-          "end_line": 130,
-          "excerpt_sha256": "48f14fc2213453d94f4c186d7dea969874446c943a76b92da785306074c705d2"
+          "start_line": 411,
+          "end_line": 426,
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
-      ]
+      "limitations": []
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

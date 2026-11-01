@@ -16,9 +16,17 @@ def packet(item, review, inventory, root):
     content=source.read_text();lines=content.splitlines(keepends=True)
     citation=dict(target=target,sha256=sha(source),start_line=1,end_line=len(lines),
                   excerpt_sha256=hashlib.sha256(content.encode()).hexdigest())
-    target_name=item.get('symbol') or item['id']
-    checklist={key:dict(analysis=f'{target_name}: synthetic {key} fixture analysis; validates packet structure without asserting a production review.',
-        invariant='This invariant belongs only to the explicitly synthetic test fixture.',source_refs=[dict(citation)],limitations=[]) for key in CHECKLIST}
+    target_name=item.get('symbol') or item['id'].removeprefix('FILE:')
+    checklist={}
+    for index,key in enumerate(CHECKLIST):
+        end=min(len(lines),index+1)
+        excerpt=''.join(lines[:end]).encode()
+        citation=dict(target=target,sha256=sha(source),start_line=1,end_line=end,
+                      excerpt_sha256=hashlib.sha256(excerpt).hexdigest())
+        checklist[key]=dict(analysis=f'The synthetic {key} contract for {target_name} is fixture-only; it makes no production approval.',
+            invariant='This invariant belongs only to the explicitly synthetic test fixture.',source_refs=[citation],
+            limitations=['This is synthetic fixture evidence, not a production review.'] if index==0 else [])
+
     item.update(checklist=checklist)
     path='docs/safety/ownership-evidence/'+hashlib.sha256(item['id'].encode()).hexdigest()+'.json'
     write_json(root/path,dict(schema_version=1,review_kind=REVIEW_PACKET_KIND,target=review_target(item),

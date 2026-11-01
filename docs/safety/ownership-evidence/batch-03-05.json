@@ -16,188 +16,160 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "thisfile: The private pointer selects the active ifile-owned filestate; ch_init either borrows an existing state or allocates and attaches a new one.",
+      "analysis": "The thisfile private pointer selects the active ifile-owned filestate; ch_init either borrows an existing state or allocates and attaches a new one.",
       "invariant": "Active selection is an alias of an ifile-owned state.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 527,
+          "end_line": 530,
+          "excerpt_sha256": "9946c45c1fa37f892fec173bc6a68b0baed89096aaf1a60cbed99c59bbdd8779"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 1170,
-          "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "end_line": 1205,
+          "excerpt_sha256": "6d1568cf139931002b166f79c142b694b324cf540b45bebc9a11838cbf0f9e89"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "thisfile: ch_get and navigation functions retain raw state/list/hash pointers across native reads and diagnostics; the pointer carries no generation or borrow lifetime.",
+      "analysis": "ch_get and navigation functions retain raw state/list/hash pointers across native reads and diagnostics; the thisfile pointer carries no generation or borrow lifetime.",
       "invariant": "Active-state aliases must not outlive the attached ifile.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 534,
+          "end_line": 565,
+          "excerpt_sha256": "9479721b22fdcb93198fe6a32104c876221c3af532d81c60671daab822d337a8"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1170,
-          "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "start_line": 660,
+          "end_line": 684,
+          "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "thisfile: Direct input, display and close/disposal calls can cross module boundaries while the active pointer is live; no callback slot mediates its lifetime.",
+      "analysis": "Direct input, display and close/disposal calls can cross module boundaries while the active pointer is live; no callback slot mediates thisfile's lifetime.",
       "invariant": "Cross-owner calls require explicit filestate stability.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 660,
+          "end_line": 684,
+          "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1170,
-          "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "start_line": 782,
+          "end_line": 800,
+          "excerpt_sha256": "32084a27b1a01d13da9392c5a5a845a164fad83a9e9b06bc93ab223ad6999a4d"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "thisfile: dispose_ifile_state clears the ifile attachment and thisfile alias before freeing nodes/state; ch_close may retain a nonseekable state for later navigation.",
+      "analysis": "dispose_ifile_state clears the ifile attachment and thisfile alias before freeing nodes/state; ch_close may retain a nonseekable state for later navigation.",
       "invariant": "Navigation retention and permanent deletion are different lifetimes.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1170,
+          "start_line": 1207,
           "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "thisfile: ch_init initializes list/hash metadata before attaching a new state; close/free paths still mutate raw globals without an owning transaction guard.",
+      "analysis": "ch_init initializes list/hash fields before attaching thisfile; later close/free updates still lack a guarded owner-wide transaction.",
       "invariant": "A published active pointer must describe initialized lists.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 1170,
-          "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "end_line": 1205,
+          "excerpt_sha256": "6d1568cf139931002b166f79c142b694b324cf540b45bebc9a11838cbf0f9e89"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "thisfile: Ordinary owned FDs close once; CH_KEEPOPEN stdin and pipe/help owners are excluded. Disposal frees all cached buffers and state on permanent deletion.",
+      "analysis": "Disposal clears thisfile when it aliases the retired state, frees nodes/state, and closes only ordinary owned FDs, excluding borrowed stdin.",
       "invariant": "Borrowed stdin must not be closed by cache disposal.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1170,
+          "start_line": 1207,
           "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "thisfile: First-buffer failure now stops before sentinel dereference; other fatal or asynchronous cleanup can still revisit raw state during partial mutation.",
+      "analysis": "On first-buffer failure thisfile retains its initialized empty sentinel state; ch_get returns -1, and later cleanup can dispose that state without treating it as a buf.",
       "invariant": "A local guard does not certify every cleanup entry.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 590,
+          "end_line": 610,
+          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1170,
-          "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "start_line": 1243,
+          "end_line": 1265,
+          "excerpt_sha256": "5c3bc2c1972b05fbfa03bc0928cd1aae372d41c7f203269d0fb1c06fdee39df2"
         }
       ],
-      "limitations": [
-        "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "thisfile: Handler-driven quit and navigation can cross these aliases; M0-MEM-001 and the retained stdin-deletion finding remain open despite the disposal fix.",
+      "analysis": "Handler-driven cleanup can cross thisfile aliases during raw mutation; the existing core/input lifetime findings remain open.",
       "invariant": "Source inspection is not maintained finding closure.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 766,
-          "excerpt_sha256": "f8f25dec241e39a360d4f5a2221ba00c842ef54395f862ccf8e63cb91a465709"
+          "start_line": 534,
+          "end_line": 565,
+          "excerpt_sha256": "9479721b22fdcb93198fe6a32104c876221c3af532d81c60671daab822d337a8"
         },
         {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1170,
-          "end_line": 1267,
-          "excerpt_sha256": "d94cfa9149ad20eb8b34af7f0dd73da117f20e096a71f4b21b1d21473681f021"
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
         }
       ],
       "limitations": [
         "The current stdin cleanup fix is preserved; IND-MEM-STDIN-DELETE remains open and requires independent maintained gate disposition."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:700c098bb40ea62c19648035."
+    }
+  },
+  "finding_context": {}
 }

@@ -16,188 +16,146 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "cmdbuf: The fixed [c_char; 2048] owns command bytes and the terminating NUL; cp and cmd_offset describe positions within this static owner.",
+      "analysis": "cmdbuf owns 2048 static bytes including a C-string terminator; cp and cmd_offset borrow/index that same fixed array.",
       "invariant": "The command array owns bytes independently of cursor aliases.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
           "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
-        },
-        {
-          "target": "source:src/cmdbuf.rs",
-          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "cmdbuf: get_cmdbuf returns a borrowed raw C-string address and edit helpers retain interior pointers; the ABI expresses no lifetime preventing a later edit while a reader uses it.",
+      "analysis": "get_cmdbuf returns a borrowed raw C-string address and edit helpers retain interior pointers; the ABI expresses no lifetime preventing a later edit while a reader uses cmdbuf.",
       "invariant": "Escaped command-string borrows must not span mutation.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "start_line": 1705,
+          "end_line": 1713,
+          "excerpt_sha256": "104d3ed1f0aa7838f4b283de4f9793ed8e50e77dc089f37c51768228c22bc82d"
         },
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "start_line": 1008,
+          "end_line": 1038,
+          "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "cmdbuf: Editing calls character-width, repaint and output functions directly; native terminal callbacks can reach display code while command bytes are partway through editing.",
+      "analysis": "Editing cmdbuf calls width, repaint and output functions while terminal output shares mutable display state with the editing operation.",
       "invariant": "Direct editing calls do not protect shared display aliases.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
-        },
-        {
-          "target": "source:src/cmdbuf.rs",
-          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "start_line": 804,
+          "end_line": 842,
+          "excerpt_sha256": "cb406ba10b02144fc3e58b3edf3c042992d7c2112856ff09d3c8b31e5c75ed4a"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "cmdbuf: Reset, insertion, erasure and history/completion edits rewrite the array in place; stable address does not preserve old text seen by a retained pointer.",
+      "analysis": "Reset, insertion, erasure and history/completion edits rewrite the cmdbuf array in place; stable address does not preserve old text seen by a retained pointer.",
       "invariant": "In-place edits invalidate the contents of prior borrows.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
         },
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "start_line": 973,
+          "end_line": 1038,
+          "excerpt_sha256": "6647f16bace80840546541d3d0f2a855f6e70c8883572674dd63dad1e5e686b6"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "cmdbuf: cmd_ichar checks current strlen plus input length, shifts suffix bytes and writes new bytes before repaint; this remains a raw multi-step update rather than a staged owner replacement.",
+      "analysis": "cmd_ichar checks cmdbuf length, shifts suffix/terminator and copies input bytes before repaint; those raw steps are not a staged owner replacement.",
       "invariant": "Capacity checks and logical edit publication remain separate.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
-        },
-        {
-          "target": "source:src/cmdbuf.rs",
-          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "start_line": 1008,
+          "end_line": 1038,
+          "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "cmdbuf: The array must never be freed; owned history/completion copies are separate heap objects whose destruction cannot release this static storage.",
+      "analysis": "The cmdbuf array must never be freed; owned history/completion copies are separate heap objects whose destruction cannot release this static storage.",
       "invariant": "Command-array addresses are not heap allocations.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
           "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
-        },
-        {
-          "target": "source:src/cmdbuf.rs",
-          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "cmdbuf: A full command returns action 2 before insertion; other raw range/alias contracts and display errors are not encoded as a failure-preserving borrowed-string API.",
+      "analysis": "A full cmdbuf rejects insertion with action 2 before shifting; retained raw string aliases and rendering failure remain separate contracts.",
       "invariant": "Rejected capacity must not publish partial new text.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
-        },
-        {
-          "target": "source:src/cmdbuf.rs",
-          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "start_line": 1008,
+          "end_line": 1020,
+          "excerpt_sha256": "f13d8569ebe0eef4df0dfe5247378fe0f2e358b4a8f5ad40629c03daf7616098"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "cmdbuf: The private array is reached through exported editing functions and raw globals without an exclusive Rust owner or handler exclusion protocol.",
+      "analysis": "The cmdbuf private array is reached through exported editing functions and raw globals without an exclusive Rust owner or handler exclusion protocol.",
       "invariant": "Static backing lifetime does not establish safe mutation access.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
           "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         },
         {
-          "target": "source:src/cmdbuf.rs",
-          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 1699,
-          "end_line": 1713,
-          "excerpt_sha256": "dafd10cf648917d2cb0bf3bcbca0cb28f78912d363fa8c307134934def4cd62f"
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
         }
       ],
       "limitations": [
         "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:7294435ec27de1be3a66cb39."
+    }
+  },
+  "finding_context": {}
 }

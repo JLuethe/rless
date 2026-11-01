@@ -12,15 +12,15 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/safe_core/mod.rs: The module declares the isolated component modules and a small Copy StorageError enum whose only payload is an interior-NUL offset.",
+      "analysis": "In src/safe_core/mod.rs, the module declares the isolated component modules and a small Copy StorageError enum whose only payload is an interior-NUL offset.",
       "invariant": "Error values own scalar diagnostic metadata only.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
-          "start_line": 1,
+          "start_line": 13,
           "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
       "limitations": [
@@ -28,116 +28,111 @@
       ]
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/safe_core/mod.rs: Re-exports move no byte ownership; StorageError copies cannot alias ByteBuf data or arena slot values.",
+      "analysis": "In src/safe_core/mod.rs, re-exports move no byte ownership; StorageError copies cannot alias ByteBuf data or arena slot values.",
       "invariant": "Module exports create no hidden storage aliases.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
-          "start_line": 1,
+          "start_line": 5,
+          "end_line": 11,
+          "excerpt_sha256": "840f24f9ff37a5f69cdcc8e878234f5034ce82348250dcc09383fe685b733c3e"
+        },
+        {
+          "target": "source:src/safe_core/mod.rs",
+          "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
+          "start_line": 13,
           "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/safe_core/mod.rs: There are no function bodies, callback registrations or initializers here; ReserveFault is re-exported only for test or fault-testing configuration.",
+      "analysis": "In src/safe_core/mod.rs, there are no function bodies, callback registrations or initializers here; ReserveFault is re-exported only for test or fault-testing configuration.",
       "invariant": "The module root creates no runtime callback.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
-          "start_line": 1,
-          "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "start_line": 5,
+          "end_line": 11,
+          "excerpt_sha256": "840f24f9ff37a5f69cdcc8e878234f5034ce82348250dcc09383fe685b733c3e"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/safe_core/mod.rs: StorageError values have no borrowed lifetime to expire; owner-specific invalidation remains in bytebuf and arena implementations.",
+      "analysis": "In src/safe_core/mod.rs, storageError values have no borrowed lifetime to expire; owner-specific invalidation remains in bytebuf and arena implementations.",
       "invariant": "Diagnostic metadata cannot outlive a borrowed pointee.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
-          "start_line": 1,
+          "start_line": 13,
           "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/safe_core/mod.rs: forbid(unsafe_code) applies to this separate crate and its modules; declaration order performs no partial runtime allocation commit.",
+      "analysis": "In src/safe_core/mod.rs, forbid(unsafe_code) applies to this separate crate and its modules; declaration order performs no partial runtime allocation commit.",
       "invariant": "Component construction cannot insert unsafe code here.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
           "start_line": 1,
-          "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "end_line": 11,
+          "excerpt_sha256": "c1add1ba997a1beef34d1449c2c41681231ad5e44eded24b5dfbb6224adb37ff"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/safe_core/mod.rs: The enum and exports need no free/close pair; their concrete owning modules supply ordinary Rust destruction.",
+      "analysis": "In src/safe_core/mod.rs, the enum and exports need no free/close pair; their concrete owning modules supply ordinary Rust destruction.",
       "invariant": "Root metadata has no manual release operation.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
-          "start_line": 1,
+          "start_line": 13,
           "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/safe_core/mod.rs: Errors do not allocate a context String, so a failed reserve can return an enum without constructing a second allocation-dependent diagnostic owner.",
+      "analysis": "In src/safe_core/mod.rs, errors do not allocate a context String, so a failed reserve can return an enum without constructing a second allocation-dependent diagnostic owner.",
       "invariant": "Error representation remains allocation-free.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
-          "start_line": 1,
+          "start_line": 13,
           "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/safe_core/mod.rs: The header states this crate is not linked into pager binaries; it declares no asynchronous dispatch or mutable process state.",
+      "analysis": "In src/safe_core/mod.rs, the header states this crate is not linked into pager binaries; it declares no asynchronous dispatch or mutable process state.",
       "invariant": "Component review does not certify production handoff.",
       "source_refs": [
         {
           "target": "source:src/safe_core/mod.rs",
           "sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a",
           "start_line": 1,
-          "end_line": 21,
-          "excerpt_sha256": "9ab6a39d5e5aaf3274904396fa1d0da2cdd0cb329efd8d37a60f34b8fb26050a"
+          "end_line": 11,
+          "excerpt_sha256": "c1add1ba997a1beef34d1449c2c41681231ad5e44eded24b5dfbb6224adb37ff"
         }
       ],
-      "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
-      ]
+      "limitations": []
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

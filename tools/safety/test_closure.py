@@ -17,7 +17,7 @@ from inventory_format import REGION_REGISTER
 class ReviewControls(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
-        (self.root/'src').mkdir();(self.root/'src/fixture.rs').write_text('static mut OBJECT: i32 = 0; extern \"C\" { fn free(); } fn callback() {}')
+        (self.root/'src').mkdir();(self.root/'src/fixture.rs').write_text('static mut OBJECT: i32 = 0; extern \"C\" { fn free(); } fn callback() {}' + '\n' + '// Synthetic topic extent.\n'*8)
         (self.root/'review.md').write_text('Fixture owner, callback and error-path review.')
         self.inventory=dict(files={'src/fixture.rs':{'sha256':sha(self.root/'src/fixture.rs')}},
             mutable_static_definitions=[dict(file='src/fixture.rs',context='',symbol='OBJECT')],

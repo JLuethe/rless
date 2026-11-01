@@ -12,132 +12,148 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/xbuf.rs: xbuffer owns data plus end/size/init_size metadata; init starts empty and add_byte acquires ecalloc storage when capacity is exhausted.",
+      "analysis": "In src/xbuf.rs, xbuffer owns data plus end/size/init_size metadata; init starts empty and add_byte acquires ecalloc storage when capacity is exhausted.",
       "invariant": "A live xbuffer needs one coherent allocation descriptor.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
           "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "end_line": 40,
+          "excerpt_sha256": "e63ea1922ff7e8ac64351798b5f86d35a9e611f2d527276520080db466784be6"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/xbuf.rs: xbuf_char_data returns a raw borrowed pointer, while Copy/Clone can duplicate the owning descriptor; add_data retains its source pointer across calls that may grow the destination.",
+      "analysis": "In src/xbuf.rs, xbuf_char_data returns a raw borrowed pointer, while Copy/Clone can duplicate the owning descriptor; add_data retains its source pointer across calls that may grow the destination.",
       "invariant": "Raw aliases must be retired before buffer growth.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
+          "start_line": 86,
           "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "excerpt_sha256": "ae6b8c0b0808b86525c389f555630d72e0e54ea6176918c2e269207234cc83ee"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/xbuf.rs: Calls are direct ecalloc/memcpy/free and an optional fault hook; there is no registered callback that can extend a slice lifetime.",
+      "analysis": "In src/xbuf.rs, calls are direct ecalloc/memcpy/free and an optional fault hook; there is no registered callback that can extend a slice lifetime.",
       "invariant": "Direct copy calls do not validate source ownership.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "start_line": 47,
+          "end_line": 66,
+          "excerpt_sha256": "fa40b7a4208e75f3f3b520c6c7348c42ae91096e6ad315d9227829c56792fcd6"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/xbuf.rs: Growth frees old data at 73; a source pointer into that same allocation in add_data can then be stale on the next loop iteration.",
+      "analysis": "In src/xbuf.rs, growth frees old data at 73; a source pointer into that same allocation in add_data can then be stale on the next loop iteration.",
       "invariant": "Self-source growth is a recorded alias hazard.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "start_line": 65,
+          "end_line": 79,
+          "excerpt_sha256": "074ae43b37fc6a1be5325f1fd77f4afa48bbcf184e97c6c71fd96a298bfe8d66"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 86,
+          "end_line": 110,
+          "excerpt_sha256": "5fe3ed4eebf77bcb009dc97d89cafba2cfde294ad5c157aed85e7e148959f5af"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/xbuf.rs: size is assigned before overflow handling and allocation, and set resets dst before copying src; these are not failure-preserving staged updates.",
+      "analysis": "In src/xbuf.rs, size is assigned before overflow handling and allocation, and set resets dst before copying src; these are not failure-preserving staged updates.",
       "invariant": "Existing bytes are not protected by a transactional replacement.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "start_line": 47,
+          "end_line": 79,
+          "excerpt_sha256": "db36fe34f71b0ee389cc8c26904cc1e15c954dfef30084f50d900a67d94d1f03"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 108,
+          "end_line": 110,
+          "excerpt_sha256": "d581a40b0784a0b32812dd810fbb0d86698f5f7021655771719b77ef24ac0cc2"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/xbuf.rs: deinit pairs ecalloc with free and resets fields, but copied descriptors or repeated initialization of a live owner can invalidate that single-release contract.",
+      "analysis": "In src/xbuf.rs, deinit pairs ecalloc with free and resets fields, but copied descriptors or repeated initialization of a live owner can invalidate that single-release contract.",
       "invariant": "Only one descriptor may release each allocation.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "start_line": 29,
+          "end_line": 40,
+          "excerpt_sha256": "3ec0fb621d2ba0f3db5a8bcda8ed180423d2fe38ae39fb5ecfcb23a03bf0b2ee"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 65,
+          "end_line": 75,
+          "excerpt_sha256": "b932fba64dd9fad151a5e75b6cffc285c5b3f67dcf40347191ce7f91d75e4d83"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/xbuf.rs: Reserve/size failure calls out_of_memory; capacity can already differ from the still-live old allocation when cleanup runs.",
+      "analysis": "In src/xbuf.rs, reserve/size failure calls out_of_memory; capacity can already differ from the still-live old allocation when cleanup runs.",
       "invariant": "Error cleanup must account for precommitted capacity metadata.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "start_line": 47,
+          "end_line": 66,
+          "excerpt_sha256": "fa40b7a4208e75f3f3b520c6c7348c42ae91096e6ad315d9227829c56792fcd6"
         }
       ],
-      "limitations": [
-        "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/xbuf.rs: The C API has raw mutable callers and no reentry guard; allocation or deinit from interrupted paths cannot be approved as a safe owner handoff.",
+      "analysis": "In src/xbuf.rs, the C API has raw mutable callers and no reentry guard; allocation or deinit from interrupted paths cannot be approved as a safe owner handoff.",
       "invariant": "Legacy xbuffer remains under M0-MEM-001.",
       "source_refs": [
         {
           "target": "source:src/xbuf.rs",
           "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
-          "start_line": 16,
-          "end_line": 115,
-          "excerpt_sha256": "682116239347f6d66ca82d0f6d2c7c1d937924dc481416739ab6ce86a6ea7cbe"
+          "start_line": 29,
+          "end_line": 40,
+          "excerpt_sha256": "3ec0fb621d2ba0f3db5a8bcda8ed180423d2fe38ae39fb5ecfcb23a03bf0b2ee"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 47,
+          "end_line": 79,
+          "excerpt_sha256": "db36fe34f71b0ee389cc8c26904cc1e15c954dfef30084f50d900a67d94d1f03"
         }
       ],
       "limitations": [
         "This review records source-level raw owner, self-alias and commit-order hazards; no new runtime reproduction or product fix is claimed."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

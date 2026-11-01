@@ -16,132 +16,157 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): The AtomicI32 stores an inherited pipe descriptor borrowed for test tracing; initialize accepts only writable nonblocking FIFO descriptors above 2.",
+      "analysis": "The TRACE_FD AtomicI32 stores an inherited pipe descriptor borrowed for test tracing; initialize accepts only writable nonblocking FIFO descriptors above 2.",
       "invariant": "Trace configuration cannot own pager standard descriptors.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 19,
+          "end_line": 20,
+          "excerpt_sha256": "9c015ae47aadd930bebeac1a6d8096b2eefe18521272fc49fbee4c7fabe460cd"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 112,
+          "end_line": 139,
+          "excerpt_sha256": "475bad44dd23c37742f52726a3eef4c8b7b0df40af6c9a07a4e9b664a4e772eb"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): Only the integer is copied into write_marker; each event buffer is stack-owned for the synchronous write and is not retained.",
+      "analysis": "Only the TRACE_FD integer is copied into write_marker; each event buffer is stack-owned for the synchronous write and is not retained.",
       "invariant": "Trace calls borrow event bytes only for one syscall.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 195,
+          "end_line": 202,
+          "excerpt_sha256": "0ecaf65e8a0bca2d73cc345302c9d9941df848cc181128e70b3312a87053fc3b"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 211,
+          "end_line": 229,
+          "excerpt_sha256": "429d5a0227444f53ff4c4484af0bde259f331b82fc8d0f105abd5da72b4af6af"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): write_marker calls libc signal-mask and write functions directly; the descriptor value is not interpreted as a function pointer.",
+      "analysis": "write_marker calls libc signal-mask and write functions directly; the TRACE_FD descriptor value is not interpreted as a function pointer.",
       "invariant": "Trace descriptor storage cannot be a callback target.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 211,
+          "end_line": 251,
+          "excerpt_sha256": "bc49342f3f06091e88089117d4c4e4ef964c268f8c1d0b3daa2f01d0bb088145"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): The harness must keep the inherited pipe open in the child until exit; CLOEXEC retires this child descriptor on helper exec.",
+      "analysis": "The harness must keep the pipe selected by TRACE_FD live until child exit; FD_CLOEXEC retires that reference on helper exec.",
       "invariant": "A live plan requires the same inherited trace pipe.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 118,
+          "end_line": 148,
+          "excerpt_sha256": "cec502d79dbc3b2b3aaa8966e8a813132df2fadd2294f7097988cedbebadb14e"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): Descriptor inspection and FD_CLOEXEC setup succeed before TRACE_FD is stored and the enabled site is Release-published.",
+      "analysis": "Descriptor inspection and FD_CLOEXEC setup succeed before TRACE_FD is stored and the enabled site is Release-published.",
       "invariant": "A descriptor is published only after validation.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 111,
+          "end_line": 148,
+          "excerpt_sha256": "b6eff279d67fdba3509655ac8f931bf90a4a7b1d5f574aa7a4c2236f6a3e5d17"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): The atomic itself owns no FD lifetime; initialize neither dup nor close occurs, and process exit or CLOEXEC releases the inherited child reference.",
+      "analysis": "TRACE_FD is borrowed descriptor metadata: the hook never dup/closes it, and exec or process exit retires the child pipe reference.",
       "invariant": "Hook code does not close the harness trace descriptor.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 19,
+          "end_line": 20,
+          "excerpt_sha256": "9c015ae47aadd930bebeac1a6d8096b2eefe18521272fc49fbee4c7fabe460cd"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 118,
+          "end_line": 139,
+          "excerpt_sha256": "c7d72b3547871895f9d96a9a25e39e3901bcdc9bc2e0cbf5b4cd0c636ff78f0b"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): Invalid flags or metadata reject initialization; bounded trace-write failure emits no valid observation and does not free application data.",
+      "analysis": "Invalid pipe metadata prevents TRACE_FD publication; bounded failed writes produce no valid marker and free no application data.",
       "invariant": "Trace failure changes evidence, not pager ownership.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 112,
+          "end_line": 139,
+          "excerpt_sha256": "475bad44dd23c37742f52726a3eef4c8b7b0df40af6c9a07a4e9b664a4e772eb"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 225,
+          "end_line": 251,
+          "excerpt_sha256": "3a890b65d26b5190701c9655920c4dfa4ad2727abcfe298f4afeeb0a973450ec"
         }
       ],
-      "limitations": [
-        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "TRACE_FD (src/fault.rs:16-252): write_marker temporarily masks signals, preserves pending SIGPIPE and restores the previous mask; hit restores the selected application errno.",
+      "analysis": "write_marker uses TRACE_FD under a temporarily saved signal mask; it preserves existing SIGPIPE state and hit restores application errno.",
       "invariant": "Trace I/O preserves caller signal-mask ownership.",
       "source_refs": [
         {
           "target": "source:src/fault.rs",
           "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
-          "start_line": 16,
-          "end_line": 252,
-          "excerpt_sha256": "0231c9eed5aa106b07c76001772defbbf73a2a9137233f1342ac71ea96f05b77"
+          "start_line": 199,
+          "end_line": 203,
+          "excerpt_sha256": "628dad927aca90d9fc783bf3a7dc85c4af4c47820f9899e364db4e347dfc3e89"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 211,
+          "end_line": 251,
+          "excerpt_sha256": "bc49342f3f06091e88089117d4c4e4ef964c268f8c1d0b3daa2f01d0bb088145"
         }
       ],
       "limitations": [
         "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
       ]
     }
+  },
+  "related_sources": {},
+  "finding_context": {
+    "M0-SIG-002": "Context only: this entry reviews storage ownership, not the caller/application mechanism in M0-SIG-002. That finding stays open and this clear storage disposition does not resolve or approve it."
   }
 }

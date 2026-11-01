@@ -16,132 +16,160 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "cmd_offset: The c_int owns the byte offset at the left edge of the visible command text, initially zero; it is distinct from display-column counts.",
+      "analysis": "The cmd_offset c_int owns the byte offset at the left edge of the visible command text, initially zero; it is distinct from display-column counts.",
       "invariant": "Visible byte origin is not a terminal column value.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
           "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "end_line": 665,
+          "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "cmd_offset: cmd_home and scrolling derive pointers into cmdbuf from the scalar; copying the offset does not validate the selected UTF sequence or current text owner.",
+      "analysis": "cmd_home and scrolling derive pointers into cmdbuf from the cmd_offset scalar; copying the offset does not validate the selected UTF sequence or current text owner.",
       "invariant": "Offset-derived pointers require current command text bounds.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "start_line": 786,
+          "end_line": 802,
+          "excerpt_sha256": "ca830175335c80c3b9644dd35463a35e570ccd84e13bd792e76ec39abe888b95"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 848,
+          "end_line": 906,
+          "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "cmd_offset: Scroll logic calls step_char and repaint/output directly to compute a new visible origin; the integer stores no callback address.",
+      "analysis": "Scroll logic calls step_char and repaint/output directly to compute a new visible origin; the cmd_offset integer stores no callback address.",
       "invariant": "Offset computation borrows formatting state synchronously.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "start_line": 848,
+          "end_line": 906,
+          "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "cmd_offset: Reset/kill sets it to zero and lshift/rshift replaces it after character stepping; later in-place edits can change what the same numeric offset denotes.",
+      "analysis": "Reset/kill sets cmd_offset to zero and lshift/rshift replaces it after character stepping; later in-place edits can change what the same numeric offset denotes.",
       "invariant": "Command edits can invalidate the meaning of an old offset.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1072,
           "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "excerpt_sha256": "e3192a4e61657380390f0829f826344a1508bcd355240729360414f703ab2617"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "cmd_offset: Scroll computes pointer differences then narrows to c_int before repaint; offset, cp and columns are not jointly committed through an owning struct.",
+      "analysis": "Scrolling assigns cmd_offset from a same-array pointer difference, separately from cp/column updates and repaint.",
       "invariant": "Offset updates must remain coherent with cursor state.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "start_line": 848,
+          "end_line": 906,
+          "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "cmd_offset: No release belongs to the scalar; changing the visible origin does not free prefix bytes or shrink the fixed array.",
+      "analysis": "No release belongs to the cmd_offset scalar; changing the visible origin does not free prefix bytes or shrink the fixed array.",
       "invariant": "Scrolling is not a buffer-owner retirement operation.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
           "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 848,
+          "end_line": 906,
+          "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "cmd_offset: There is no typed invalid-offset recovery at every pointer reconstruction; normal boundary assumptions belong to the still-open raw editor ownership contract.",
+      "analysis": "Reconstructing cmdbuf+cmd_offset relies on a current in-bounds byte offset; no typed invalid-offset result repairs a stale text/layout relationship.",
       "invariant": "Numeric offset alone cannot prove a valid substring.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
-          "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "start_line": 786,
+          "end_line": 802,
+          "excerpt_sha256": "ca830175335c80c3b9644dd35463a35e570ccd84e13bd792e76ec39abe888b95"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 848,
+          "end_line": 906,
+          "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": [
-        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "cmd_offset: The global is non-atomic and participates in shared redraw state; source review does not authorize handler-time scrolling or editor reentry.",
+      "analysis": "cmd_offset participates in shared redraw state without a guard permitting handler-time scroll or editor reentry.",
       "invariant": "Visible-origin mutation requires controlled editor sequencing.",
       "source_refs": [
         {
           "target": "source:src/cmdbuf.rs",
           "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
           "start_line": 589,
-          "end_line": 1086,
-          "excerpt_sha256": "b0860eb63aaa75ad00fc01e5ec6e7ca5fafdd6fe2683b7b99e2cc17f42de499e"
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
         }
       ],
       "limitations": [
         "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:327b1b9df77601d1c6097578."
+    }
+  },
+  "finding_context": {}
 }

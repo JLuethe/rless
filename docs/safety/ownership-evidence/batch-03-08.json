@@ -16,15 +16,15 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "maxbufs: The c_int owns a cache budget, -1 for unlimited or a rounded positive block count from ch_setbufspace; it owns no existing cache node.",
+      "analysis": "The maxbufs c_int owns a cache budget, -1 for unlimited or a rounded positive block count from ch_setbufspace; it owns no existing cache node.",
       "invariant": "Cache budget is policy rather than allocated capacity.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
+          "start_line": 530,
+          "end_line": 530,
+          "excerpt_sha256": "7ad046d43a41a610f35d61b67b2707b80752537e2d63da5823e282874cea2017"
         },
         {
           "target": "source:src/ch.rs",
@@ -34,158 +34,118 @@
           "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
         }
       ],
-      "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "maxbufs: ch_get compares copied budget with active nbufs; lowering it neither retires cached pointers nor changes the lifetime of retained nonseekable data.",
+      "analysis": "ch_get compares copied budget with active nbufs; lowering maxbufs neither retires cached pointers nor changes the lifetime of retained nonseekable data.",
       "invariant": "Budget changes do not invalidate cache nodes safely.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1054,
-          "end_line": 1068,
-          "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
+          "start_line": 590,
+          "end_line": 607,
+          "excerpt_sha256": "9833959160bc21a4fb4a94ff1ef4725911fb59a2039be224fe7067e07e62c86d"
         }
       ],
-      "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "maxbufs: Budget exhaustion selects whether to call ch_addbuf or reuse an old node; neither branch is a callback retained in the scalar.",
+      "analysis": "Budget exhaustion selects whether to call ch_addbuf or reuse an old node; neither branch is a callback retained in the maxbufs scalar.",
       "invariant": "Allocation policy does not store callable addresses.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
+          "start_line": 590,
+          "end_line": 607,
+          "excerpt_sha256": "9833959160bc21a4fb4a94ff1ef4725911fb59a2039be224fe7067e07e62c86d"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1054,
-          "end_line": 1068,
-          "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
+          "start_line": 1108,
+          "end_line": 1114,
+          "excerpt_sha256": "df871dc8d6142a9601717e4df2c1caf6f979a47cc7920837ffb073525b3050ad"
         }
       ],
-      "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "maxbufs: The global applies across active file-state changes and is not branded to one filestate capacity or initialized node count.",
+      "analysis": "maxbufs applies across selected files; it does not brand a retained allocation or initialize that file state\u2019s node list.",
       "invariant": "A global budget is not proof of per-file allocation extent.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
+          "start_line": 1054,
+          "end_line": 1068,
+          "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
         },
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1054,
-          "end_line": 1068,
-          "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
+          "start_line": 1170,
+          "end_line": 1205,
+          "excerpt_sha256": "6d1568cf139931002b166f79c142b694b324cf540b45bebc9a11838cbf0f9e89"
         }
       ],
-      "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "maxbufs: ch_setbufspace rounds size_t then narrows into c_int and clamps below one; this policy commit is separate from allocation/list publication.",
+      "analysis": "ch_setbufspace rounds size_t then narrows into c_int and clamps below one; this maxbufs policy commit is separate from allocation/list publication.",
       "invariant": "Budget conversion does not commit a buffer owner.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
           "start_line": 1054,
           "end_line": 1068,
           "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
         }
       ],
       "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
+        "maxbufs is policy, not allocated extent; the concern is an incoherent policy/nbufs/active-file snapshot, not allocation ownership inside c_int."
       ]
     },
     "release_pair": {
-      "analysis": "maxbufs: Changing maxbufs never calls free; cache lists are retired by ch_delbufs or permanent ifile disposal.",
+      "analysis": "Changing maxbufs never calls free; cache lists are retired by ch_delbufs or permanent ifile disposal.",
       "invariant": "Budget retirement and storage retirement remain separate.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1054,
-          "end_line": 1068,
-          "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
+          "start_line": 1139,
+          "end_line": 1149,
+          "excerpt_sha256": "9510468b27d5dceec8b9420b747d8c6d16d7d50b08596f9e84576df3d6a04b47"
         }
       ],
-      "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "maxbufs: ch_addbuf failure disables autobuf and an empty-cache guard records failure; the budget does not own or roll back these error states.",
+      "analysis": "ch_addbuf failure may disable autobuf and set an empty-cache failure latch; maxbufs neither owns nor rolls back those states.",
       "invariant": "Failure handling cannot be inferred from budget alone.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1054,
-          "end_line": 1068,
-          "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
+          "start_line": 590,
+          "end_line": 610,
+          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
         }
       ],
-      "limitations": [
-        "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "maxbufs: Raw configuration and active cache counters are read across command operations without an exclusive ownership type.",
+      "analysis": "A reentrant reader of maxbufs and thisfile counters has no joint configuration/owner snapshot, which is the scoped M0-MEM-001 concern.",
       "invariant": "Coupled cache policy remains a raw-core review constraint.",
       "source_refs": [
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 524,
-          "end_line": 613,
-          "excerpt_sha256": "a7124f29d4135f350dd83c6a44facb283ef92bed0f808b7ef26a397469bdf978"
+          "start_line": 590,
+          "end_line": 610,
+          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
         },
         {
           "target": "source:src/ch.rs",
@@ -199,5 +159,7 @@
         "Only budget/state coupling is reviewed; no unsupported claim of a runtime integer failure or cache-size defect."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

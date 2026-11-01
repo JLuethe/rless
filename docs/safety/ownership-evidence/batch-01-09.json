@@ -12,132 +12,150 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): The module owns one AtomicUsize containing the inherited SIGPIPE disposition and one static constructor function pointer.",
+      "analysis": "In src/process.rs, the module owns one AtomicUsize containing the inherited SIGPIPE disposition and one static constructor function pointer.",
       "invariant": "Both owned objects have image lifetime.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 4,
+          "end_line": 17,
+          "excerpt_sha256": "095bd6a92b16ae5894a2df39e1234a61d873d64d3a5eea29b09bfe4b26cf2554"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): remember_sigpipe uses a stack libc::sigaction; only its scalar sa_sigaction value is copied into the atomic before the stack value expires.",
+      "analysis": "In src/process.rs, remember_sigpipe uses a stack libc::sigaction; only its scalar sa_sigaction value is copied into the atomic before the stack value expires.",
       "invariant": "No pointer to the stack sigaction is retained.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 6,
+          "end_line": 11,
+          "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): REMEMBER_SIGPIPE names exactly unsafe extern C fn remember_sigpipe(); the ELF init_array invokes it before Rust main, and init calls libc::signal directly.",
+      "analysis": "In src/process.rs, rEMEMBER_SIGPIPE names exactly unsafe extern C fn remember_sigpipe(); the ELF init_array invokes it before Rust main, and init calls libc::signal directly.",
       "invariant": "Constructor ABI and target are fixed in source.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
+          "start_line": 6,
           "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "excerpt_sha256": "393cfbd06afd894938a17f2c8ff614c0e77d4f19c61b6fa57eb72b4219232177"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): Across exec a previous custom handler is reset, leaving DFL or IGN; the saved value remains meaningful through Rust runtime startup.",
+      "analysis": "In src/process.rs, across exec a previous custom handler is reset, leaving DFL or IGN; the saved value remains meaningful through Rust runtime startup.",
       "invariant": "The saved disposition is an exec-inherited sentinel.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 13,
+          "end_line": 21,
+          "excerpt_sha256": "f05b9f47a7f503a319ae6624ecc8f21d1acf2ff185b628aa2606eac9cea69d45"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): The constructor stores after successful sigaction lookup; init reads after constructors finish and restores the inherited disposition.",
+      "analysis": "In src/process.rs, the constructor stores after successful sigaction lookup; init reads after constructors finish and restores the inherited disposition.",
       "invariant": "Initialization order precedes the restoring read.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 6,
+          "end_line": 21,
+          "excerpt_sha256": "b50c1d1ab377265c103aa55be4976fc585c0272467815eed3c6020fddcfa1947"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): No handler heap allocation or resource handle is acquired; static function and atomic storage are released with the image.",
+      "analysis": "In src/process.rs, no handler heap allocation or resource handle is acquired; static function and atomic storage are released with the image.",
       "invariant": "Signal disposition values are never heap-released.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
-          "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "start_line": 4,
+          "end_line": 17,
+          "excerpt_sha256": "095bd6a92b16ae5894a2df39e1234a61d873d64d3a5eea29b09bfe4b26cf2554"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): Failed sigaction lookup leaves the initial DFL value; libc::signal status is ignored, so restoration failure is not reported by this API.",
+      "analysis": "In src/process.rs, failed sigaction lookup leaves the initial DFL value; libc::signal status is ignored, so restoration failure is not reported by this API.",
       "invariant": "Query failure never publishes uninitialized action data.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
+          "start_line": 6,
+          "end_line": 11,
+          "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
+        },
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 19,
           "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "excerpt_sha256": "ac60ae8824aaf04c220b2b5966860345db562fc1e13167d64315f13b22cbb175"
         }
       ],
-      "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/process.rs (src/process.rs:1-23): The constructor only queries a disposition; init restores SIGPIPE before each executable enters translated application code.",
+      "analysis": "In src/process.rs, the constructor only queries a disposition; init restores SIGPIPE before each executable enters translated application code.",
       "invariant": "No application callback is invoked by the query.",
       "source_refs": [
         {
           "target": "source:src/process.rs",
           "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
-          "start_line": 1,
+          "start_line": 13,
           "end_line": 23,
-          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+          "excerpt_sha256": "5db8cc9da8632718b1ecf0e67ba47a81bb28646aaad5b8076336e2466b3123a1"
+        },
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 1,
+          "end_line": 4,
+          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
+          "end_line": 414,
+          "excerpt_sha256": "895924d05d69abe39890d20ba0d24f58a648e1b7f46322426c5437c87b0bcd19"
         }
       ],
       "limitations": [
         "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/bin/rless.rs": {
+      "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+      "relationship": "The executable restores inherited SIGPIPE before it enters pager startup, ordering this process-state owner. Target: FILE:src/process.rs."
+    },
+    "src/bin/lessecho.rs": {
+      "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+      "relationship": "The companion executable restores SIGPIPE before creating arguments and entering translated helper logic. Target: FILE:src/process.rs."
+    }
+  },
+  "finding_context": {}
 }

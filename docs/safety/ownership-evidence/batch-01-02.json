@@ -12,132 +12,154 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): The module defines one four-byte C character array initialized from the exact 712 NUL literal; no allocator or initializer callback creates it.",
+      "analysis": "In src/version.rs, the module defines one four-byte C character array initialized from the exact 712 NUL literal; no allocator or initializer callback creates it.",
       "invariant": "Version bytes reside in static storage.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 5,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): The exported version symbol is borrowed by command::dispversion, optfunc::opt__V and lesskey_parse numeric parsing; maintained call sites read its bytes.",
+      "analysis": "In src/version.rs, the exported version symbol is borrowed by command::dispversion, optfunc::opt__V and lesskey_parse numeric parsing; maintained call sites read its bytes.",
       "invariant": "C string readers borrow a four-byte NUL string.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 5,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1454,
+          "end_line": 1463,
+          "excerpt_sha256": "31ab95e43561bb28aaa0fe1ce2a0ee2a8eea3beb71104c429a87e0c2112b4a10"
+        },
+        {
+          "target": "source:src/optfunc.rs",
+          "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+          "start_line": 1085,
+          "end_line": 1104,
+          "excerpt_sha256": "b76e6f0a3f63c810a23292b265c3ebcc2771e5f78f779248f516b95c1ae9d998"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1641,
+          "end_line": 1647,
+          "excerpt_sha256": "6051960e9ee290e42150bb85def5db448f4681edf8e1b71e0bc8761e79af0d59"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): The transmute changes the four-byte array element representation only; the module registers no callback or code pointer.",
+      "analysis": "In src/version.rs, the transmute changes the four-byte array element representation only; the module registers no callback or code pointer.",
       "invariant": "Array conversion cannot create callback ownership.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 6,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): There is no replace, resize or free operation in the module, and repository references contain no assignment to the array.",
+      "analysis": "In src/version.rs, there is no replace, resize or free operation in the module, and repository references contain no assignment to the array.",
       "invariant": "The backing array address remains stable.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 5,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): The entire initialized array is installed by static initialization; readers never see a length/pointer pair being committed separately.",
+      "analysis": "In src/version.rs, the entire initialized array is installed by static initialization; readers never see a length/pointer pair being committed separately.",
       "invariant": "All four version bytes are initialized before main.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 6,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): Neither the exported symbol nor pointers into it may be passed to free; its owner is the loaded image for the process lifetime.",
+      "analysis": "In src/version.rs, neither the exported symbol nor pointers into it may be passed to free; its owner is the loaded image for the process lifetime.",
       "invariant": "Static image storage is never heap-released.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 5,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): Initialization is infallible; display or parse failure does not transfer ownership of the array to its caller.",
+      "analysis": "In src/version.rs, initialization is infallible; display or parse failure does not transfer ownership of the array to its caller.",
       "invariant": "Reader errors retain the original version owner.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 6,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
         }
       ],
-      "limitations": [
-        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/version.rs (src/version.rs:1-7): Version display may run during command processing but this module installs no signal handler and performs no asynchronous writes.",
+      "analysis": "In src/version.rs, version display may run during command processing but this module installs no signal handler and performs no asynchronous writes.",
       "invariant": "Current maintained users only read version storage.",
       "source_refs": [
         {
           "target": "source:src/version.rs",
           "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
-          "start_line": 1,
+          "start_line": 5,
           "end_line": 7,
-          "excerpt_sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78"
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
         }
       ],
       "limitations": [
         "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "Command dispatch/display selects, consumes or reads this reviewed state outside its definition module. Target: FILE:src/version.rs."
+    },
+    "src/optfunc.rs": {
+      "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+      "relationship": "Version output borrows the reviewed static version bytes through the option handler. Target: FILE:src/version.rs."
+    },
+    "src/lesskey_parse.rs": {
+      "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+      "relationship": "Lesskey initialization reads the reviewed version string through numeric parsing without taking ownership. Target: FILE:src/version.rs."
+    }
+  },
+  "finding_context": {}
 }

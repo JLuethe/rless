@@ -16,188 +16,141 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "anchor: The static ifile sentinel owns no heap names initially and its next/prev links point back to itself; allocated nodes form a circular list around it.",
+      "analysis": "The static ifile sentinel owns no heap names initially and anchor's next/prev links point back to itself; allocated nodes form a circular list around it.",
       "invariant": "The sentinel is permanent image storage, not a node allocation.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
           "start_line": 80,
-          "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "end_line": 118,
+          "excerpt_sha256": "c47070a9580c5e0b526174a6c5656f5e843a9da2224c695640f6bc608875ff1b"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "anchor: Navigation and link/unlink retain raw sentinel/node links; callers receive allocated node addresses that may be invalidated by deletion elsewhere.",
+      "analysis": "Traversal of anchor lends raw node addresses; the static sentinel cannot extend the lifetime of a node deleted elsewhere.",
       "invariant": "Sentinel traversal cannot validate a retained node handle.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
-          "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "start_line": 175,
+          "end_line": 201,
+          "excerpt_sha256": "7e93ba79ce7a82524342f17873db0c25f677f19a4a380224a575d3cb536f5354"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "start_line": 122,
+          "end_line": 143,
+          "excerpt_sha256": "3716b30e35d22cf4c0cc82bb1cd3ff7b2fadfb51069c7c90450ad1eda61bd490"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "anchor: Node creation calls mark_check_ifile after linking and deletion calls unmark before disposal; these direct cross-owner calls share the same list mutation interval.",
+      "analysis": "Operations around anchor call mark_check_ifile/unmark and ch disposal directly during node-list mutation.",
       "invariant": "Related mark callbacks must see a coherent list.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 145,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "anchor: unlink updates neighboring links and later frees the node; the sentinel remains live, but no generation prevents a stale external node address from being reused.",
+      "analysis": "unlink updates neighboring links and later frees the node; the anchor sentinel remains live, but no generation prevents a stale external node address from being reused.",
       "invariant": "Permanent sentinel lifetime does not protect deleted nodes.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 135,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "excerpt_sha256": "b9ceb0cec851df1540b4d9fcd6b18cf04503c3e06049afc46dae14d17bec590b"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "anchor: link_ifile publishes four raw links before index/count updates; no guard prevents observation or interruption of that intermediate state.",
+      "analysis": "link_ifile changes anchor-neighbor links before indexes/counts, without a guard preventing observation of intermediate state.",
       "invariant": "List and index publication is not an atomic commit.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
-          "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "start_line": 122,
+          "end_line": 143,
+          "excerpt_sha256": "3716b30e35d22cf4c0cc82bb1cd3ff7b2fadfb51069c7c90450ad1eda61bd490"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "anchor: The sentinel must never be passed to free; only separately allocated nodes and their strings are released by del_ifile.",
+      "analysis": "The anchor sentinel must never be passed to free; only separately allocated nodes and their strings are released by del_ifile.",
       "invariant": "Heap-node cleanup excludes the static anchor.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
-          "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "start_line": 96,
+          "end_line": 118,
+          "excerpt_sha256": "700b0932666ba29703bff8f4396eb04c6afadeeb3f64386e9c624fb4b3a08506"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "start_line": 154,
+          "end_line": 174,
+          "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "anchor: Allocation before linking leaves sentinel links unchanged, but later fatal paths can enter cleanup amid node or filename ownership changes.",
+      "analysis": "Allocation before linking leaves anchor unchanged; fatal cleanup during later node/name mutation still relies on coherent list links.",
       "invariant": "Error traversal still relies on raw list coherence.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 145,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
+          "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         },
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
+          "start_line": 221,
           "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "excerpt_sha256": "9e00f00009c30f03667e1e721fb5836c6e35583add88562355db37a44f35a578"
         }
       ],
-      "limitations": [
-        "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "anchor: List writes are not masked or dispatched via a single owning event loop; the broad mutable-core owner finding stays attached.",
+      "analysis": "No event-loop owner or signal mask protects anchor-linked mutation; this is the concrete list-state concern under M0-MEM-001.",
       "invariant": "M0-MEM-001 remains open for sentinel-linked ownership.",
       "source_refs": [
         {
           "target": "source:src/ifile.rs",
           "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 80,
+          "start_line": 122,
           "end_line": 174,
-          "excerpt_sha256": "3f440f83422b4c8ddbfa1262a8fb6301087de389bef341c64bc1979bee2ae7dd"
-        },
-        {
-          "target": "source:src/ifile.rs",
-          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
-          "start_line": 175,
-          "end_line": 240,
-          "excerpt_sha256": "b44985e65eb9ce6ef009cbed2eb31cba6d463a96b14479edf184d662403b5291"
+          "excerpt_sha256": "ce7fa969aef5fa83723d61cf3b55591e894e04dd44e14dfb59348e2af504cb6c"
         }
       ],
       "limitations": [
         "This reviews the anchor object and its adjacent link protocol; independent external node users and asynchronous cleanup remain unapproved."
       ]
     }
-  }
+  },
+  "related_sources": {},
+  "finding_context": {}
 }

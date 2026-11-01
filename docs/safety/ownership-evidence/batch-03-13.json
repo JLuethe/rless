@@ -12,7 +12,7 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "FILE:src/pattern.rs: A caller pattern slot owns an allocated GNU buffer and its native internal allocations; converted patterns are temporary, and match registers now live in local fixed arrays.",
+      "analysis": "In src/pattern.rs, a caller pattern slot owns an allocated GNU buffer and its native internal allocations; converted patterns are temporary, and match registers now live in local fixed arrays.",
       "invariant": "Compiled pattern and per-match register owners are separate.",
       "source_refs": [
         {
@@ -25,231 +25,175 @@
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
+          "start_line": 588,
+          "end_line": 610,
+          "excerpt_sha256": "57f45c6f1a8e127bffdce7360b64923e0d2cfcae3a4523d05024842f4c94b2bb"
         },
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "start_line": 691,
+          "end_line": 720,
+          "excerpt_sha256": "14afd1adadc916f84de149d67ef4656794525dcacca14b23426e547555d22335"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "FILE:src/pattern.rs: re_search borrows the line and local register arrays; returned match endpoints borrow line storage and become stale when that line owner changes.",
+      "analysis": "In src/pattern.rs, re_search borrows the line and local register arrays; returned match endpoints borrow line storage and become stale when that line owner changes.",
       "invariant": "Match endpoints cannot outlive their source line.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
-          "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "start_line": 666,
+          "end_line": 724,
+          "excerpt_sha256": "3458eb28a079818602a080e7a161905df7c1f136886b16c77732eb216db85ede"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "FILE:src/pattern.rs: GNU entry points are direct calls, but re_set_syntax changes process-global state and filter handlers may free a pattern while another operation borrows it.",
+      "analysis": "In src/pattern.rs, gNU entry points are direct calls, but re_set_syntax changes process-global state and filter handlers may free a pattern while another operation borrows it.",
       "invariant": "Named native functions do not protect compiled-owner lifetime.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
-          "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+          "start_line": 6,
+          "end_line": 24,
+          "excerpt_sha256": "ed5ac8e780547955f2d45a15461a56851fd4d2d7dd502a4e171ddeeaf49897bf"
+        },
+        {
+          "target": "source:src/pattern.rs",
+          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
+          "start_line": 447,
+          "end_line": 451,
+          "excerpt_sha256": "afc99baa60ab40526e874d1de92452961c6f96315ea9bd8da551e893c925337a"
         },
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
           "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "end_line": 575,
+          "excerpt_sha256": "aba7e438c31078ea8f8a400fad3d25c9a9d39997030ff3a9e28379f0965bc713"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "FILE:src/pattern.rs: Successful replacement regfrees/frees the old compiled owner and publishes the new pointer; uncompile nulls the slot after release, while failed compilation retains the old slot.",
+      "analysis": "In src/pattern.rs, successful replacement regfrees/frees the old compiled owner and publishes the new pointer; uncompile nulls the slot after release, while failed compilation retains the old slot.",
       "invariant": "Pattern replacement invalidates all old compiled aliases.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
-          "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "start_line": 570,
+          "end_line": 610,
+          "excerpt_sha256": "6ed54fd5435e9edbadd9f871264e4c315ffcb5d80c4b0522245150115f9dca97"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "FILE:src/pattern.rs: Compile stages a new object and restores prior syntax before error/recovery; native layout bitfields and narrowed offsets remain explicit ABI/range contracts.",
+      "analysis": "In src/pattern.rs, compile stages a new object and restores prior syntax before error/recovery; native layout bitfields and narrowed offsets remain explicit ABI/range contracts.",
       "invariant": "Staging does not prove copied native ABI layout.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
+          "start_line": 436,
           "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+          "excerpt_sha256": "acdb6610aec92e3eafd44d66c8533e254feb24e547d782a29a60c888e1cc0480"
         },
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
           "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "end_line": 575,
+          "excerpt_sha256": "aba7e438c31078ea8f8a400fad3d25c9a9d39997030ff3a9e28379f0965bc713"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "FILE:src/pattern.rs: Successful compiled objects require regfree followed by free; local REGS_FIXED arrays need no native free, and converted temporary text is freed after compilation.",
+      "analysis": "In src/pattern.rs, successful compiled objects require regfree followed by free; local REGS_FIXED arrays need no native free, and converted temporary text is freed after compilation.",
       "invariant": "Stack registers must never be passed to native free.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
-          "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+          "start_line": 570,
+          "end_line": 610,
+          "excerpt_sha256": "6ed54fd5435e9edbadd9f871264e4c315ffcb5d80c4b0522245150115f9dca97"
         },
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "start_line": 691,
+          "end_line": 720,
+          "excerpt_sha256": "14afd1adadc916f84de149d67ef4656794525dcacca14b23426e547555d22335"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "FILE:src/pattern.rs: Compile failure frees staged storage and can report an error; source review does not rederive native partial-compile cleanup semantics or every narrowing boundary.",
+      "analysis": "In src/pattern.rs, compile failure frees staged storage and can report an error; source review does not rederive native partial-compile cleanup semantics or every narrowing boundary.",
       "invariant": "Failure cleanup still needs the canonical native contract.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
-          "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
-        },
-        {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
           "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
+          "end_line": 568,
+          "excerpt_sha256": "b47bd1baade75cef354e70d6fde5a564aadb62b2c3cc71ce02c0c6598e1936c0"
         },
         {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 44,
+          "end_line": 56,
+          "excerpt_sha256": "2fede7e9243c7596a9beaa708adb9c8833d2c2038a8a592a70e0ade8bc20db5a"
         }
       ],
-      "limitations": [
-        "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "FILE:src/pattern.rs: The syntax value is restored on both source paths, but signal-driven filter cleanup can still retire borrowed compiled data; existing native/signal findings remain open.",
+      "analysis": "In src/pattern.rs, the syntax value is restored on both source paths, but signal-driven filter cleanup can still retire borrowed compiled data; existing native/signal findings remain open.",
       "invariant": "Borrowed pattern lifetime is not protected from handlers.",
       "source_refs": [
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 404,
-          "end_line": 448,
-          "excerpt_sha256": "bcbd80f6b7ec8fb3c43f5f881404151cda831373d9266b8a980d2e687b19ac45"
+          "start_line": 447,
+          "end_line": 451,
+          "excerpt_sha256": "afc99baa60ab40526e874d1de92452961c6f96315ea9bd8da551e893c925337a"
         },
         {
           "target": "source:src/pattern.rs",
           "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
           "start_line": 552,
-          "end_line": 802,
-          "excerpt_sha256": "8392a38b671321fa88f3f7199077b15d162485fe732f7b5a1bdf945120b2ff04"
+          "end_line": 559,
+          "excerpt_sha256": "cbee67745fa797a20bb3ec331d8c47d63f77c1838a83f2675d9c28dd2f58f11b"
         },
         {
-          "target": "source:src/pattern.rs",
-          "sha256": "47657d88c9d56edbc16955acd556c0a90b02508a90d5d9d9ebf1a5fd99aab7dd",
-          "start_line": 804,
-          "end_line": 872,
-          "excerpt_sha256": "9630864e714270ee2f886fcba966125298623af21a10bd468631c4807ef1e3b7"
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 44,
+          "end_line": 56,
+          "excerpt_sha256": "2fede7e9243c7596a9beaa708adb9c8833d2c2038a8a592a70e0ade8bc20db5a"
         }
       ],
       "limitations": [
         "Current fixed registers and syntax restoration are preserved improvements. M0-LEAK-001 and M0-FFI-001 remain open records, not claims of a newly reproduced leak/global-syntax failure."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/pattern.rs."
+    }
+  },
+  "finding_context": {}
 }

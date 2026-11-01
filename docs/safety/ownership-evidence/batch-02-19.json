@@ -16,188 +16,199 @@
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "table_rows: This c_int owns the last initialized geometry, distinct from capacity; pos_init starts at zero and updates it after clearing changed rows.",
+      "analysis": "This table_rows c_int owns the last initialized geometry, distinct from capacity; pos_init starts at zero and updates it after clearing changed rows.",
       "invariant": "Logical row count tracks initialized table content.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
           "start_line": 50,
-          "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+          "end_line": 53,
+          "excerpt_sha256": "d82407230701dd38697fcfd93dc629863b590ff43d34b17f23ed6496dfa4bc7a"
         },
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "aliases_escapes": {
-      "analysis": "table_rows: Readers copy min(sc_height,table_rows) before scanning; no array reference is returned by the row-count value.",
+      "analysis": "Readers copy min(sc_height,table_rows) before scanning; no array reference is returned by the row-count value.",
       "invariant": "Logical rows limit a scan but do not own its bytes.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
-          "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+          "start_line": 118,
+          "end_line": 137,
+          "excerpt_sha256": "fabe6948ff001c777276f3b7aa35a965e002b81edabe4a1f246e29f85cb30274"
         },
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "callback_targets": {
-      "analysis": "table_rows: No callback target lives in this field; get_scrpos consumes it during ordinary navigation and fatal cleanup through direct calls.",
+      "analysis": "No callback target lives in this table_rows field; get_scrpos consumes it during ordinary navigation and fatal cleanup through direct calls.",
       "invariant": "Row metadata can be read during cleanup reentry.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
-          "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
-        },
-        {
-          "target": "source:src/position.rs",
-          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
           "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "end_line": 244,
+          "excerpt_sha256": "b22a7002567eebd58b4d7a0ebd0a6d934f801d171fc29d2be4cdd8d92eb455cd"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "invalidation": {
-      "analysis": "table_rows: Resize reuse invalidates removed/newly exposed rows before changing the count; old rows may nevertheless describe a freed array during allocation growth.",
+      "analysis": "Resize reuse invalidates removed/newly exposed rows before changing the table_rows count; old rows may nevertheless describe a freed array during allocation growth.",
       "invariant": "Initialized-row history cannot validate retired storage.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
+          "start_line": 171,
           "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
-        },
-        {
-          "target": "source:src/position.rs",
-          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "mutation_commit": {
-      "analysis": "table_rows: On success table_rows is assigned after table and capacity; on reuse it is assigned after the invalidation loop. Growth failure prevents that joint update.",
+      "analysis": "The ownership state described by table_rows remains published while pos_init frees the old array at line 184 without clearing table before the RHS ecalloc call. The assignment at 188 occurs only after ecalloc returns. Failure therefore leaves table pointing at freed memory, with the previous capacity/row metadata still published (M0-MEM-004).",
       "invariant": "Row publication must remain coherent with its backing owner.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
+          "start_line": 173,
           "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
-        },
-        {
-          "target": "source:src/position.rs",
-          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "excerpt_sha256": "c7894f940e8de7742b2e8f3bad707471bf3badaecbfb7166b8e135b2a68294cf"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "release_pair": {
-      "analysis": "table_rows: The scalar has no destructor/free pair; clearing rows logically retires positions without releasing array capacity.",
+      "analysis": "The table_rows scalar has no destructor/free pair; clearing rows logically retires positions without releasing array capacity.",
       "invariant": "Invalidating rows is distinct from freeing the allocation.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
-          "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
-        },
-        {
-          "target": "source:src/position.rs",
-          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "start_line": 173,
+          "end_line": 180,
+          "excerpt_sha256": "a537f7ea52dc474db211671692ac7307a79a3b7a443781daa994c34d52f541a4"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "error_cleanup": {
-      "analysis": "table_rows: available<2 and null checks correctly avoid small geometry scans, but a nonnull freed table can still pass them on fatal replacement.",
+      "analysis": "For table_rows, replacement allocation failure calls ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file. With a current file and is_tty, close_file calls get_scrpos; nonnull table and available rows >=2 allow a read of the freed array (M0-MEM-004).",
       "invariant": "Row bounds do not resolve the growth cleanup hazard.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
+          "start_line": 182,
           "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 860,
+          "end_line": 887,
+          "excerpt_sha256": "477e15342e8cb8885a78cc46eaf268356aff029fc5cf1e053bb03c0836e62330"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 969,
+          "excerpt_sha256": "54bd56b0d427e831ff86929d935fd0a3e0251c6d7e7fe24e1dccc7166ecc787a"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1078,
+          "end_line": 1083,
+          "excerpt_sha256": "2b997a8f7c13dcf535481729891283def45315511bd82bcdd437d26d7046b153"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 907,
+          "excerpt_sha256": "5f8591bb715bbac9cbf69a6dd7180f660031e7eab030c6608391e419d875e7c3"
         },
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 274,
+          "end_line": 282,
+          "excerpt_sha256": "90616eacd2eef93332912f5737ec1c16dec941bf63b4ce413845ba5d7a763788"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 293,
+          "end_line": 295,
+          "excerpt_sha256": "6a5ca53b6e43cf1bc88d129a7fa1d5b4dc3f996177a65c075c057c55dbe64e51"
         }
       ],
-      "limitations": [
-        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
-      ]
+      "limitations": []
     },
     "signals_handoff": {
-      "analysis": "table_rows: As a mutable global, its relation to sc_height/table relies on excluded reentry; ordinary resize tests do not establish a handler-safe transaction.",
+      "analysis": "As a mutable global, table_rows's relation to sc_height/table relies on excluded reentry; ordinary resize tests do not establish a handler-safe transaction.",
       "invariant": "Existing M0-MEM-003 and IND-POS-F4 remain open.",
       "source_refs": [
         {
           "target": "source:src/position.rs",
           "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 50,
+          "start_line": 171,
           "end_line": 195,
-          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
-        },
-        {
-          "target": "source:src/position.rs",
-          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
-          "start_line": 230,
-          "end_line": 291,
-          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
       "limitations": [
         "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
       ]
     }
-  }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: STATIC:d8def47d2ed5784f9ae2d78a."
+    },
+    "src/edit.rs": {
+      "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+      "relationship": "File activation/close reads position state or resets input status, establishing the reviewed cross-file lifecycle dependency. Target: STATIC:d8def47d2ed5784f9ae2d78a."
+    }
+  },
+  "finding_context": {}
 }
