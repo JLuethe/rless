@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:a4e6340411205d17caecbfe3",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/runtime.rs"
+    ],
+    "symbol": "IO_WAITING",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): The AtomicUsize owns the number of active IoWait guards, initialized at zero; each IoWait::new increments once.",
+      "invariant": "Each live guard contributes one wait count.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): os::intio reads a copied count to decide whether to post an interrupt; it receives no reference to a guard or buffer.",
+      "invariant": "The count does not expose guard storage.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): IoWait::drop is static Rust destructor dispatch; the numeric counter stores no dynamically selected destructor or native callback.",
+      "invariant": "Wait count cannot retain a callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "invalidation": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): Nested key reads acquire separate guards; dropping the inner guard leaves the outer count nonzero as the retained unit test checks.",
+      "invariant": "Ending an inner read does not retire its outer wait.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): SeqCst fetch_add/fetch_sub pair guard creation and drop; only a decrement observing one clears IO_INTERRUPTED.",
+      "invariant": "The final guard alone clears pending interruption.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "release_pair": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): A guard releases its count contribution through Drop on Rust return; no malloc/free or descriptor-close pair belongs to this atomic.",
+      "invariant": "Guard destruction balances a previously added count.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): Early input errors return through Rust frames and run Drop; the design avoids longjmp across the guard.",
+      "invariant": "I/O errors cannot skip ordinary guard destruction.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "IO_WAITING (src/runtime.rs:1-110): Signal-side intio checks the atomic without borrowing a guard; realistic stack-bounded nesting cannot approach usize count exhaustion.",
+      "invariant": "Handler notification does not mutate guard ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    }
+  }
+}

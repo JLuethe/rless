@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:6f152cb7136ced769d847ee4",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/fault.rs"
+    ],
+    "symbol": "FAIL_AT",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): The private AtomicUsize owns the requested positive ordinal; initialize resets it to zero and parse_plan rejects zero and overflow.",
+      "invariant": "An enabled plan has a positive representable ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): The parsed usize is copied into the field; hit copies it out, so no borrow of the environment string reaches the hook.",
+      "invariant": "Ordinal storage never retains environment bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): The ordinal is passed by value to next_trigger; it is neither a native pointer nor an indirect-call target.",
+      "invariant": "Ordinal arithmetic cannot dispatch a callback.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): Environment OsStrings may be dropped after initialize because the atomic retains only their parsed numeric result.",
+      "invariant": "Dropping parser input cannot invalidate the ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): initialize sets FAIL_AT before the FAIL_SITE Release publication; hit Acquire-checks the site and rejects a zero requested value.",
+      "invariant": "Readers observe the ordinal of the published plan.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): The counter configuration is static scalar storage with no destructor-owned external resource.",
+      "invariant": "Ordinal storage has no heap release obligation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): parse_plan uses checked multiplication/addition and reports invalid plans; hit returns false if an unconfigured zero is observed.",
+      "invariant": "Invalid ordinals do not become executable plans.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FAIL_AT (src/fault.rs:16-204): Normal hook reads use Relaxed only after the site Acquire; startup-only reset excludes concurrent plan replacement.",
+      "invariant": "The configured ordinal is stable while hooks execute.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    }
+  }
+}

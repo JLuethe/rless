@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:ef18f0df7355fd2d850830c3",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/output.rs"
+    ],
+    "symbol": "OUTPUT_FAILED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): The AtomicBool owns a sticky process output-failure bit, initially false and distinct from the translated output buffer owner.",
+      "invariant": "The flag owns no output bytes or descriptor.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): output_failed copies the value; flush_buffer swaps it to true, and pager.rs:768/974 reads through output_failed rather than borrowing the flag.",
+      "invariant": "Failure observation exports only a Boolean.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): The first false-to-true result permits one direct io_error_diagnostic call; the bit contains no callback or error object pointer.",
+      "invariant": "The failure latch cannot retain diagnostic buffers.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): The flag remains true after an error; terminal recovery may still attempt output, but no reset invalidates an observed failure.",
+      "invariant": "Output failure remains sticky for process lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): swap(true) commits failure before diagnostic and screen recovery; Relaxed is sufficient because the bit publishes no other memory payload.",
+      "invariant": "Failure is recorded before recovery callbacks execute.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): AtomicBool owns no malloc block; io_error_diagnostic borrows its literal slice and does not acquire flag-owned resources.",
+      "invariant": "Failure cleanup never frees the failure flag.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): EINTR retries do not set it; zero or hard write failure sets it and returns false without recursive error/putstr calls.",
+      "invariant": "Retryable interruption is not a sticky failure.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OUTPUT_FAILED (src/output.rs:487-562): Atomic accesses protect the latch itself; the separate mutable obuf/ob reentrancy contract remains pending and is not approved by this entry.",
+      "invariant": "Latch review does not approve output-buffer aliasing.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 487,
+          "end_line": 562,
+          "excerpt_sha256": "8a519756173b6e4f243bb6cff6fa2db1038c8f7a21b981c491c75f3aab7a3436"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    }
+  }
+}

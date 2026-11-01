@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:c596ff34a51d604df6fa29b7",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/version.rs"
+    ],
+    "symbol": "version",
+    "context": "",
+    "declared_type": "[:: core :: ffi :: c_char ; 4]",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "version (src/version.rs:5-7): The exported object owns exactly [c_char; 4], created from 712 followed by NUL in the image, rather than a pointer to allocated memory.",
+      "invariant": "The owner is the four-byte static array itself.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "version (src/version.rs:5-7): command.rs:1454-1463 lends its address through PARG; optfunc.rs:1093 and lesskey_parse.rs:1642-1646 also borrow it for reading.",
+      "invariant": "Callers receive a borrowed C string, not ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "version (src/version.rs:5-7): The initializer transmute returns an array value; no slot can hold or dispatch a function pointer.",
+      "invariant": "Version content is data and cannot be a callback.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "invalidation": {
+      "analysis": "version (src/version.rs:5-7): All observed consumers read the same four-byte address; no maintained code reallocates or overwrites the symbol.",
+      "invariant": "Borrowed version pointers do not outlive image data.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "version (src/version.rs:5-7): The literal establishes three digits and the terminating zero before any entry point executes.",
+      "invariant": "Static initialization publishes a complete C string.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "release_pair": {
+      "analysis": "version (src/version.rs:5-7): This object has no allocator pair or close operation; releasing the image at process exit ends its lifetime.",
+      "invariant": "Version pointers must never be passed to free.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "version (src/version.rs:5-7): Readers cannot make a partial allocation commit because no allocation occurs; output errors leave the array intact.",
+      "invariant": "Failed display leaves version bytes unchanged.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "version (src/version.rs:5-7): No handler is registered by this definition; concurrent read-only consumers do not mutate the bytes.",
+      "invariant": "The review permits reads and excludes external writes.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review."
+      ]
+    }
+  }
+}

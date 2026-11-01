@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:67aad4a8a246dc0989dedd29",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/fault.rs"
+    ],
+    "symbol": "ATTEMPTS",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): The static AtomicUsize owns the observed attempt count, reset to zero before a new startup plan is published.",
+      "invariant": "Attempt state is a process-lifetime numeric counter.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): next_trigger receives a shared atomic reference; fetch_update serializes value changes without handing its storage to a callback or caller.",
+      "invariant": "Shared references access the count only atomically.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): fetch_update uses a local checked_add closure with no captures of pager storage; that closure executes synchronously and is not retained.",
+      "invariant": "Counter update closures cannot escape the operation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "invalidation": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): No count borrow survives a move or free because this object never moves; reset is restricted to startup initialization.",
+      "invariant": "Counter address remains fixed for every hook.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): fetch_update commits checked_add(1) atomically; the successful previous value determines the one requested firing ordinal.",
+      "invariant": "Each committed count transition has one previous value.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "release_pair": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): The shared reference is borrowed by next_trigger and needs no explicit release; the static owns no heap block.",
+      "invariant": "Neither next_trigger nor hit may deallocate the counter.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): Overflow yields Err instead of wrapping to a previous ordinal and requests a single explicit exhaustion marker.",
+      "invariant": "Counter exhaustion never repeats an earlier ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "ATTEMPTS (src/fault.rs:16-204): Concurrent or interrupted increments use a lock-free atomic operation; other legacy handler operations remain separately tracked.",
+      "invariant": "Hook reentry cannot tear the attempt count.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    }
+  }
+}

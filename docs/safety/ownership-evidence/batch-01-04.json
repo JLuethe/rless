@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:84093c43c1d9d19533f8e3f8",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/fault.rs"
+    ],
+    "symbol": "FAIL_SITE",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): The private AtomicUsize owns a site number, initially disabled at zero, without any pager pointer or allocated payload.",
+      "invariant": "The atomic owns a scalar site identifier only.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): initialize stores a copied Site discriminant and hit reads it; neither returns a reference or exposes its address to native code.",
+      "invariant": "Site state cannot alias an application allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): hit compares a numeric Site; dispatch uses direct Rust calls to next_trigger and write_marker rather than a stored callback.",
+      "invariant": "Site selection does not store function addresses.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): The object has static lifetime; initialize resets its value without invalidating hit references or moving the atomic.",
+      "invariant": "Reconfiguration changes a value, never its address.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): initialize validates the plan and descriptor first, then publishes FAIL_SITE with Release; hit loads Acquire before reading related configuration.",
+      "invariant": "Publication of an enabled site follows configuration.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): The AtomicUsize requires no free or close; the trace descriptor it selects is owned separately from this numeric field.",
+      "invariant": "Releasing a trace pipe never releases the site object.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): Parsing and fcntl/fstat errors occur before the enabling store; hit returns false for another site, leaving application ownership unchanged.",
+      "invariant": "Configuration failure leaves the selected site disabled.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FAIL_SITE (src/fault.rs:16-204): The target atomic-width guard requires supported lock-free widths; hit uses atomic access even if reached during a legacy handler.",
+      "invariant": "This scalar is accessed atomically in hook contexts.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    }
+  }
+}

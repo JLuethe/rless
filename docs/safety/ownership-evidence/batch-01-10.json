@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:dad75ea4af15c5514174b724",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/process.rs"
+    ],
+    "symbol": "INHERITED_SIGPIPE",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): The AtomicUsize is initialized with libc::SIG_DFL and owns the integer representation of the pre-Rust SIGPIPE disposition.",
+      "invariant": "The saved value is initialized before the constructor.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): The sa_sigaction field is copied from a stack query, not referenced; no code borrows the atomic as a mutable static.",
+      "invariant": "Saved signal state does not alias stack metadata.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): init passes the saved value to libc::signal, not to a Rust function call; exec inheritance constrains it to DFL or IGN.",
+      "invariant": "The inherited value is restored through the C API.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "invalidation": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): The atomic is never relocated or freed; Rust startup may change SIGPIPE but cannot invalidate the stored scalar.",
+      "invariant": "Runtime signal setup cannot invalidate saved storage.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): A successful constructor query stores Relaxed; single-threaded constructor-before-main ordering precedes init load Relaxed.",
+      "invariant": "Publication relies on executable startup sequencing.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "release_pair": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): This is disposition metadata, not a kernel FD or allocated handler owner; no explicit destructor is paired with it.",
+      "invariant": "Signal metadata cannot be freed as a pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): On query failure the safe initialized DFL remains; the ignored signal return may lose restoration diagnostics but creates no memory owner.",
+      "invariant": "Query errors cannot expose an uninitialized scalar.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "INHERITED_SIGPIPE (src/process.rs:1-23): The saved sentinel is not mutated in a handler; only the startup constructor writes it and init restores the process-wide disposition.",
+      "invariant": "Current application handlers do not write saved state.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 1,
+          "end_line": 23,
+          "excerpt_sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+      ]
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:e10ead5254340eb5268da696",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/help.rs"
+    ],
+    "symbol": "size_helpdata",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): The exported c_int owns the default help payload length, zero-initialized then assigned 17587 minus one by the static initializer.",
+      "invariant": "Default help size is a representable inline integer.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): lmsg.rs:2592 copies the value into size_help_data; no source hands out an owning pointer to this integer.",
+      "invariant": "The default length is copied rather than transferred.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): c2rust_run_static_initializers is the sole writer, selected by INIT_ARRAY; the length itself is never interpreted as a callback.",
+      "invariant": "Callback dispatch is separate from the size value.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "invalidation": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): The integer retains its image address and value after startup; translated help changes a different size_help_data variable.",
+      "invariant": "Changing translated help cannot resize this field.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): The initializer derives length from the exact array type and subtracts one; 17586 fits c_int on the supported target.",
+      "invariant": "Default length matches the compiled backing array.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "release_pair": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): The scalar needs no free/close pair; copying it into message state transfers no ownership of the default help bytes.",
+      "invariant": "Length metadata has no independent release obligation.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): Computing size_of minus one is infallible for this nonempty fixed array and acquires no resource requiring cleanup.",
+      "invariant": "Size initialization cannot leave a partial allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "size_helpdata (src/help.rs:17595-17605): The loader invokes the initializer before application main and registered handlers; there is no later maintained writer.",
+      "invariant": "Default size is fixed before application signal setup.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    }
+  }
+}

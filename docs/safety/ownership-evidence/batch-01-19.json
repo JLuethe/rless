@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:844f5336864816a0e2578c05",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "meta_escape_buf",
+    "context": "",
+    "declared_type": "[:: core :: ffi :: c_char ; 2]",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): The static two-character array owns storage for a numeric -f escape byte and its NUL terminator.",
+      "invariant": "The escape buffer owns exactly two static bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): meta_escape borrows its address after -f; printf and strlen only read through that pointer during the later output loop.",
+      "invariant": "Escape-buffer aliases are read-only during emission.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): The array contains characters, not function pointers; consumers are direct libc string operations without retained callbacks.",
+      "invariant": "Two-byte escape storage cannot register code.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "invalidation": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): Repeated -f options overwrite the same static array before output; its address never changes and old values have no separate owner.",
+      "invariant": "Reusing the buffer does not invalidate its address.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): main_0 stores index zero, writes zero to index one, then points meta_escape to the buffer.",
+      "invariant": "The NUL terminator precedes pointer publication.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "release_pair": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): Static storage must not be freed, including when meta_escape later selects an argv tail or literal.",
+      "invariant": "Changing escape selection cannot release this array.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): If numeric parsing consumes nothing, pr_error exits; both array indices remain in bounds and no allocation was committed.",
+      "invariant": "Failed -f parsing cannot leave an allocated buffer.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "meta_escape_buf (src/bin/lessecho.rs:87-426): Only startup option parsing writes the array; the helper has no registered handler using it concurrently.",
+      "invariant": "No supported callback races the two-byte update.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    }
+  }
+}

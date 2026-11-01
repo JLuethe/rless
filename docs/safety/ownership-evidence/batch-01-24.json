@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:e0776a8e6718955d46e0f8f1",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/help.rs"
+    ],
+    "symbol": "INIT_ARRAY",
+    "context": "",
+    "declared_type": "[unsafe extern \"C\" fn () ; 1]",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): The used static array owns one unsafe extern C fn() code address, with Linux init_array placement on the supported target.",
+      "invariant": "The callback table has one fixed C-ABI entry.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): The loader borrows the retained table; its element points to image code with no captured stack or heap context.",
+      "invariant": "Startup callbacks retain no temporary data aliases.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): The exact target c2rust_run_static_initializers sets size_helpdata using size_of minus one and returns without application calls.",
+      "invariant": "The initializer target is explicit and nonallocating.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "invalidation": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): The function-pointer array is shared and immutable; no runtime replacement or unloading invalidates its target.",
+      "invariant": "Callback address and code lifetime match the image.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): Static initialization fixes the table before loader traversal, and traversal establishes the default help length before main.",
+      "invariant": "Constructor dispatch completes before help use.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "release_pair": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): No unregister or free is appropriate for a loader-owned startup table; process image release retires table and code together.",
+      "invariant": "Code addresses are not allocator-owned buffers.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): The target does only bounded constant size computation and scalar assignment, with no fallible allocation or ownership commit.",
+      "invariant": "The constructor needs no error cleanup owner.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "INIT_ARRAY (src/help.rs:17595-17605): This is a loader startup callback rather than an asynchronous signal handler; it finishes before application handler registration.",
+      "invariant": "Constructor execution does not interrupt pager mutation.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    }
+  }
+}

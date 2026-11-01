@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:36ed0474322b321cc3251891",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "quote_all",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): The private c_int owns the Boolean quoting option, initially zero and set to one by parsing -a in main_0.",
+      "invariant": "The quote-all option is an inline scalar.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): The output loop reads the scalar by value; no pointer to it is passed to printf, the argument Vec or a native object.",
+      "invariant": "Quote selection does not lend mutable storage.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): The branch selects a literal printf format and direct calls; it does not contain a callback pointer.",
+      "invariant": "Quote-all is control data, never callable state.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "invalidation": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): The flag has static lifetime and no backing allocation; option parsing finishes before the argument output loop reads it.",
+      "invariant": "Parsing precedes all quote-all output decisions.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): The only option update stores the complete integer one; no coupled pointer/length update can expose partial ownership.",
+      "invariant": "Setting -a is a single complete scalar update.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "release_pair": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): Process image lifetime owns the flag; ordinary exit requires no free or descriptor close for it.",
+      "invariant": "Quote-all storage has no external release pair.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): An invalid option calls pr_error and exits; this scalar needs no rollback or resource cleanup.",
+      "invariant": "Parse failure cannot leak a quote-all allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "quote_all (src/bin/lessecho.rs:87-409): The helper runs one main_0 call on its startup thread and registers no handler that mutates the quoting flag.",
+      "invariant": "Current quote-all mutation is single-threaded.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:7ece8c0202fbfa983cec1068",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/fault.rs"
+    ],
+    "symbol": "EXHAUSTION_REPORTED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): The AtomicBool owns a one-bit exhaustion latch, initialized false and reset before the startup plan is enabled.",
+      "invariant": "The latch stores only a process-lifetime Boolean.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): next_trigger borrows the static through a shared atomic reference; no mutable Rust alias or raw pointer escapes.",
+      "invariant": "The latch is shared through atomic operations only.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): The latch is tested by swap in a direct branch; it contains neither closure state nor a callable address.",
+      "invariant": "Exhaustion state cannot register callbacks.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "invalidation": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): Reset changes the bit in place during startup; hook accesses cannot observe freed or replaced latch storage.",
+      "invariant": "The exhaustion latch has a stable static address.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): On fetch_update overflow, swap(true) selects exactly the first observer to report exhaustion; later observers produce no duplicate.",
+      "invariant": "Only one overflow observer sees the false latch.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "release_pair": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): The flag needs no drop, free or descriptor close; event emission does not transfer its ownership.",
+      "invariant": "The exhaustion latch has no external release pair.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): Counter overflow is reported as site 255 and u64::MAX rather than reused success; failed marker writes remain missing test evidence.",
+      "invariant": "Exhaustion cannot silently count as a requested hit.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "EXHAUSTION_REPORTED (src/fault.rs:16-204): Atomic swap is used in the hook, with target-width support checked at compile time; it does not allocate or enter a mutex.",
+      "invariant": "Handler entry does not require a latch allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 204,
+          "excerpt_sha256": "152caa940a9f125658c4fa2383537522726163a60f939738bebcc80e1926d19e"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:92df0134f7fd408af70b0314",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "closequote",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_char",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): The c_char owns a closing-quote byte initialized to double quote; -c copies a character and -d copies a parsed number.",
+      "invariant": "Closing quote is owned inline in static storage.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): Only a copied byte survives parsing; printf receives its integer promotion rather than a borrowed pointer into argv.",
+      "invariant": "Closing quote cannot dangle when argv changes.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): Quoted-output dispatch is a direct printf call using %c; the field is not a registered native callback.",
+      "invariant": "Closing quote is interpreted only as a character.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "invalidation": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): Option replacement changes the byte in place before output starts; no heap owner or string alias is invalidated.",
+      "invariant": "Quote updates do not replace storage.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): The -d parser failure exits if no number was consumed; successful option parsing commits a complete character value.",
+      "invariant": "Output follows successful numeric option consumption.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "release_pair": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): No destructor or free operation applies to this scalar; process exit releases its image lifetime.",
+      "invariant": "Closing quote has no allocator or FD owner.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): pr_error prints an error and exits for a missing number; quote state has no allocation requiring cleanup.",
+      "invariant": "Numeric option error cannot leak quote storage.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "closequote (src/bin/lessecho.rs:87-409): The helper is single-threaded and has no custom handler that changes closequote between output arguments.",
+      "invariant": "Current closing-quote writes precede output reads.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 409,
+          "excerpt_sha256": "54210787d6a0b0f0f56d253c8ef389f35e9f68083c13b66c9852be7258b361cd"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    }
+  }
+}

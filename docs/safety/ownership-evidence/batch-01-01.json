@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:build.rs",
+    "kind": "source-file",
+    "paths": [
+      "build.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:build.rs (build.rs:1-8): Cargo creates the TARGET String in main; the build script owns that value until its stack scope ends.",
+      "invariant": "The target value is a Rust-owned String.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:build.rs (build.rs:1-8): The comparison and assertion borrow TARGET locally; no reference is returned or written into generated source.",
+      "invariant": "No borrowed TARGET data survives main.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:build.rs (build.rs:1-8): The only invoked interfaces are std::env::var, assert_eq and println; cargo:rustc-link-lib=tinfo is build metadata, not a runtime callback.",
+      "invariant": "Build metadata stores no function pointers.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:build.rs (build.rs:1-8): The TARGET String is neither replaced nor resized after creation; its borrows end before ordinary Rust drop.",
+      "invariant": "No live pointer is invalidated by replacement.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:build.rs (build.rs:1-8): The x86_64 GNU/Linux assertion precedes the linker directive, so unsupported targets cannot proceed as a successful supported build.",
+      "invariant": "The target check precedes link metadata emission.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:build.rs (build.rs:1-8): String allocation belongs to std and is released by its destructor; no malloc buffer, file descriptor or tinfo handle is acquired here.",
+      "invariant": "Rust drops the sole temporary allocation.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:build.rs (build.rs:1-8): Missing TARGET or a mismatched target terminates the build with a diagnostic; unwinding or process exit retains no pager state.",
+      "invariant": "Build failure cannot leave runtime pager owners.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:build.rs (build.rs:1-8): This program executes in Cargo before the pager exists; it installs no handler and hands no pointer to another process.",
+      "invariant": "Cargo sees text, never an owned application pointer.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    }
+  }
+}
