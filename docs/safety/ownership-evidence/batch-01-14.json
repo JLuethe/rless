@@ -12,7 +12,7 @@
     "declared_type": "* mut :: core :: ffi :: c_char",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "2d803720e6a1d042e211d06f693ff58939f282da74856f94937fbe9b7a43651a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The helper version is independent of the pager exported version array."
+      ]
     },
     "aliases_escapes": {
       "analysis": "pr_version copies the version pointer into local p and extracts the known short 1.15 text into a ten-byte stack buffer; neither alias escapes printf.",
@@ -42,7 +44,8 @@
         }
       ],
       "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries.",
+        "printf borrows the helper version pointer without acquiring its literal."
       ]
     },
     "callback_targets": {
@@ -57,7 +60,9 @@
           "excerpt_sha256": "83160041a051da9b764d13e4de002819f526510d5b82ef49d264aaced8ccd54a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The helper invokes no indirect target through version."
+      ]
     },
     "invalidation": {
       "analysis": "No maintained assignment replaces this version private pointer after static initialization; its literal outlives the local scan.",
@@ -120,7 +125,9 @@
           "excerpt_sha256": "313f00feed8e8be631d889196e485ce6afdde7352470575d4db6f316e6892c92"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The static helper version pointer must never become a malloc-release obligation."
+      ]
     },
     "error_cleanup": {
       "analysis": "pr_version stops at NUL if no space exists; the fixed version literal bounds the extracted revision to fit its ten-byte array.",

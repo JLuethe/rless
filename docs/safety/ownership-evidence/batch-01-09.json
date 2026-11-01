@@ -8,11 +8,11 @@
       "src/process.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/process.rs, the module owns one AtomicUsize containing the inherited SIGPIPE disposition and one static constructor function pointer.",
+      "analysis": "src/process.rs captures inherited SIGPIPE in an atomic. The module owns one AtomicUsize containing the inherited SIGPIPE disposition and one static constructor function pointer.",
       "invariant": "Both owned objects have image lifetime.",
       "source_refs": [
         {
@@ -23,10 +23,12 @@
           "excerpt_sha256": "095bd6a92b16ae5894a2df39e1234a61d873d64d3a5eea29b09bfe4b26cf2554"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Only the inherited disposition value is saved, not an owned signal-handler object."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/process.rs, remember_sigpipe uses a stack libc::sigaction; only its scalar sa_sigaction value is copied into the atomic before the stack value expires.",
+      "analysis": "src/process.rs copies a scalar from stack sigaction storage. Remember_sigpipe uses a stack libc::sigaction; only its scalar sa_sigaction value is copied into the atomic before the stack value expires.",
       "invariant": "No pointer to the stack sigaction is retained.",
       "source_refs": [
         {
@@ -37,10 +39,12 @@
           "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The stack sigaction is not retained after remember_sigpipe returns."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/process.rs, rEMEMBER_SIGPIPE names exactly unsafe extern C fn remember_sigpipe(); the ELF init_array invokes it before Rust main, and init calls libc::signal directly.",
+      "analysis": "src/process.rs places remember_sigpipe in init_array. REMEMBER_SIGPIPE names exactly unsafe extern C fn remember_sigpipe(); the ELF init_array invokes it before Rust main, and init calls libc::signal directly.",
       "invariant": "Constructor ABI and target are fixed in source.",
       "source_refs": [
         {
@@ -51,10 +55,12 @@
           "excerpt_sha256": "393cfbd06afd894938a17f2c8ff614c0e77d4f19c61b6fa57eb72b4219232177"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Constructor ordering assumes the supported ELF startup environment."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/process.rs, across exec a previous custom handler is reset, leaving DFL or IGN; the saved value remains meaningful through Rust runtime startup.",
+      "analysis": "src/process.rs retains the exec-inherited disposition. Across exec a previous custom handler is reset, leaving DFL or IGN; the saved value remains meaningful through Rust runtime startup.",
       "invariant": "The saved disposition is an exec-inherited sentinel.",
       "source_refs": [
         {
@@ -68,7 +74,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/process.rs, the constructor stores after successful sigaction lookup; init reads after constructors finish and restores the inherited disposition.",
+      "analysis": "src/process.rs orders capture before init restores SIGPIPE. The constructor stores after successful sigaction lookup; init reads after constructors finish and restores the inherited disposition.",
       "invariant": "Initialization order precedes the restoring read.",
       "source_refs": [
         {
@@ -82,7 +88,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/process.rs, no handler heap allocation or resource handle is acquired; static function and atomic storage are released with the image.",
+      "analysis": "src/process.rs owns no heap handler context. No handler heap allocation or resource handle is acquired; static function and atomic storage are released with the image.",
       "invariant": "Signal disposition values are never heap-released.",
       "source_refs": [
         {
@@ -93,10 +99,12 @@
           "excerpt_sha256": "095bd6a92b16ae5894a2df39e1234a61d873d64d3a5eea29b09bfe4b26cf2554"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Restoring a signal disposition does not release application resources."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/process.rs, failed sigaction lookup leaves the initial DFL value; libc::signal status is ignored, so restoration failure is not reported by this API.",
+      "analysis": "src/process.rs leaves the default on failed sigaction lookup. Failed sigaction lookup leaves the initial DFL value; libc::signal status is ignored, so restoration failure is not reported by this API.",
       "invariant": "Query failure never publishes uninitialized action data.",
       "source_refs": [
         {
@@ -117,7 +125,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/process.rs, the constructor only queries a disposition; init restores SIGPIPE before each executable enters translated application code.",
+      "analysis": "src/process.rs restores SIGPIPE before translated startup. The constructor only queries a disposition; init restores SIGPIPE before each executable enters translated application code.",
       "invariant": "No application callback is invoked by the query.",
       "source_refs": [
         {
@@ -150,11 +158,11 @@
   "related_sources": {
     "src/bin/rless.rs": {
       "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
-      "relationship": "The executable restores inherited SIGPIPE before it enters pager startup, ordering this process-state owner. Target: FILE:src/process.rs."
+      "relationship": "main at src/bin/rless.rs:1-4 invokes process::init before pager::main, restoring the disposition captured in process.rs before translated startup."
     },
     "src/bin/lessecho.rs": {
       "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
-      "relationship": "The companion executable restores SIGPIPE before creating arguments and entering translated helper logic. Target: FILE:src/process.rs."
+      "relationship": "The helper main at src/bin/lessecho.rs:411-414 invokes process::init before constructing helper arguments, giving inherited SIGPIPE the same restoration ordering as the pager."
     }
   },
   "finding_context": {}

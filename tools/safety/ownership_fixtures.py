@@ -25,7 +25,7 @@ def packet(item, review, inventory, root):
                       excerpt_sha256=hashlib.sha256(excerpt).hexdigest())
         checklist[key]=dict(analysis=f'The synthetic {key} contract for {target_name} is fixture-only; it makes no production approval.',
             invariant='This invariant belongs only to the explicitly synthetic test fixture.',source_refs=[citation],
-            limitations=['This is synthetic fixture evidence, not a production review.'] if index==0 else [])
+            limitations=[f'The synthetic {key} fixture supplies no independent {target_name} approval.'])
 
     item.update(checklist=checklist)
     path='docs/safety/ownership-evidence/'+hashlib.sha256(item['id'].encode()).hexdigest()+'.json'

@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "table_rows records initialized geometry rather than owning rows separately."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Readers copy min(sc_height,table_rows) before scanning; no array reference is returned by the row-count value.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The old row count can admit reads after the table allocation has been freed."
+      ]
     },
     "callback_targets": {
       "analysis": "No callback target lives in this table_rows field; get_scrpos consumes it during ordinary navigation and fatal cleanup through direct calls.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "b22a7002567eebd58b4d7a0ebd0a6d934f801d171fc29d2be4cdd8d92eb455cd"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Cleanup reaches get_scrpos before successful replacement updates table_rows."
+      ]
     },
     "invalidation": {
       "analysis": "Resize reuse invalidates removed/newly exposed rows before changing the table_rows count; old rows may nevertheless describe a freed array during allocation growth.",
@@ -86,7 +92,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "The ownership state described by table_rows remains published while pos_init frees the old array at line 184 without clearing table before the RHS ecalloc call. The assignment at 188 occurs only after ecalloc returns. Failure therefore leaves table pointing at freed memory, with the previous capacity/row metadata still published (M0-MEM-004).",
+      "analysis": "table_rows changes immediately in the within-capacity branch, but the growth branch assigns it only after ecalloc returns. Failed growth therefore retains the old initialized-row count while table already points to freed storage; the geometry scalar outlives its backing array (M0-MEM-004).",
       "invariant": "Row publication must remain coherent with its backing owner.",
       "source_refs": [
         {
@@ -111,10 +117,12 @@
           "excerpt_sha256": "a537f7ea52dc474db211671692ac7307a79a3b7a443781daa994c34d52f541a4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Retiring geometry does not itself free or null the table pointer."
+      ]
     },
     "error_cleanup": {
-      "analysis": "For table_rows, replacement allocation failure calls ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file. With a current file and is_tty, close_file calls get_scrpos; nonnull table and available rows >=2 allow a read of the freed array (M0-MEM-004).",
+      "analysis": "table_rows participates directly in the cleanup read guard: get_scrpos uses min(sc_height,table_rows). The ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file path can reach that guard before table_rows is updated. With a current tty file and at least two old rows, the count admits reads through freed table (M0-MEM-004).",
       "invariant": "Row bounds do not resolve the growth cleanup hazard.",
       "source_refs": [
         {
@@ -203,11 +211,11 @@
   "related_sources": {
     "src/pager.rs": {
       "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
-      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: STATIC:d8def47d2ed5784f9ae2d78a."
+      "relationship": "ecalloc failure at src/pager.rs:860-887 enters quit/edit(NULL) at src/pager.rs:948-969 before table_rows can be updated for the new screen height."
     },
     "src/edit.rs": {
       "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
-      "relationship": "File activation/close reads position state or resets input status, establishing the reviewed cross-file lifecycle dependency. Target: STATIC:d8def47d2ed5784f9ae2d78a."
+      "relationship": "close_file invokes get_scrpos at src/edit.rs:899-907 via src/edit.rs:924-927 and src/edit.rs:1078-1083; the position reader uses old table_rows to admit rows during failed-growth cleanup."
     }
   },
   "finding_context": {}

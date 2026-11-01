@@ -12,7 +12,7 @@
     "declared_type": "lbool",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -41,7 +41,9 @@
           "excerpt_sha256": "e5fb252c7ef88d919af98d53ad4fdefecb13fd2a850221a2f052fc113e04ba58"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "literal owns a next-character interpretation flag."
+      ]
     },
     "aliases_escapes": {
       "analysis": "literal retains no character pointer; cmd_char2 consumes completed bytes from the separate multibyte staging buffer before insertion.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The flag must describe the same command sequence as cp and cmdbuf."
+      ]
     },
     "callback_targets": {
       "analysis": "When true, cmd_char2 skips normal edit-command decoding and directly calls cmd_ichar; no function pointer is stored in the literal mode bit.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct key processing stores no callback target in literal."
+      ]
     },
     "invalidation": {
       "analysis": "Reset or consumption clears it, but the literal bit has no generation tying it to a particular command or partially assembled UTF character.",
@@ -118,7 +124,9 @@
           "excerpt_sha256": "ef2f48cf8ee90fe9f7bcf22a75f00dd574575d4b1ecb1962d47edc68556de119"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Consuming literal mode retires no heap object."
+      ]
     },
     "error_cleanup": {
       "analysis": "literal is cleared before cmd_ichar may reject capacity, so a failed byte insertion does not automatically restore the consumed interpretation mode.",
@@ -168,7 +176,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:79b3134255a294064e216636."
+      "relationship": "The terminate handler at src/signal.rs:83-85 has no literal-mode access. It marks the asynchronous termination boundary; a reentrant change to the next-character flag remains untraced."
     }
   },
   "finding_context": {}

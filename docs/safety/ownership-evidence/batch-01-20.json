@@ -12,7 +12,7 @@
     "declared_type": "AtomicBool",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "705a26d94fee17c3e0c0ba4cf5e5bb9937b5722fada3fa382323891059ae9e07"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "OUTPUT_FAILED owns sticky failure state rather than output bytes."
+      ]
     },
     "aliases_escapes": {
       "analysis": "output_failed copies the OUTPUT_FAILED value; flush_buffer swaps it to true, and pager.rs:768/974 reads through output_failed rather than borrowing the flag.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "22984a3eb86c54a865c32028cc4cdb62e3efa2d980356711bf3ec085fe4c3032"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The atomic latch cannot retain a buffer being flushed."
+      ]
     },
     "callback_targets": {
       "analysis": "The first false-to-true result permits one direct io_error_diagnostic call; the OUTPUT_FAILED bit contains no callback or error object pointer.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "89ee112a3708f5dea45fe8876d9e5c86e5938c9b71f1517149677ad97cf1c922"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Fatal output handling can enter quit independently of atomic storage safety."
+      ]
     },
     "invalidation": {
       "analysis": "The OUTPUT_FAILED flag remains true after an error; terminal recovery may still attempt output, but no reset invalidates an observed failure.",
@@ -118,7 +124,9 @@
           "excerpt_sha256": "b901e5b0d50891f8021a628b3722ae3dbb4dab70ec8c9db23ae3a718cc52f9f3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Setting OUTPUT_FAILED is not the release of a buffered write owner."
+      ]
     },
     "error_cleanup": {
       "analysis": "EINTR retries do not set OUTPUT_FAILED; zero or hard write failure sets it and returns false without recursive error/putstr calls.",
@@ -161,7 +169,7 @@
   "related_sources": {
     "src/pager.rs": {
       "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
-      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: STATIC:ef18f0df7355fd2d850830c3."
+      "relationship": "The copy loop at src/pager.rs:768 tests output_failed and stops processing files. It consumes OUTPUT_FAILED sticky state but does not own or release the output buffer through the latch."
     }
   },
   "finding_context": {}

@@ -12,7 +12,7 @@
     "declared_type": "* mut POSITION",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "table owns the array address; size and row counters do not duplicate ownership."
+      ]
     },
     "aliases_escapes": {
       "analysis": "position/get_scrpos and writer loops dereference the table global pointer; copied scrpos results do not retain or protect the underlying allocation.",
@@ -62,7 +64,9 @@
           "excerpt_sha256": "90616eacd2eef93332912f5737ec1c16dec941bf63b4ce413845ba5d7a763788"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A nonnull table can still be stale after free during growth."
+      ]
     },
     "callback_targets": {
       "analysis": "There is no code pointer stored here; allocation and fatal cleanup are direct calls that may indirectly revisit table readers.",
@@ -83,7 +87,9 @@
           "excerpt_sha256": "477e15342e8cb8885a78cc46eaf268356aff029fc5cf1e053bb03c0836e62330"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ecalloc can enter close_file before publishing a replacement table."
+      ]
     },
     "invalidation": {
       "analysis": "pos_init frees the old allocation at 184 while table still contains that address until the assignment at 188 completes.",
@@ -100,7 +106,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "The ownership state described by table remains published while pos_init frees the old array at line 184 without clearing table before the RHS ecalloc call. The assignment at 188 occurs only after ecalloc returns. Failure therefore leaves table pointing at freed memory, with the previous capacity/row metadata still published (M0-MEM-004).",
+      "analysis": "table remains the published array pointer when pos_init frees its old allocation. The RHS ecalloc must return before assignment can replace table; failure therefore leaves the exact old address dangling. Capacity counters cannot repair that pointer lifetime gap (M0-MEM-004).",
       "invariant": "Failure does not commit a valid replacement owner.",
       "source_refs": [
         {
@@ -125,10 +131,12 @@
           "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The global table address must not be dereferenced between old free and successful replacement."
+      ]
     },
     "error_cleanup": {
-      "analysis": "For table, replacement allocation failure calls ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file. With a current file and is_tty, close_file calls get_scrpos; nonnull table and available rows >=2 allow a read of the freed array (M0-MEM-004).",
+      "analysis": "table can be dereferenced after failed growth: ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file -> get_scrpos. With a current tty file, nonnull table and at least two available rows, get_scrpos reads the freed allocation (M0-MEM-004). This is source-traced and not runtime reproduced.",
       "invariant": "Fatal cleanup must not read a retired table allocation.",
       "source_refs": [
         {
@@ -224,15 +232,15 @@
   "related_sources": {
     "src/pager.rs": {
       "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
-      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: STATIC:cb1b55763368fe2bf6728dca."
+      "relationship": "Failed ecalloc at src/pager.rs:860-887 enters quit, whose edit(NULL) at src/pager.rs:948-969 can run before table receives a replacement address."
     },
     "src/edit.rs": {
       "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
-      "relationship": "File activation/close reads position state or resets input status, establishing the reviewed cross-file lifecycle dependency. Target: STATIC:cb1b55763368fe2bf6728dca."
+      "relationship": "The edit(NULL)/edit_ifile(NULL) path at src/edit.rs:924-927 and src/edit.rs:1078-1083 calls close_file; its get_scrpos call at src/edit.rs:899-907 can read through the still-published table pointer."
     },
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:cb1b55763368fe2bf6728dca."
+      "relationship": "terminate at src/signal.rs:83-85 calls quit. The separately traced close_file/get_scrpos reader makes termination relevant to the table pointer lifetime gap during replacement."
     }
   },
   "finding_context": {}

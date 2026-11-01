@@ -12,7 +12,7 @@
     "declared_type": "lbool",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "d23268da90c7cdc0fc63db8d6172b3f7d170573ec6ebea9d66c4c0fdcaf62bb5"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "insert_mode is editing policy, not ownership of inserted bytes."
+      ]
     },
     "aliases_escapes": {
       "analysis": "cmd_istr saves a copied Boolean while borrowing source text; no pointer into that source is stored in the insert_mode policy field.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Temporary overrides must not be observed by another editor operation."
+      ]
     },
     "callback_targets": {
       "analysis": "cmd_ichar may directly delete a character before insertion in overwrite mode; the insert_mode flag contains no dynamic edit callback or closure.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The cited termination handler does not by itself prove an insert_mode reentry route."
+      ]
     },
     "invalidation": {
       "analysis": "cmd_istr restores insert_mode on normal return, but no RAII guard restores its temporary override on every nonlocal/fatal path.",
@@ -113,7 +119,9 @@
           "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Restoring insert_mode does not restore a moved or invalidated command cursor."
+      ]
     },
     "error_cleanup": {
       "analysis": "cmd_istr restores the insert_mode saved mode after an action error breaks its loop; fatal/reentrant paths still lack an exclusive editor transaction.",
@@ -130,7 +138,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "A reentrant edit while insert_mode is temporarily forced can observe the wrong destructive-edit policy; no exclusive editor owner excludes that condition.",
+      "analysis": "insert_mode is temporarily overridden by ordinary editor operations. A second editor observing the override would use the wrong policy, but the terminate -> quit citation does not establish that such an operation is reachable from a handler. No concrete asynchronous insert_mode mutation is claimed; exclusive editor entry remains a required precondition.",
       "invariant": "Insert-mode review does not approve asynchronous editing.",
       "source_refs": [
         {
@@ -156,7 +164,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:5b27208908809bd7082ce8d4."
+      "relationship": "src/signal.rs:83-85 reaches quit but does not invoke an editor or alter insert_mode. Observing a temporary insert override from a handler is a conditional editor-entry concern, not an established path."
     }
   },
   "finding_context": {}

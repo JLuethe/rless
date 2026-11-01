@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "4fd06a7bdcc12f34fa35667a4df080c88f99756451cf4cb4c58d1ab9ec65276e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "maxbufs is a cache budget rather than the number of allocated nodes."
+      ]
     },
     "aliases_escapes": {
       "analysis": "ch_get compares copied budget with active nbufs; lowering maxbufs neither retires cached pointers nor changes the lifetime of retained nonseekable data.",
@@ -43,12 +45,14 @@
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 590,
-          "end_line": 607,
-          "excerpt_sha256": "9833959160bc21a4fb4a94ff1ef4725911fb59a2039be224fe7067e07e62c86d"
+          "start_line": 584,
+          "end_line": 589,
+          "excerpt_sha256": "5382094542eb0458c1e4d21aa34ae3c289a51597ff2a6340617c3c0a50e6a932"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The comparison requires a coherent maxbufs, nbufs and active-file view."
+      ]
     },
     "callback_targets": {
       "analysis": "Budget exhaustion selects whether to call ch_addbuf or reuse an old node; neither branch is a callback retained in the maxbufs scalar.",
@@ -57,19 +61,14 @@
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 590,
-          "end_line": 607,
-          "excerpt_sha256": "9833959160bc21a4fb4a94ff1ef4725911fb59a2039be224fe7067e07e62c86d"
-        },
-        {
-          "target": "source:src/ch.rs",
-          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 1108,
-          "end_line": 1114,
-          "excerpt_sha256": "df871dc8d6142a9601717e4df2c1caf6f979a47cc7920837ffb073525b3050ad"
+          "start_line": 584,
+          "end_line": 589,
+          "excerpt_sha256": "5382094542eb0458c1e4d21aa34ae3c289a51597ff2a6340617c3c0a50e6a932"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The ch_get comparison gates direct ch_addbuf, not a callback stored in policy."
+      ]
     },
     "invalidation": {
       "analysis": "maxbufs applies across selected files; it does not brand a retained allocation or initialize that file state\u2019s node list.",
@@ -120,7 +119,9 @@
           "excerpt_sha256": "9510468b27d5dceec8b9420b747d8c6d16d7d50b08596f9e84576df3d6a04b47"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Changing the budget does not itself free cache nodes."
+      ]
     },
     "error_cleanup": {
       "analysis": "ch_addbuf failure may disable autobuf and set an empty-cache failure latch; maxbufs neither owns nor rolls back those states.",
@@ -129,9 +130,9 @@
         {
           "target": "source:src/ch.rs",
           "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-          "start_line": 590,
-          "end_line": 610,
-          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
+          "start_line": 584,
+          "end_line": 589,
+          "excerpt_sha256": "5382094542eb0458c1e4d21aa34ae3c289a51597ff2a6340617c3c0a50e6a932"
         }
       ],
       "limitations": []

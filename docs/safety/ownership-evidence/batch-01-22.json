@@ -12,7 +12,7 @@
     "declared_type": "[:: core :: ffi :: c_char ; 17587]",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "5d24005208381bd1eff9a716e629432398985f8d3e1d35e6197a390744a778b3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "helpdata owns the image literal, not translated help_data replacements."
+      ]
     },
     "aliases_escapes": {
       "analysis": "lmsg.rs:2591 borrows helpdata's address as help_data only with owned_help false; ch.rs:659 reads the selected help owner through that alias.",
@@ -77,7 +79,8 @@
         }
       ],
       "limitations": [
-        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews.",
+        "Retained help input must borrow whichever help_data owner is currently selected."
       ]
     },
     "callback_targets": {
@@ -92,7 +95,9 @@
           "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The size initializer does not mutate literal help bytes."
+      ]
     },
     "invalidation": {
       "analysis": "Selecting translated help changes help_data rather than helpdata; the default backing array remains at its image address.",
@@ -148,7 +153,9 @@
           "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Only owned_help replacements may be freed; the literal must survive unchanged."
+      ]
     },
     "error_cleanup": {
       "analysis": "The literal initializer cannot allocate or fail; failed translated-message loading can retain/reset this static fallback without allocating helpdata.",
@@ -189,11 +196,11 @@
   "related_sources": {
     "src/lmsg.rs": {
       "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
-      "relationship": "Message initialization/replacement distinguishes borrowed default help from owned heap translations, relevant to this help-image owner. Target: STATIC:32d990e92d0b2864925d8413."
+      "relationship": "Message installation at src/lmsg.rs:2554-2561 may free owned_help and replace help_data; initialization at src/lmsg.rs:2587-2592 restores the helpdata image alias. The literal stays separate from owned translations."
     },
     "src/ch.rs": {
       "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
-      "relationship": "Input reading borrows selected help bytes or retained file state; the cited access establishes the cross-owner use. Target: STATIC:32d990e92d0b2864925d8413."
+      "relationship": "The help-input branch at src/ch.rs:653-661 returns bytes from selected help_data. It borrows helpdata only while the message subsystem still selects the default image."
     }
   },
   "finding_context": {}

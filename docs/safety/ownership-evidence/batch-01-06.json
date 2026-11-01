@@ -12,7 +12,7 @@
     "declared_type": "AtomicUsize",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "5cadcc39e008a068bc94966dfec0fc7de46d81ddf1716572697738d109ccec7e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ATTEMPTS owns checked bookkeeping rather than a history of allocation owners."
+      ]
     },
     "aliases_escapes": {
       "analysis": "next_trigger receives a shared atomic reference; fetch_update serializes value changes without handing ATTEMPTS's storage to a callback or caller.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "7a2311e1ecb236d84b6713f24678448625bc93c47e89fd4740b73672da40c1cc"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A copied attempt count does not retain any object from that attempt."
+      ]
     },
     "callback_targets": {
       "analysis": "ATTEMPTS.fetch_update applies a synchronous checked_add closure that retains no pager pointer or callback context.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "1984820ac5377c74e1453ceda63a248e7d45b3c78dbd4632bd78d84ddc6cf412"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The checked counter path cannot validate asynchronous allocation callers."
+      ]
     },
     "invalidation": {
       "analysis": "No count borrow survives a move or free because this ATTEMPTS object never moves; reset is restricted to startup initialization.",
@@ -125,7 +131,9 @@
           "excerpt_sha256": "1984820ac5377c74e1453ceda63a248e7d45b3c78dbd4632bd78d84ddc6cf412"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Counter exhaustion releases no heap object or descriptor."
+      ]
     },
     "error_cleanup": {
       "analysis": "ATTEMPTS overflow returns an error instead of wrapping, and the exhaustion latch selects one explicit exhaustion report.",
@@ -174,6 +182,6 @@
   },
   "related_sources": {},
   "finding_context": {
-    "M0-SIG-002": "Context only: this entry reviews storage ownership, not the caller/application mechanism in M0-SIG-002. That finding stays open and this clear storage disposition does not resolve or approve it."
+    "M0-SIG-002": "ATTEMPTS uses checked atomic bookkeeping without retaining allocation owners. M0-SIG-002 describes unsafe asynchronous caller work rather than counter lifetime, so checking this scalar cannot discharge the caller obligation."
   }
 }

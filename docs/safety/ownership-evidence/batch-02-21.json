@@ -12,7 +12,7 @@
     "declared_type": "* mut :: core :: ffi :: c_char",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "0cabf637159adb56e68b176b66cff2d9d9ed1d6e96b32a43d31111f660a87db6"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "metachars alone names the helper malloc block; counts are separate scalars."
+      ]
     },
     "aliases_escapes": {
       "analysis": "strchr and strcpy receive borrowed aliases during direct calls; no external API returns the metachars pointer, but growth retires all aliases of the old allocation.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "0b8ef717aa02931d237ff4546e4b6f0c7b30f8ec05062033a72d9c321a6581f2"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "An old metachars address cannot survive add_metachar growth."
+      ]
     },
     "callback_targets": {
       "analysis": "The metachars field contains string data, never callable addresses; is_metachar calls strchr synchronously without retained context.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "b5a346286dcc5da7350fdf9549fef5096e44349c06bcdb29529968f8e3bbc720"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "is_metachar reads synchronously and retains no pointer after return."
+      ]
     },
     "invalidation": {
       "analysis": "When capacity grows, old text is copied to p and old storage freed before metachars=p; no code uses the old pointer after publication in the normal path.",
@@ -104,7 +110,9 @@
           "excerpt_sha256": "7abd13d1187fb8bd8f2d2e795250e059732b34d956eab92908debfdac48360a3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A copied metachars pointer is not a second allocation owner."
+      ]
     },
     "error_cleanup": {
       "analysis": "malloc failure exits before copying metachars; unchecked capacity arithmetic still lacks an explicit validated extent contract.",

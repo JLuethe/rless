@@ -8,11 +8,11 @@
       "src/runtime.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/runtime.rs, ioWait owns a counter contribution and RestoreMask owns the saved signal-mask value; read_interruptible borrows its caller buffer and descriptor.",
+      "analysis": "src/runtime.rs owns scoped wait and mask guards. IoWait owns a counter contribution and RestoreMask owns the saved signal-mask value; read_interruptible borrows its caller buffer and descriptor.",
       "invariant": "Input buffers and FDs are not acquired by this module.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "23b3e9d4042f8517e9e05ebdd234e82d1668a6887b470c852041ba1a3503c1ea"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "RestoreMask owns a saved mask value, not a kernel resource allocation."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/runtime.rs, the raw buffer is lent to libc::read only for the synchronous call; guard Drop balances nested waits and restores the original mask on Rust return.",
+      "analysis": "src/runtime.rs borrows caller buffers only during read. The raw buffer is lent to libc::read only for the synchronous call; guard Drop balances nested waits and restores the original mask on Rust return.",
       "invariant": "A read must return before its caller buffer owner moves.",
       "source_refs": [
         {
@@ -51,10 +53,12 @@
           "excerpt_sha256": "25520c33d70aa5122cad16bfa9e5c92f13669e4f8770afc83bfde86675d9d27a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Caller buffers must remain valid until the synchronous read returns."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/runtime.rs, rless_signal at 26-40 converts optional function values through sigaction; SIG_ERR and prior sentinel integers are transmuted into Rust function-pointer representations (M0-SIG-004).",
+      "analysis": "src/runtime.rs converts signal dispositions at rless_signal. Rless_signal at 26-40 converts optional function values through sigaction; SIG_ERR and prior sentinel integers are transmuted into Rust function-pointer representations (M0-SIG-004).",
       "invariant": "Signal sentinels still lack a distinct typed representation.",
       "source_refs": [
         {
@@ -65,10 +69,12 @@
           "excerpt_sha256": "5362e0902306b86dbab740f835c8279a050aa5e081c8d9c5399df7a2b65c6bcf"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "rless_signal sentinel conversion remains separately open under M0-SIG-004."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/runtime.rs, the RAII mask survives until read exits, but retained kernel handler addresses outlive rless_signal and must be stable image functions.",
+      "analysis": "src/runtime.rs requires registered code to outlive kernel use. The RAII mask survives until read exits, but retained kernel handler addresses outlive rless_signal and must be stable image functions.",
       "invariant": "Signal registration outlives its stack sigaction struct.",
       "source_refs": [
         {
@@ -89,7 +95,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/runtime.rs, blocking handled signals precedes checking IO_INTERRUPTED and ppoll atomically restores the saved mask while waiting; SA_RESTART is deliberately disabled.",
+      "analysis": "src/runtime.rs blocks signals before testing notification state. Blocking handled signals precedes checking IO_INTERRUPTED and ppoll atomically restores the saved mask while waiting; SA_RESTART is deliberately disabled.",
       "invariant": "Read interruption does not depend on a check/read gap.",
       "source_refs": [
         {
@@ -103,7 +109,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/runtime.rs, restoreMask Drop restores the previous mask while preserving errno; IoWait Drop decrements the active count. No read path closes the borrowed FD.",
+      "analysis": "src/runtime.rs restores masks and wait counts on return. RestoreMask Drop restores the previous mask while preserving errno; IoWait Drop decrements the active count. No read path closes the borrowed FD.",
       "invariant": "Guard cleanup must run through ordinary Rust frames.",
       "source_refs": [
         {
@@ -121,10 +127,12 @@
           "excerpt_sha256": "3d99623c266fc119dcc02b6e6b1ab1bd92d689f0eb23e3c358dd59631d4ff281"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Guard Drop restores state on Rust return, not on arbitrary process exit."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/runtime.rs, sigprocmask/ppoll/read errors return normally so guards run; failed sigaction returns the unresolved function-pointer error sentinel rather than a typed Result.",
+      "analysis": "src/runtime.rs returns errors through guard destruction. Sigprocmask/ppoll/read errors return normally so guards run; failed sigaction returns the unresolved function-pointer error sentinel rather than a typed Result.",
       "invariant": "Mask cleanup is explicit while sentinel errors remain hazardous.",
       "source_refs": [
         {
@@ -145,7 +153,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/runtime.rs, the atomic protocol avoids nonlocal jumps; it does not repair callback representation or the translated handlers that mutate/free pager state.",
+      "analysis": "src/runtime.rs does not make translated handlers owner-safe. The atomic protocol avoids nonlocal jumps; it does not repair callback representation or the translated handlers that mutate/free pager state.",
       "invariant": "M0-SIG-004 prevents a clear signal-boundary disposition.",
       "source_refs": [
         {

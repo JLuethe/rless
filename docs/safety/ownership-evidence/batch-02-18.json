@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "table_size records capacity and owns no allocation independently of table."
+      ]
     },
     "aliases_escapes": {
       "analysis": "pos_init reads it by value to choose reuse versus growth; no external pointer to the table_size field escapes, but its meaning depends on the live table owner.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "662fe9dfafbb0ed6c6cf2bdc6c239fb100577598d4311a3211a4b7f6002efaa3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Its old positive value does not establish that the published table is still live."
+      ]
     },
     "callback_targets": {
       "analysis": "No callback is stored; the allocation selected by the table_size capacity comparison may invoke fatal cleanup before the next value is assigned.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Fatal allocation cleanup can run before the new capacity assignment."
+      ]
     },
     "invalidation": {
       "analysis": "Shrink preserves table_size as capacity, but growth frees its backing allocation before table_size is replaced, leaving stale capacity metadata on failure.",
@@ -79,7 +85,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "The ownership state described by table_size remains published while pos_init frees the old array at line 184 without clearing table before the RHS ecalloc call. The assignment at 188 occurs only after ecalloc returns. Failure therefore leaves table pointing at freed memory, with the previous capacity/row metadata still published (M0-MEM-004).",
+      "analysis": "table_size is the old capacity while pos_init frees table and calls ecalloc. The new table_size = sc_height assignment follows successful pointer replacement, so failure preserves a positive capacity describing storage that no longer exists. The scalar is not itself freed; its stale capacity claim accompanies M0-MEM-004.",
       "invariant": "Capacity publication is not failure-atomic with the owner.",
       "source_refs": [
         {
@@ -111,10 +117,12 @@
           "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Changing capacity metadata cannot release the old position array safely."
+      ]
     },
     "error_cleanup": {
-      "analysis": "For table_size, replacement allocation failure calls ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file. With a current file and is_tty, close_file calls get_scrpos; nonnull table and available rows >=2 allow a read of the freed array (M0-MEM-004).",
+      "analysis": "table_size is not consulted by the get_scrpos cleanup guard. Failed ecalloc enters out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file -> get_scrpos with the old table_size still published, but nonnull table and min(sc_height,table_rows) >=2 admit the read. The hazard is stale backing ownership, not an out-of-range table_size dereference (M0-MEM-004).",
       "invariant": "Failed growth cannot prove the old capacity remains owned.",
       "source_refs": [
         {
@@ -203,11 +211,11 @@
   "related_sources": {
     "src/pager.rs": {
       "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
-      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: STATIC:e956bb6707cfd766d532906a."
+      "relationship": "The out_of_memory -> quit route at src/pager.rs:860-887 and src/pager.rs:948-969 runs before failed growth can assign a new table_size; old capacity metadata remains visible during cleanup."
     },
     "src/edit.rs": {
       "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
-      "relationship": "File activation/close reads position state or resets input status, establishing the reviewed cross-file lifecycle dependency. Target: STATIC:e956bb6707cfd766d532906a."
+      "relationship": "File-close cleanup reaches get_scrpos through src/edit.rs:924-927 and src/edit.rs:1078-1083 to src/edit.rs:899-907. That reader does not consult table_size as proof of live storage."
     }
   },
   "finding_context": {}

@@ -8,11 +8,11 @@
       "src/ifile.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/ifile.rs, each allocated ifile owns saved filename/realpath strings, copied screen position and links; filestate and alternate-stream fields connect to separate ch/edit owners.",
+      "analysis": "src/ifile.rs owns allocated ifile nodes and names. Each allocated ifile owns saved filename/realpath strings, copied screen position and links; filestate and alternate-stream fields connect to separate ch/edit owners.",
       "invariant": "List nodes distinguish owned strings from attached resources.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "altpipe and altfilename cleanup is not implied by freeing node names."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/ifile.rs, get_ifile and accessors return raw node/string/state pointers; h_hold is only an integer count, and del_ifile itself does not enforce that borrowed handles have retired.",
+      "analysis": "src/ifile.rs publishes raw handles in a circular list. Get_ifile and accessors return raw node/string/state pointers; h_hold is only an integer count, and del_ifile itself does not enforce that borrowed handles have retired.",
       "invariant": "Node deletion requires all outside aliases to be retired.",
       "source_refs": [
         {
@@ -58,10 +60,12 @@
           "excerpt_sha256": "12e5988ec2bfe316790fe4b91e68999a671020617bcd6c26ef95ae0356f0029d"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Held raw IFILE handles need retirement before del_ifile frees the node."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/ifile.rs, mark_check_ifile, unmark and dispose_ifile_state are direct calls; they can mutate related mark/input state before a node is unlinked.",
+      "analysis": "src/ifile.rs calls mark and state cleanup directly. Mark_check_ifile, unmark and dispose_ifile_state are direct calls; they can mutate related mark/input state before a node is unlinked.",
       "invariant": "Cross-module hooks must respect list mutation order.",
       "source_refs": [
         {
@@ -72,10 +76,12 @@
           "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct mark cleanup can mutate related state before unlink completes."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/ifile.rs, find_ifile can free/replace h_filename for a shorter alias; del_ifile retires current/old aliases, marks and filestate before freeing node/name storage.",
+      "analysis": "src/ifile.rs retires names and attachments on deletion. Find_ifile can free/replace h_filename for a shorter alias; del_ifile retires current/old aliases, marks and filestate before freeing node/name storage.",
       "invariant": "Filename and node borrowers must not span replacement.",
       "source_refs": [
         {
@@ -96,7 +102,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/ifile.rs, new_ifile allocates node/names before linking, while find_ifile frees an old name before save allocates the replacement; metadata is raw and not failure-transactional.",
+      "analysis": "src/ifile.rs links nodes after allocation but replaces names unstaged. New_ifile allocates node/names before linking, while find_ifile frees an old name before save allocates the replacement; metadata is raw and not failure-transactional.",
       "invariant": "Linked and replaced owners need separate commit contracts.",
       "source_refs": [
         {
@@ -117,7 +123,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/ifile.rs, deletion frees h_rfilename, h_filename and p after disposal/unlink; altpipe and altfilename need their edit-side cleanup and cannot be assumed released by these three frees.",
+      "analysis": "src/ifile.rs frees names and nodes after detachment. Deletion frees h_rfilename, h_filename and p after disposal/unlink; altpipe and altfilename need their edit-side cleanup and cannot be assumed released by these three frees.",
       "invariant": "Every attached owner needs its own release path.",
       "source_refs": [
         {
@@ -135,10 +141,12 @@
           "excerpt_sha256": "d9efd0b5e68c44c1eeda420c747cecc49187069f38b9d565d1e340a57a306181"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The three frees in del_ifile do not replace edit-side pipe cleanup."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/ifile.rs, fatal allocation during partial node/name construction or name replacement may enter cleanup with incomplete owners; no RAII rollback exists in this C-shaped descriptor.",
+      "analysis": "src/ifile.rs can reach cleanup during partial construction. Fatal allocation during partial node/name construction or name replacement may enter cleanup with incomplete owners; no RAII rollback exists in this C-shaped descriptor.",
       "invariant": "Allocation failure cannot be assumed to retire all aliases.",
       "source_refs": [
         {
@@ -159,7 +167,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/ifile.rs, list/count/index mutations are ordinary raw global writes; asynchronous quit or other handlers have no exclusion protocol around them.",
+      "analysis": "src/ifile.rs mutates list state without handler exclusion. List/count/index mutations are ordinary raw global writes; asynchronous quit or other handlers have no exclusion protocol around them.",
       "invariant": "M0-MEM-001 keeps the whole file hazard-recorded.",
       "source_refs": [
         {

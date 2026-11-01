@@ -12,7 +12,7 @@
     "declared_type": "unsafe extern \"C\" fn ()",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "059ad576fcf87723550ecc4098b03daa34ee9c72c55e2f945e2eff92bf93bf84"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "REMEMBER_SIGPIPE owns an image function address in init_array."
+      ]
     },
     "aliases_escapes": {
       "analysis": "The loader retains the REMEMBER_SIGPIPE code address; neither the callback code nor the separate INHERITED_SIGPIPE atomic is transferred to a caller.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "191b4500443d5dc479f9505274c90567b2d5525166b97f2a3115b7ba27afc9ae"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The loader does not receive a borrowed stack callback context."
+      ]
     },
     "callback_targets": {
       "analysis": "REMEMBER_SIGPIPE stores exactly remember_sigpipe with unsafe extern C fn() ABI; that function queries sigaction without pager dispatch.",
@@ -56,7 +60,8 @@
         }
       ],
       "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners.",
+        "The constructor target must run before process::init reads its saved value."
       ]
     },
     "invalidation": {
@@ -99,7 +104,9 @@
           "excerpt_sha256": "059ad576fcf87723550ecc4098b03daa34ee9c72c55e2f945e2eff92bf93bf84"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The static function pointer is retired with the executable image."
+      ]
     },
     "error_cleanup": {
       "analysis": "The REMEMBER_SIGPIPE target reads the queried action only on sigaction success, preserving the default saved value on failure.",

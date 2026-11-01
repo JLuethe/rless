@@ -8,7 +8,7 @@
       "src/pattern.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -30,7 +30,9 @@
           "excerpt_sha256": "14afd1adadc916f84de149d67ef4656794525dcacca14b23426e547555d22335"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "OWN-06 distinguishes outer pattern storage, GNU internals and converted temporary text."
+      ]
     },
     "aliases_escapes": {
       "analysis": "OWN-06 match endpoints borrow line storage independently of compiled-pattern lifetime and carry no Rust owner generation.",
@@ -44,7 +46,9 @@
           "excerpt_sha256": "3458eb28a079818602a080e7a161905df7c1f136886b16c77732eb216db85ede"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Returned endpoints borrow the current searched line, not the compiled pattern owner."
+      ]
     },
     "callback_targets": {
       "analysis": "OWN-06 calls GNU compile/search/free entry points directly and temporarily changes global syntax; direct names do not establish owner exclusion.",
@@ -72,7 +76,9 @@
           "excerpt_sha256": "cbee67745fa797a20bb3ec331d8c47d63f77c1838a83f2675d9c28dd2f58f11b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct GNU calls still depend on native layout and global syntax contracts."
+      ]
     },
     "invalidation": {
       "analysis": "OWN-06 successful recompilation retires the old compiled owner; changing line storage separately invalidates returned match endpoints.",
@@ -128,7 +134,9 @@
           "excerpt_sha256": "14afd1adadc916f84de149d67ef4656794525dcacca14b23426e547555d22335"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Stack REGS_FIXED arrays require no regfree or allocator release."
+      ]
     },
     "error_cleanup": {
       "analysis": "OWN-06 frees a failed candidate and retains the previous caller pattern slot; converted temporary text is freed after the compile call returns.",
@@ -145,7 +153,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "OWN-06 restores GNU syntax on both paths today. M0-FFI-001 retains its historical title and stays open pending maintained independent closure; it is not evidence of a current un-restored syntax value. Signal-side filter release still lacks owner exclusion.",
+      "analysis": "OWN-06 now saves previous_syntax from re_set_syntax and restores it after re_compile_pattern before success or failure handling. The historical no-restore wording of M0-FFI-001 is superseded by that current source. What remains substantively unproved is serialized process-global syntax use: this review has not excluded an intervening or concurrent native regex user between setting and restoration. Filter-owner release under signals is a separate live-owner concern; no finding is closed here.",
       "invariant": "Regex lifetime must be controlled outside the handler.",
       "source_refs": [
         {
@@ -178,7 +186,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: OWN-06."
+      "relationship": "u_interrupt at src/signal.rs:44-56 calls set_filter_pattern(NULL,0); OWN-06 borrows compiled filter objects whose lifetime may be ended by that filter replacement."
     }
   },
   "finding_context": {}

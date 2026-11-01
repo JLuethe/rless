@@ -8,11 +8,11 @@
       "src/position.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/position.rs, table owns an ecalloc POSITION array, table_size records capacity and table_rows the initialized geometry; pos_shift temporarily owns a converted line buffer.",
+      "analysis": "src/position.rs owns a position array with separate geometry scalars. Table owns an ecalloc POSITION array, table_size records capacity and table_rows the initialized geometry; pos_shift temporarily owns a converted line buffer.",
       "invariant": "Capacity and initialized row bounds describe different extents.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "table_size and table_rows describe storage but do not own separate arrays."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/position.rs, most access is through raw global table cursors; get_scrpos returns copied coordinates, while callers can enter cleanup using the same globals during allocation failure.",
+      "analysis": "src/position.rs exports coordinates while retaining raw global cursors. Most access is through raw global table cursors; get_scrpos returns copied coordinates, while callers can enter cleanup using the same globals during allocation failure.",
       "invariant": "Copies of positions do not make the backing table live.",
       "source_refs": [
         {
@@ -51,10 +53,12 @@
           "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Copied coordinates do not make raw table cursors safe during replacement."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/position.rs, there are direct input/conversion/display calls and no stored callback; ecalloc may call out_of_memory then quit, indirectly reentering position readers.",
+      "analysis": "src/position.rs can reenter readers through fatal allocation cleanup. There are direct input/conversion/display calls and no stored callback; ecalloc may call out_of_memory then quit, indirectly reentering position readers.",
       "invariant": "Allocation is a possible cleanup reentry point.",
       "source_refs": [
         {
@@ -65,10 +69,12 @@
           "excerpt_sha256": "46b68f441753bfb4a79d372049920c5128e17e036b8524378d7dd62a2354db1b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Fatal ecalloc can reach position readers through quit and close_file."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/position.rs, shrink/regrow explicitly invalidates changed rows and query bounds use min(sc_height,table_rows); growth still frees table before replacing its published pointer.",
+      "analysis": "src/position.rs frees the published table during growth. Shrink/regrow explicitly invalidates changed rows and query bounds use min(sc_height,table_rows); growth still frees table before replacing its published pointer.",
       "invariant": "Geometry checks cannot validate a freed table pointer.",
       "source_refs": [
         {
@@ -89,7 +95,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "The ownership state described by src/position.rs remains published while pos_init frees the old array at line 184 without clearing table before the RHS ecalloc call. The assignment at 188 occurs only after ecalloc returns. Failure therefore leaves table pointing at freed memory, with the previous capacity/row metadata still published (M0-MEM-004).",
+      "analysis": "src/position.rs publishes three separate pieces of state: table, table_size and table_rows. pos_init frees the array before evaluating the replacement ecalloc, then assigns the new pointer and both scalars only on return. The entire old pointer/geometry combination remains globally visible during fatal cleanup, without a staged owner commit (M0-MEM-004).",
       "invariant": "Replacement is not a failure-preserving owner transaction.",
       "source_refs": [
         {
@@ -103,7 +109,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/position.rs, growth pairs old allocation with free and pos_shift frees cline; table remains process-owned at exit, but the old global address is stale during replacement.",
+      "analysis": "src/position.rs pairs old array release with growth allocation. Growth pairs old allocation with free and pos_shift frees cline; table remains process-owned at exit, but the old global address is stale during replacement.",
       "invariant": "A freed allocation must not remain a readable global owner.",
       "source_refs": [
         {
@@ -121,10 +127,12 @@
           "excerpt_sha256": "46b68f441753bfb4a79d372049920c5128e17e036b8524378d7dd62a2354db1b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Freeing the old array is not a transactional table replacement."
+      ]
     },
     "error_cleanup": {
-      "analysis": "For src/position.rs, replacement allocation failure calls ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file. With a current file and is_tty, close_file calls get_scrpos; nonnull table and available rows >=2 allow a read of the freed array (M0-MEM-004).",
+      "analysis": "src/position.rs exposes the cross-owner failure path: ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file -> get_scrpos. A current tty file and at least two available rows permit the stale table read; table_size is no liveness guard, while table_rows directly supplies the row bound. This module-level mechanism is source-inspected only (M0-MEM-004).",
       "invariant": "Fatal growth cleanup can revisit the old table alias.",
       "source_refs": [
         {
@@ -194,7 +202,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/position.rs, direct handler termination can also enter cleanup; bounds tests cover ordinary small/shrink/growth geometry but do not approve reentry during failed replacement.",
+      "analysis": "src/position.rs does not exclude termination during replacement. Direct handler termination can also enter cleanup; bounds tests cover ordinary small/shrink/growth geometry but do not approve reentry during failed replacement.",
       "invariant": "Existing position and raw-owner findings remain recorded.",
       "source_refs": [
         {
@@ -220,15 +228,15 @@
   "related_sources": {
     "src/pager.rs": {
       "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
-      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: FILE:src/position.rs."
+      "relationship": "ecalloc/out_of_memory at src/pager.rs:860-887 enter quit; quit at src/pager.rs:948-969 calls edit(NULL). Failed position-array growth can therefore leave the old globals visible to file-close cleanup."
     },
     "src/edit.rs": {
       "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
-      "relationship": "File activation/close reads position state or resets input status, establishing the reviewed cross-file lifecycle dependency. Target: FILE:src/position.rs."
+      "relationship": "close_file calls get_scrpos at src/edit.rs:899-907; edit(NULL) dispatches through edit_ifile(NULL) at src/edit.rs:924-927 and src/edit.rs:1078-1083. This is the traced cleanup reader of position.rs table geometry."
     },
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/position.rs."
+      "relationship": "terminate calls quit at src/signal.rs:83-85; quit can enter the file-close position-reader route, so asynchronous termination is relevant to the unguarded position globals."
     }
   },
   "finding_context": {}

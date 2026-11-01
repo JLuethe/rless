@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "38e642a23ff0d660948145ccf14ecac9c979e37b50bc7cc41a38d6305109c9c0"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ifiles counts membership and owns no node or filename."
+      ]
     },
     "aliases_escapes": {
       "analysis": "nifile copies the ifiles count to callers; no address escapes, but count accuracy depends on raw list updates completing together.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "c5ea60d75d53bc315edbff9bf0cbfd48edec17865c58a606a2b9a7a7cb8f0f38"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A count value cannot prove circular links or held IFILE handles are valid."
+      ]
     },
     "callback_targets": {
       "analysis": "There is no callback stored in this ifiles integer; surrounding mark/disposal calls belong to the node operations that adjust it.",
@@ -55,7 +59,9 @@
           "excerpt_sha256": "ce7fa969aef5fa83723d61cf3b55591e894e04dd44e14dfb59348e2af504cb6c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "List mutation calls update the count without an owning callback context."
+      ]
     },
     "invalidation": {
       "analysis": "Deleting a node decrements the ifiles value without retiring any caller-held node pointer; count changes cannot be used as generation checks.",
@@ -97,7 +103,9 @@
           "excerpt_sha256": "38e642a23ff0d660948145ccf14ecac9c979e37b50bc7cc41a38d6305109c9c0"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Decrementing ifiles does not substitute for del_ifile node and name release."
+      ]
     },
     "error_cleanup": {
       "analysis": "No overflow/error policy protects the signed count or restores ifiles after partial list mutation; this limitation belongs to the existing raw-core finding.",

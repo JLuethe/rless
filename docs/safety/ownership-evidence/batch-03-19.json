@@ -12,7 +12,7 @@
     "declared_type": "* mut :: core :: ffi :: c_char",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "cp is an interior pointer into cmdbuf and never an allocator owner."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Step/repaint helpers copy cp into raw np/save_cp/old_cp aliases and update through pointer arguments; none retains ownership of command bytes.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "95a8b1f16405fffc0539f99ef2801c02301a7e2f2edd7b0d1fb01da6ad1c031c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The base allocation must survive every cmd_step_left or insert operation."
+      ]
     },
     "callback_targets": {
       "analysis": "Character stepping updates cp-related raw cursor aliases before repaint invokes terminal output using borrowed printable representations.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "cb406ba10b02144fc3e58b3edf3c042992d7c2112856ff09d3c8b31e5c75ed4a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Named editor calls can update the cursor but store no callback in cp."
+      ]
     },
     "invalidation": {
       "analysis": "Insertion/erasure and scrolling change which byte a saved address denotes; cmd_reset repositions cp without tracking outstanding borrowed cursor values.",
@@ -118,7 +124,9 @@
           "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "cp must not be passed to free even when it points at the allocation start."
+      ]
     },
     "error_cleanup": {
       "analysis": "Start/end checks constrain normal cp movement, but error returns carry no validated cursor generation after replacement or reentry.",
@@ -168,7 +176,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:c13207fabc32b5f947566d8e."
+      "relationship": "src/signal.rs:83-85 enters quit without dereferencing cp. The cursor borrow needs ordinary editor exclusion, but no downstream handler-to-editor cursor mutation is established by these lines."
     }
   },
   "finding_context": {}

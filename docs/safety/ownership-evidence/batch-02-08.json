@@ -8,7 +8,7 @@
       "src/fault.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -30,7 +30,9 @@
           "excerpt_sha256": "3058d27566623cb3d00d3d7d39cfe7ae8f48e0b1e1d1106d8257becd17be1544"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "OWN-13 owns scalar plan state but only borrows the harness pipe."
+      ]
     },
     "aliases_escapes": {
       "analysis": "OWN-13 lends static atomic references to next_trigger and stack marker bytes to write_marker; neither alias escapes its call.",
@@ -51,7 +53,9 @@
           "excerpt_sha256": "884f230b8ac7c5e0d1f6744e7a1e8d3719d2f9ce9a293446c746bd9176f430fc"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Stack marker bytes cannot outlive the bounded write_marker call."
+      ]
     },
     "callback_targets": {
       "analysis": "OWN-13 calls libc mask/write/errno operations directly; caller allocation reached from SIGUSR1 remains M0-SIG-002.",
@@ -79,7 +83,9 @@
           "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct hook operations do not approve SIGUSR1 caller lookup or allocation."
+      ]
     },
     "invalidation": {
       "analysis": "OWN-13 configuration is startup-only; exec closes the trace pipe and removes the matching inherited environment plan.",
@@ -128,7 +134,9 @@
           "excerpt_sha256": "c7d72b3547871895f9d96a9a25e39e3901bcdc9bc2e0cbf5b4cd0c636ff78f0b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The hook does not acquire pager heap blocks or pager-owned descriptors."
+      ]
     },
     "error_cleanup": {
       "analysis": "OWN-13 rejects invalid configuration before enablement; failed bounded trace writes produce no valid observation and require no heap rollback.",
@@ -178,7 +186,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: OWN-13."
+      "relationship": "sigusr reads LESS_SIGUSR1 via lgetenv and queues it with ungetsc at src/signal.rs:86-100. OWN-13 hooks may be reached from that allocation caller; the hook does not make it signal-safe."
     }
   },
   "finding_context": {}

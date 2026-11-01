@@ -8,11 +8,11 @@
       "src/ch.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/ch.rs, filestate owns cache nodes and optional ordinary FDs; ifile retains its state. The test at 1290-1334 temporarily owns two pipe FDs and allocated states, lending the read FD to CH_KEEPOPEN.",
+      "analysis": "src/ch.rs owns cache nodes and ordinary input descriptors. Filestate owns cache nodes and optional ordinary FDs; ifile retains its state. The test at 1290-1334 temporarily owns two pipe FDs and allocated states, lending the read FD to CH_KEEPOPEN.",
       "invariant": "Cache memory and borrowed stream ownership stay distinct.",
       "source_refs": [
         {
@@ -37,10 +37,12 @@
           "excerpt_sha256": "3425928d99889af11b9d4a521fecca48e758495eb5640b1c0f32344b6367c744"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A retained filestate can outlive its active thisfile selection."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/ch.rs, raw LRU/hash links, active thisfile and cache data pointers cross native reads and display calls; no borrow checker or generation retires every outside alias.",
+      "analysis": "src/ch.rs publishes raw LRU and active-file aliases. Raw LRU/hash links, active thisfile and cache data pointers cross native reads and display calls; no borrow checker or generation retires every outside alias.",
       "invariant": "Cache-node aliases require stable filestate lifetime.",
       "source_refs": [
         {
@@ -58,10 +60,12 @@
           "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "LRU links and hash aliases remain raw outside local list operations."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/ch.rs, input, log, diagnostic and close paths call named functions directly; a fatal allocator/display path or handler cleanup can revisit shared state without a retained callback object.",
+      "analysis": "src/ch.rs uses named input and disposal callees. Input, log, diagnostic and close paths call named functions directly; a fatal allocator/display path or handler cleanup can revisit shared state without a retained callback object.",
       "invariant": "Direct call dispatch does not prevent owner reentry.",
       "source_refs": [
         {
@@ -79,10 +83,12 @@
           "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A direct call can still reenter cleanup through fatal allocation failure."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/ch.rs, flush marks seekable buffers invalid, navigation can retain nonseekable state, and permanent dispose clears attachments before freeing nodes/state.",
+      "analysis": "src/ch.rs detaches retained state before permanent release. Flush marks seekable buffers invalid, navigation can retain nonseekable state, and permanent dispose clears attachments before freeing nodes/state.",
       "invariant": "Flush, navigation-close and permanent deletion differ.",
       "source_refs": [
         {
@@ -103,7 +109,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/ch.rs, ch_addbuf initializes and links a calloc node; first-buffer failure stops before casting the sentinel. Raw multi-link updates still lack one owning transaction.",
+      "analysis": "src/ch.rs guards a failed first cache allocation. Ch_addbuf initializes and links a calloc node; first-buffer failure stops before casting the sentinel. Raw multi-link updates still lack one owning transaction.",
       "invariant": "An empty sentinel cannot be published as a buf payload.",
       "source_refs": [
         {
@@ -124,7 +130,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/ch.rs, calloc/free retire nodes; owned FD close occurs once while borrowed stdin/pipe/help have separate owners. The test frees states through disposal, closes both pipe ends on success and restores thisfile.",
+      "analysis": "src/ch.rs distinguishes owned FDs from borrowed inputs. Calloc/free retire nodes; owned FD close occurs once while borrowed stdin/pipe/help have separate owners. The test frees states through disposal, closes both pipe ends on success and restores thisfile.",
       "invariant": "Input cleanup must not close borrowed standard streams.",
       "source_refs": [
         {
@@ -142,10 +148,12 @@
           "excerpt_sha256": "3425928d99889af11b9d4a521fecca48e758495eb5640b1c0f32344b6367c744"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "CH_KEEPOPEN and stdin borrowing require descriptor provenance at disposal."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/ch.rs, read/log/allocation failures have separate state and sticky latches; passing guards alone cannot establish every caller diagnostic, exit status or reentrant cleanup contract.",
+      "analysis": "src/ch.rs keeps failure latches separate from raw owner state. Read/log/allocation failures have separate state and sticky latches; passing guards alone cannot establish every caller diagnostic, exit status or reentrant cleanup contract.",
       "invariant": "Local error guards cannot close end-to-end findings.",
       "source_refs": [
         {
@@ -173,7 +181,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/ch.rs, signal polling does not exclude a handler that enters allocator, output or cleanup during linked-state mutation; broad core ownership remains open.",
+      "analysis": "src/ch.rs does not exclude handler cleanup during link mutation. Signal polling does not exclude a handler that enters allocator, output or cleanup during linked-state mutation; broad core ownership remains open.",
       "invariant": "Cache lifetime still needs ordinary owner-controlled dispatch.",
       "source_refs": [
         {
@@ -199,7 +207,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/ch.rs."
+      "relationship": "terminate invokes quit at src/signal.rs:83-85. The quit/edit disposal route can detach and free the active thisfile/cache state analyzed in ch.rs."
     }
   },
   "finding_context": {}

@@ -8,11 +8,11 @@
       "src/safe_core/mod.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/safe_core/mod.rs, the module declares the isolated component modules and a small Copy StorageError enum whose only payload is an interior-NUL offset.",
+      "analysis": "src/safe_core/mod.rs declares the isolated component and scalar errors. The module declares the isolated component modules and a small Copy StorageError enum whose only payload is an interior-NUL offset.",
       "invariant": "Error values own scalar diagnostic metadata only.",
       "source_refs": [
         {
@@ -24,11 +24,12 @@
         }
       ],
       "limitations": [
-        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager."
+        "The separate tools/safety/core manifest compiles this root; src/lib.rs does not include it in the production pager.",
+        "StorageError owns only scalar metadata, not the failing byte owner."
       ]
     },
     "aliases_escapes": {
-      "analysis": "In src/safe_core/mod.rs, re-exports move no byte ownership; StorageError copies cannot alias ByteBuf data or arena slot values.",
+      "analysis": "src/safe_core/mod.rs re-exports APIs without transferring byte owners. Re-exports move no byte ownership; StorageError copies cannot alias ByteBuf data or arena slot values.",
       "invariant": "Module exports create no hidden storage aliases.",
       "source_refs": [
         {
@@ -46,10 +47,12 @@
           "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Re-exporting ByteBuf does not analyze its application integration."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/safe_core/mod.rs, there are no function bodies, callback registrations or initializers here; ReserveFault is re-exported only for test or fault-testing configuration.",
+      "analysis": "src/safe_core/mod.rs contains no runtime callback registration. There are no function bodies, callback registrations or initializers here; ReserveFault is re-exported only for test or fault-testing configuration.",
       "invariant": "The module root creates no runtime callback.",
       "source_refs": [
         {
@@ -60,10 +63,12 @@
           "excerpt_sha256": "840f24f9ff37a5f69cdcc8e878234f5034ce82348250dcc09383fe685b733c3e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "There is no runtime callable target in this declaration-only module."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/safe_core/mod.rs, storageError values have no borrowed lifetime to expire; owner-specific invalidation remains in bytebuf and arena implementations.",
+      "analysis": "src/safe_core/mod.rs keeps owner lifetimes in concrete modules. StorageError values have no borrowed lifetime to expire; owner-specific invalidation remains in bytebuf and arena implementations.",
       "invariant": "Diagnostic metadata cannot outlive a borrowed pointee.",
       "source_refs": [
         {
@@ -77,7 +82,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/safe_core/mod.rs, forbid(unsafe_code) applies to this separate crate and its modules; declaration order performs no partial runtime allocation commit.",
+      "analysis": "src/safe_core/mod.rs forbids unsafe code in the isolated crate. Forbid(unsafe_code) applies to this separate crate and its modules; declaration order performs no partial runtime allocation commit.",
       "invariant": "Component construction cannot insert unsafe code here.",
       "source_refs": [
         {
@@ -91,7 +96,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/safe_core/mod.rs, the enum and exports need no free/close pair; their concrete owning modules supply ordinary Rust destruction.",
+      "analysis": "src/safe_core/mod.rs defines no manual resource destructor. The enum and exports need no free/close pair; their concrete owning modules supply ordinary Rust destruction.",
       "invariant": "Root metadata has no manual release operation.",
       "source_refs": [
         {
@@ -102,10 +107,12 @@
           "excerpt_sha256": "96f10597b5482e01ca0b6e7e83ea762fdeb164421b6c803e13f5493a61ff4ba3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Concrete arena and bytebuf modules retain their own destruction obligations."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/safe_core/mod.rs, errors do not allocate a context String, so a failed reserve can return an enum without constructing a second allocation-dependent diagnostic owner.",
+      "analysis": "src/safe_core/mod.rs represents errors without allocating strings. Errors do not allocate a context String, so a failed reserve can return an enum without constructing a second allocation-dependent diagnostic owner.",
       "invariant": "Error representation remains allocation-free.",
       "source_refs": [
         {
@@ -119,7 +126,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/safe_core/mod.rs, the header states this crate is not linked into pager binaries; it declares no asynchronous dispatch or mutable process state.",
+      "analysis": "src/safe_core/mod.rs declares no asynchronous application dispatch. The header states this crate is not linked into pager binaries; it declares no asynchronous dispatch or mutable process state.",
       "invariant": "Component review does not certify production handoff.",
       "source_refs": [
         {

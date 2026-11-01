@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "17cfdc7464e55afc45aba14dd9e674a2e3ebae600d50a4d0db1adb7a3889dd07"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "cmd_col is a display column and owns no command bytes."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Width helpers and motion paths read/copy the cmd_col scalar while cp points into command bytes; the number does not own that cursor or the prompt string.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "9aee9641faeb61e192fda0b85b8200821a0ce8f7baa70d4671c4db7fc2570780"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Its relationship with cp and prompt_col is an editor precondition."
+      ]
     },
     "callback_targets": {
       "analysis": "putchr/putstr/putbs output accompanies cmd_col width updates, but no callback context is stored in the column integer.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "9aee9641faeb61e192fda0b85b8200821a0ce8f7baa70d4671c4db7fc2570780"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "No handler-to-cmdbuf mutation trace is established by the terminate citation."
+      ]
     },
     "invalidation": {
       "analysis": "Repaint/scroll/prompt replacement can invalidate cmd_col-to-cp correspondence even while cmdbuf remains at a static address.",
@@ -125,7 +131,9 @@
           "excerpt_sha256": "5a867b45586dfd2c1e0dfb5f8a01c62e784ded72ddb2e10a39e361e65043dd8e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Resetting the column cannot release cmdbuf or restore a stale cursor."
+      ]
     },
     "error_cleanup": {
       "analysis": "Output failure and invalid geometry cannot be represented by the cmd_col count alone; checks in cmd_right/left rely on valid surrounding editor state.",
@@ -142,7 +150,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "cmd_home uses cmd_col relative to prompt_col to step cp left; a reentrant mismatch could violate the cursor boundary assumption, the entry-specific M0-MEM-001 concern.",
+      "analysis": "cmd_col must remain coherent with prompt_col and cp when cmd_home steps the cursor left. The cited terminate handler only establishes entry into quit; no route from that cleanup into a reentrant cmdbuf edit is traced here. M0-MEM-001 remains open as an editor-coherence precondition, not a newly demonstrated handler-induced under-read.",
       "invariant": "Column state is reviewed with its coupled raw cursor.",
       "source_refs": [
         {
@@ -169,7 +177,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:4d231085d16a986ec4edd0c8."
+      "relationship": "terminate at src/signal.rs:83-85 calls quit and makes no cmd_col access. A handler-induced cursor-column change has not been traced; the editor coherence concern is conditional, not demonstrated by this handler."
     }
   },
   "finding_context": {}

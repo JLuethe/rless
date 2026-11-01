@@ -12,7 +12,7 @@
     "declared_type": "AtomicI32",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "475bad44dd23c37742f52726a3eef4c8b7b0df40af6c9a07a4e9b664a4e772eb"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "TRACE_FD stores a borrowed harness pipe number."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Only the TRACE_FD integer is copied into write_marker; each event buffer is stack-owned for the synchronous write and is not retained.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "429d5a0227444f53ff4c4484af0bde259f331b82fc8d0f105abd5da72b4af6af"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The integer does not prevent the harness from ending the pipe lifetime."
+      ]
     },
     "callback_targets": {
       "analysis": "write_marker calls libc signal-mask and write functions directly; the TRACE_FD descriptor value is not interpreted as a function pointer.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "bc49342f3f06091e88089117d4c4e4ef964c268f8c1d0b3daa2f01d0bb088145"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "write_marker writes directly and retains no hook callback."
+      ]
     },
     "invalidation": {
       "analysis": "The harness must keep the pipe selected by TRACE_FD live until child exit; FD_CLOEXEC retires that reference on helper exec.",
@@ -118,7 +124,9 @@
           "excerpt_sha256": "c7d72b3547871895f9d96a9a25e39e3901bcdc9bc2e0cbf5b4cd0c636ff78f0b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "TRACE_FD storage must not be treated as permission to close a pager FD."
+      ]
     },
     "error_cleanup": {
       "analysis": "Invalid pipe metadata prevents TRACE_FD publication; bounded failed writes produce no valid marker and free no application data.",
@@ -167,6 +175,6 @@
   },
   "related_sources": {},
   "finding_context": {
-    "M0-SIG-002": "Context only: this entry reviews storage ownership, not the caller/application mechanism in M0-SIG-002. That finding stays open and this clear storage disposition does not resolve or approve it."
+    "M0-SIG-002": "TRACE_FD borrows a validated inherited pipe and the bounded marker path preserves local signal state. M0-SIG-002 still concerns lookup and queue allocation before the hook; pipe provenance does not approve that asynchronous caller."
   }
 }

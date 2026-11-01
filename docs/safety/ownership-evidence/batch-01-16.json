@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_char",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "37259796b4c9d14a32601f643b59946625b0f18eea805a5b269d536ab58b274b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "openquote owns one delimiter byte rather than a string buffer."
+      ]
     },
     "aliases_escapes": {
       "analysis": "openquote retains only a copied byte from the local arg pointer; printf receives an integer promotion, not ownership of argv.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "abbcc8492a8372ee97dfb3afe5c860e641126cd6806bbb1bb779eec4f24cf538"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Reading the delimiter by value creates no surviving pointer alias."
+      ]
     },
     "callback_targets": {
       "analysis": "The quoted-output printf receives a promoted integer, not a callback or address of openquote.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "abbcc8492a8372ee97dfb3afe5c860e641126cd6806bbb1bb779eec4f24cf538"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "putchar consumes a copied byte and retains no delimiter callback."
+      ]
     },
     "invalidation": {
       "analysis": "Changing openquote replaces an inline byte before output and invalidates no retained string pointer.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "194a6ba271826cdc6c7c0c7af52bfe6efa3065e3da2aad9cf17eb9db68033405"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The delimiter has no free or close counterpart."
+      ]
     },
     "error_cleanup": {
       "analysis": "Missing numeric input for openquote calls pr_error; no newly allocated quote object needs rollback.",

@@ -8,11 +8,11 @@
       "src/cvt.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/cvt.rs, cvt_alloc_chpos returns a newly ecalloc-owned integer map; cvt_text borrows caller source, destination, optional map and length, and temporarily owns an ANSI parser state.",
+      "analysis": "src/cvt.rs allocates chpos maps while borrowing text buffers. Cvt_alloc_chpos returns a newly ecalloc-owned integer map; cvt_text borrows caller source, destination, optional map and length, and temporarily owns an ANSI parser state.",
       "invariant": "Returned maps and caller buffers have different owners.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "731ddca1b20f3b73087cc8c4ae0fb35fa995be7944e3e66a36b5ea621f9a35a4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The caller owns every chpos allocation returned by cvt_alloc_chpos."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/cvt.rs, source/destination/map cursors are raw interior aliases; no slice length proves that caller-provided output or map storage covers all writes.",
+      "analysis": "src/cvt.rs walks raw caller-owned conversion ranges. Source/destination/map cursors are raw interior aliases; no slice length proves that caller-provided output or map storage covers all writes.",
       "invariant": "Conversion requires independently valid buffer extents.",
       "source_refs": [
         {
@@ -51,10 +53,12 @@
           "excerpt_sha256": "d663fd63aee56d99d7e072ff22b00549e1e04fe1d284e1bc2fc19e6e34593b1c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Output capacity is a raw caller precondition, not checked by a slice type."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/cvt.rs, step_charc, put_wchar, ansi_start/step/done and ctype operations are direct calls; no callback context is retained beyond conversion.",
+      "analysis": "src/cvt.rs calls conversion helpers synchronously. Step_charc, put_wchar, ansi_start/step/done and ctype operations are direct calls; no callback context is retained beyond conversion.",
       "invariant": "Parser-state lifetime ends at its matching ansi_done.",
       "source_refs": [
         {
@@ -72,10 +76,12 @@
           "excerpt_sha256": "5a15c0543a2609bbddec9e986920fbbcb38b7371a0a635dff4c6483c1a8827b0"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct ansi calls do not prove the backing buffers remain stable."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/cvt.rs, backspace and CR operations move cursors inside retained output; external replacement of source or map while conversion runs would invalidate those aliases.",
+      "analysis": "src/cvt.rs requires buffer owners to survive cursor use. Backspace and CR operations move cursors inside retained output; external replacement of source or map while conversion runs would invalidate those aliases.",
       "invariant": "Conversion borrows must remain stable through the call.",
       "source_refs": [
         {
@@ -96,7 +102,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/cvt.rs, cvt_length uses wrapping multiply/add and writes output incrementally; allocation sizing and final lenp assignment do not establish a checked all-or-nothing commit.",
+      "analysis": "src/cvt.rs writes converted output incrementally. Cvt_length uses wrapping multiply/add and writes output incrementally; allocation sizing and final lenp assignment do not establish a checked all-or-nothing commit.",
       "invariant": "Wrapped sizing cannot prove destination capacity.",
       "source_refs": [
         {
@@ -117,7 +123,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/cvt.rs, caller must free the chpos map with the matching allocator; each nonnull ansi_start branch calls ansi_done, while cvt_text must never free borrowed osrc/odst.",
+      "analysis": "src/cvt.rs releases ANSI state but lends output storage. Caller must free the chpos map with the matching allocator; each nonnull ansi_start branch calls ansi_done, while cvt_text must never free borrowed osrc/odst.",
       "invariant": "Temporary parser state and returned maps release separately.",
       "source_refs": [
         {
@@ -135,10 +141,12 @@
           "excerpt_sha256": "afcd93c232857cee59c5d3cdee9a827e0ecd4d3649dd9b22b21241f704dca262"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ansi_done releases parser state; it must not free borrowed osrc or odst."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/cvt.rs, there is no typed capacity error or rollback after partial output; ecalloc failure exits through pager cleanup, and wide src_pos narrows into c_int map entries.",
+      "analysis": "src/cvt.rs has no typed partial-output rollback. There is no typed capacity error or rollback after partial output; ecalloc failure exits through pager cleanup, and wide src_pos narrows into c_int map entries.",
       "invariant": "Failure and narrowing remain explicit raw-core risks.",
       "source_refs": [
         {
@@ -159,7 +167,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/cvt.rs, utf_mode is a shared translated global and the conversion uses raw cursor state; no signal callback is installed here or allowed to replace active buffers.",
+      "analysis": "src/cvt.rs depends on stable translated conversion state. Utf_mode is a shared translated global and the conversion uses raw cursor state; no signal callback is installed here or allowed to replace active buffers.",
       "invariant": "Caller-controlled conversion is not asynchronous owner-safe.",
       "source_refs": [
         {

@@ -12,7 +12,7 @@
     "declared_type": "AtomicBool",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "5cadcc39e008a068bc94966dfec0fc7de46d81ddf1716572697738d109ccec7e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "EXHAUSTION_REPORTED owns a suppression bit for bookkeeping exhaustion."
+      ]
     },
     "aliases_escapes": {
       "analysis": "next_trigger borrows EXHAUSTION_REPORTED through a shared atomic reference and exports neither a raw address nor a mutable alias.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "1984820ac5377c74e1453ceda63a248e7d45b3c78dbd4632bd78d84ddc6cf412"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The bit cannot retain the trace pipe or its marker bytes."
+      ]
     },
     "callback_targets": {
       "analysis": "The EXHAUSTION_REPORTED latch is tested by swap in a direct branch; it contains neither closure state nor a callable address.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "87a1d85967f9b5786f35068d208e919835686796946b53505ad3979541c5f9d3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Atomic suppression registers no delayed output callback."
+      ]
     },
     "invalidation": {
       "analysis": "Reset changes the EXHAUSTION_REPORTED bit in place during startup; hook accesses cannot observe freed or replaced latch storage.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "1984820ac5377c74e1453ceda63a248e7d45b3c78dbd4632bd78d84ddc6cf412"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Setting the exhaustion latch needs no allocation rollback."
+      ]
     },
     "error_cleanup": {
       "analysis": "EXHAUSTION_REPORTED prevents duplicate overflow reports; a failed marker write remains missing evidence, not a successful requested hit.",
@@ -153,6 +161,6 @@
   },
   "related_sources": {},
   "finding_context": {
-    "M0-SIG-002": "Context only: this entry reviews storage ownership, not the caller/application mechanism in M0-SIG-002. That finding stays open and this clear storage disposition does not resolve or approve it."
+    "M0-SIG-002": "EXHAUSTION_REPORTED suppresses repeated bookkeeping-exhaustion markers. M0-SIG-002 remains about asynchronous command setup, which may happen even when no exhaustion marker is emitted; this reporting latch supplies no caller exclusion."
   }
 }

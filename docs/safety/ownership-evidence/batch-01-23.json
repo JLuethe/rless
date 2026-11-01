@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "size_helpdata owns the literal-size scalar rather than the selected help owner."
+      ]
     },
     "aliases_escapes": {
       "analysis": "lmsg.rs:2592 copies the size_helpdata value into size_help_data; no source hands out an owning pointer to this integer.",
@@ -56,7 +58,8 @@
         }
       ],
       "limitations": [
-        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews.",
+        "The copied default size does not validate a later translated help_data allocation."
       ]
     },
     "callback_targets": {
@@ -71,7 +74,9 @@
           "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Static initialization determines default size without a retained runtime callback."
+      ]
     },
     "invalidation": {
       "analysis": "The size_helpdata integer retains its image address and value after startup; translated help changes a different size_help_data variable.",
@@ -120,7 +125,9 @@
           "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A size reset cannot release allocated translation text."
+      ]
     },
     "error_cleanup": {
       "analysis": "The size_helpdata initializer computes size_of of a nonempty fixed array minus one; it acquires no fallible resource.",
@@ -154,7 +161,7 @@
   "related_sources": {
     "src/lmsg.rs": {
       "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
-      "relationship": "Message initialization/replacement distinguishes borrowed default help from owned heap translations, relevant to this help-image owner. Target: STATIC:e10ead5254340eb5268da696."
+      "relationship": "src/lmsg.rs:2587-2592 copies size_helpdata when restoring default help, while src/lmsg.rs:2554-2561 installs a translated size. Thus the static default scalar does not own selected help_data geometry."
     }
   },
   "finding_context": {}

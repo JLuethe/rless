@@ -12,7 +12,7 @@
     "declared_type": "* mut filestate",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "6d1568cf139931002b166f79c142b694b324cf540b45bebc9a11838cbf0f9e89"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "thisfile selects an active filestate and is not a second allocator owner."
+      ]
     },
     "aliases_escapes": {
       "analysis": "ch_get and navigation functions retain raw state/list/hash pointers across native reads and diagnostics; the thisfile pointer carries no generation or borrow lifetime.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Cached interior pointers depend on the selected filestate remaining live."
+      ]
     },
     "callback_targets": {
       "analysis": "Direct input, display and close/disposal calls can cross module boundaries while the active pointer is live; no callback slot mediates thisfile's lifetime.",
@@ -76,7 +80,9 @@
           "excerpt_sha256": "32084a27b1a01d13da9392c5a5a845a164fad83a9e9b06bc93ab223ad6999a4d"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Fatal cleanup can revisit active state through named calls."
+      ]
     },
     "invalidation": {
       "analysis": "dispose_ifile_state clears the ifile attachment and thisfile alias before freeing nodes/state; ch_close may retain a nonseekable state for later navigation.",
@@ -118,7 +124,9 @@
           "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Permanent disposal must detach thisfile before freeing the selected allocation."
+      ]
     },
     "error_cleanup": {
       "analysis": "On first-buffer failure thisfile retains its initialized empty sentinel state; ch_get returns -1, and later cleanup can dispose that state without treating it as a buf.",
@@ -168,7 +176,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:700c098bb40ea62c19648035."
+      "relationship": "terminate at src/signal.rs:83-85 enters quit; the separately traced file-disposal path may detach thisfile and free its filestate while interrupted users still hold raw aliases."
     }
   },
   "finding_context": {}

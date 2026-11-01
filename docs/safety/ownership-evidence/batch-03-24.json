@@ -12,7 +12,7 @@
     "declared_type": "lbool",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "414fb2a9fb9f9f74a966896298ae53454e08aab35c5d87a00e4bd6ef79cdd52e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "pasting owns a mode integer rather than paste text."
+      ]
     },
     "aliases_escapes": {
       "analysis": "command.rs:1239 reads pasting and command.rs:1744 clears it for a new command; its Boolean value carries no input-source identity.",
@@ -69,7 +71,9 @@
           "excerpt_sha256": "3a658b8facc318700672f62144cfb5bf2e0addd04ecccd55b5b62ea1c7e5d90a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Paste mode must remain coherent with cmdbuf and its cursor."
+      ]
     },
     "callback_targets": {
       "analysis": "A paste-end action calls stop_ignoring_input directly; the pasting mode stores neither that function address nor a retained callback context.",
@@ -83,7 +87,9 @@
           "excerpt_sha256": "414fb2a9fb9f9f74a966896298ae53454e08aab35c5d87a00e4bd6ef79cdd52e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Command parsing changes the mode directly and may call editor operations."
+      ]
     },
     "invalidation": {
       "analysis": "The command loop resets pasting separately from command text and other mode flags; stale mode state must not be reused for a different command input.",
@@ -125,7 +131,9 @@
           "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Ending a paste changes policy without releasing command-buffer storage."
+      ]
     },
     "error_cleanup": {
       "analysis": "A Boolean cannot report truncated input, absent end markers or underlying read errors; pasting must not be treated as an I/O completion receipt.",
@@ -175,11 +183,11 @@
   "related_sources": {
     "src/command.rs": {
       "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
-      "relationship": "Command dispatch/display selects, consumes or reads this reviewed state outside its definition module. Target: STATIC:9afcbf4c01306a8a95a252cc."
+      "relationship": "Paste recognition reads pasting at src/command.rs:1233-1246, and stop_ignoring_input clears it at src/command.rs:1738-1748; command parsing therefore shares the cmdbuf paste-mode scalar."
     },
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:9afcbf4c01306a8a95a252cc."
+      "relationship": "src/signal.rs:83-85 shows termination entering quit, without reading or changing pasting. Any route from that cleanup into paste-mode editing is untraced and is only a precondition concern here."
     }
   },
   "finding_context": {}

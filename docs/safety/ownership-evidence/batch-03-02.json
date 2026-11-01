@@ -12,7 +12,7 @@
     "declared_type": "AtomicBool",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "b784e7be1f927a1ff4fdeae39fd59ab80a902dd5f15b31e7277751776ab62fcd"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "BUFFER_ALLOCATION_FAILED owns one suppression latch, not a cache node."
+      ]
     },
     "aliases_escapes": {
       "analysis": "buffer_allocation_failed exports a Boolean; ch_get checks BUFFER_ALLOCATION_FAILED before touching cache state and records it when only the list sentinel remains.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "20705e9dcd1f0e3ca54fc783cd58c0eb9ae998c08385da84ca4e991888edb991"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The sentinel guard, rather than this atomic alone, protects cache payload access."
+      ]
     },
     "callback_targets": {
       "analysis": "The first failed transition calls a fixed diagnostic directly; no indirect target or allocator callback is retained by the BUFFER_ALLOCATION_FAILED flag.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "f0b036173a02519c823c7162a80213f9f8195a6ef9a8108e08bd51cb0b317bd4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Diagnostic emission is direct and does not transfer buffer ownership to the latch."
+      ]
     },
     "invalidation": {
       "analysis": "BUFFER_ALLOCATION_FAILED remains set even after navigation or buffer changes; failed first allocation is not hidden by a later state replacement.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "df871dc8d6142a9601717e4df2c1caf6f979a47cc7920837ffb073525b3050ad"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The Boolean has no allocator counterpart even when first-buffer allocation fails."
+      ]
     },
     "error_cleanup": {
       "analysis": "After BUFFER_ALLOCATION_FAILED is set, ch_get returns -1 without casting the sentinel to a buf. The initialized filestate stays attached until normal close/permanent disposal; the Boolean itself needs no release.",
@@ -160,6 +168,6 @@
   },
   "related_sources": {},
   "finding_context": {
-    "IND-MEM-FIRSTBUF": "Context only: this entry reviews storage ownership, not the caller/application mechanism in IND-MEM-FIRSTBUF. That finding stays open and this clear storage disposition does not resolve or approve it."
+    "IND-MEM-FIRSTBUF": "BUFFER_ALLOCATION_FAILED is the latch in the current sentinel guard at ch.rs first-buffer handling. That guard is part of the repaired IND-MEM-FIRSTBUF mechanism, not a separate caller path; its scalar storage is clear while independent maintained closure of the full regression and wiring remains pending."
   }
 }

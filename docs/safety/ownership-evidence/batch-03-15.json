@@ -8,11 +8,11 @@
       "src/signal.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/signal.rs, the module owns sigs and registers image-lifetime handler code; handlers borrow screen/filter/command state owned elsewhere rather than acquiring independent snapshots.",
+      "analysis": "src/signal.rs owns notification bits and handler registrations. The module owns sigs and registers image-lifetime handler code; handlers borrow screen/filter/command state owned elsewhere rather than acquiring independent snapshots.",
       "invariant": "Registered code lifetime is separate from application state.",
       "source_refs": [
         {
@@ -23,10 +23,12 @@
           "excerpt_sha256": "553b2e16e36712af7e6f1b8cc7a5980181e824a58067aee4e10cd57eb0c1655d"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Registering a handler address does not create a snapshot of interrupted owners."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/signal.rs, u_interrupt may retire filter aliases, sigusr1 borrows configuration text then mutates the command queue, and terminate can free owners active on interrupted stacks.",
+      "analysis": "src/signal.rs lets handlers borrow interrupted owners. U_interrupt may retire filter aliases, sigusr1 borrows configuration text then mutates the command queue, and terminate can free owners active on interrupted stacks.",
       "invariant": "A handler cannot assume interrupted owner borrows ended.",
       "source_refs": [
         {
@@ -37,10 +39,12 @@
           "excerpt_sha256": "327df406fba167197c8c0a0c49bf39614b8ef9523a73d9c580df3c914ef069e4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A suspended filter borrow can be invalidated by u_interrupt."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/signal.rs, init_signals names u_interrupt, stop, lwinch, terminate, sigalarm and sigusr1; ignored/default/error values still cross Option function-pointer representations.",
+      "analysis": "src/signal.rs registers concrete application handler targets. Init_signals names u_interrupt, stop, lwinch, terminate, sigalarm and sigusr1; ignored/default/error values still cross Option function-pointer representations.",
       "invariant": "Signal sentinels are not ordinary Rust function targets.",
       "source_refs": [
         {
@@ -51,10 +55,12 @@
           "excerpt_sha256": "f9b7b34e0920c6a2b040ac3a70f4eadbb70822d87c2e420b3cdf863ed4e770df"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Image-lifetime targets do not resolve the sentinel representation finding."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/signal.rs, handoff replaces dispositions but active handler work can already have changed filters or queue state; there is no typed retirement token for the registered application context.",
+      "analysis": "src/signal.rs cannot reverse effects of an already active handler. Handoff replaces dispositions but active handler work can already have changed filters or queue state; there is no typed retirement token for the registered application context.",
       "invariant": "Disposition replacement does not restore retired data aliases.",
       "source_refs": [
         {
@@ -68,7 +74,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/signal.rs, sigs uses read/modify/write and psignals snapshots then clears it; some resize work is deferred, while direct filter/queue/quit effects remain outside that commit.",
+      "analysis": "src/signal.rs mixes deferred bits with direct handler effects. Sigs uses read/modify/write and psignals snapshots then clears it; some resize work is deferred, while direct filter/queue/quit effects remain outside that commit.",
       "invariant": "Notification bits do not make handler effects transactional.",
       "source_refs": [
         {
@@ -82,7 +88,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/signal.rs, set_filter_pattern and quit invoke external owner release; the handlers have no local owning value whose Drop can coordinate those interrupted resources.",
+      "analysis": "src/signal.rs releases other owners through filter and quit paths. Set_filter_pattern and quit invoke external owner release; the handlers have no local owning value whose Drop can coordinate those interrupted resources.",
       "invariant": "Async release must not invalidate suspended ordinary callers.",
       "source_refs": [
         {
@@ -93,10 +99,12 @@
           "excerpt_sha256": "327df406fba167197c8c0a0c49bf39614b8ef9523a73d9c580df3c914ef069e4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Handler-triggered quit may release owners still active on suspended stacks."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/signal.rs, registration results are mostly ignored and sentinels are transmuted; fatal handler cleanup can enter an already partial application transaction.",
+      "analysis": "src/signal.rs does not type signal-registration error sentinels. Registration results are mostly ignored and sentinels are transmuted; fatal handler cleanup can enter an already partial application transaction.",
       "invariant": "Signal error paths lack an independently validated owner state.",
       "source_refs": [
         {
@@ -110,7 +118,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/signal.rs, the four maintained M0-SIG findings describe the direct filter mutation, async lookup/queue work, termination cleanup and sentinel representation still left open.",
+      "analysis": "src/signal.rs retains the four open signal findings. The four maintained M0-SIG findings describe the direct filter mutation, async lookup/queue work, termination cleanup and sentinel representation still left open.",
       "invariant": "Handler review records hazards rather than approving safety.",
       "source_refs": [
         {
@@ -136,7 +144,7 @@
   "related_sources": {
     "src/runtime.rs": {
       "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
-      "relationship": "Signal registration uses the runtime callback/sentinel conversion at the boundary reviewed here. Target: FILE:src/signal.rs."
+      "relationship": "rless_signal at src/runtime.rs:26-41 translates callback and sentinel representations for signal.rs registration. Its returned function-pointer representation remains a separate open ABI concern."
     }
   },
   "finding_context": {}

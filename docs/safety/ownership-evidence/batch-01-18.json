@@ -12,7 +12,7 @@
     "declared_type": "* mut :: core :: ffi :: c_char",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "meta_escape may borrow a literal, argument tail or meta_escape_buf."
+      ]
     },
     "aliases_escapes": {
       "analysis": "meta_escape borrows a static literal, the two-byte static array or an argv tail owned by args_strings throughout main_0.",
@@ -56,7 +58,8 @@
         }
       ],
       "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries.",
+        "Its raw C pointer must not outlive the selected backing owner."
       ]
     },
     "callback_targets": {
@@ -71,7 +74,9 @@
           "excerpt_sha256": "8d65df6b9a3c1245986ba0550b829402336a81aa67e6e0c85ec13f1443480e13"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct printf/string reads assume a stable NUL-terminated backing region."
+      ]
     },
     "invalidation": {
       "analysis": "Later options may replace the meta_escape pointer before output; no code retains an earlier escape alias and the backing argv Vecs are not resized in main_0.",
@@ -88,7 +93,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "For -f the character and trailing NUL are written before the meta_escape pointer is assigned; -e selects an already terminated argv tail or literal.",
+      "analysis": "meta_escape is assigned either a borrowed option tail or the address of meta_escape_buf after its two bytes are written. The pointer has no separate length field to commit, and its C-string lifetime depends on retaining the selected argument or static buffer until helper exit.",
       "invariant": "The escape pointer always selects a terminated string.",
       "source_refs": [
         {
@@ -127,7 +132,9 @@
           "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "meta_escape must not be freed when it points into argv or static bytes."
+      ]
     },
     "error_cleanup": {
       "analysis": "A missing -f number exits before output, so partially changed option state is not consumed; other parse errors do not transfer meta_escape's owner.",

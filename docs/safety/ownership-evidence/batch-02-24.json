@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "2bd1207ebacd43e9254179ace6a5afefb7f4bf90eeca4c142156ecaf3b3d1b19"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "errmsgs counts diagnostics rather than owning rendered messages."
+      ]
     },
     "aliases_escapes": {
       "analysis": "pager.rs:822 reads errmsgs by value to decide whether startup should wait for acknowledgement; no caller owns a pointer to a counted error object.",
@@ -62,7 +64,9 @@
           "excerpt_sha256": "0353559f633c635f5e438481f65288a4f6a2680f914ba9a761d9d003ed5899b8"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The count does not retain error parameter strings across output calls."
+      ]
     },
     "callback_targets": {
       "analysis": "error directly calls rendering/input functions and may be reached from out_of_memory; no callback address is stored in the errmsgs counter.",
@@ -76,7 +80,9 @@
           "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Output and fatal allocation paths can enter cleanup independently of count updates."
+      ]
     },
     "invalidation": {
       "analysis": "The errmsgs counter remains live for process lifetime, but reentrant error paths can mutate it while earlier rendering still owns buffers and attributes.",
@@ -125,7 +131,9 @@
           "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Resetting errmsgs releases neither message data nor output buffers."
+      ]
     },
     "error_cleanup": {
       "analysis": "out_of_memory enters error and increments errmsgs during partial owner failure; counting the diagnostic does not prove rendering cleanup is safe.",
@@ -168,7 +176,7 @@
   "related_sources": {
     "src/pager.rs": {
       "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
-      "relationship": "The allocator and quit path can enter fatal cleanup while the reviewed owner is partly replaced. Target: STATIC:291fd06da0d08785cfe9b9a6."
+      "relationship": "Startup checks errmsgs before prompting at src/pager.rs:820-836; out_of_memory at src/pager.rs:860-866 enters fatal handling. The count influences display flow but owns no error message allocation."
     }
   },
   "finding_context": {}

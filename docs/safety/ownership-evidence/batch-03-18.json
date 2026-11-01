@@ -12,7 +12,7 @@
     "declared_type": "[:: core :: ffi :: c_char ; 2048]",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "cmdbuf owns the base command allocation; cp is an interior alias."
+      ]
     },
     "aliases_escapes": {
       "analysis": "get_cmdbuf returns a borrowed raw C-string address and edit helpers retain interior pointers; the ABI expresses no lifetime preventing a later edit while a reader uses cmdbuf.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Reallocation invalidates raw cursor and offset-derived addresses."
+      ]
     },
     "callback_targets": {
       "analysis": "Editing cmdbuf calls width, repaint and output functions while terminal output shares mutable display state with the editing operation.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "cb406ba10b02144fc3e58b3edf3c042992d7c2112856ff09d3c8b31e5c75ed4a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct history and editing calls do not lend an exclusive owner token."
+      ]
     },
     "invalidation": {
       "analysis": "Reset, insertion, erasure and history/completion edits rewrite the cmdbuf array in place; stable address does not preserve old text seen by a retained pointer.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Only the allocation base may be freed, never a retained cp alias."
+      ]
     },
     "error_cleanup": {
       "analysis": "A full cmdbuf rejects insertion with action 2 before shifting; retained raw string aliases and rendering failure remain separate contracts.",
@@ -154,7 +162,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:7294435ec27de1be3a66cb39."
+      "relationship": "terminate at src/signal.rs:83-85 enters quit without naming cmdbuf. The raw editor owner lacks an encoded exclusion contract, but this citation alone does not establish a cleanup-to-cmdbuf mutation route."
     }
   },
   "finding_context": {}

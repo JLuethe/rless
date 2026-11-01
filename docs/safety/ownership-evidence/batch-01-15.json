@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "a258106f20d93585c1c9917a8181f24b6783882e8e21f5d8ad3afd18039b2e4e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "quote_all owns one policy integer and no quoted argument bytes."
+      ]
     },
     "aliases_escapes": {
       "analysis": "The output loop reads the quote_all scalar by value; no pointer to it is passed to printf, the argument Vec or a native object.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "74366fff44e3527c38bcd93f2b8ca8a3667847d06537b35afe090a8e4f4f186a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The quoting flag cannot extend the lifetime of argv or metachars storage."
+      ]
     },
     "callback_targets": {
       "analysis": "The branch selects a literal printf format and direct calls; quote_all does not contain a callback pointer.",
@@ -55,7 +59,9 @@
           "excerpt_sha256": "3b212714c1ecbc206b67f94605fd861d90fbc7fc6147924377e96adde1ea985f"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "is_metachar reads policy synchronously; no callable is stored in quote_all."
+      ]
     },
     "invalidation": {
       "analysis": "The quote_all flag has static lifetime and no backing allocation; option parsing finishes before the argument output loop reads it.",
@@ -104,7 +110,9 @@
           "excerpt_sha256": "a258106f20d93585c1c9917a8181f24b6783882e8e21f5d8ad3afd18039b2e4e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Ending quote_all storage does not release any argument or escape buffer."
+      ]
     },
     "error_cleanup": {
       "analysis": "An invalid option calls pr_error and exits; this quote_all scalar needs no rollback or resource cleanup.",

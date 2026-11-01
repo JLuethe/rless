@@ -10,7 +10,7 @@
       "src/ifile.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -32,7 +32,9 @@
           "excerpt_sha256": "c47070a9580c5e0b526174a6c5656f5e843a9da2224c695640f6bc608875ff1b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The ifile, filestate, descriptor and cache nodes are distinct OWN-01 owners."
+      ]
     },
     "aliases_escapes": {
       "analysis": "OWN-01 retains curr/old-ifile, active thisfile, LRU/hash and rendering aliases; a raw hold count is not a generation-checked handle.",
@@ -53,7 +55,9 @@
           "excerpt_sha256": "e9a63b40ec852386d2725a74f754e9c98b54514cbab526de956a612e3dd2cd1c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "An IFILE handle is not an owning reference that prevents del_ifile."
+      ]
     },
     "callback_targets": {
       "analysis": "OWN-01 calls mark, input-disposal and render/filter operations directly while other stages may retain aliases into those owners.",
@@ -74,7 +78,9 @@
           "excerpt_sha256": "ed59162782e7b904e9a19e00fa9b04c6f9fe63e6fb971d1162c3412bbf711f3b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct fatal-cleanup calls can revisit active filestate aliases."
+      ]
     },
     "invalidation": {
       "analysis": "OWN-01 preserves nonseekable state for navigation, while permanent del_ifile first clears external aliases and then disposes the retained state.",
@@ -137,10 +143,12 @@
           "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Borrowed fd 0 and CH_KEEPOPEN descriptors cannot be closed as ordinary owned files."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In OWN-01, failed first ch_addbuf leaves only the initialized sentinel; ch_get records BUFFER_ALLOCATION_FAILED and returns -1. Permanent deletion calls dispose_ifile_state: detach h_filestate/thisfile, free each cached node, close only an owned ordinary FD, then free state. del_ifile subsequently unlinks and frees names/node. A null state returns immediately, making repeated disposal harmless.",
+      "analysis": "OWN-01 cleanup preserves the first-buffer sentinel distinction: failed ch_addbuf leaves no payload node, reports once and returns -1. dispose_ifile_state detaches ifile/thisfile, frees cache nodes, closes only an ordinary owned FD and frees state. del_ifile then unlinks the ifile and frees both names and its node; borrowed stdin is not an owned close target.",
       "invariant": "Source analysis cannot replace regression-based closure.",
       "source_refs": [
         {
@@ -194,7 +202,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: OWN-01."
+      "relationship": "terminate at src/signal.rs:83-85 calls quit. OWN-01 traces the resulting edit/close_file/dispose path that can revisit filestate, cache and ifile owners during cleanup."
     }
   },
   "finding_context": {}

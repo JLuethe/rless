@@ -12,7 +12,7 @@
     "declared_type": "lbool",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -41,7 +41,9 @@
           "excerpt_sha256": "315f810ecc2577b121b0dba82a9bbeb4f8780ccb23fbfa9c799d3dce8f5f4002"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "prompting owns a display-mode flag but no prompt text."
+      ]
     },
     "aliases_escapes": {
       "analysis": "putchr borrows end_pr_string data after checking the prompting flag; the flag itself provides no lifetime guarantee for that separate prompt buffer.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "948a58bff6305526ace075bc5281c17a5a4c7ec48fbf6babb201d85285a4b5d5"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "putchr consumers can observe the flag without retaining the prompt owner."
+      ]
     },
     "callback_targets": {
       "analysis": "screen output can reach putchr through the tputs callback, while command rendering calls it directly; the prompting Boolean stores no callback context.",
@@ -76,7 +80,9 @@
           "excerpt_sha256": "b2bf8bc850c2dcced1ede83760c26727df6b2aed1cc4f34d635ec4cf58c26264"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "tputs provider correctness is separate from the prompting scalar."
+      ]
     },
     "invalidation": {
       "analysis": "putchr clears the prompting bit before recursively calling putstr on end_pr_string, preventing repeated end-prompt emission on that normal path.",
@@ -125,7 +131,9 @@
           "excerpt_sha256": "948a58bff6305526ace075bc5281c17a5a4c7ec48fbf6babb201d85285a4b5d5"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Clearing prompting does not retire terminal-provider or prompt allocations."
+      ]
     },
     "error_cleanup": {
       "analysis": "If terminal/output operations fail after the prompting bit changes, the display and state may diverge; the sticky failure owner is separate and cannot validate prompt aliases.",
@@ -168,15 +176,15 @@
   "related_sources": {
     "src/command.rs": {
       "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
-      "relationship": "Command dispatch/display selects, consumes or reads this reviewed state outside its definition module. Target: STATIC:4381f1b566810f2c1c50250b."
+      "relationship": "Prompt rendering sets prompting true after display at src/command.rs:1444-1452; output code consumes that shared display-mode flag without taking prompt-text ownership."
     },
     "src/screen.rs": {
       "sha256": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
-      "relationship": "Terminal-provider output can call putchr and therefore consumes the reviewed prompt/display state. Target: STATIC:4381f1b566810f2c1c50250b."
+      "relationship": "Terminal capability output at src/screen.rs:1685-1694 can route bytes through putchr, where prompting changes output behavior. The provider callback and prompt-text lifetimes remain separate obligations."
     },
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:4381f1b566810f2c1c50250b."
+      "relationship": "terminate at src/signal.rs:83-85 enters quit without touching prompting. These lines alone establish neither a prompt-mode change nor a reentrant tputs callback during display."
     }
   },
   "finding_context": {}

@@ -8,11 +8,11 @@
       "src/fault.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/fault.rs, five static atomics own the parsed site/ordinal/count/latch and borrowed trace FD number; initialization owns temporary OsStrings and stack libc metadata.",
+      "analysis": "src/fault.rs owns fault-plan atomics and temporary parsing values. Five static atomics own the parsed site/ordinal/count/latch and borrowed trace FD number; initialization owns temporary OsStrings and stack libc metadata.",
       "invariant": "Hook state retains values rather than environment pointers.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "3058d27566623cb3d00d3d7d39cfe7ae8f48e0b1e1d1106d8257becd17be1544"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "TRACE_FD is a borrowed inherited pipe number, not a hook-owned descriptor."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/fault.rs, the sixteen-byte marker stays on the hit stack and is lent only during write_marker; the harness must keep its dedicated inherited pipe live until child exit.",
+      "analysis": "src/fault.rs lends marker bytes only during a trace write. The sixteen-byte marker stays on the hit stack and is lent only during write_marker; the harness must keep its dedicated inherited pipe live until child exit.",
       "invariant": "Marker bytes cannot escape their synchronous write.",
       "source_refs": [
         {
@@ -51,10 +53,12 @@
           "excerpt_sha256": "884f230b8ac7c5e0d1f6744e7a1e8d3719d2f9ce9a293446c746bd9176f430fc"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The harness must retain its pipe endpoint until the child finishes."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/fault.rs, hook calls are direct libc operations plus local checked closures; no application callback is stored. Callers may still enter allocation from SIGUSR1 queue work (M0-SIG-002).",
+      "analysis": "src/fault.rs uses direct hook operations. Hook calls are direct libc operations plus local checked closures; no application callback is stored. Callers may still enter allocation from SIGUSR1 queue work (M0-SIG-002).",
       "invariant": "Hook-local callback safety cannot approve its caller.",
       "source_refs": [
         {
@@ -72,10 +76,12 @@
           "excerpt_sha256": "bc49342f3f06091e88089117d4c4e4ef964c268f8c1d0b3daa2f01d0bb088145"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct marker libc calls do not approve asynchronous caller allocation."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/fault.rs, initialize resets once before handlers; FD_CLOEXEC retires the child descriptor during exec and environment removal prevents inherited plan reuse.",
+      "analysis": "src/fault.rs retires the inherited trace descriptor at exec. Initialize resets once before handlers; FD_CLOEXEC retires the child descriptor during exec and environment removal prevents inherited plan reuse.",
       "invariant": "A live hook plan must retain its validated pipe identity.",
       "source_refs": [
         {
@@ -89,7 +95,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/fault.rs, plan parsing and FD checks finish before FAIL_AT/TRACE_FD stores and Release publication of FAIL_SITE; hit uses Acquire before reading configuration.",
+      "analysis": "src/fault.rs publishes validated plan state with Release. Plan parsing and FD checks finish before FAIL_AT/TRACE_FD stores and Release publication of FAIL_SITE; hit uses Acquire before reading configuration.",
       "invariant": "Enabling a site follows complete plan validation.",
       "source_refs": [
         {
@@ -110,7 +116,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/fault.rs, temporary environment strings drop normally; atomics own no heap memory, and the inherited child pipe is retired by CLOEXEC or process exit rather than a hook close.",
+      "analysis": "src/fault.rs borrows the harness pipe without closing it. Temporary environment strings drop normally; atomics own no heap memory, and the inherited child pipe is retired by CLOEXEC or process exit rather than a hook close.",
       "invariant": "Hook release does not close pager-owned descriptors.",
       "source_refs": [
         {
@@ -128,10 +134,12 @@
           "excerpt_sha256": "0c0276c17acd0ba0e55b1f51ca2a88e886b423317fa9439a9743fa29c56df85c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "CLOEXEC and process exit retire the child pipe without a hook close."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/fault.rs, malformed plans fail before pager mutation; trace writes are bounded, nonblocking, preserve errno and reject absent/invalid marker evidence.",
+      "analysis": "src/fault.rs rejects malformed plans before enablement. Malformed plans fail before pager mutation; trace writes are bounded, nonblocking, preserve errno and reject absent/invalid marker evidence.",
       "invariant": "Trace failure cannot fabricate a successful observation.",
       "source_refs": [
         {
@@ -159,7 +167,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/fault.rs, write_marker restores the prior mask and preserves existing SIGPIPE; lock-free hook mechanics do not repair asynchronous caller lookup/allocation.",
+      "analysis": "src/fault.rs preserves local mask state around marker writes. Write_marker restores the prior mask and preserves existing SIGPIPE; lock-free hook mechanics do not repair asynchronous caller lookup/allocation.",
       "invariant": "M0-SIG-002 remains an open caller-context hazard.",
       "source_refs": [
         {
@@ -192,7 +200,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/fault.rs."
+      "relationship": "The sigusr1 -> sigusr path at src/signal.rs:86-100 reads environment text then calls ungetsc. Its queue allocation can invoke fault hooks from an asynchronous caller, outside the hook atomics contract."
     }
   },
   "finding_context": {}

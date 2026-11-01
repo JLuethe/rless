@@ -12,7 +12,7 @@
     "declared_type": "AtomicUsize",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "660031c3fc1f1b6837b076611e84b916fd29c08bd16d7f3e4f176cc808ac33b4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "FAIL_SITE selects a plan site and owns no injected allocation."
+      ]
     },
     "aliases_escapes": {
       "analysis": "initialize stores a copied Site discriminant and hit reads FAIL_SITE; neither returns a reference or exposes its address to native code.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Acquire publication must pair with initialization of ordinal and trace state."
+      ]
     },
     "callback_targets": {
       "analysis": "hit compares FAIL_SITE with the selected Site and directly invokes next_trigger/write_marker; no callback address is stored.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "ae16c00a7846337538a3ada1d7c5ff1ab01eb55821e8e434539087d867b42437"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The site tag is not a function pointer supplied by the harness."
+      ]
     },
     "invalidation": {
       "analysis": "The FAIL_SITE object has static lifetime; initialize resets its value without invalidating hit references or moving the atomic.",
@@ -104,7 +110,9 @@
           "excerpt_sha256": "660031c3fc1f1b6837b076611e84b916fd29c08bd16d7f3e4f176cc808ac33b4"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Disabling the tag releases no pager resource."
+      ]
     },
     "error_cleanup": {
       "analysis": "A rejected plan or FD check leaves FAIL_SITE disabled; hit ignores other sites without acquiring application storage.",
@@ -153,6 +161,6 @@
   },
   "related_sources": {},
   "finding_context": {
-    "M0-SIG-002": "Context only: this entry reviews storage ownership, not the caller/application mechanism in M0-SIG-002. That finding stays open and this clear storage disposition does not resolve or approve it."
+    "M0-SIG-002": "FAIL_SITE publishes the selected hook plan through atomic state. M0-SIG-002 concerns the SIGUSR1 lookup and queue-allocation caller, whose safety is not implied by publishing a site tag; that caller finding remains open."
   }
 }

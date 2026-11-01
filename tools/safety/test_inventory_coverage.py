@@ -143,6 +143,23 @@ class InventoryV2Controls(unittest.TestCase):
             packet(item,review,self.inventory,self.root)
         return review
 
+    def test_fresh_inventory_metadata_keeps_source_bound_review_valid(self):
+        self.inventory.update(source_fingerprint='a'*64, recorded_at_utc='old')
+        review = self.completed_review()
+        self.check(review, complete=True)
+        # A new run after changes to tests/findings has new metadata and paths,
+        # but the source AST, compiler output and build inputs are identical.
+        self.inventory.update(source_fingerprint='b'*64, recorded_at_utc='new')
+        self.assertEqual(self.check(review, complete=True)['status'], 'reviewed')
+        self.inventory['derivation_inputs_sha256'] = '2'*64
+        with self.assertRaisesRegex(ValueError, 'derivation inputs'):
+            self.check(review)
+        self.inventory['derivation_inputs_sha256'] = '1'*64
+        source = self.root/'src/lib.rs'
+        source.write_text(source.read_text()+'// changed source byte\n')
+        with self.assertRaisesRegex(ValueError, 'stale inventory source'):
+            self.check(review)
+
     def test_shared_static_has_review_row_and_omission_is_rejected(self):
         review = seed(self.inventory, self.regions, self.root)
         statics = [item for item in review['entries'] if item['kind'] == 'shared-static-definition']

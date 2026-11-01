@@ -12,7 +12,7 @@
     "declared_type": "lbool",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ch_have_ungotchar owns a validity flag rather than a cached byte allocation."
+      ]
     },
     "aliases_escapes": {
       "analysis": "ch_get reads the ch_have_ungotchar flag and copies the payload; neither value keeps the active filestate alive or records the input generation.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Validity alone does not identify which input supplied ch_ungotchar."
+      ]
     },
     "callback_targets": {
       "analysis": "The ch_have_ungotchar flag gates data selection, not indirect dispatch; overrun diagnostics call error and can cross display owners before replacement completes.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The direct pushback path has no registered validity callback."
+      ]
     },
     "invalidation": {
       "analysis": "Negative ch_ungetchar input cancels validity and ch_get consumes it once; the ch_have_ungotchar Boolean does not itself invalidate any stale active-file alias.",
@@ -113,7 +119,9 @@
           "excerpt_sha256": "d39387f9eef19c33039bc4202327266d2a49b77c670f584501306a897ee26c2d"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Clearing the flag retires a pending byte logically without allocator release."
+      ]
     },
     "error_cleanup": {
       "analysis": "An already-valid slot reports an overrun but subsequently replaces its payload; callers must not mistake the ch_have_ungotchar bit for a retained error receipt.",

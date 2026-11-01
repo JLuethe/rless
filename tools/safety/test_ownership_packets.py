@@ -85,8 +85,58 @@ class PacketPrecision(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'missing from finding_ids'):validate_finding_mentions(self.item,known)
         self.item['finding_ids']=['M0-SIG-002']
         with self.assertRaisesRegex(ValueError,'context-only'):validate_finding_mentions(self.item,known)
-        self.item['finding_context']={'M0-SIG-002':'Context only: the clear storage judgment does not approve the asynchronous caller or close its finding.'}
+        self.item['finding_context']={'M0-SIG-002':'STATE has static scalar storage; M0-SIG-002 concerns asynchronous callers outside this fixture and remains open.'}
         self.save();self.check();validate_finding_mentions(self.item,known)
+    def test_five_and_seven_repeated_extents_are_rejected_four_are_allowed(self):
+        original=copy.deepcopy(self.item['checklist'])
+        for count in (4,5,7):
+            self.item['checklist']=copy.deepcopy(original)
+            for topic in CHECKLIST[:count]:
+                self.item['checklist'][topic]['source_refs']=copy.deepcopy(original[CHECKLIST[0]]['source_refs'])
+            self.save()
+            if count==4:self.check()
+            else:
+                with self.assertRaisesRegex(ValueError,'more than four topics'):self.check()
+    def test_five_and_seven_repeated_limitations_are_rejected_four_are_allowed(self):
+        original=copy.deepcopy(self.item['checklist'])
+        for count in (4,5,7):
+            for empty in (False,True):
+                self.item['checklist']=copy.deepcopy(original)
+                for topic in CHECKLIST[:count]:
+                    self.item['checklist'][topic]['limitations']=[] if empty else ['Repeated limitation needing a topic-specific explanation.']
+                self.save()
+                if count==4:self.check()
+                else:
+                    with self.assertRaisesRegex(ValueError,'more than four topics'):self.check()
+    def test_opening_location_clause_is_not_a_target_claim(self):
+        for identity in ('STATE','src/state.rs'):
+            if identity.startswith('src/'):
+                self.item.update(id='FILE:src/state.rs',kind='source-file');self.item.pop('symbol')
+                from ownership import review_target
+                self.payload['target']=review_target(self.item)
+            self.item['checklist']['owner_creation']['analysis']=f'In {identity}, this generic paragraph asserts all ownership and cleanup obligations were considered.'
+            self.save()
+            with self.assertRaisesRegex(ValueError,'opening clause'):self.check()
+    def test_cycle_opening_clause_is_not_a_target_claim(self):
+        from ownership import review_target
+        self.item.update(id='OWN-01',kind='ownership-cycle');self.item.pop('symbol')
+        self.payload['target']=review_target(self.item)
+        self.item['checklist']['owner_creation']['analysis']='In OWN-01, this generic paragraph asserts all ownership and cleanup obligations were considered.'
+        self.save()
+        with self.assertRaisesRegex(ValueError,'opening clause'):self.check()
+    def test_context_requires_entry_and_finding_and_different_reasons(self):
+        known={'findings':[{'id':'M0-SIG-002','status':'open'},{'id':'M0-IO-004','status':'open'}]}
+        self.item['finding_ids']=['M0-SIG-002']
+        for reason in ('x'*60,'M0-SIG-002 stays open outside the static storage scope being considered here.',
+                       'STATE stays clear but this long explanation does not identify its referenced finding.'):
+            self.item['finding_context']={'M0-SIG-002':reason}
+            with self.assertRaisesRegex(ValueError,'naming entry and finding'):validate_finding_mentions(self.item,known)
+        self.item['finding_ids']=['M0-SIG-002','M0-IO-004']
+        self.item['finding_context']={identity:f'STATE is scalar storage; {identity} covers an independent caller obligation that remains open.' for identity in self.item['finding_ids']}
+        with self.assertRaisesRegex(ValueError,'distinct per ID'):validate_finding_mentions(self.item,known)
+        self.item['finding_context']['M0-IO-004']='STATE stores no descriptor; M0-IO-004 concerns unsafely attributed logger completion, outside this scalar fixture.'
+        validate_finding_mentions(self.item,known)
+
     def test_unknown_finding_is_rejected(self):
         self.item['finding_ids']=['UNKNOWN']
         with self.assertRaisesRegex(ValueError,'unknown'):validate_finding_mentions(self.item,{'findings':[]})

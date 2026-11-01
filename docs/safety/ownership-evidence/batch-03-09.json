@@ -12,7 +12,7 @@
     "declared_type": "lbool",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "a7daac957e54cb2d5f1fa42be55d56d2d0782c892a564c33b6f11c2a3d52b370"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "tried owns a process-wide drain-attempt flag, not the log stream."
+      ]
     },
     "aliases_escapes": {
       "analysis": "The tried bit retains no pointer, but end_logfile dereferences thisfile while interpreting it and drains the current log/input owner.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "f1b706baf4bdf854d8c36044dd7fcb26a01145daae983d5b89304bc55e803aca"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A later stream can observe a flag left by an earlier drain."
+      ]
     },
     "callback_targets": {
       "analysis": "tried gates direct ierror/ch_forw_get calls during drain; those calls may enter display/input owners while the guard is set.",
@@ -55,7 +59,9 @@
           "excerpt_sha256": "a930f392a5b157933a6aaa3d01a49c2bc32be7ebd0959dada877cf0a574817d2"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The direct drain loop runs after setting tried and has no per-stream callback token."
+      ]
     },
     "invalidation": {
       "analysis": "Once true the guard is not reset for another log stream, so tried does not carry identity for the specific FD, filename or ifile it first guarded.",
@@ -99,7 +105,9 @@
           "excerpt_sha256": "c97109fe6a1fb102256ba4ac349eeae98bfb3baceb9950b21f0e1bfe08ef003a"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The guard value cannot close the descriptor used by the drain."
+      ]
     },
     "error_cleanup": {
       "analysis": "tried records an attempted drain rather than successful writes; sticky LOG_FAILED separately records hard write/close failure.",

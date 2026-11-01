@@ -12,7 +12,7 @@
     "declared_type": "AtomicUsize",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "0c92c0c5fae1a2e65f8a45291b8717ec04c580a82263770d73ed803744a5b2ff"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "INHERITED_SIGPIPE owns an atomic disposition value, not executable code."
+      ]
     },
     "aliases_escapes": {
       "analysis": "remember_sigpipe copies sa_sigaction into INHERITED_SIGPIPE; the saved value does not borrow the stack query structure.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The copied sa_sigaction integer outlives the stack query struct."
+      ]
     },
     "callback_targets": {
       "analysis": "init passes the INHERITED_SIGPIPE saved value to libc::signal, not to a Rust function call; exec inheritance constrains it to DFL or IGN.",
@@ -56,7 +60,8 @@
         }
       ],
       "limitations": [
-        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners."
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners.",
+        "Restoration assumes exec inherited DFL or IGN in the supported startup model."
       ]
     },
     "invalidation": {
@@ -99,7 +104,9 @@
           "excerpt_sha256": "0c92c0c5fae1a2e65f8a45291b8717ec04c580a82263770d73ed803744a5b2ff"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The atomic has no kernel-resource close or allocator free counterpart."
+      ]
     },
     "error_cleanup": {
       "analysis": "A failed query leaves INHERITED_SIGPIPE at its initialized SIG_DFL; ignored restoration errors do not create a memory owner.",

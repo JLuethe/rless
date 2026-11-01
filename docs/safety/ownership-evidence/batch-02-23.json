@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "c01fb5f691ebe0ab11ac4aab6f2454656b5d0f2d3af045a1690ea4a9b175d09f"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "size_metachars is signed capacity metadata, not allocated storage."
+      ]
     },
     "aliases_escapes": {
       "analysis": "The size_metachars integer is copied into malloc size_t and compared with num_metachars; no address to it escapes, but it describes a separate raw allocation.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "22545bb7da53a619f2a846060f2ece8668a811d409a3a1988dbc5519894f4d74"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Capacity publication alone does not validate a metachars alias."
+      ]
     },
     "callback_targets": {
       "analysis": "The size_metachars field is passed as an allocation size, not a callable address; malloc/strcpy/free execute as direct native operations.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "7abd13d1187fb8bd8f2d2e795250e059732b34d956eab92908debfdac48360a3"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "add_metachar reaches malloc directly, without a staging callback."
+      ]
     },
     "invalidation": {
       "analysis": "Changing capacity should track the new allocation, but size_metachars is assigned before malloc while metachars still owns the previous buffer.",
@@ -104,7 +110,9 @@
           "excerpt_sha256": "4a1072eefe94a8e436290e079b03ebbcc25aaa7fb49d66fccbae5329b951abf8"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The capacity scalar has no independent allocator counterpart."
+      ]
     },
     "error_cleanup": {
       "analysis": "malloc failure terminates without rolling size_metachars back, so the old capacity is not preserved as a retryable owner state.",

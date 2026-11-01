@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "cmd_offset is an offset into the current command buffer."
+      ]
     },
     "aliases_escapes": {
       "analysis": "cmd_home and scrolling derive pointers into cmdbuf from the cmd_offset scalar; copying the offset does not validate the selected UTF sequence or current text owner.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A retained offset requires revalidation after command-buffer replacement."
+      ]
     },
     "callback_targets": {
       "analysis": "Scroll logic calls step_char and repaint/output directly to compute a new visible origin; the cmd_offset integer stores no callback address.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Display navigation consumes the offset synchronously without a stored callback."
+      ]
     },
     "invalidation": {
       "analysis": "Reset/kill sets cmd_offset to zero and lshift/rshift replaces it after character stepping; later in-place edits can change what the same numeric offset denotes.",
@@ -118,7 +124,9 @@
           "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Resetting cmd_offset does not free the command allocation."
+      ]
     },
     "error_cleanup": {
       "analysis": "Reconstructing cmdbuf+cmd_offset relies on a current in-bounds byte offset; no typed invalid-offset result repairs a stale text/layout relationship.",
@@ -168,7 +176,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:327b1b9df77601d1c6097578."
+      "relationship": "terminate calls quit at src/signal.rs:83-85 rather than modifying cmd_offset. Any cleanup route that could invalidate this offset requires a further editor call trace, which is not claimed here."
     }
   },
   "finding_context": {}

@@ -2,6 +2,7 @@
 """Seed and validate source-bound ownership reviews, never infer review from counts."""
 import argparse
 import copy
+from collections import Counter
 import hashlib
 import json
 import re
@@ -161,7 +162,7 @@ INVENTORY_BINDING = 'source-inventory-content-v1'
 
 
 def inventory_digest(inventory):
-    """Bind complete inventory content, independently of run timestamp/storage.
+    """Bind source and derivation content, independently of run metadata.
 
     Artifact hashes, compiler configurations, build derivation hashes and every
     source/static/native/indirect/expanded site remain bound. validate_inventory_v2
@@ -169,6 +170,10 @@ def inventory_digest(inventory):
     """
     value = copy.deepcopy(inventory)
     value.pop('recorded_at_utc', None)
+    # This broad runner fingerprint includes tests, review tools and findings.
+    # Those are not source inventory facts. Source bytes and parser/build inputs
+    # remain bound separately and are freshly derived by validate_inventory_v2.
+    value.pop('source_fingerprint', None)
     if isinstance(value.get('raw_inventory'), dict):
         value['raw_inventory'].pop('path', None)
     for config in value.get('expanded_configurations', {}).values():
@@ -247,6 +252,9 @@ def validate_expanded_review(item, entries, configuration, root):
 
 REVIEW_PACKET_KIND = 'entry-specific-ownership-v1'
 MAX_CITATION_LINES = 150
+# A declaration-only file can support several topics with the same literal.
+# Permit at most half the checklist to share one set; a majority must not.
+MAX_IDENTICAL_TOPICS = 4
 TARGET_FIELDS = ('id', 'kind', 'paths', 'symbol', 'context', 'configuration', 'declared_type',
                  'binding_mutability', 'site_ids', 'review_sites_sha256')
 
@@ -296,11 +304,13 @@ def validate_review_packet(item, review, inventory, root):
                 or any(not isinstance(x, str) or len(x.strip()) < 12 for x in analysis['limitations'])
                 or not isinstance(analysis['source_refs'], list) or not analysis['source_refs']):
             raise ValueError('missing structured ownership analysis: ' + topic)
-        # A label such as 'OWN-01:' is not a claim about the reviewed target.
+        # Introductory labels and location clauses are not ownership claims.
+        body = analysis['analysis'].strip()
         body = re.sub(r'^\s*(?:' + re.escape(item.get('symbol') or item['id'])
-                      + r')(?:\s*\([^)]*\))?\s*:\s*', '', analysis['analysis'], count=1)
+                      + r')(?:\s*\([^)]*\))?\s*:\s*', '', body, count=1)
+        body = re.sub(r'^(?:In|For|Regarding|Concerning|With respect to)\s+[^,;:]+[,;:]\s*', '', body, count=1)
         if not re.search(r'(?<![A-Za-z0-9_])' + re.escape(target_name) + r'(?![A-Za-z0-9_])', body):
-            raise ValueError('analysis names target only in its label: ' + topic)
+            raise ValueError('analysis names target only in its label or opening clause: ' + topic)
         extent_sets.append(tuple(sorted({(c.get('target',''), c.get('start_line',0), c.get('end_line',0))
                                         for c in analysis['source_refs']})))
         limitation_sets.append(tuple(sorted(set(analysis['limitations']))))
@@ -339,6 +349,10 @@ def validate_review_packet(item, review, inventory, root):
         raise ValueError('identical citation extents across all eight topics')
     if len(set(limitation_sets)) == 1:
         raise ValueError('identical limitations across all eight topics')
+    if max(Counter(extent_sets).values()) > MAX_IDENTICAL_TOPICS:
+        raise ValueError('identical citation extents shared by more than four topics')
+    if max(Counter(limitation_sets).values()) > MAX_IDENTICAL_TOPICS:
+        raise ValueError('identical limitations shared by more than four topics')
     if set(related) != used_related:
         raise ValueError('unused related-source relationship')
     if item['kind'] != 'expanded-source' and (not primary_excerpts or item.get('symbol')
@@ -358,8 +372,16 @@ def validate_finding_mentions(item, findings):
         raise ValueError('finding named in analysis but missing from finding_ids: ' + ', '.join(sorted(mentioned-set(ids))))
     if item['status'] == 'reviewed-clear' and ids:
         context = item.get('finding_context', {})
-        if set(context) != set(ids) or any(not isinstance(v, str) or len(v.strip()) < 40 for v in context.values()):
-            raise ValueError('clear entry needs an explicit context-only finding explanation')
+        target = item.get('symbol') or item['id'].removeprefix('FILE:')
+        def names(text, token):
+            return re.search(r'(?<![A-Za-z0-9_-])'+re.escape(token)+r'(?![A-Za-z0-9_-])', text)
+        if (not isinstance(context, dict) or set(context) != set(ids)
+                or any(not isinstance(v, str) or len(v.strip()) < 40
+                       or not names(v, target) or not names(v, identity)
+                       for identity, v in context.items())
+                or len({re.sub(r'\b(?:M0|IND)-[A-Z0-9-]+\b', '<finding>', v).strip()
+                        for v in context.values()}) != len(ids)):
+            raise ValueError('clear entry needs an explicit context-only finding explanation naming entry and finding, distinct per ID')
 
 
 def validate(review, inventory, regions, findings, root=ROOT, complete=True):

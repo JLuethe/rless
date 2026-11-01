@@ -12,7 +12,7 @@
     "declared_type": "AtomicUsize",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "06af98af08b1eb0acfbe10a7883dae0f508a748ee557b40319b98c5d398cbd66"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "IO_WAITING counts active read/open guards rather than owning their descriptors."
+      ]
     },
     "aliases_escapes": {
       "analysis": "intio reads IO_WAITING by value to decide whether to post an interrupt; it receives no borrow of a guard or input buffer.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "38e69c1e295d5862f2031d918eccf1a007b8818ae384bea8bad9fb9431c4407f"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A positive counter does not validate the buffer of a particular waiter."
+      ]
     },
     "callback_targets": {
       "analysis": "IoWait::drop is static Rust destructor dispatch; the IO_WAITING numeric counter stores no dynamically selected destructor or native callback.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "6f902a2b0700b286c9e45152b97528e10614fede5c0ce37375a614e1e46ee214"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The notification protocol stores no per-waiter function target."
+      ]
     },
     "invalidation": {
       "analysis": "Nested IoWait guards each contribute to IO_WAITING; dropping the inner guard leaves the outer count and its interruption state live.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "8dfde3adcf476f66dcc38dc76c781f2fec60e4c38bb8a0ebf2decf58f35d1356"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "IoWait Drop balances the count without closing the borrowed FD."
+      ]
     },
     "error_cleanup": {
       "analysis": "Early I/O errors return through the IoWait destructor, decrementing IO_WAITING rather than jumping past cleanup.",
@@ -168,10 +176,10 @@
   "related_sources": {
     "src/os.rs": {
       "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
-      "relationship": "Input wait setup and intio access the reviewed interrupt/wait atomics through their shared notification protocol. Target: STATIC:a4e6340411205d17caecbfe3."
+      "relationship": "iread and iopen at src/os.rs:229-236 and src/os.rs:267-275 create IoWait guards; intio at src/os.rs:290-295 tests IO_WAITING before notification. The count spans active blocking calls."
     }
   },
   "finding_context": {
-    "M0-SIG-004": "Context only: this entry reviews storage ownership, not the caller/application mechanism in M0-SIG-004. That finding stays open and this clear storage disposition does not resolve or approve it."
+    "M0-SIG-004": "IO_WAITING counts active guards and gates intio notification. M0-SIG-004 concerns disposition conversion at registration, independent of balancing wait counts; this counter neither stores nor validates a returned signal target."
   }
 }

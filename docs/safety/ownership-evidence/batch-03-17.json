@@ -12,7 +12,7 @@
     "declared_type": "AtomicBool",
     "binding_mutability": "shared"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "345aa90f8b79914f1d8e7df8dd8d580834ab6c8a6a19b96cacce6dd3bd0dd1ec"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "HISTORY_ERROR_REPORTED owns one reporting latch, not history nodes."
+      ]
     },
     "aliases_escapes": {
       "analysis": "HISTORY_ERROR_REPORTED swap/store lend no history-node, byte-string or FILE pointer to an observer.",
@@ -41,7 +43,9 @@
           "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Atomic access to the latch does not retain a history entry."
+      ]
     },
     "callback_targets": {
       "analysis": "history_save_error directly selects error rendering or an allocation-free quitting diagnostic; no function address is stored in this HISTORY_ERROR_REPORTED flag.",
@@ -55,7 +59,9 @@
           "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The output routine can fail independently of atomic suppression."
+      ]
     },
     "invalidation": {
       "analysis": "A successful save resets the HISTORY_ERROR_REPORTED latch for a later distinct outage; clearing it does not retire or replace any history-node owner.",
@@ -104,7 +110,9 @@
           "excerpt_sha256": "14133a9eae02f4a05d2ac3e2ca6a248a83406dbe006381f53f40306aa15a9233"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "No history storage is freed when the latch is set."
+      ]
     },
     "error_cleanup": {
       "analysis": "During quit the diagnostic uses fixed bytes instead of recursive screen error handling; failure to write that diagnostic leaves the HISTORY_ERROR_REPORTED latch set.",
@@ -147,7 +155,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:6bc38ac7fb82ec2e15fde6c3."
+      "relationship": "terminate calls quit at src/signal.rs:83-85 but does not touch HISTORY_ERROR_REPORTED. The citation bounds a general asynchronous-cleanup precondition, not a proved write to this latch or history state."
     }
   },
   "finding_context": {}

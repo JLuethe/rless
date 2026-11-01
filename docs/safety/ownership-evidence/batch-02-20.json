@@ -8,11 +8,11 @@
       "src/bin/lessecho.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/bin/lessecho.rs, main owns CString-derived argument byte Vecs and a pointer Vec, while metachars owns a separate malloc buffer and quoting/escape state borrows literals, argument tails or static bytes.",
+      "analysis": "src/bin/lessecho.rs owns argument vectors and a separate metachar allocation. Main owns CString-derived argument byte Vecs and a pointer Vec, while metachars owns a separate malloc buffer and quoting/escape state borrows literals, argument tails or static bytes.",
       "invariant": "Argument and metacharacter buffers have separate owners.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Argument Vecs and the malloc metachars block have different owner lifetimes."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/bin/lessecho.rs, argv points into args_strings, which is not resized during main_0; meta_escape may retain an argument tail until exit, while metachars aliases must not survive its growth.",
+      "analysis": "src/bin/lessecho.rs keeps argv aliases valid through main_0. Argv points into args_strings, which is not resized during main_0; meta_escape may retain an argument tail until exit, while metachars aliases must not survive its growth.",
       "invariant": "Borrowed argument tails must remain inside their owner lifetime.",
       "source_refs": [
         {
@@ -51,10 +53,12 @@
           "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "meta_escape can borrow an argument tail until helper exit."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/bin/lessecho.rs, the helper calls process::init then main_0 directly; fprintf/printf/string operations retain no application callback, and copied FILE layout fields are not accessed here.",
+      "analysis": "src/bin/lessecho.rs calls process initialization before helper logic. The helper calls process::init then main_0 directly; fprintf/printf/string operations retain no application callback, and copied FILE layout fields are not accessed here.",
       "invariant": "Output interfaces borrow strings for each direct call.",
       "source_refs": [
         {
@@ -72,10 +76,12 @@
           "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "stdio calls here install no application callback context."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/bin/lessecho.rs, add_metachar allocates replacement storage, copies the old C string and frees it before publishing the new pointer; private is_metachar borrows it only synchronously.",
+      "analysis": "src/bin/lessecho.rs replaces the metachar buffer during growth. Add_metachar allocates replacement storage, copies the old C string and frees it before publishing the new pointer; private is_metachar borrows it only synchronously.",
       "invariant": "Metacharacter aliases must be retired before replacement.",
       "source_refs": [
         {
@@ -89,7 +95,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/bin/lessecho.rs, capacity is doubled before malloc and num_metachars+1 uses unchecked signed arithmetic; numeric option accumulation is likewise unchecked in lstrtol.",
+      "analysis": "src/bin/lessecho.rs updates signed capacity before allocation. Capacity is doubled before malloc and num_metachars+1 uses unchecked signed arithmetic; numeric option accumulation is likewise unchecked in lstrtol.",
       "invariant": "Raw capacity arithmetic has no checked commit contract.",
       "source_refs": [
         {
@@ -110,7 +116,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/bin/lessecho.rs, growth frees the prior metachars buffer; the final buffer and argument Vecs live until process exit, which intentionally skips ordinary Rust drops and lets the OS retire them.",
+      "analysis": "src/bin/lessecho.rs retires final helper storage at process exit. Growth frees the prior metachars buffer; the final buffer and argument Vecs live until process exit, which intentionally skips ordinary Rust drops and lets the OS retire them.",
       "invariant": "Process-exit retention is distinct from per-growth release.",
       "source_refs": [
         {
@@ -128,10 +134,12 @@
           "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The last metachars allocation is retired by exit rather than a final explicit free."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/bin/lessecho.rs, malloc null calls pr_error/exit before strcpy; missing numbers also exit. Overflow/panic behavior is not represented by a fallible owner API.",
+      "analysis": "src/bin/lessecho.rs exits on null allocation before copying. Malloc null calls pr_error/exit before strcpy; missing numbers also exit. Overflow/panic behavior is not represented by a fallible owner API.",
       "invariant": "Fatal parse paths do not transfer helper buffer ownership.",
       "source_refs": [
         {
@@ -152,7 +160,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/bin/lessecho.rs, no custom helper signal callback mutates these owners and SIGPIPE disposition is restored before parsing, but the raw owner APIs have no safe reusable lifetime boundary.",
+      "analysis": "src/bin/lessecho.rs restores SIGPIPE before parsing arguments. No custom helper signal callback mutates these owners and SIGPIPE disposition is restored before parsing, but the raw owner APIs have no safe reusable lifetime boundary.",
       "invariant": "One-shot helper review does not approve general reentry.",
       "source_refs": [
         {

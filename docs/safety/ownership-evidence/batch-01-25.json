@@ -8,11 +8,11 @@
       "src/help.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/help.rs, the module owns the 17587-byte help array, its default size scalar and a one-entry static constructor table; all are image storage.",
+      "analysis": "src/help.rs defines the static help image and size. The module owns the 17587-byte help array, its default size scalar and a one-entry static constructor table; all are image storage.",
       "invariant": "All module owners have static image lifetime.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "8acc3f0c9ae087f09003cda3bd36928bc9dfda51e03077a528cf2f3556e2bffe"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The 17587-byte literal and default size do not own loaded translations."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/help.rs, the exported array and size are borrowed/copied by lmsg; allocated translations replace help_data and size_help_data separately from these owners.",
+      "analysis": "src/help.rs lends default help bytes to lmsg. The exported array and size are borrowed/copied by lmsg; allocated translations replace help_data and size_help_data separately from these owners.",
       "invariant": "The default image and allocated translations stay distinct.",
       "source_refs": [
         {
@@ -51,10 +53,12 @@
           "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "lmsg help_data may point elsewhere while helpdata stays image-owned."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/help.rs, the only function is c2rust_run_static_initializers; INIT_ARRAY retains its exact C-ABI target to initialize the default size.",
+      "analysis": "src/help.rs registers the size initializer in init_array. The only function is c2rust_run_static_initializers; INIT_ARRAY retains its exact C-ABI target to initialize the default size.",
       "invariant": "Every module callback target is explicitly enumerated.",
       "source_refs": [
         {
@@ -65,10 +69,12 @@
           "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "INIT_ARRAY review is limited to the size constructor target."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/help.rs, the complete byte table was inspected as literals only; the maintained tree contains no array replacement or post-startup size assignment.",
+      "analysis": "src/help.rs does not replace the literal help array. The complete byte table was inspected as literals only; the maintained tree contains no array replacement or post-startup size assignment.",
       "invariant": "Default help backing storage is never resized.",
       "source_refs": [
         {
@@ -89,7 +95,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/help.rs, literal bytes exist before constructors; the size callback derives 17586 non-NUL bytes from the compiled array type.",
+      "analysis": "src/help.rs derives help size during static initialization. Literal bytes exist before constructors; the size callback derives 17586 non-NUL bytes from the compiled array type.",
       "invariant": "Help length is established before application reads.",
       "source_refs": [
         {
@@ -103,7 +109,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/help.rs, the module acquires no allocator block; default storage must not be freed, and lmsg uses owned_help to distinguish heap replacements.",
+      "analysis": "src/help.rs requires default help storage to remain unfreed. The module acquires no allocator block; default storage must not be freed, and lmsg uses owned_help to distinguish heap replacements.",
       "invariant": "Static help bytes are excluded from heap cleanup.",
       "source_refs": [
         {
@@ -121,10 +127,12 @@
           "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Heap translations need their separate owned_help release policy."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/help.rs, there is no fallible I/O or allocation in this file; failed translation loading must retain a valid static fallback in its separate owner.",
+      "analysis": "src/help.rs performs no fallible translation loading. There is no fallible I/O or allocation in this file; failed translation loading must retain a valid static fallback in its separate owner.",
       "invariant": "Default-help initialization cannot abandon resources.",
       "source_refs": [
         {
@@ -145,7 +153,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/help.rs, the one constructor runs before application handlers and only writes the size; text aliases are read-only in maintained application code.",
+      "analysis": "src/help.rs initializes size before handler registration. The one constructor runs before application handlers and only writes the size; text aliases are read-only in maintained application code.",
       "invariant": "No callback mutates default help text during paging.",
       "source_refs": [
         {
@@ -164,7 +172,7 @@
   "related_sources": {
     "src/lmsg.rs": {
       "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
-      "relationship": "Message initialization/replacement distinguishes borrowed default help from owned heap translations, relevant to this help-image owner. Target: FILE:src/help.rs."
+      "relationship": "init_lmsg at src/lmsg.rs:2587-2592 frees owned_help before restoring borrowed helpdata and size_helpdata. The selected message owner is distinct from the image array in help.rs."
     }
   },
   "finding_context": {}

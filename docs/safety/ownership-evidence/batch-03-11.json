@@ -8,11 +8,11 @@
       "src/input.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/input.rs, the file owns stack positions and render-decision scalars while borrowing ch input/cache state, line rendering owners and optional caller output slots.",
+      "analysis": "src/input.rs borrows input and line-rendering owners. The file owns stack positions and render-decision scalars while borrowing ch input/cache state, line rendering owners and optional caller output slots.",
       "invariant": "Render cursors do not own the retained input bytes.",
       "source_refs": [
         {
@@ -30,10 +30,12 @@
           "excerpt_sha256": "c9fe5a1b08b3d205506ccb753228bf626eb3a4b97f40bc669df41c5d47b4b66b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Rendering functions borrow line/cache owners rather than own their data."
+      ]
     },
     "aliases_escapes": {
-      "analysis": "In src/input.rs, p_linepos/p_newline borrow caller storage and receive copies; pappend/prewind/loadc/savec mutate separate global line owners that cannot be replaced during the segment operation.",
+      "analysis": "src/input.rs writes copied positions to caller slots. P_linepos/p_newline borrow caller storage and receive copies; pappend/prewind/loadc/savec mutate separate global line owners that cannot be replaced during the segment operation.",
       "invariant": "Output-slot writes require live caller storage throughout.",
       "source_refs": [
         {
@@ -58,10 +60,12 @@
           "excerpt_sha256": "e1f586b0cd68d88200f1cce5b4dcde4f7dd3d284f3739e7d6f51b67a5c032729"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Returned positions are scalar copies, not lifetime tokens for cached lines."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/input.rs, prep_hilite/is_filtered and line/status operations are direct calls with no retained function pointer; they cross filter/render owners also touched by handlers.",
+      "analysis": "src/input.rs calls filter and render operations directly. Prep_hilite/is_filtered and line/status operations are direct calls with no retained function pointer; they cross filter/render owners also touched by handlers.",
       "invariant": "Direct filter calls still require stable pattern owners.",
       "source_refs": [
         {
@@ -79,10 +83,12 @@
           "excerpt_sha256": "d7e7dd6d35cd07224a6b21c8a9e632aa2c9eb58212a7d1d90e509cffac19893e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct filter calls can overlap owner mutation by existing handlers."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/input.rs, seek, prewind and replay can change cached/current line content; raw positions and saved rendering state must be revalidated when the input or line owner changes.",
+      "analysis": "src/input.rs invalidates line content on seek and replay. Seek, prewind and replay can change cached/current line content; raw positions and saved rendering state must be revalidated when the input or line owner changes.",
       "invariant": "A source offset is not a retained-buffer lifetime token.",
       "source_refs": [
         {
@@ -103,7 +109,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/input.rs, sentinel outputs are installed early and final positions are written after rendering; the many line/cache/filter mutations are not a staged all-or-nothing owner transaction.",
+      "analysis": "src/input.rs publishes outputs around incremental rendering. Sentinel outputs are installed early and final positions are written after rendering; the many line/cache/filter mutations are not a staged all-or-nothing owner transaction.",
       "invariant": "Partial rendering does not commit a complete line owner.",
       "source_refs": [
         {
@@ -124,7 +130,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/input.rs, no heap or FD is acquired in these function bodies; line/cache/ANSI owners are released by their own modules, never by freeing p_linepos/p_newline.",
+      "analysis": "src/input.rs acquires no local heap owner in these functions. No heap or FD is acquired in these function bodies; line/cache/ANSI owners are released by their own modules, never by freeing p_linepos/p_newline.",
       "invariant": "Borrowed output arguments must not be deallocated here.",
       "source_refs": [
         {
@@ -142,10 +148,12 @@
           "excerpt_sha256": "c9fe5a1b08b3d205506ccb753228bf626eb3a4b97f40bc669df41c5d47b4b66b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "No local allocation does not imply that line and ANSI owners need no release."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/input.rs, invalid positions, seek failure or missing bytes return -1 and null_line; these exits do not themselves prove all lower read errors were diagnosed correctly.",
+      "analysis": "src/input.rs returns sentinel positions on local failure. Invalid positions, seek failure or missing bytes return -1 and null_line; these exits do not themselves prove all lower read errors were diagnosed correctly.",
       "invariant": "Render failure cannot substitute for read-error evidence.",
       "source_refs": [
         {
@@ -173,7 +181,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/input.rs, sIGINT can mutate filter storage during prep/filter use, and asynchronous cleanup can retire input state; the source review retains the existing signal/raw-owner findings.",
+      "analysis": "src/input.rs can be interrupted while borrowing filter storage. SIGINT can mutate filter storage during prep/filter use, and asynchronous cleanup can retire input state; the source review retains the existing signal/raw-owner findings.",
       "invariant": "Filter and input aliases are not yet signal-dispatch protected.",
       "source_refs": [
         {
@@ -199,7 +207,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: FILE:src/input.rs."
+      "relationship": "u_interrupt at src/signal.rs:44-56 replaces the filter with NULL; input.rs calls filter matching while rendering, so its borrowed filter storage can be retired by that handler."
     }
   },
   "finding_context": {}

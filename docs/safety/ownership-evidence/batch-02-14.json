@@ -12,7 +12,7 @@
     "declared_type": "ifile",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "c47070a9580c5e0b526174a6c5656f5e843a9da2224c695640f6bc608875ff1b"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "anchor owns the sentinel object while list nodes are separate allocations."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Traversal of anchor lends raw node addresses; the static sentinel cannot extend the lifetime of a node deleted elsewhere.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "3716b30e35d22cf4c0cc82bb1cd3ff7b2fadfb51069c7c90450ad1eda61bd490"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Circular links can point into nodes whose handles outlive list mutations."
+      ]
     },
     "callback_targets": {
       "analysis": "Operations around anchor call mark_check_ifile/unmark and ch disposal directly during node-list mutation.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Direct list helpers do not revoke all outside IFILE aliases."
+      ]
     },
     "invalidation": {
       "analysis": "unlink updates neighboring links and later frees the node; the anchor sentinel remains live, but no generation prevents a stale external node address from being reused.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The static anchor must never be freed with allocated ifile nodes."
+      ]
     },
     "error_cleanup": {
       "analysis": "Allocation before linking leaves anchor unchanged; fatal cleanup during later node/name mutation still relies on coherent list links.",

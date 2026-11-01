@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_uchar",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "d39387f9eef19c33039bc4202327266d2a49b77c670f584501306a897ee26c2d"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ch_ungotchar owns only the saved byte value."
+      ]
     },
     "aliases_escapes": {
       "analysis": "ch_ungetchar copies its argument and ch_get copies the ch_ungotchar byte into a cache buffer; no pointer to the payload escapes.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The byte must be interpreted with ch_have_ungotchar and the selected input."
+      ]
     },
     "callback_targets": {
       "analysis": "An overrun calls error directly before replacing the ch_ungotchar value; diagnostics may reenter shared screen state but no function pointer is stored in the byte.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "ch_ungetchar writes payload directly without a callback object."
+      ]
     },
     "invalidation": {
       "analysis": "Consumption clears the availability flag, and file-state replacement does not by itself encode which input the ch_ungotchar global byte belongs to.",
@@ -120,7 +126,9 @@
           "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Consuming validity does not free the integer payload or file cache."
+      ]
     },
     "error_cleanup": {
       "analysis": "The overrun path reports and then overwrites the ch_ungotchar payload; no typed error result preserves the previous logical pushback transaction.",

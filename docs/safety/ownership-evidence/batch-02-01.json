@@ -8,11 +8,11 @@
       "src/safe_core/arena.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/safe_core/arena.rs, at lines 59-84 Arena owns Vec<Slot<T>> and each live slot owns Option<T>; with_arena creates an empty owner under a fresh invariant lifetime brand.",
+      "analysis": "src/safe_core/arena.rs owns slot storage in a branded arena. At lines 59-84 Arena owns Vec<Slot<T>> and each live slot owns Option<T>; with_arena creates an empty owner under a fresh invariant lifetime brand.",
       "invariant": "Every stored value has exactly one live slot owner.",
       "source_refs": [
         {
@@ -31,11 +31,12 @@
         }
       ],
       "limitations": [
-        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs.",
+        "Arena ownership does not establish invariants inside an arbitrary stored T."
       ]
     },
     "aliases_escapes": {
-      "analysis": "In src/safe_core/arena.rs, handle copies contain index/generation rather than pointers; get/get_mut at 137-149 return references tied to the arena borrow. The Rc phantom brand prevents cross-thread transfer.",
+      "analysis": "src/safe_core/arena.rs returns references tied to arena borrows. Handle copies contain index/generation rather than pointers; get/get_mut at 137-149 return references tied to the arena borrow. The Rc phantom brand prevents cross-thread transfer.",
       "invariant": "Handles identify objects without retaining their addresses.",
       "source_refs": [
         {
@@ -53,10 +54,12 @@
           "excerpt_sha256": "30a58091dd26487dfa82d14489c655243405287cee231b1a37c93ff9fa4388a6"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Generational handles cannot validate external raw pointers retained by T."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/safe_core/arena.rs, with_arena takes a higher-ranked FnOnce consumed synchronously; reserve uses a borrowed Gate, and a removed T may run its ordinary Rust destructor in its new owner.",
+      "analysis": "src/safe_core/arena.rs consumes the higher-ranked closure synchronously. With_arena takes a higher-ranked FnOnce consumed synchronously; reserve uses a borrowed Gate, and a removed T may run its ordinary Rust destructor in its new owner.",
       "invariant": "No closure context escapes the branded scope.",
       "source_refs": [
         {
@@ -74,10 +77,12 @@
           "excerpt_sha256": "24ff592c2f90a4686ae8f2ba563d71f28d6758fa90b5ba80a94b3edf4fd9d539"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A user destructor can execute arbitrary ordinary Rust code outside the arena contract."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/safe_core/arena.rs, remove at 151-166 takes the value, advances generation and retires a slot at u64 exhaustion; stale handles cannot revive during reuse.",
+      "analysis": "src/safe_core/arena.rs invalidates removed handles with generations. Remove at 151-166 takes the value, advances generation and retires a slot at u64 exhaustion; stale handles cannot revive during reuse.",
       "invariant": "Slot reuse must not recreate a previous generation.",
       "source_refs": [
         {
@@ -98,7 +103,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/safe_core/arena.rs, insert_gate checks live count before mutation and reserves before pushing a new slot; failed reserve returns InsertError containing the original T.",
+      "analysis": "src/safe_core/arena.rs reserves before publishing a new slot. Insert_gate checks live count before mutation and reserves before pushing a new slot; failed reserve returns InsertError containing the original T.",
       "invariant": "Failed insertion transfers the value back to its caller.",
       "source_refs": [
         {
@@ -112,7 +117,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/safe_core/arena.rs, remove returns owned T to the caller; dropping the arena drops remaining Some(T) values and the Vec allocation through Rust destructors.",
+      "analysis": "src/safe_core/arena.rs transfers removed values to their caller. Remove returns owned T to the caller; dropping the arena drops remaining Some(T) values and the Vec allocation through Rust destructors.",
       "invariant": "Removal transfers ownership without duplicating T.",
       "source_refs": [
         {
@@ -130,10 +135,12 @@
           "excerpt_sha256": "59a811889119e8edc5f78b4bb86904a038d2c791d9e232f61ae674448667fd27"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A removed T remains owned by its caller until that caller drops it."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/safe_core/arena.rs, capacity error leaves slot/live metadata unchanged; the drop-count test at 200-226 checks no early drop and one eventual release. Rust unwinding still owns the Vec.",
+      "analysis": "src/safe_core/arena.rs returns the original value on reserve failure. Capacity error leaves slot/live metadata unchanged; the drop-count test at 200-226 checks no early drop and one eventual release. Rust unwinding still owns the Vec.",
       "invariant": "Insertion failure leaves the existing arena owner valid.",
       "source_refs": [
         {
@@ -154,7 +161,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/safe_core/arena.rs, brand is invariant and main-thread confined; the component installs no signal handler and must be entered only in ordinary control flow.",
+      "analysis": "src/safe_core/arena.rs confines the brand to ordinary main-thread use. Brand is invariant and main-thread confined; the component installs no signal handler and must be entered only in ordinary control flow.",
       "invariant": "Arena mutation requires an exclusive Rust borrow.",
       "source_refs": [
         {

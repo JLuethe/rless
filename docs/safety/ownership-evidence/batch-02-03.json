@@ -8,11 +8,11 @@
       "src/safe_core/coordinate.rs"
     ]
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
-      "analysis": "In src/safe_core/coordinate.rs, sourceOffset, LogicalLine and display/index wrappers own checked integer values; RetainedRange owns two offsets and explicitly owns no file or backing bytes.",
+      "analysis": "src/safe_core/coordinate.rs owns coordinate values without backing bytes. SourceOffset, LogicalLine and display/index wrappers own checked integer values; RetainedRange owns two offsets and explicitly owns no file or backing bytes.",
       "invariant": "Numeric coordinates are values, not storage owners.",
       "source_refs": [
         {
@@ -31,11 +31,12 @@
         }
       ],
       "limitations": [
-        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness.",
+        "Coordinate wrappers contain no file identity or owner generation."
       ]
     },
     "aliases_escapes": {
-      "analysis": "In src/safe_core/coordinate.rs, copy creates independent scalar values with no references; a BufferIndex must still be checked against its current byte owner before use.",
+      "analysis": "src/safe_core/coordinate.rs copies offsets without creating byte aliases. Copy creates independent scalar values with no references; a BufferIndex must still be checked against its current byte owner before use.",
       "invariant": "Copying a coordinate cannot lend a buffer address.",
       "source_refs": [
         {
@@ -60,10 +61,12 @@
           "excerpt_sha256": "2f6e214f5569c1eeead76b2fd99959bbc592cb81e17cab659186a07ebba3afae"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "An unchanged BufferIndex can outlive the bytes for which it was checked."
+      ]
     },
     "callback_targets": {
-      "analysis": "In src/safe_core/coordinate.rs, the coordinate macro generates arithmetic/conversion methods and map closures execute immediately; no callable address is retained in any wrapper.",
+      "analysis": "src/safe_core/coordinate.rs runs conversion closures synchronously. The coordinate macro generates arithmetic/conversion methods and map closures execute immediately; no callable address is retained in any wrapper.",
       "invariant": "Coordinate values contain no callback state.",
       "source_refs": [
         {
@@ -74,10 +77,12 @@
           "excerpt_sha256": "1a499c6de6cfe3b31f53a10465f64125f1c33973310a92ba047fc6d2fa1a46ef"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Immediate map closures cannot validate native callback ABIs."
+      ]
     },
     "invalidation": {
-      "analysis": "In src/safe_core/coordinate.rs, retainedRange does not carry generation or file identity; lines 110-111 require revalidation after owner invalidation even if the scalar range remains unchanged.",
+      "analysis": "src/safe_core/coordinate.rs requires retained ranges to be revalidated. RetainedRange does not carry generation or file identity; lines 110-111 require revalidation after owner invalidation even if the scalar range remains unchanged.",
       "invariant": "Range validity does not establish owner freshness.",
       "source_refs": [
         {
@@ -91,7 +96,7 @@
       "limitations": []
     },
     "mutation_commit": {
-      "analysis": "In src/safe_core/coordinate.rs, constructors reject negative source offsets, zero logical lines and unrepresentable native conversions before returning a new value.",
+      "analysis": "src/safe_core/coordinate.rs checks numeric bounds before returning values. Constructors reject negative source offsets, zero logical lines and unrepresentable native conversions before returning a new value.",
       "invariant": "Failed conversions cannot publish truncated coordinates.",
       "source_refs": [
         {
@@ -119,7 +124,7 @@
       "limitations": []
     },
     "release_pair": {
-      "analysis": "In src/safe_core/coordinate.rs, all wrappers contain scalar fields and require no allocator or descriptor release; ending a range value does not release underlying input.",
+      "analysis": "src/safe_core/coordinate.rs has no allocator release for scalar wrappers. All wrappers contain scalar fields and require no allocator or descriptor release; ending a range value does not release underlying input.",
       "invariant": "Numeric drop cannot free a retained byte owner.",
       "source_refs": [
         {
@@ -137,10 +142,12 @@
           "excerpt_sha256": "3f01178f3c7666e43bb8fd579515b87733d51ddb13b0d801bd8153eeb086ea6c"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Dropping RetainedRange does not retire any referenced file data."
+      ]
     },
     "error_cleanup": {
-      "analysis": "In src/safe_core/coordinate.rs, checked_add, try_from and boundary/index return typed errors; index rejects the one-past-end position while boundary intentionally admits it.",
+      "analysis": "src/safe_core/coordinate.rs returns typed range and conversion errors. Checked_add, try_from and boundary/index return typed errors; index rejects the one-past-end position while boundary intentionally admits it.",
       "invariant": "An initialized-byte index excludes the end boundary.",
       "source_refs": [
         {
@@ -161,7 +168,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "In src/safe_core/coordinate.rs, the module has no mutable global state, I/O or handler registration; values may be copied but cannot make asynchronous owner access valid.",
+      "analysis": "src/safe_core/coordinate.rs does not authorize asynchronous backing-owner access. The module has no mutable global state, I/O or handler registration; values may be copied but cannot make asynchronous owner access valid.",
       "invariant": "Signal delivery does not confer ownership on coordinates.",
       "source_refs": [
         {

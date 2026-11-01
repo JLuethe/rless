@@ -12,7 +12,7 @@
     "declared_type": "[:: core :: ffi :: c_char ; 2]",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "38c661a57046a39dbc30fbdf0d14a9741b3b3bc8a2ea7fff33bd9b11c5bb08a8"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "meta_escape_buf owns two static bytes and no allocation."
+      ]
     },
     "aliases_escapes": {
       "analysis": "meta_escape borrows meta_escape_buf's address after -f; printf and strlen only read through that pointer during the later output loop.",
@@ -49,7 +51,8 @@
         }
       ],
       "limitations": [
-        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries.",
+        "meta_escape may alias these bytes until helper exit."
       ]
     },
     "callback_targets": {
@@ -64,7 +67,9 @@
           "excerpt_sha256": "6861e8a347804426f839bd1fe2e36c0337de4465024a671aa6299b8f92f42e9e"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "No function target is stored in the two-byte escape buffer."
+      ]
     },
     "invalidation": {
       "analysis": "Repeated -f options overwrite the same static array before output; meta_escape_buf's address never changes and old values have no separate owner.",
@@ -106,7 +111,9 @@
           "excerpt_sha256": "38c661a57046a39dbc30fbdf0d14a9741b3b3bc8a2ea7fff33bd9b11c5bb08a8"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Static escape bytes cannot be released by a C allocator."
+      ]
     },
     "error_cleanup": {
       "analysis": "A failed -f parse exits before output; meta_escape_buf writes remain within its two indices and acquire no allocation.",

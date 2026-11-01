@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_char",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -34,7 +34,9 @@
           "excerpt_sha256": "c2da90a562599c4fd40718e2b418a42a437e50fd6ef8b728bd68017f039b8561"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "closequote owns one terminating quote byte independent of argument data."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Only a copied byte survives parsing; printf receives closequote's integer promotion rather than a borrowed pointer into argv.",
@@ -55,7 +57,9 @@
           "excerpt_sha256": "abbcc8492a8372ee97dfb3afe5c860e641126cd6806bbb1bb779eec4f24cf538"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A copied closing delimiter cannot validate the input string lifetime."
+      ]
     },
     "callback_targets": {
       "analysis": "Quoted-output dispatch is a direct printf call using %c; the closequote field is not a registered native callback.",
@@ -69,7 +73,9 @@
           "excerpt_sha256": "abbcc8492a8372ee97dfb3afe5c860e641126cd6806bbb1bb779eec4f24cf538"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Output calls do not register a target in closequote."
+      ]
     },
     "invalidation": {
       "analysis": "Option replacement changes the closequote byte in place before output starts; no heap owner or string alias is invalidated.",
@@ -111,7 +117,9 @@
           "excerpt_sha256": "194a6ba271826cdc6c7c0c7af52bfe6efa3065e3da2aad9cf17eb9db68033405"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "The byte is image state and never owns output FILE storage."
+      ]
     },
     "error_cleanup": {
       "analysis": "pr_error terminates a missing-number closequote option without acquiring a quote allocation or transferring argv ownership.",

@@ -12,7 +12,7 @@
     "declared_type": ":: core :: ffi :: c_int",
     "binding_mutability": "mutable"
   },
-  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
   "reviewer": "Codex author source review; independent approval pending",
   "checklist": {
     "owner_creation": {
@@ -27,7 +27,9 @@
           "excerpt_sha256": "17cfdc7464e55afc45aba14dd9e674a2e3ebae600d50a4d0db1adb7a3889dd07"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "prompt_col records the prompt boundary without owning prompt text."
+      ]
     },
     "aliases_escapes": {
       "analysis": "Cursor/home/scroll routines use prompt_col as the left editing boundary; no borrow of the actual prompt bytes is retained in this number.",
@@ -48,7 +50,9 @@
           "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "A saved cmd_col and cp must use the same prompt layout."
+      ]
     },
     "callback_targets": {
       "analysis": "cmd_putstr invokes putchr while measuring prompt_col; the width value does not own or store the terminal provider callback.",
@@ -62,7 +66,9 @@
           "excerpt_sha256": "f782359491f0a6caaba69a18937890aabfb2b5834ed9caec0308f8f6956019f0"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "terminate reaches quit, but reentrant editor mutation remains untraced."
+      ]
     },
     "invalidation": {
       "analysis": "Redrawing a prompt replaces prompt_col\u2019s boundary while a saved cmd_col/cp may still describe the previous prompt layout.",
@@ -106,7 +112,9 @@
           "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
         }
       ],
-      "limitations": []
+      "limitations": [
+        "Changing the prompt column does not release either prompt or command storage."
+      ]
     },
     "error_cleanup": {
       "analysis": "Failed output or unsuitable terminal geometry does not roll back width accumulation here; callers must not infer a rendered prefix solely from prompt_col.",
@@ -130,7 +138,7 @@
       "limitations": []
     },
     "signals_handoff": {
-      "analysis": "The global is part of raw command/display state accessed by exported functions, with no handler-exclusion contract encoded by prompt_col's type.",
+      "analysis": "prompt_col is raw shared prompt-layout state, and changing it while cmd_col/cp describe an earlier layout would violate editor coherence. terminate calls quit, but this record has not traced cleanup back into a prompt_col mutation. Handler-driven editor reentry is an unverified precondition, not an established source path.",
       "invariant": "Prompt-boundary mutation remains controlled-loop work.",
       "source_refs": [
         {
@@ -156,7 +164,7 @@
   "related_sources": {
     "src/signal.rs": {
       "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
-      "relationship": "Handlers may enter output, filter/queue mutation or cleanup while the reviewed ordinary owner has live aliases. Target: STATIC:b7ab2d40b1a0b0453fc65878."
+      "relationship": "The quit entry at src/signal.rs:83-85 contains no prompt_col mutation. This source establishes termination only; reaching another prompt-layout update from cleanup remains an unverified precondition."
     }
   },
   "finding_context": {}
