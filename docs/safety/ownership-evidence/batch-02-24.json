@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:291fd06da0d08785cfe9b9a6",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/output.rs"
+    ],
+    "symbol": "errmsgs",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "errmsgs: The exported c_int owns the process error count, initially zero and incremented by error before rendering diagnostics.",
+      "invariant": "Error count is scalar state with no diagnostic allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "errmsgs: pager.rs:822 reads it by value to decide whether startup should wait for acknowledgement; no caller owns a pointer to a counted error object.",
+      "invariant": "Count observation does not transfer diagnostic storage.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "errmsgs: error directly calls rendering/input functions and may be reached from out_of_memory; no callback address is stored in the counter.",
+      "invariant": "Diagnostic dispatch is separate from count storage.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "invalidation": {
+      "analysis": "errmsgs: The counter remains live for process lifetime, but reentrant error paths can mutate it while earlier rendering still owns buffers and attributes.",
+      "invariant": "Static lifetime does not protect diagnostic reentry.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "errmsgs: errmsgs+=1 occurs before output and has no overflow policy or rollback if later diagnostic steps fail or recurse.",
+      "invariant": "Error accounting is not a transactional rendering commit.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "release_pair": {
+      "analysis": "errmsgs: There is no free/close operation for the integer; surrounding diagnostic cleanup must release its own resources independently of the count.",
+      "invariant": "Counter lifetime cannot stand in for rendering cleanup.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "errmsgs: Fatal allocation reports through error, so reporting may enter shared rendering state during an already partial owner mutation; count increments do not validate that state.",
+      "invariant": "Error reporting is not proof of owner recovery.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "errmsgs: The count is non-atomic translated global state; asynchronous cleanup/error interactions remain part of the open raw-core owner review.",
+      "invariant": "M0-MEM-001 remains recorded for mutable diagnostic state.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 421,
+          "end_line": 426,
+          "excerpt_sha256": "36cdc4d3a1165754bf83070b2c276559f98b61d580b816303e964607b89f1ba0"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 988,
+          "end_line": 1013,
+          "excerpt_sha256": "954c2abafb5406c64327dff54c246ab6b2521d851e779deacac8325f3d0d3f59"
+        }
+      ],
+      "limitations": [
+        "This records the count and its direct mutation context; the entire error renderer and handler cleanup are not independently approved."
+      ]
+    }
+  }
+}

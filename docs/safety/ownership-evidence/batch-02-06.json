@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/lib.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/lib.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/lib.rs: The library root declares modules and dependencies but defines no runtime owner, raw object, initializer function or mutable static.",
+      "invariant": "No application allocation is owned by the root file.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/lib.rs: Public module visibility exposes named APIs without creating new data aliases in this file; raw alias contracts belong to those module entries.",
+      "invariant": "Module declarations are not ownership transfers.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/lib.rs: macro_use c2rust_bitfields enables compile-time derives; the root installs no runtime callback and has no indirect call expression.",
+      "invariant": "Macro import does not register an application callback.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/lib.rs: fault is feature-gated, runtime private and the other modules exported; changing visibility creates no transient pointee lifetime here.",
+      "invariant": "Root declarations retain no borrowed runtime address.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/lib.rs: The module graph is a compile-time selection; no sequence of partial heap-owner updates occurs during root evaluation.",
+      "invariant": "Library declarations have no partial runtime commit.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/lib.rs: There is no constructor, destructor or native handle release in the root; module owners remain responsible for their own resources.",
+      "invariant": "Root review cannot stand in for module release review.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/lib.rs: Compilation errors reject the selected module graph; this root supplies no fallible runtime branch that could abandon an owner.",
+      "invariant": "Build failure cannot leave a root-owned runtime object.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/lib.rs: The private runtime declaration does not itself install handlers; remaining translated modules retain their separate signal and ownership obligations.",
+      "invariant": "Root visibility does not approve asynchronous module use.",
+      "source_refs": [
+        {
+          "target": "source:src/lib.rs",
+          "sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1",
+          "start_line": 1,
+          "end_line": 60,
+          "excerpt_sha256": "0baf09d0a408d992674fc3a65c94b6eee6fa160cb06140339a930d095b5c5aa1"
+        }
+      ],
+      "limitations": [
+        "This review covers only root-file sites. It neither approves the transitive translated modules nor links the isolated safe_core tree."
+      ]
+    }
+  }
+}

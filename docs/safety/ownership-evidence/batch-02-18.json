@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:e956bb6707cfd766d532906a",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/position.rs"
+    ],
+    "symbol": "table_size",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "table_size: The c_int owns allocated table capacity, initialized zero and assigned sc_height only after a successful ecalloc return.",
+      "invariant": "Capacity records storage size rather than current screen rows.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "table_size: pos_init reads it by value to choose reuse versus growth; no external pointer to the field escapes, but its meaning depends on the live table owner.",
+      "invariant": "A capacity number alone cannot validate a table address.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "table_size: No callback is stored; the allocation selected by the capacity comparison may invoke fatal cleanup before the next value is assigned.",
+      "invariant": "Capacity decisions can enter owner-sensitive cleanup.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "invalidation": {
+      "analysis": "table_size: Shrink retains capacity and changes table_rows; growth frees the old array while the old capacity value remains published until replacement succeeds.",
+      "invariant": "Capacity lifetime must follow allocation lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "table_size: The successful branch commits table, then table_size and table_rows; failure between old free and new assignment leaves stale capacity/pointer association.",
+      "invariant": "Capacity publication is not failure-atomic with the owner.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "release_pair": {
+      "analysis": "table_size: The integer requires no free; only the array described by it is allocated, and retained capacity after shrink is intentional.",
+      "invariant": "Capacity metadata must not be released as storage.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "table_size: Fatal replacement failure does not clear capacity, so cleanup may interpret it as describing still-live memory; the existing raw-owner finding is retained.",
+      "invariant": "Failed growth cannot prove the old capacity remains owned.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "table_size: Raw global capacity updates assume normal startup/resize sequencing and exclude asynchronous cleanup during the transition.",
+      "invariant": "That sequencing is not yet a proved handoff contract.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 195,
+          "excerpt_sha256": "faee597fe20a53ade573cd2c807818290f6e6270be4d60651e9cb04fb20c132d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    }
+  }
+}

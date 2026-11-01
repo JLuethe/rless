@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/safe_core/coordinate.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/safe_core/coordinate.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: SourceOffset, LogicalLine and display/index wrappers own checked integer values; RetainedRange owns two offsets and explicitly owns no file or backing bytes.",
+      "invariant": "Numeric coordinates are values, not storage owners.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: Copy creates independent scalar values with no references; a BufferIndex must still be checked against its current byte owner before use.",
+      "invariant": "Copying a coordinate cannot lend a buffer address.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: The coordinate macro generates arithmetic/conversion methods and map closures execute immediately; no callable address is retained in any wrapper.",
+      "invariant": "Coordinate values contain no callback state.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: RetainedRange does not carry generation or file identity; lines 110-111 require revalidation after owner invalidation even if the scalar range remains unchanged.",
+      "invariant": "Range validity does not establish owner freshness.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: Constructors reject negative source offsets, zero logical lines and unrepresentable native conversions before returning a new value.",
+      "invariant": "Failed conversions cannot publish truncated coordinates.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: All wrappers contain scalar fields and require no allocator or descriptor release; ending a range value does not release underlying input.",
+      "invariant": "Numeric drop cannot free a retained byte owner.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: checked_add, try_from and boundary/index return typed errors; index rejects the one-past-end position while boundary intentionally admits it.",
+      "invariant": "An initialized-byte index excludes the end boundary.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/safe_core/coordinate.rs: The module has no mutable global state, I/O or handler registration; values may be copied but cannot make asynchronous owner access valid.",
+      "invariant": "Signal delivery does not confer ownership on coordinates.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 8,
+          "end_line": 145,
+          "excerpt_sha256": "87c4f47660d960bfc1bb5ca5adde7419c568ac71a37b671d563ee503603863de"
+        },
+        {
+          "target": "source:src/safe_core/coordinate.rs",
+          "sha256": "9b159d432451897f896577d8adb7b3eb9cf1f334677d486e2e8c59de1aec1480",
+          "start_line": 148,
+          "end_line": 228,
+          "excerpt_sha256": "46dba238038e281cb9b15fdc4f8aca7643b3b0c1ae77ae28b5d2a64308dcddf5"
+        }
+      ],
+      "limitations": [
+        "Checked coordinates are not a proof of live input identity; future caller integration must validate owner generation and range freshness."
+      ]
+    }
+  }
+}

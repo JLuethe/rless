@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-11",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/runtime.rs",
+      "src/signal.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-11: The cycle owns interrupt atomics and sigs while libc retains handler registrations; stack sigaction/pollfd/mask values live only through their calls.",
+      "invariant": "Kernel callback registrations borrow stable code addresses.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-11: Handlers access global screen/filter/queue state that the interrupted main path may already be using; u_interrupt frees filters and sigusr1 enters queue construction.",
+      "invariant": "Interrupted owner aliases are not yet protected by dispatch.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-11: Targets are u_interrupt, stop, lwinch, terminate, sigalarm and sigusr1; default/ignored/error sentinels still pass through Option function-pointer transmutes.",
+      "invariant": "Real code targets and signal sentinel values remain distinct concepts.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-11: init_signals replaces dispositions for handoff and restores them later; concurrent handler mutations can invalidate filters or cleanup state before main-loop resumption.",
+      "invariant": "Handoff must retire callbacks before changing their owners.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-11: The read mask/ppoll protocol commits notification checks safely, but sigs updates and direct handler work are not a transactional main-loop event dispatch.",
+      "invariant": "Atomic read wakeup does not make all handler mutations atomic.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-11: IoWait and RestoreMask unwind normally; terminate directly calls quit and filter handlers can free memory while an interrupted owner retains aliases.",
+      "invariant": "Handler-triggered release remains an explicit open hazard.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-11: Failed sigaction and native error sentinels are not represented with a separate error type; asynchronous quit can enter partial cleanup during interrupted work.",
+      "invariant": "Error cleanup cannot be assumed reentry-safe.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-11: psignals performs some deferred resize/job-control work, but SIGINT, SIGUSR1 and termination retain direct mutation; the four M0-SIG findings stay open.",
+      "invariant": "This cycle is hazard-recorded, never signal-safe approved.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 41,
+          "end_line": 212,
+          "excerpt_sha256": "ecc2ab78d0ff762b55c28b08535da9e62958180e5eb2599084c013ab74f95b30"
+        }
+      ],
+      "limitations": [
+        "This is source review of current registrations, wakeup and callback lifetime; it does not close job-control, callback-provider or independent review gates."
+      ]
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/safe_core/reserve.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/safe_core/reserve.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/safe_core/reserve.rs: reserve borrows a caller-owned Vec and Gate; ReserveFault owns fail_at, attempts and hits as checked scalar bookkeeping.",
+      "invariant": "Allocation ownership remains with the supplied Vec.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/safe_core/reserve.rs: Both mutable borrows are scoped to the call; checked_len receives only lengths and the gate receives no reference to elements.",
+      "invariant": "Gate execution cannot retain the vector element borrow.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/safe_core/reserve.rs: Gate dispatch uses &mut impl Gate and completes before try_reserve; the private Unfaulted and test ReserveFault implementations retain no callback.",
+      "invariant": "Reserve notification is synchronous and non-retaining.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/safe_core/reserve.rs: Successful Vec growth can relocate storage, but exclusive borrowing prevents callers from retaining safe element references across reserve.",
+      "invariant": "Reallocation occurs under an exclusive vector borrow.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/safe_core/reserve.rs: checked_len checks element addition, byte multiplication and isize bound before gate or allocator; capacity-satisfied requests skip both.",
+      "invariant": "No allocator sees an unchecked byte-length request.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/safe_core/reserve.rs: A successful reserve updates capacity of the same Vec owner; allocation failure leaves its prior storage owned and valid.",
+      "invariant": "Reserve never transfers the vector allocation to Gate.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/safe_core/reserve.rs: try_reserve failures map to AllocationFailed; attempts uses checked_add and a one-time selected ordinal cannot wrap into a repeated hit.",
+      "invariant": "Failure accounting cannot repeat an old ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/safe_core/reserve.rs: No process-global state or signal callback exists; Vec reserve may allocate and therefore belongs to ordinary component execution.",
+      "invariant": "Reserve is not an asynchronous signal operation.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 1,
+          "end_line": 107,
+          "excerpt_sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator."
+      ]
+    }
+  }
+}

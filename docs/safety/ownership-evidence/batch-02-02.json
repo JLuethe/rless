@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/safe_core/bytebuf.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/safe_core/bytebuf.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: At 16-23 ByteBuf and NulTerminatedBytes each own a private Vec<u8>; construction copies caller bytes after a successful fallible reserve.",
+      "invariant": "Each byte vector has one Rust object owner.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: as_bytes returns only shared borrowed slices; self-copy APIs accept ranges and reacquire bytes after reserve instead of retaining a pointer into the old Vec.",
+      "invariant": "A retained slice cannot coexist with mutation in safe Rust.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: Gate::before_reserve and the interior-NUL predicate are synchronous Rust calls; no native string callback or pointer is registered.",
+      "invariant": "Reserve gates do not retain borrowed byte storage.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: reset/truncate/pop preserve Vec ownership; replacement stages a distinct Vec and self-copy uses original indices after any reallocation.",
+      "invariant": "Growth cannot invalidate an escaped raw alias.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: At 102-121 replacement reserves and fills staged storage before assigning self.bytes; the old owner survives an allocation failure unchanged.",
+      "invariant": "Replacement commits only a complete staged vector.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: Assignment drops the replaced Vec once; the C-string adapter returns a separately owned vector, so dropping ByteBuf cannot retire its adapter.",
+      "invariant": "Adapter storage has an independent Rust release path.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: Range, length and interior-NUL errors return small StorageError values; failed reserve never exposes uninitialized bytes or partial content.",
+      "invariant": "Error returns preserve the previous initialized byte sequence.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/safe_core/bytebuf.rs: Exclusive mutation uses &mut self and the crate forbids unsafe code; no handler entry or global scratch buffer exists in this component.",
+      "invariant": "Byte-owner mutation belongs to normal Rust control flow.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 1,
+          "end_line": 181,
+          "excerpt_sha256": "3738efb524319b1dd0c5ed19600cd35e3ec7df451d0b12ee821a7ca673202a29"
+        },
+        {
+          "target": "source:src/safe_core/bytebuf.rs",
+          "sha256": "04f76b8051f6044becc2c93ebd4797a536128daf888a3ca67e4fd83bae73adac",
+          "start_line": 185,
+          "end_line": 325,
+          "excerpt_sha256": "9d4408848b99a6962869693b7ba9489debc6e47393ef0d6acb19ea468bc8d749"
+        }
+      ],
+      "limitations": [
+        "Pure component review only; this does not approve legacy xbuffer callers or integrate ByteBuf into either production executable."
+      ]
+    }
+  }
+}

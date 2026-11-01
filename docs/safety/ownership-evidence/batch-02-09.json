@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/runtime.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/runtime.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/runtime.rs: IoWait owns a counter contribution and RestoreMask owns the saved signal-mask value; read_interruptible borrows its caller buffer and descriptor.",
+      "invariant": "Input buffers and FDs are not acquired by this module.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/runtime.rs: The raw buffer is lent to libc::read only for the synchronous call; guard Drop balances nested waits and restores the original mask on Rust return.",
+      "invariant": "A read must return before its caller buffer owner moves.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/runtime.rs: rless_signal at 26-40 converts optional function values through sigaction; SIG_ERR and prior sentinel integers are transmuted into Rust function-pointer representations (M0-SIG-004).",
+      "invariant": "Signal sentinels still lack a distinct typed representation.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/runtime.rs: The RAII mask survives until read exits, but retained kernel handler addresses outlive rless_signal and must be stable image functions.",
+      "invariant": "Signal registration outlives its stack sigaction struct.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/runtime.rs: Blocking handled signals precedes checking IO_INTERRUPTED and ppoll atomically restores the saved mask while waiting; SA_RESTART is deliberately disabled.",
+      "invariant": "Read interruption does not depend on a check/read gap.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/runtime.rs: RestoreMask Drop restores the previous mask while preserving errno; IoWait Drop decrements the active count. No read path closes the borrowed FD.",
+      "invariant": "Guard cleanup must run through ordinary Rust frames.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/runtime.rs: sigprocmask/ppoll/read errors return normally so guards run; failed sigaction returns the unresolved function-pointer error sentinel rather than a typed Result.",
+      "invariant": "Mask cleanup is explicit while sentinel errors remain hazardous.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/runtime.rs: The atomic protocol avoids nonlocal jumps; it does not repair callback representation or the translated handlers that mutate/free pager state.",
+      "invariant": "M0-SIG-004 prevents a clear signal-boundary disposition.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 1,
+          "end_line": 110,
+          "excerpt_sha256": "1cc80ea80295d03752cfe828596c5d6116709a9ffcb03040a8bf7b9f04dec15d"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 112,
+          "end_line": 129,
+          "excerpt_sha256": "afbf85273731e9aad65eb4d3625480c2328c9582327635e38c264e5e45028608"
+        }
+      ],
+      "limitations": [
+        "Raw buffer validity and the single-reader assumption remain caller contracts; M0-SIG-004 is open and no production code is changed."
+      ]
+    }
+  }
+}

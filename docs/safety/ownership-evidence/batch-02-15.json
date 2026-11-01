@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:060b78c166c658148ddb3024",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ifile.rs"
+    ],
+    "symbol": "ifiles",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "ifiles: The private c_int owns the count of linked nodes, initially zero and adjusted by link_ifile/unlink_ifile; it owns no node memory itself.",
+      "invariant": "File count is metadata, not a resource owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "ifiles: nifile copies the count to callers; no address escapes, but count accuracy depends on raw list updates completing together.",
+      "invariant": "A copied count cannot establish node lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "ifiles: There is no callback stored in this integer; surrounding mark/disposal calls belong to the node operations that adjust it.",
+      "invariant": "Count metadata cannot register callback ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "invalidation": {
+      "analysis": "ifiles: Deleting a node decrements the value without retiring any caller-held node pointer; count changes cannot be used as generation checks.",
+      "invariant": "Count decrements do not invalidate external aliases safely.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "ifiles: Count increment/decrement happens after link writes and uses unchecked c_int arithmetic, with no transactional rollback on interrupted mutation.",
+      "invariant": "Count and list membership lack a joint commit guard.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "release_pair": {
+      "analysis": "ifiles: This scalar is not freed; freeing a node only logically removes one count contribution and must not release the count object.",
+      "invariant": "Static count storage survives every node deletion.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "ifiles: No overflow/error policy protects the signed count or restores it after partial list mutation; this limitation belongs to the existing raw-core finding.",
+      "invariant": "Count arithmetic has no proved upper-bound contract here.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "ifiles: The counter is a mutable static rather than atomic main-loop-owned state; interrupted traversal or cleanup has no synchronization contract.",
+      "invariant": "Count review cannot clear M0-MEM-001.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 219,
+          "excerpt_sha256": "cf0618414e434905f6a83cc3983a99287b90ecbee2cdda65f9929f1d993fd54f"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    }
+  }
+}

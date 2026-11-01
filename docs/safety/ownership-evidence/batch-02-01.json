@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/safe_core/arena.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/safe_core/arena.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/safe_core/arena.rs: At lines 59-84 Arena owns Vec<Slot<T>> and each live slot owns Option<T>; with_arena creates an empty owner under a fresh invariant lifetime brand.",
+      "invariant": "Every stored value has exactly one live slot owner.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/safe_core/arena.rs: Handle copies contain index/generation rather than pointers; get/get_mut at 137-149 return references tied to the arena borrow. The Rc phantom brand prevents cross-thread transfer.",
+      "invariant": "Handles identify objects without retaining their addresses.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/safe_core/arena.rs: with_arena takes a higher-ranked FnOnce consumed synchronously; reserve uses a borrowed Gate, and a removed T may run its ordinary Rust destructor in its new owner.",
+      "invariant": "No closure context escapes the branded scope.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/safe_core/arena.rs: remove at 151-166 takes the value, advances generation and retires a slot at u64 exhaustion; stale handles cannot revive during reuse.",
+      "invariant": "Slot reuse must not recreate a previous generation.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/safe_core/arena.rs: insert_gate checks live count before mutation and reserves before pushing a new slot; failed reserve returns InsertError containing the original T.",
+      "invariant": "Failed insertion transfers the value back to its caller.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/safe_core/arena.rs: remove returns owned T to the caller; dropping the arena drops remaining Some(T) values and the Vec allocation through Rust destructors.",
+      "invariant": "Removal transfers ownership without duplicating T.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/safe_core/arena.rs: Capacity error leaves slot/live metadata unchanged; the drop-count test at 200-226 checks no early drop and one eventual release. Rust unwinding still owns the Vec.",
+      "invariant": "Insertion failure leaves the existing arena owner valid.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/safe_core/arena.rs: Brand is invariant and main-thread confined; the component installs no signal handler and must be entered only in ordinary control flow.",
+      "invariant": "Arena mutation requires an exclusive Rust borrow.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 17,
+          "end_line": 178,
+          "excerpt_sha256": "0d0d44d9ae5ef8f85ca6d2063b4be69ca653a09f6297dee8792ef3682b378125"
+        },
+        {
+          "target": "source:src/safe_core/arena.rs",
+          "sha256": "481cbc55a0351508f774e6a4f1ce99eada3b8e69ca86db6e1a02b9313ac78db1",
+          "start_line": 180,
+          "end_line": 248,
+          "excerpt_sha256": "b99fef8cab3a0bb050e15dfa961347118d0428fe6da81a5ddc9d52752006946f"
+        }
+      ],
+      "limitations": [
+        "Isolated preparation crate only; the production pager does not yet use this arena, and retained Rust references cannot cross its mutation APIs."
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/bin/lessecho.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "FILE:src/bin/lessecho.rs: main owns CString-derived argument byte Vecs and a pointer Vec, while metachars owns a separate malloc buffer and quoting/escape state borrows literals, argument tails or static bytes.",
+      "invariant": "Argument and metacharacter buffers have separate owners.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "FILE:src/bin/lessecho.rs: argv points into args_strings, which is not resized during main_0; meta_escape may retain an argument tail until exit, while metachars aliases must not survive its growth.",
+      "invariant": "Borrowed argument tails must remain inside their owner lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "FILE:src/bin/lessecho.rs: The helper calls process::init then main_0 directly; fprintf/printf/string operations retain no application callback, and copied FILE layout fields are not accessed here.",
+      "invariant": "Output interfaces borrow strings for each direct call.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "invalidation": {
+      "analysis": "FILE:src/bin/lessecho.rs: add_metachar allocates replacement storage, copies the old C string and frees it before publishing the new pointer; private is_metachar borrows it only synchronously.",
+      "invariant": "Metacharacter aliases must be retired before replacement.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "FILE:src/bin/lessecho.rs: Capacity is doubled before malloc and num_metachars+1 uses unchecked signed arithmetic; numeric option accumulation is likewise unchecked in lstrtol.",
+      "invariant": "Raw capacity arithmetic has no checked commit contract.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "release_pair": {
+      "analysis": "FILE:src/bin/lessecho.rs: Growth frees the prior metachars buffer; the final buffer and argument Vecs live until process exit, which intentionally skips ordinary Rust drops and lets the OS retire them.",
+      "invariant": "Process-exit retention is distinct from per-growth release.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "FILE:src/bin/lessecho.rs: malloc null calls pr_error/exit before strcpy; missing numbers also exit. Overflow/panic behavior is not represented by a fallible owner API.",
+      "invariant": "Fatal parse paths do not transfer helper buffer ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "FILE:src/bin/lessecho.rs: No custom helper signal callback mutates these owners and SIGPIPE disposition is restored before parsing, but the raw owner APIs have no safe reusable lifetime boundary.",
+      "invariant": "One-shot helper review does not approve general reentry.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 21,
+          "end_line": 43,
+          "excerpt_sha256": "b07c21de2d0dd6dcd4982d01ebc277097253add73059da4c3101e5edaf00103a"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 87,
+          "end_line": 426,
+          "excerpt_sha256": "5d840f8498c536d7f6fa1b67983561bd8c01e996793f1df7fe070416fd60bc8d"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    }
+  }
+}

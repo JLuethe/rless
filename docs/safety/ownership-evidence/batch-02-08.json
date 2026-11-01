@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-13",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/fault.rs"
+    ]
+  },
+  "inventory_sha256": "ce239bd69c08b603a4ed320ee1a172775cc67183d1d2fb916be7f0836d8f3d05",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-13: This cycle owns test plan atomics and uses a harness-lent pipe, not application buffer storage; startup parse values are copied before temporary strings drop.",
+      "invariant": "The hook is not an owner of pager allocations.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-13: next_trigger borrows static atomics and write_marker borrows a stack event; no event pointer or environment slice crosses the hook return.",
+      "invariant": "Hook aliases expire with their immediate operation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-13: The only nonlocal calls are explicit libc trace/mask/errno operations; application allocation hooks can be reached from the still-open SIGUSR1 queue path.",
+      "invariant": "Direct hook calls do not approve asynchronous callers.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-13: The once-at-startup configuration must not be replaced during hit; helper exec closes the dedicated trace descriptor and removes the matching plan environment.",
+      "invariant": "Reconfiguration is excluded while hook references are live.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-13: Site publication is the Release commit point after pipe checks and scalar setup; overflow reports an explicit exhaustion event rather than repeating an ordinal.",
+      "invariant": "A published plan has complete stable configuration.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-13: The hook does not allocate application memory or close their FDs; the harness-created child pipe reference survives until exec or process exit.",
+      "invariant": "Application owners retain their original release pairs.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-13: Invalid configuration is rejected early; three-attempt nonblocking trace writes and bounded SIGPIPE consumption cannot leave a hook-owned heap object behind.",
+      "invariant": "Hook errors require no application-memory rollback.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-13: The fixed event and lock-free atomics improve the test hook, while SIGUSR1 still performs lgetenv/ungetsc in signal.rs:86-99.",
+      "invariant": "Existing M0-SIG-002 remains explicitly recorded.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 149,
+          "excerpt_sha256": "f006bb27e8f06c99e2e76e792b95f6bbf918dd79e9f3e2423f49e289f534b6e9"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 156,
+          "end_line": 252,
+          "excerpt_sha256": "8247f433f783ce523fb55a203319db3ba16c8c0c6cd7935be8644571d4414daa"
+        }
+      ],
+      "limitations": [
+        "This replaces the stale schema-1 cycle review with fresh source analysis, not an approval of M1.3 signal/queue migration."
+      ]
+    }
+  }
+}
