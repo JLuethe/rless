@@ -408,7 +408,13 @@ pub(crate) unsafe fn open_pinned_input(path: *const libc::c_char, flags: libc::c
     }
     if stat.st_mode & libc::S_IFMT == libc::S_IFREG {
         let pinned = CString::new(format!("/proc/self/fd/{anchor_fd}")).unwrap();
-        return libc::open(pinned.as_ptr(), flags | libc::O_CLOEXEC);
+        let fd = libc::open(pinned.as_ptr(), flags | libc::O_CLOEXEC);
+        let error = if fd < 0 { *libc::__errno_location() } else { 0 };
+        drop(anchor);
+        if fd < 0 {
+            *libc::__errno_location() = error;
+        }
+        return fd;
     }
     match open_worker(anchor, flags) {
         Ok(fd) => fd,
