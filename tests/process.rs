@@ -259,6 +259,29 @@ fn help_translation_uses_its_separate_id_and_rolls_back_on_later_error() {
 }
 
 #[test]
+fn translated_option_description_cannot_change_argument_grammar() {
+    let work = Work::new();
+    let message_path = work.0.join("option-grammar-messages");
+    std::fs::write(&message_path, b"d_comma d\n").unwrap();
+    for secure in [false, true] {
+        let mut command = work.command();
+        command.env("LESSMSG", &message_path);
+        if secure {
+            command.env("LESSSECURE", "1");
+        }
+        let output = command
+            .arg("-x4,8")
+            .arg("--")
+            .arg("missing")
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(1), "{output:?}");
+        let diagnostics = [output.stdout, output.stderr].concat();
+        assert_eq!(diagnostics, b"missing: No such file or directory\n");
+    }
+}
+
+#[test]
 fn empty_lessmsg_replacement_does_not_create_a_null_slice() {
     let work = Work::new();
     let message_path = work.0.join("empty-message");

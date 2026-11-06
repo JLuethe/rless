@@ -186,7 +186,7 @@ def run(binary, output, *, retained=None):
             healthy(o)
             hit(o)
             check(o['files']['history']['sha256'] == sha(old), 'old history replaced')
-            check(not any(x.startswith('history.') for x in o['files']), 'temporary history leaked')
+            check(not any(x.startswith(('history.', '.history.')) for x in o['files']), 'temporary history leaked')
         observe(plan, fault(history, shim, plan), verify)
 
     # run_v2 fixture files cannot express symlinks. Set up an isolated PTY
@@ -226,7 +226,7 @@ def run(binary, output, *, retained=None):
                 o = run_pty(argv, env, work, history, lambda data: data.replace(directory.encode(), b'{ROOT}'))
                 healthy(o)
                 check((work / 'victim').read_bytes() == old, 'symlink target modified')
-                check(not any(x.name.startswith('history.') for x in work.iterdir()), 'temporary file left')
+                check(not any(x.name.startswith(('history.', '.history.')) for x in work.iterdir()), 'temporary file left')
                 if plan == 'baseline':
                     check(not (work / 'history').is_symlink(), 'successful rename followed symlink')
                     check((work / 'history').stat().st_mode & 0o777 == 0o600, 'new history not private')
@@ -234,7 +234,7 @@ def run(binary, output, *, retained=None):
                     check((work / 'history').is_symlink(), 'failed rename replaced symlink')
                     check((work / 'hit').read_bytes() == b'hit\n', 'rename fault missed')
                 o['symlink_effects'] = dict(victim_sha256=sha((work / 'victim').read_bytes()),
-                    temporary_names=sorted(x.name for x in work.iterdir() if x.name.startswith('history.')),
+                    temporary_names=sorted(x.name for x in work.iterdir() if x.name.startswith(('history.', '.history.'))),
                     history_is_symlink=(work / 'history').is_symlink(),
                     history_mode=(work / 'history').stat().st_mode & 0o777,
                     hit_sha256=sha((work / 'hit').read_bytes()))

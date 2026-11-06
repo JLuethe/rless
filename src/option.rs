@@ -704,7 +704,7 @@ pub unsafe extern "C" fn scan_option(mut s: *const ::core::ffi::c_char, mut is_e
                 while *s as ::core::ffi::c_int == ' ' as ::core::ffi::c_int {
                     s = s.offset(1);
                 }
-                s = optstring(s, &raw mut str, printopt, (*o).odesc[1usize]);
+                s = optstring(s, &raw mut str, printopt, option_validchars(o));
                 if s.is_null() {
                     return;
                 }
@@ -999,6 +999,20 @@ unsafe extern "C" fn nostring(mut printopt: *const ::core::ffi::c_char) {
 #[no_mangle]
 pub unsafe extern "C" fn nopendopt() {
     nostring(opt_desc(pendopt));
+}
+/// Option argument grammar is executable policy, not translated UI text.
+unsafe fn option_validchars(o: *const loption) -> *const ::core::ffi::c_char {
+    match (*o).odescid[1].0 {
+        0 => ::core::ptr::null(),
+        336 => c"s".as_ptr(),
+        337 => c".d".as_ptr(),
+        338 => c"-.d".as_ptr(),
+        339 => c"d,".as_ptr(),
+        _ => {
+            crate::pager::quit(1);
+            libc::_exit(1);
+        }
+    }
 }
 unsafe extern "C" fn optstring(
     mut s: *const ::core::ffi::c_char,

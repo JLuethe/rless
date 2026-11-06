@@ -129,18 +129,23 @@ int open(const char *path, int flags, ...) {
     return real_call(path, flags, mode);
 }
 
+static int history_temporary(const char *path) {
+    const char *base = strrchr(path, '/');
+    base = base ? base + 1 : path;
+    return strncmp(base, ".history.", 9) == 0 || strncmp(base, "history.", 8) == 0;
+}
+
 FILE *fdopen(int fd, const char *mode) {
     FILE *(*real_call)(int, const char *) = dlsym(RTLD_NEXT, "fdopen");
     if (!real_call) _exit(125);
-    /* The randomized basename starts with history. */
+    /* Both the historical and current randomized temp basenames are accepted. */
     {
         char proc[64], path[1024];
         snprintf(proc, sizeof proc, "/proc/self/fd/%d", fd);
         ssize_t n = syscall(SYS_readlinkat, AT_FDCWD, proc, path, sizeof path - 1);
         if (n >= 0) {
             path[n] = 0;
-            const char *base = strrchr(path, '/');
-            if (base && strncmp(base + 1, "history.", 8) == 0) {
+            if (history_temporary(path)) {
                 if (plan("hist-fdopen")) { hit(); errno = EMFILE; return NULL; }
                 history_stream = real_call(fd, mode);
                 if (history_stream && plan("hist-write")) {
@@ -178,9 +183,18 @@ int fclose(FILE *stream) {
 int rename(const char *source, const char *dest) {
     int (*real_call)(const char *, const char *) = dlsym(RTLD_NEXT, "rename");
     if (!real_call) _exit(125);
-    if (plan("hist-rename") && strstr(source, "history.") &&
+    if (plan("hist-rename") && history_temporary(source) &&
         strcmp(strrchr(dest, '/') ? strrchr(dest, '/') + 1 : dest, "history") == 0) {
         hit(); errno = EIO; return -1;
     }
     return real_call(source, dest);
+}
+
+int renameat(int olddirfd, const char *source, int newdirfd, const char *dest) {
+    int (*real_call)(int, const char *, int, const char *) = dlsym(RTLD_NEXT, "renameat");
+    if (!real_call) _exit(125);
+    if (plan("hist-rename") && history_temporary(source) && strcmp(dest, "history") == 0) {
+        hit(); errno = EIO; return -1;
+    }
+    return real_call(olddirfd, source, newdirfd, dest);
 }
