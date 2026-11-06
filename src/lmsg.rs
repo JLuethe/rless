@@ -2750,7 +2750,8 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
         return;
     }
     LMSG_PARSE_ERRORS.store(0, Ordering::Relaxed);
-    let mut staged = vec![::core::ptr::null_mut(); 340];
+    // Ordinary message IDs are 0..340; LM_HELP is the separate ID 340.
+    let mut staged = vec![::core::ptr::null_mut(); 341];
     let mut staged_help_len = 0;
     let mut valid = true;
     xbuf_init(&raw mut xbuf);

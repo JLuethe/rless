@@ -222,6 +222,43 @@ fn invalid_lessmsg_file_does_not_publish_earlier_replacements() {
 }
 
 #[test]
+fn help_translation_uses_its_separate_id_and_rolls_back_on_later_error() {
+    let work = Work::new();
+    let message_path = work.0.join("help-messages");
+    for (payload, custom_expected) in [
+        (b"HELP custom help line\n".as_slice(), true),
+        (
+            b"HELP custom help line\nNo_such_option %n\n".as_slice(),
+            false,
+        ),
+    ] {
+        std::fs::write(&message_path, payload).unwrap();
+        for secure in [false, true] {
+            let mut command = work.command();
+            command.env("LESSMSG", &message_path);
+            if secure {
+                command.env("LESSSECURE", "1");
+            }
+            let output = command.arg("--help").output().unwrap();
+            assert_eq!(output.status.code(), Some(0), "{output:?}");
+            let diagnostics = [output.stdout, output.stderr].concat();
+            assert_eq!(
+                diagnostics
+                    .windows(b"custom help line".len())
+                    .any(|w| w == b"custom help line"),
+                custom_expected,
+                "{diagnostics:?}"
+            );
+            if !custom_expected {
+                assert!(diagnostics
+                    .windows(b"invalid message format placeholders".len())
+                    .any(|w| w == b"invalid message format placeholders"));
+            }
+        }
+    }
+}
+
+#[test]
 fn empty_lessmsg_replacement_does_not_create_a_null_slice() {
     let work = Work::new();
     let message_path = work.0.join("empty-message");
