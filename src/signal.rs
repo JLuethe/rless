@@ -74,8 +74,15 @@ unsafe extern "C" fn u_interrupt(_: ::core::ffi::c_int) {
 unsafe extern "C" fn stop(_: ::core::ffi::c_int) {
     notify(STOP);
 }
-unsafe extern "C" fn sigalarm(_: ::core::ffi::c_int) {
-    if TIMER_ACTIVE.load(Ordering::SeqCst) {
+unsafe extern "C" fn sigalarm(
+    _: ::core::ffi::c_int,
+    info: *mut libc::siginfo_t,
+    _: *mut libc::c_void,
+) {
+    // ITIMER_REAL is delivered with SI_KERNEL on Linux. Signals sent by a
+    // process use SI_USER/SI_TKILL/SI_QUEUE and must not finish our timer.
+    if !info.is_null() && (*info).si_code == libc::SI_KERNEL && TIMER_ACTIVE.load(Ordering::SeqCst)
+    {
         notify(ALARM);
     }
 }
@@ -160,9 +167,10 @@ unsafe fn transition_mstimer_masked(
         tv_nsec: 0,
     };
     loop {
-        let received = libc::sigtimedwait(alarm_set, std::ptr::null_mut(), &timeout);
+        let mut info: libc::siginfo_t = std::mem::zeroed();
+        let received = libc::sigtimedwait(alarm_set, &mut info, &timeout);
         if received == libc::SIGALRM {
-            fired = true;
+            fired |= info.si_code == libc::SI_KERNEL;
             continue;
         }
         if received < 0 {
@@ -206,6 +214,7 @@ enum Disposition {
     Default,
     Ignore,
     Handler(unsafe extern "C" fn(libc::c_int)),
+    Siginfo(unsafe extern "C" fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void)),
 }
 
 impl Disposition {
@@ -214,6 +223,7 @@ impl Disposition {
             Self::Default => libc::SIG_DFL,
             Self::Ignore => libc::SIG_IGN,
             Self::Handler(handler) => handler as libc::sighandler_t,
+            Self::Siginfo(handler) => handler as libc::sighandler_t,
         }
     }
 }
@@ -281,7 +291,11 @@ unsafe fn install_batch_inner(
                 restore_batch(entries, &previous, installed, &saved_mask);
                 return Err(error);
             }
-            action.sa_flags = 0;
+            action.sa_flags = if matches!(disposition, Disposition::Siginfo(_)) {
+                libc::SA_SIGINFO
+            } else {
+                0
+            };
             &action
         };
         let failed = if fail_at == Some(index) {
@@ -322,7 +336,7 @@ pub unsafe extern "C" fn init_signals(on: lbool) -> libc::c_int {
             (libc::SIGQUIT, Disposition::Ignore),
             (libc::SIGTERM, Disposition::Handler(terminate)),
             (libc::SIGHUP, Disposition::Handler(terminate)),
-            (libc::SIGALRM, Disposition::Handler(sigalarm)),
+            (libc::SIGALRM, Disposition::Siginfo(sigalarm)),
             (libc::SIGUSR1, Disposition::Handler(sigusr1)),
         ]
     } else {
@@ -541,7 +555,7 @@ mod notification_tests {
     }
 
     #[test]
-    fn old_pending_alarm_is_drained_before_a_new_timer() {
+    fn pending_external_alarm_is_drained_before_a_new_timer() {
         let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
             let mut alarm_set: libc::sigset_t = std::mem::zeroed();
@@ -572,13 +586,30 @@ mod notification_tests {
             assert_eq!(raised, 0);
             assert_eq!(pending, 0);
             assert_eq!(libc::sigismember(&before, libc::SIGALRM), 1);
-            assert_eq!(old_fired, Ok(true));
+            assert_eq!(old_fired, Ok(false));
             assert_eq!(blocked_arm, Err(libc::EBUSY));
             assert_eq!(armed, Ok(false));
             assert_eq!(later_fired, Ok(false));
             assert_eq!(after_result, 0);
             assert_eq!(libc::sigismember(&after, libc::SIGALRM), 0);
             assert_eq!(restored, 0);
+        }
+    }
+
+    #[test]
+    fn external_alarm_cannot_complete_the_pager_timer() {
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
+        unsafe {
+            PENDING.store(0, Ordering::SeqCst);
+            TIMER_ACTIVE.store(true, Ordering::SeqCst);
+            let mut info: libc::siginfo_t = std::mem::zeroed();
+            info.si_code = libc::SI_USER;
+            sigalarm(libc::SIGALRM, &mut info, std::ptr::null_mut());
+            assert_eq!(PENDING.load(Ordering::SeqCst) & ALARM, 0);
+            info.si_code = libc::SI_KERNEL;
+            sigalarm(libc::SIGALRM, &mut info, std::ptr::null_mut());
+            assert_eq!(PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM, ALARM);
+            TIMER_ACTIVE.store(false, Ordering::SeqCst);
         }
     }
 }
