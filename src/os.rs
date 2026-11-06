@@ -37,11 +37,6 @@ extern "C" {
         __requested_time: *const timespec,
         __remaining: *mut timespec,
     ) -> ::core::ffi::c_int;
-    fn setitimer(
-        __which: __itimer_which_t,
-        __new: *const itimerval,
-        __old: *mut itimerval,
-    ) -> ::core::ffi::c_int;
     fn __errno_location() -> *mut ::core::ffi::c_int;
     fn poll(
         __fds: *mut pollfd,
@@ -392,26 +387,12 @@ pub unsafe extern "C" fn sleep_ms(mut ms: ::core::ffi::c_int) {
     nanosleep(&raw mut t, ::core::ptr::null_mut::<timespec>());
 }
 #[no_mangle]
-pub unsafe extern "C" fn set_mstimer(mut ms: ::core::ffi::c_ulong) {
-    let mut timer: itimerval = itimerval {
-        it_interval: timeval {
-            tv_sec: 0,
-            tv_usec: 0,
-        },
-        it_value: timeval {
-            tv_sec: 0,
-            tv_usec: 0,
-        },
-    };
-    timer.it_value.tv_sec = ms.wrapping_div(1000 as ::core::ffi::c_ulong) as __time_t;
-    timer.it_value.tv_usec = ms
-        .wrapping_rem(1000 as ::core::ffi::c_ulong)
-        .wrapping_mul(1000 as ::core::ffi::c_ulong) as __suseconds_t;
-    timer.it_interval.tv_usec = 0 as __suseconds_t;
-    timer.it_interval.tv_sec = timer.it_interval.tv_usec as __time_t;
-    setitimer(
-        __itimer_which::ITIMER_REAL,
-        &raw mut timer,
-        ::core::ptr::null_mut::<itimerval>(),
-    );
+pub unsafe extern "C" fn set_mstimer(ms: ::core::ffi::c_ulong) -> ::core::ffi::c_int {
+    match crate::signal::transition_mstimer(ms) {
+        Ok(fired) => fired as ::core::ffi::c_int,
+        Err(error) => {
+            *__errno_location() = error;
+            -1
+        }
+    }
 }

@@ -3,8 +3,13 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::libc;
-use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering};
 extern "C" {
+    fn setitimer(
+        which: libc::c_int,
+        new_value: *const libc::itimerval,
+        old_value: *mut libc::itimerval,
+    ) -> libc::c_int;
     fn getpid() -> __pid_t;
     fn quit(status: ::core::ffi::c_int);
     fn secure_allow(features: ::core::ffi::c_uint) -> lbool;
@@ -23,8 +28,6 @@ extern "C" {
     fn polling_ok();
     fn flush();
     fn set_filter_pattern(pattern: *const ::core::ffi::c_char, search_type: ::core::ffi::c_int);
-    #[link_name = "rless_signal"]
-    fn signal(__sig: ::core::ffi::c_int, __handler: __sighandler_t) -> __sighandler_t;
     fn kill(__pid: __pid_t, __sig: ::core::ffi::c_int) -> ::core::ffi::c_int;
     static mut sc_width: ::core::ffi::c_int;
     static mut sc_height: ::core::ffi::c_int;
@@ -38,7 +41,6 @@ impl lbool {
     pub const LFALSE: Self = Self(0);
     pub const LTRUE: Self = Self(1);
 }
-pub type __sighandler_t = libc::sighandler_t;
 #[no_mangle]
 pub static mut sigs: ::core::ffi::c_int = 0;
 const INTERRUPT: u32 = 1 << 0;
@@ -50,6 +52,11 @@ const TERMINATE: u32 = 1 << 6;
 static PENDING: AtomicU32 = AtomicU32::new(0);
 static USER_COMMANDS: AtomicUsize = AtomicUsize::new(0);
 static USER_COMMANDS_OVERFLOW: AtomicU32 = AtomicU32::new(0);
+static TIMER_ACTIVE: AtomicBool = AtomicBool::new(false);
+// Main-thread owned. Asynchronous handlers never access this snapshot.
+static mut STARTUP_ACTIONS: std::mem::MaybeUninit<[libc::sigaction; 8]> =
+    std::mem::MaybeUninit::uninit();
+static mut STARTUP_ACTIONS_READY: bool = false;
 
 #[inline]
 fn notify(bit: u32) {
@@ -68,7 +75,9 @@ unsafe extern "C" fn stop(_: ::core::ffi::c_int) {
     notify(STOP);
 }
 unsafe extern "C" fn sigalarm(_: ::core::ffi::c_int) {
-    notify(ALARM);
+    if TIMER_ACTIVE.load(Ordering::SeqCst) {
+        notify(ALARM);
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lwinch(_: ::core::ffi::c_int) {
@@ -101,6 +110,97 @@ pub unsafe fn collect_pending_signals() {
     sigs |= delivered as i32;
 }
 
+/// Start or stop the one process timer owned by the pager. Blocking SIGALRM
+/// makes disarm, pending-signal drain, and the next arm one ordered transition.
+/// A signal from an earlier timer cannot be applied to a later operation.
+pub unsafe fn transition_mstimer(milliseconds: libc::c_ulong) -> Result<bool, libc::c_int> {
+    let mut alarm_set: libc::sigset_t = std::mem::zeroed();
+    let mut saved_mask: libc::sigset_t = std::mem::zeroed();
+    if libc::sigemptyset(&mut alarm_set) != 0 || libc::sigaddset(&mut alarm_set, libc::SIGALRM) != 0
+    {
+        return Err(*libc::__errno_location());
+    }
+    if libc::sigprocmask(libc::SIG_BLOCK, &alarm_set, &mut saved_mask) != 0 {
+        return Err(*libc::__errno_location());
+    }
+    let inherited_block = libc::sigismember(&saved_mask, libc::SIGALRM);
+    let result = if inherited_block < 0 {
+        Err(*libc::__errno_location())
+    } else if milliseconds != 0 && inherited_block != 0 {
+        // A timed read cannot wake by SIGALRM while its inherited mask blocks
+        // delivery. Fail with a defined error instead of waiting forever.
+        Err(libc::EBUSY)
+    } else {
+        transition_mstimer_masked(milliseconds, &alarm_set)
+    };
+    let restore = libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut());
+    if restore != 0 {
+        return Err(*libc::__errno_location());
+    }
+    result
+}
+
+unsafe fn transition_mstimer_masked(
+    milliseconds: libc::c_ulong,
+    alarm_set: &libc::sigset_t,
+) -> Result<bool, libc::c_int> {
+    if milliseconds != 0 && TIMER_ACTIVE.load(Ordering::SeqCst) {
+        return Err(libc::EBUSY);
+    }
+    TIMER_ACTIVE.store(false, Ordering::SeqCst);
+    let zero: libc::itimerval = std::mem::zeroed();
+    if setitimer(libc::ITIMER_REAL, &zero, std::ptr::null_mut()) != 0 {
+        return Err(*libc::__errno_location());
+    }
+    let mut fired =
+        PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM != 0 || sigs & ALARM as i32 != 0;
+    sigs &= !(ALARM as i32);
+    let timeout = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    loop {
+        let received = libc::sigtimedwait(alarm_set, std::ptr::null_mut(), &timeout);
+        if received == libc::SIGALRM {
+            fired = true;
+            continue;
+        }
+        if received < 0 {
+            let error = *libc::__errno_location();
+            if error == libc::EINTR {
+                continue;
+            }
+            if error == libc::EAGAIN {
+                break;
+            }
+            return Err(error);
+        }
+    }
+    if milliseconds == 0 {
+        return Ok(fired);
+    }
+    let seconds = milliseconds / 1000;
+    if seconds > libc::time_t::MAX as libc::c_ulong {
+        return Err(libc::EOVERFLOW);
+    }
+    let timer = libc::itimerval {
+        it_interval: libc::timeval {
+            tv_sec: 0,
+            tv_usec: 0,
+        },
+        it_value: libc::timeval {
+            tv_sec: seconds as libc::time_t,
+            tv_usec: ((milliseconds % 1000) * 1000) as libc::suseconds_t,
+        },
+    };
+    TIMER_ACTIVE.store(true, Ordering::SeqCst);
+    if setitimer(libc::ITIMER_REAL, &timer, std::ptr::null_mut()) != 0 {
+        TIMER_ACTIVE.store(false, Ordering::SeqCst);
+        return Err(*libc::__errno_location());
+    }
+    Ok(false)
+}
+
 #[derive(Clone, Copy)]
 enum Disposition {
     Default,
@@ -120,16 +220,49 @@ impl Disposition {
 
 // Installation is a single main-thread transaction. Signals in the set stay
 // masked until every disposition succeeds, or all changed actions are restored.
-unsafe fn install_batch(entries: &[(libc::c_int, Disposition)]) -> Result<(), libc::c_int> {
+unsafe fn install_batch(
+    entries: &[(libc::c_int, Disposition)],
+    restore_actions: Option<&[libc::sigaction; 8]>,
+) -> Result<[libc::sigaction; 8], libc::c_int> {
+    install_batch_inner(entries, restore_actions, None)
+}
+
+unsafe fn restore_batch(
+    entries: &[(libc::c_int, Disposition)],
+    previous: &[libc::sigaction; 8],
+    installed: usize,
+    saved_mask: &libc::sigset_t,
+) {
+    let mut failed = false;
+    for index in (0..installed).rev() {
+        failed |= libc::sigaction(entries[index].0, &previous[index], std::ptr::null_mut()) != 0;
+    }
+    if failed {
+        // The process cannot safely continue with unknown dispositions or a
+        // mask that might leave termination and job-control signals blocked.
+        libc::_exit(1);
+    }
+    if libc::sigprocmask(libc::SIG_SETMASK, saved_mask, std::ptr::null_mut()) != 0 {
+        libc::_exit(1);
+    }
+}
+
+unsafe fn install_batch_inner(
+    entries: &[(libc::c_int, Disposition)],
+    restore_actions: Option<&[libc::sigaction; 8]>,
+    fail_at: Option<usize>,
+) -> Result<[libc::sigaction; 8], libc::c_int> {
     if entries.len() > 8 {
         return Err(libc::EINVAL);
     }
     let mut block: libc::sigset_t = std::mem::zeroed();
     let mut saved_mask: libc::sigset_t = std::mem::zeroed();
-    libc::sigemptyset(&mut block);
+    if libc::sigemptyset(&mut block) != 0 {
+        return Err(*libc::__errno_location());
+    }
     for (number, _) in entries {
-        if *number > 0 {
-            libc::sigaddset(&mut block, *number);
+        if libc::sigaddset(&mut block, *number) != 0 {
+            return Err(*libc::__errno_location());
         }
     }
     if libc::sigprocmask(libc::SIG_BLOCK, &block, &mut saved_mask) != 0 {
@@ -137,30 +270,39 @@ unsafe fn install_batch(entries: &[(libc::c_int, Disposition)]) -> Result<(), li
     }
     let mut previous: [libc::sigaction; 8] = std::mem::zeroed();
     let mut installed = 0;
-    for (number, disposition) in entries {
+    for (index, (number, disposition)) in entries.iter().enumerate() {
         let mut action: libc::sigaction = std::mem::zeroed();
-        action.sa_sigaction = disposition.native();
-        libc::sigemptyset(&mut action.sa_mask);
-        action.sa_flags = 0;
-        if libc::sigaction(*number, &action, &mut previous[installed]) != 0 {
-            let error = *libc::__errno_location();
-            for index in (0..installed).rev() {
-                libc::sigaction(entries[index].0, &previous[index], std::ptr::null_mut());
+        let next = if let Some(actions) = restore_actions {
+            &actions[index]
+        } else {
+            action.sa_sigaction = disposition.native();
+            if libc::sigemptyset(&mut action.sa_mask) != 0 {
+                let error = *libc::__errno_location();
+                restore_batch(entries, &previous, installed, &saved_mask);
+                return Err(error);
             }
-            libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut());
+            action.sa_flags = 0;
+            &action
+        };
+        let failed = if fail_at == Some(index) {
+            *libc::__errno_location() = libc::EIO;
+            true
+        } else {
+            libc::sigaction(*number, next, &mut previous[installed]) != 0
+        };
+        if failed {
+            let error = *libc::__errno_location();
+            restore_batch(entries, &previous, installed, &saved_mask);
             return Err(error);
         }
         installed += 1;
     }
     if libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0 {
         let error = *libc::__errno_location();
-        for index in (0..installed).rev() {
-            libc::sigaction(entries[index].0, &previous[index], std::ptr::null_mut());
-        }
-        libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut());
+        restore_batch(entries, &previous, installed, &saved_mask);
         return Err(error);
     }
-    Ok(())
+    Ok(previous)
 }
 
 #[no_mangle]
@@ -195,8 +337,28 @@ pub unsafe extern "C" fn init_signals(on: lbool) -> libc::c_int {
             (libc::SIGUSR1, Disposition::Default),
         ]
     };
-    match install_batch(&dispositions) {
-        Ok(()) => 0,
+    let original = if on.0 == 0 {
+        if !STARTUP_ACTIONS_READY {
+            *libc::__errno_location() = libc::EINVAL;
+            return -1;
+        }
+        Some(std::ptr::read(
+            (&raw const STARTUP_ACTIONS).cast::<[libc::sigaction; 8]>(),
+        ))
+    } else {
+        None
+    };
+    match install_batch(&dispositions, original.as_ref()) {
+        Ok(previous) => {
+            if on.0 != 0 && !STARTUP_ACTIONS_READY {
+                std::ptr::write(
+                    (&raw mut STARTUP_ACTIONS).cast::<[libc::sigaction; 8]>(),
+                    previous,
+                );
+                STARTUP_ACTIONS_READY = true;
+            }
+            0
+        }
         Err(error) => {
             *libc::__errno_location() = error;
             -1
@@ -223,16 +385,36 @@ pub unsafe extern "C" fn psignals() {
             sigusr(b"LESS_SIGUSR1\0".as_ptr() as *const ::core::ffi::c_char);
         }
     }
-    if tsignals & (1 as ::core::ffi::c_int) << 2 as ::core::ffi::c_int != 0 {
-        signal(22 as ::core::ffi::c_int, libc::SIG_IGN);
+    if tsignals & STOP as i32 != 0 {
+        let mut ignore: libc::sigaction = std::mem::zeroed();
+        let mut default: libc::sigaction = std::mem::zeroed();
+        let mut saved_tt: libc::sigaction = std::mem::zeroed();
+        let mut saved_st: libc::sigaction = std::mem::zeroed();
+        ignore.sa_sigaction = libc::SIG_IGN;
+        default.sa_sigaction = libc::SIG_DFL;
+        if libc::sigemptyset(&mut ignore.sa_mask) != 0
+            || libc::sigemptyset(&mut default.sa_mask) != 0
+            || libc::sigaction(libc::SIGTTOU, &ignore, &mut saved_tt) != 0
+        {
+            quit(1);
+            libc::_exit(1);
+        }
         clear_bot();
         term_deinit();
         flush();
         raw_mode(lbool::LFALSE);
-        signal(22 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(20 as ::core::ffi::c_int, libc::SIG_DFL);
-        kill(getpid(), 20 as ::core::ffi::c_int);
-        signal(20 as ::core::ffi::c_int, stop as __sighandler_t);
+        if libc::sigaction(libc::SIGTTOU, &saved_tt, std::ptr::null_mut()) != 0
+            || libc::sigaction(libc::SIGTSTP, &default, &mut saved_st) != 0
+        {
+            quit(1);
+            libc::_exit(1);
+        }
+        let stop_result = kill(getpid(), libc::SIGTSTP);
+        let restore_result = libc::sigaction(libc::SIGTSTP, &saved_st, std::ptr::null_mut());
+        if stop_result != 0 || restore_result != 0 {
+            quit(1);
+            libc::_exit(1);
+        }
         raw_mode(lbool::LTRUE);
         term_init();
         screen_trashed();
@@ -311,10 +493,14 @@ mod notification_tests {
                 libc::sigprocmask(libc::SIG_SETMASK, std::ptr::null(), &mut old_mask),
                 0
             );
-            assert!(install_batch(&[
-                (libc::SIGURG, Disposition::Ignore),
-                (-1, Disposition::Default)
-            ])
+            assert!(install_batch_inner(
+                &[
+                    (libc::SIGURG, Disposition::Ignore),
+                    (libc::SIGUSR2, Disposition::Default)
+                ],
+                None,
+                Some(1)
+            )
             .is_err());
             assert_eq!(
                 libc::sigaction(libc::SIGURG, std::ptr::null(), &mut after),
@@ -331,6 +517,63 @@ mod notification_tests {
                     libc::sigismember(&old_mask, signal)
                 );
             }
+            let entries = [(libc::SIGURG, Disposition::Ignore)];
+            let inherited = install_batch(&entries, None).unwrap();
+            assert_eq!(
+                libc::sigaction(libc::SIGURG, std::ptr::null(), &mut after),
+                0
+            );
+            assert_eq!(after.sa_sigaction, libc::SIG_IGN);
+            install_batch(&entries, Some(&inherited)).unwrap();
+            assert_eq!(
+                libc::sigaction(libc::SIGURG, std::ptr::null(), &mut after),
+                0
+            );
+            assert_eq!(after.sa_sigaction, before.sa_sigaction);
+            // glibc may add the Linux x86_64 SA_RESTORER trampoline bit when
+            // reinstalling an otherwise identical native sigaction.
+            assert_eq!((after.sa_flags ^ before.sa_flags) & !0x0400_0000, 0);
+        }
+    }
+
+    #[test]
+    fn old_pending_alarm_is_drained_before_a_new_timer() {
+        unsafe {
+            let mut alarm_set: libc::sigset_t = std::mem::zeroed();
+            let mut old_mask: libc::sigset_t = std::mem::zeroed();
+            assert_eq!(libc::sigemptyset(&mut alarm_set), 0);
+            assert_eq!(libc::sigaddset(&mut alarm_set, libc::SIGALRM), 0);
+            assert_eq!(
+                libc::sigprocmask(libc::SIG_BLOCK, &alarm_set, &mut old_mask),
+                0
+            );
+            TIMER_ACTIVE.store(true, Ordering::SeqCst);
+            let raised = libc::raise(libc::SIGALRM);
+            let mut before: libc::sigset_t = std::mem::zeroed();
+            let pending = libc::sigpending(&mut before);
+            let old_fired = transition_mstimer(0);
+            let blocked_arm = transition_mstimer(60_000);
+            let mut unblocked = std::ptr::read(&old_mask);
+            assert_eq!(libc::sigdelset(&mut unblocked, libc::SIGALRM), 0);
+            assert_eq!(
+                libc::sigprocmask(libc::SIG_SETMASK, &unblocked, std::ptr::null_mut()),
+                0
+            );
+            let armed = transition_mstimer(60_000);
+            let later_fired = transition_mstimer(0);
+            let mut after: libc::sigset_t = std::mem::zeroed();
+            let after_result = libc::sigpending(&mut after);
+            let restored = libc::sigprocmask(libc::SIG_SETMASK, &old_mask, std::ptr::null_mut());
+            assert_eq!(raised, 0);
+            assert_eq!(pending, 0);
+            assert_eq!(libc::sigismember(&before, libc::SIGALRM), 1);
+            assert_eq!(old_fired, Ok(true));
+            assert_eq!(blocked_arm, Err(libc::EBUSY));
+            assert_eq!(armed, Ok(false));
+            assert_eq!(later_fired, Ok(false));
+            assert_eq!(after_result, 0);
+            assert_eq!(libc::sigismember(&after, libc::SIGALRM), 0);
+            assert_eq!(restored, 0);
         }
     }
 }

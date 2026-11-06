@@ -18,7 +18,8 @@ extern "C" {
     ) -> POSITION;
     fn lmsg(id: lessmsg_id) -> *const ::core::ffi::c_char;
     fn get_time() -> time_t;
-    fn set_mstimer(ms: ::core::ffi::c_ulong);
+    fn set_mstimer(ms: ::core::ffi::c_ulong) -> ::core::ffi::c_int;
+    fn quit(status: ::core::ffi::c_int);
     fn error(fmt: *const ::core::ffi::c_char, parg: *const PARG);
     fn ierror(fmt: *const ::core::ffi::c_char, parg: *const PARG);
     fn position(sindex: ::core::ffi::c_int) -> POSITION;
@@ -772,7 +773,10 @@ pub unsafe extern "C" fn scan_eof() {
     );
     scanning_eof = lbool::LTRUE;
     if time_want_filesize > 0 as ::core::ffi::c_int {
-        set_mstimer(time_want_filesize as ::core::ffi::c_ulong);
+        if set_mstimer(time_want_filesize as ::core::ffi::c_ulong) < 0 {
+            quit(1);
+            libc::_exit(1);
+        }
     }
     while pos != -1 as ::core::ffi::c_int as POSITION {
         let c2rust_fresh0 = linenum;
@@ -785,6 +789,7 @@ pub unsafe extern "C" fn scan_eof() {
             ::core::ptr::null_mut::<*const ::core::ffi::c_char>(),
             ::core::ptr::null_mut::<size_t>(),
         );
+        crate::signal::collect_pending_signals();
         if sigs
             & ((1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int
                 | (1 as ::core::ffi::c_int) << 1 as ::core::ffi::c_int
@@ -799,8 +804,10 @@ pub unsafe extern "C" fn scan_eof() {
         }
     }
     if time_want_filesize > 0 as ::core::ffi::c_int {
-        set_mstimer(0 as ::core::ffi::c_ulong);
-        sigs &= !((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int);
+        if set_mstimer(0) < 0 {
+            quit(1);
+            libc::_exit(1);
+        }
     }
     scanning_eof = lbool::LFALSE;
 }
