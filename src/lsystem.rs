@@ -45,7 +45,6 @@ extern "C" {
     fn position(sindex: ::core::ffi::c_int) -> POSITION;
     fn lwinch(r#type: ::core::ffi::c_int);
     fn init_signals(on: lbool) -> ::core::ffi::c_int;
-    fn signal(__sig: ::core::ffi::c_int, __handler: __sighandler_t) -> __sighandler_t;
     static mut sigs: ::core::ffi::c_int;
 }
 pub type __uint64_t = u64;
@@ -457,7 +456,6 @@ pub union parg {
     pub p_char: ::core::ffi::c_char,
 }
 pub type PARG = parg;
-pub type __sighandler_t = libc::sighandler_t;
 unsafe extern "C" fn print_done_msg(mut donemsg: *const ::core::ffi::c_char) {
     if donemsg.is_null() {
         return;
@@ -659,7 +657,21 @@ unsafe extern "C" fn pipe_data(
         handoff_error(b"rless: cannot prepare signal handlers for pipe\n");
         return -1;
     }
-    signal(13 as ::core::ffi::c_int, libc::SIG_IGN);
+    let mut ignored_pipe: libc::sigaction = std::mem::zeroed();
+    let mut previous_pipe: libc::sigaction = std::mem::zeroed();
+    ignored_pipe.sa_sigaction = libc::SIG_IGN;
+    libc::sigemptyset(&mut ignored_pipe.sa_mask);
+    if libc::sigaction(libc::SIGPIPE, &ignored_pipe, &mut previous_pipe) != 0 {
+        pclose(f);
+        if init_signals(lbool::LTRUE) != 0 {
+            ::libc::_exit(1);
+        }
+        raw_mode(lbool::LTRUE);
+        term_init();
+        screen_trashed();
+        handoff_error(b"rless: cannot ignore SIGPIPE for pipe\n");
+        return -1;
+    }
     c = -1 as ::core::ffi::c_int;
     while epos == -1 as ::core::ffi::c_int as POSITION || {
         let c2rust_fresh0 = spos;
@@ -684,7 +696,10 @@ unsafe extern "C" fn pipe_data(
         }
     }
     pclose(f);
-    signal(13 as ::core::ffi::c_int, libc::SIG_DFL);
+    if libc::sigaction(libc::SIGPIPE, &previous_pipe, std::ptr::null_mut()) != 0 {
+        handoff_error(b"rless: cannot restore SIGPIPE after pipe\n");
+        ::libc::_exit(1);
+    }
     if init_signals(lbool::LTRUE) != 0 {
         handoff_error(b"rless: cannot restore signal handlers after pipe\n");
         ::libc::_exit(1);
