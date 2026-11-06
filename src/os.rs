@@ -270,6 +270,14 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
 pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32) -> i32 {
     let _waiting = crate::runtime::IoWait::new();
     loop {
+        if sigs != 0 {
+            let cancel = sigs & 3 != 0;
+            psignals();
+            if cancel {
+                *__errno_location() = libc::EINTR;
+                return -1;
+            }
+        }
         if crate::runtime::take_interrupt() {
             crate::signal::collect_pending_signals();
             if sigs & 3 != 0 {
