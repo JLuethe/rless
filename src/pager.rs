@@ -977,6 +977,7 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
         && (crate::output::output_failed()
             || crate::ch::logfile_failed()
             || crate::ch::buffer_allocation_failed()
+            || crate::ch::input_read_failed()
             || crate::screen::terminal_failed())
     {
         status = 1;

@@ -7,9 +7,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 static LOG_FAILED: AtomicBool = AtomicBool::new(false);
 static BUFFER_ALLOCATION_FAILED: AtomicBool = AtomicBool::new(false);
+static INPUT_READ_FAILED: AtomicBool = AtomicBool::new(false);
 
 pub fn buffer_allocation_failed() -> bool {
     BUFFER_ALLOCATION_FAILED.load(Ordering::Relaxed)
+}
+
+pub fn input_read_failed() -> bool {
+    INPUT_READ_FAILED.load(Ordering::Relaxed)
 }
 
 pub fn logfile_failed() -> bool {
@@ -680,6 +685,7 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                 }
                 if n < 0 as ssize_t {
                     read_error = lbool::LTRUE;
+                    INPUT_READ_FAILED.store(true, Ordering::Relaxed);
                     return -1 as ::core::ffi::c_int;
                 }
                 if secure_allow(

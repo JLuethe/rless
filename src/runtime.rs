@@ -16,6 +16,11 @@ pub(crate) struct IoWait;
 impl IoWait {
     pub(crate) fn new() -> Self {
         IO_WAITING.fetch_add(1, Ordering::SeqCst);
+        // If delivery completed just before registration, the handler saw no
+        // waiter. Recheck its published event after joining the wait set.
+        if crate::signal::has_pending_notifications() {
+            IO_INTERRUPTED.store(true, Ordering::SeqCst);
+        }
         Self
     }
 }

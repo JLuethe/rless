@@ -57,6 +57,10 @@ fn notify(bit: u32) {
     crate::runtime::interrupt_waiting_io();
 }
 
+pub(crate) fn has_pending_notifications() -> bool {
+    PENDING.load(Ordering::SeqCst) != 0
+}
+
 unsafe extern "C" fn u_interrupt(_: ::core::ffi::c_int) {
     notify(INTERRUPT);
 }
@@ -275,6 +279,20 @@ mod notification_tests {
             assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 2);
             assert_eq!(PENDING.load(Ordering::SeqCst), 0);
             sigs = 0;
+        }
+    }
+
+    #[test]
+    fn notification_before_wait_registration_still_interrupts_the_wait() {
+        unsafe {
+            PENDING.store(0, Ordering::SeqCst);
+            lwinch(libc::SIGWINCH);
+            let waiting = crate::runtime::IoWait::new();
+            assert!(crate::runtime::take_interrupt());
+            collect_pending_signals();
+            assert_eq!(sigs as u32, RESIZE);
+            sigs = 0;
+            drop(waiting);
         }
     }
 
