@@ -1374,9 +1374,126 @@ pub unsafe extern "C" fn cat_file() {
     }
     flush();
 }
+
+// Hold the verified object through the overwrite/append decision. Opening a
+// pathname again after a prompt lets another process replace its final link.
+unsafe fn open_verified_logfile(filename: *const libc::c_char) -> Result<(libc::c_int, bool), ()> {
+    let mut fd = -1;
+    let mut existed = false;
+    for _ in 0..4 {
+        fd = libc::open(
+            filename,
+            libc::O_WRONLY | libc::O_CLOEXEC | libc::O_NOFOLLOW | libc::O_NONBLOCK,
+        );
+        if fd >= 0 {
+            existed = true;
+            break;
+        }
+        if *libc::__errno_location() != libc::ENOENT {
+            return Err(());
+        }
+        fd = libc::open(
+            filename,
+            libc::O_WRONLY | libc::O_CREAT | libc::O_EXCL | libc::O_CLOEXEC | libc::O_NOFOLLOW,
+            0o600,
+        );
+        if fd >= 0 {
+            break;
+        }
+        if *libc::__errno_location() != libc::EEXIST {
+            return Err(());
+        }
+    }
+    if fd < 0 {
+        *libc::__errno_location() = libc::EAGAIN;
+        return Err(());
+    }
+    let mut stat: libc::stat = std::mem::zeroed();
+    let stat_failed = libc::fstat(fd, &mut stat) != 0;
+    if stat_failed
+        || stat.st_mode & libc::S_IFMT != libc::S_IFREG
+        || stat.st_nlink != 1
+        || stat.st_uid != libc::geteuid()
+    {
+        let error = if stat_failed {
+            *libc::__errno_location()
+        } else {
+            libc::EPERM
+        };
+        libc::close(fd);
+        *libc::__errno_location() = error;
+        return Err(());
+    }
+    let flags = libc::fcntl(fd, libc::F_GETFL);
+    if flags < 0 || libc::fcntl(fd, libc::F_SETFL, flags & !libc::O_NONBLOCK) < 0 {
+        let error = *libc::__errno_location();
+        libc::close(fd);
+        *libc::__errno_location() = error;
+        return Err(());
+    }
+    Ok((fd, existed))
+}
+
+#[cfg(test)]
+mod logfile_tests {
+    use super::open_verified_logfile;
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::fs::{symlink, PermissionsExt};
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+
+    #[test]
+    fn logfile_open_rejects_links_and_keeps_the_verified_object() {
+        let directory = std::env::temp_dir().join(format!(
+            "rless-log-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        let target = directory.join("target");
+        std::fs::write(&target, b"unchanged").unwrap();
+        let alias = directory.join("alias");
+        symlink(&target, &alias).unwrap();
+        let hard = directory.join("hard");
+        std::fs::hard_link(&target, &hard).unwrap();
+        for path in [&alias, &hard] {
+            let name = CString::new(path.as_os_str().as_bytes()).unwrap();
+            assert!(unsafe { open_verified_logfile(name.as_ptr()) }.is_err());
+        }
+        std::fs::remove_file(&hard).unwrap();
+        assert_eq!(std::fs::read(&target).unwrap(), b"unchanged");
+
+        let log = directory.join("log");
+        let name = CString::new(log.as_os_str().as_bytes()).unwrap();
+        let (fd, existed) = unsafe { open_verified_logfile(name.as_ptr()) }.unwrap();
+        assert!(!existed);
+        assert_eq!(
+            std::fs::metadata(&log).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+        assert_ne!(
+            unsafe { libc::fcntl(fd, libc::F_GETFD) } & libc::FD_CLOEXEC,
+            0
+        );
+        assert_eq!(unsafe { libc::close(fd) }, 0);
+
+        let (fd, existed) = unsafe { open_verified_logfile(name.as_ptr()) }.unwrap();
+        assert!(existed);
+        let displaced = directory.join("displaced");
+        std::fs::rename(&log, &displaced).unwrap();
+        std::fs::write(&log, b"replacement").unwrap();
+        assert_eq!(unsafe { libc::write(fd, b"old".as_ptr().cast(), 3) }, 3);
+        assert_eq!(unsafe { libc::close(fd) }, 0);
+        assert_eq!(std::fs::read(&displaced).unwrap(), b"old");
+        assert_eq!(std::fs::read(&log).unwrap(), b"replacement");
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
-    let mut exists: ::core::ffi::c_int = 0;
     let mut answer: ::core::ffi::c_int = 0;
     let mut parg: PARG = parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -1384,12 +1501,15 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
     if ch_getflags() & 0o1 as ::core::ffi::c_int != 0 {
         return;
     }
-    exists = open(filename, 0 as ::core::ffi::c_int);
-    if exists >= 0 as ::core::ffi::c_int {
-        close(exists);
-    }
-    exists = (exists >= 0 as ::core::ffi::c_int) as ::core::ffi::c_int;
-    if exists == 0 || force_logfile != 0 {
+    let (candidate, existed) = match open_verified_logfile(filename) {
+        Ok(result) => result,
+        Err(()) => {
+            parg.p_string = filename;
+            error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+            return;
+        }
+    };
+    if !existed || force_logfile != 0 {
         answer = 'O' as ::core::ffi::c_int;
     } else {
         parg.p_string = filename;
@@ -1398,26 +1518,25 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
     loop {
         match answer {
             79 | 111 => {
-                logfile = creat(filename, 0o644 as mode_t);
-                break;
-            }
-            65 | 97 => {
-                logfile = open(
-                    filename,
-                    0o2000 as ::core::ffi::c_int | 0o1 as ::core::ffi::c_int,
-                );
-                if lseek(
-                    logfile,
-                    0 as ::core::ffi::c_int as __off_t,
-                    2 as ::core::ffi::c_int,
-                ) == -1 as ::core::ffi::c_int as off_t
+                if libc::ftruncate(candidate, 0) == 0
+                    && libc::lseek(candidate, 0, libc::SEEK_SET) >= 0
                 {
-                    close(logfile);
-                    logfile = -1 as ::core::ffi::c_int;
+                    logfile = candidate;
                 }
                 break;
             }
-            68 | 100 => return,
+            65 | 97 => {
+                let flags = libc::fcntl(candidate, libc::F_GETFL);
+                if flags >= 0 && libc::fcntl(candidate, libc::F_SETFL, flags | libc::O_APPEND) == 0
+                {
+                    logfile = candidate;
+                }
+                break;
+            }
+            68 | 100 => {
+                close(candidate);
+                return;
+            }
             _ => {
                 answer = query(
                     lmsg(lessmsg_id::LM_Overwrite),
@@ -1427,6 +1546,7 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
         }
     }
     if logfile < 0 as ::core::ffi::c_int {
+        close(candidate);
         parg.p_string = filename;
         error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
         return;
