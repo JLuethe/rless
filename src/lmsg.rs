@@ -2605,7 +2605,11 @@ unsafe extern "C" fn lmsg_line(
         mp = lmsg_char(mp, line, line_size, fd, xbuf, lmsg_file, linenum);
     }
     if id.0 != lessmsg_id::LM_HELP.0 {
-        let bytes = std::slice::from_raw_parts(xbuf_char_data(xbuf).cast::<u8>(), (*xbuf).end);
+        let bytes: &[u8] = if (*xbuf).end == 0 {
+            &[]
+        } else {
+            std::slice::from_raw_parts(xbuf_char_data(xbuf).cast::<u8>(), (*xbuf).end)
+        };
         if bytes.contains(&0)
             || format_signature(bytes).as_ref() != default_formats()[id.0 as usize].as_ref()
         {

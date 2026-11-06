@@ -177,3 +177,26 @@ fn lessmsg_rejects_mismatched_native_format_conversions_before_use() {
         }
     }
 }
+
+#[test]
+fn empty_lessmsg_replacement_does_not_create_a_null_slice() {
+    let work = Work::new();
+    let message_path = work.0.join("empty-message");
+    std::fs::write(&message_path, b"press_RETURN \n").unwrap();
+    for secure in [false, true] {
+        let mut command = work.command();
+        command.env("LESSMSG", &message_path);
+        if secure {
+            command.env("LESSSECURE", "1");
+        }
+        let output = command.arg("--").arg("missing").output().unwrap();
+        assert!(output.status.code().is_some(), "{output:?}");
+        let diagnostics = [output.stdout, output.stderr].concat();
+        assert!(
+            !diagnostics
+                .windows(b"unsafe precondition".len())
+                .any(|window| window == b"unsafe precondition"),
+            "{diagnostics:?}"
+        );
+    }
+}
