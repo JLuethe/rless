@@ -231,6 +231,7 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
     let _waiting = crate::runtime::IoWait::new();
     loop {
         if crate::runtime::take_interrupt() {
+            crate::signal::collect_pending_signals();
             return if fd != tty && sigs & 7 == 0 { -3 } else { -2 };
         }
         flush();
@@ -249,6 +250,7 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
             }
         }
         if crate::runtime::take_interrupt() {
+            crate::signal::collect_pending_signals();
             return if fd != tty && sigs & 7 == 0 { -3 } else { -2 };
         }
         let n = crate::runtime::read_interruptible(fd, buf, len);
@@ -269,8 +271,9 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
     let _waiting = crate::runtime::IoWait::new();
     loop {
         if crate::runtime::take_interrupt() {
+            crate::signal::collect_pending_signals();
             if sigs & 3 != 0 {
-                sigs = 0;
+                psignals();
                 *__errno_location() = libc::EINTR;
                 return -1;
             }
@@ -289,9 +292,7 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
 }
 #[no_mangle]
 pub unsafe extern "C" fn intio() {
-    if crate::runtime::IO_WAITING.load(std::sync::atomic::Ordering::SeqCst) != 0 {
-        crate::runtime::IO_INTERRUPTED.store(true, std::sync::atomic::Ordering::SeqCst);
-    }
+    crate::runtime::interrupt_waiting_io();
 }
 #[no_mangle]
 pub unsafe extern "C" fn polling_ok() {

@@ -1496,6 +1496,7 @@ pub unsafe extern "C" fn getcc_clear() {
 }
 unsafe extern "C" fn getccu(mut timeout_ms: ::core::ffi::c_ulong) -> ::core::ffi::c_int {
     let mut c: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
+    crate::signal::collect_pending_signals();
     while c == 0 as ::core::ffi::c_int && sigs == 0 as ::core::ffi::c_int {
         if ungot.is_null() {
             c = getchr_timeout(timeout_ms);
@@ -1855,6 +1856,7 @@ pub unsafe extern "C" fn commands() {
     search_type = (1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int;
     newaction = 101 as ::core::ffi::c_int;
     's_36: loop {
+        crate::signal::collect_pending_signals();
         clear_mca();
         cmd_accept();
         number = 0 as LINENUM;

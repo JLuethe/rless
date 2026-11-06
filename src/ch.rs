@@ -532,6 +532,7 @@ unsafe extern "C" fn ch_position(mut block: BLOCKNUM, mut offset: size_t) -> POS
     return block * 8192 as POSITION + offset as POSITION;
 }
 unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
+    crate::signal::collect_pending_signals();
     let mut read_again: lbool = lbool::LFALSE;
     let mut len: POSITION = 0;
     let mut pos: POSITION = 0;
@@ -722,6 +723,7 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                         }
                         sleep_ms(50 as ::core::ffi::c_int);
                     }
+                    crate::signal::collect_pending_signals();
                     if ignore_eoi.0 != 0
                         && follow_mode == 1 as ::core::ffi::c_int
                         && curr_ifile_changed().0 != 0

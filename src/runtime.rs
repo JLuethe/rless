@@ -4,6 +4,13 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 pub(crate) static IO_INTERRUPTED: AtomicBool = AtomicBool::new(false);
 pub(crate) static IO_WAITING: AtomicUsize = AtomicUsize::new(0);
 
+#[inline]
+pub(crate) fn interrupt_waiting_io() {
+    if IO_WAITING.load(Ordering::SeqCst) != 0 {
+        IO_INTERRUPTED.store(true, Ordering::SeqCst);
+    }
+}
+
 pub(crate) struct IoWait;
 
 impl IoWait {

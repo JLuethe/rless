@@ -3,6 +3,7 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::libc;
+use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
 extern "C" {
     fn getpid() -> __pid_t;
     fn quit(status: ::core::ffi::c_int);
@@ -19,7 +20,6 @@ extern "C" {
     fn ungetsc(s: *const ::core::ffi::c_char);
     fn lgetenv(var: *const ::core::ffi::c_char) -> *const ::core::ffi::c_char;
     fn isnullenv(s: *const ::core::ffi::c_char) -> lbool;
-    fn intio();
     fn polling_ok();
     fn flush();
     fn set_filter_pattern(pattern: *const ::core::ffi::c_char, search_type: ::core::ffi::c_int);
@@ -41,35 +41,37 @@ impl lbool {
 pub type __sighandler_t = libc::sighandler_t;
 #[no_mangle]
 pub static mut sigs: ::core::ffi::c_int = 0;
-unsafe extern "C" fn u_interrupt(mut r#type: ::core::ffi::c_int) {
-    lbell();
-    signal(2 as ::core::ffi::c_int, u_interrupt as __sighandler_t);
-    sigs |= (1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int;
-    set_filter_pattern(
-        ::core::ptr::null::<::core::ffi::c_char>(),
-        0 as ::core::ffi::c_int,
-    );
-    polling_ok();
-    intio();
+const INTERRUPT: u32 = 1 << 0;
+const STOP: u32 = 1 << 2;
+const RESIZE: u32 = 1 << 3;
+const ALARM: u32 = 1 << 4;
+const USER_COMMAND: u32 = 1 << 5;
+const TERMINATE: u32 = 1 << 6;
+static PENDING: AtomicU32 = AtomicU32::new(0);
+static USER_COMMANDS: AtomicUsize = AtomicUsize::new(0);
+static USER_COMMANDS_OVERFLOW: AtomicU32 = AtomicU32::new(0);
+
+#[inline]
+fn notify(bit: u32) {
+    PENDING.fetch_or(bit, Ordering::SeqCst);
+    crate::runtime::interrupt_waiting_io();
 }
-unsafe extern "C" fn stop(mut r#type: ::core::ffi::c_int) {
-    signal(20 as ::core::ffi::c_int, stop as __sighandler_t);
-    sigs |= (1 as ::core::ffi::c_int) << 2 as ::core::ffi::c_int;
-    intio();
+
+unsafe extern "C" fn u_interrupt(_: ::core::ffi::c_int) {
+    notify(INTERRUPT);
 }
-unsafe extern "C" fn sigalarm(mut r#type: ::core::ffi::c_int) {
-    signal(14 as ::core::ffi::c_int, sigalarm as __sighandler_t);
-    sigs |= (1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int;
-    intio();
+unsafe extern "C" fn stop(_: ::core::ffi::c_int) {
+    notify(STOP);
+}
+unsafe extern "C" fn sigalarm(_: ::core::ffi::c_int) {
+    notify(ALARM);
 }
 #[no_mangle]
-pub unsafe extern "C" fn lwinch(mut r#type: ::core::ffi::c_int) {
-    signal(28 as ::core::ffi::c_int, lwinch as __sighandler_t);
-    sigs |= (1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int;
-    intio();
+pub unsafe extern "C" fn lwinch(_: ::core::ffi::c_int) {
+    notify(RESIZE);
 }
-unsafe extern "C" fn terminate(mut r#type: ::core::ffi::c_int) {
-    quit(15 as ::core::ffi::c_int);
+unsafe extern "C" fn terminate(_: ::core::ffi::c_int) {
+    notify(TERMINATE);
 }
 unsafe extern "C" fn sigusr(mut var: *const ::core::ffi::c_char) {
     let mut cmd: *const ::core::ffi::c_char = lgetenv(var);
@@ -77,11 +79,22 @@ unsafe extern "C" fn sigusr(mut var: *const ::core::ffi::c_char) {
         return;
     }
     ungetsc(cmd);
-    intio();
 }
-unsafe extern "C" fn sigusr1(mut r#type: ::core::ffi::c_int) {
-    signal(10 as ::core::ffi::c_int, sigusr1 as __sighandler_t);
-    sigusr(b"LESS_SIGUSR1\0".as_ptr() as *const ::core::ffi::c_char);
+unsafe extern "C" fn sigusr1(_: ::core::ffi::c_int) {
+    if USER_COMMANDS.fetch_add(1, Ordering::SeqCst) == usize::MAX {
+        USER_COMMANDS_OVERFLOW.store(1, Ordering::SeqCst);
+    }
+    notify(USER_COMMAND);
+}
+
+/// Transfer asynchronous notifications to the main-thread legacy event mask.
+/// No application state is accessed from the handlers themselves.
+pub unsafe fn collect_pending_signals() {
+    let delivered = PENDING.swap(0, Ordering::SeqCst);
+    if delivered & INTERRUPT != 0 {
+        lbell();
+    }
+    sigs |= delivered as i32;
 }
 #[no_mangle]
 pub unsafe extern "C" fn init_signals(mut on: lbool) {
@@ -119,11 +132,23 @@ pub unsafe extern "C" fn init_signals(mut on: lbool) {
 #[no_mangle]
 pub unsafe extern "C" fn psignals() {
     let mut tsignals: ::core::ffi::c_int = 0;
+    collect_pending_signals();
     tsignals = sigs;
     if tsignals == 0 as ::core::ffi::c_int {
         return;
     }
     sigs = 0 as ::core::ffi::c_int;
+    if tsignals & TERMINATE as i32 != 0 {
+        quit(15);
+    }
+    if tsignals & USER_COMMAND as i32 != 0 {
+        if USER_COMMANDS_OVERFLOW.swap(0, Ordering::SeqCst) != 0 {
+            quit(1);
+        }
+        for _ in 0..USER_COMMANDS.swap(0, Ordering::SeqCst) {
+            sigusr(b"LESS_SIGUSR1\0".as_ptr() as *const ::core::ffi::c_char);
+        }
+    }
     if tsignals & (1 as ::core::ffi::c_int) << 2 as ::core::ffi::c_int != 0 {
         signal(22 as ::core::ffi::c_int, libc::SIG_IGN);
         clear_bot();
@@ -151,9 +176,35 @@ pub unsafe extern "C" fn psignals() {
         screen_trashed();
     }
     if tsignals & (1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int != 0 {
+        set_filter_pattern(::core::ptr::null(), 0);
+        polling_ok();
         if quit_on_intr != 0 {
             quit(1 as ::core::ffi::c_int + 1 as ::core::ffi::c_int);
         }
         getcc_clear();
+    }
+}
+
+#[cfg(test)]
+mod notification_tests {
+    use super::*;
+
+    #[test]
+    fn handler_notifications_preserve_command_count_and_coalesce_state_bits() {
+        unsafe {
+            assert_eq!(PENDING.swap(0, Ordering::SeqCst), 0);
+            assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 0);
+            sigs = 0;
+            sigusr1(libc::SIGUSR1);
+            sigusr1(libc::SIGUSR1);
+            lwinch(libc::SIGWINCH);
+            lwinch(libc::SIGWINCH);
+            terminate(libc::SIGTERM);
+            collect_pending_signals();
+            assert_eq!(sigs as u32, USER_COMMAND | RESIZE | TERMINATE);
+            assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 2);
+            assert_eq!(PENDING.load(Ordering::SeqCst), 0);
+            sigs = 0;
+        }
     }
 }
