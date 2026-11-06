@@ -2541,6 +2541,75 @@ fn format_signature(bytes: &[u8]) -> Option<Vec<Vec<u8>>> {
     Some(conversions)
 }
 
+/// Expand a single decimal placeholder without letting translation bytes
+/// reach a native variadic formatter. The caller supplies a writable C buffer.
+pub unsafe fn format_decimal_to_c(
+    template: *const libc::c_char,
+    value: libc::c_int,
+    output: *mut libc::c_char,
+    capacity: usize,
+) -> bool {
+    if template.is_null() || output.is_null() || capacity == 0 {
+        return false;
+    }
+    let input = CStr::from_ptr(template).to_bytes();
+    let mut decimal = [0u8; 12];
+    let mut decimal_start = decimal.len();
+    let mut magnitude = (value as i64).unsigned_abs();
+    loop {
+        decimal_start -= 1;
+        decimal[decimal_start] = b'0' + (magnitude % 10) as u8;
+        magnitude /= 10;
+        if magnitude == 0 {
+            break;
+        }
+    }
+    if value < 0 {
+        decimal_start -= 1;
+        decimal[decimal_start] = b'-';
+    }
+    let mut written = 0;
+    let mut emit = |byte: u8| {
+        if written < capacity - 1 {
+            *output.add(written) = byte as libc::c_char;
+            written += 1;
+        }
+    };
+    let mut index = 0;
+    let mut conversions = 0;
+    while index < input.len() {
+        if input[index] != b'%' {
+            emit(input[index]);
+            index += 1;
+            continue;
+        }
+        if index + 1 == input.len() {
+            *output = 0;
+            return false;
+        }
+        match input[index + 1] {
+            b'%' => emit(b'%'),
+            b'd' => {
+                for &byte in &decimal[decimal_start..] {
+                    emit(byte);
+                }
+                conversions += 1;
+            }
+            _ => {
+                *output = 0;
+                return false;
+            }
+        }
+        index += 2;
+    }
+    if conversions != 1 {
+        *output = 0;
+        return false;
+    }
+    *output.add(written) = 0;
+    true
+}
+
 unsafe fn default_formats() -> &'static [Option<Vec<Vec<u8>>>] {
     DEFAULT_FORMATS.get_or_init(|| {
         (0..340)
@@ -2700,6 +2769,43 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
 #[cfg(test)]
 mod format_tests {
     use super::*;
+
+    #[test]
+    fn decimal_translation_never_interprets_native_variadic_conversions() {
+        unsafe {
+            let mut out = [0i8; 32];
+            assert!(format_decimal_to_c(
+                c"sub %% %d".as_ptr(),
+                -12,
+                out.as_mut_ptr(),
+                out.len()
+            ));
+            assert_eq!(CStr::from_ptr(out.as_ptr()).to_bytes(), b"sub % -12");
+            for invalid in [c"%n", c"%p", c"%s", c"%1$d", c"%*d", c"%d %d"] {
+                assert!(!format_decimal_to_c(
+                    invalid.as_ptr(),
+                    7,
+                    out.as_mut_ptr(),
+                    out.len()
+                ));
+                assert_eq!(out[0], 0);
+            }
+            assert!(format_decimal_to_c(
+                c"value %d".as_ptr(),
+                123,
+                out.as_mut_ptr(),
+                5
+            ));
+            assert_eq!(CStr::from_ptr(out.as_ptr()).to_bytes(), b"valu");
+            assert!(format_decimal_to_c(
+                c"%d".as_ptr(),
+                i32::MIN,
+                out.as_mut_ptr(),
+                out.len()
+            ));
+            assert_eq!(CStr::from_ptr(out.as_ptr()).to_bytes(), b"-2147483648");
+        }
+    }
 
     #[test]
     fn every_builtin_message_has_a_parseable_format_signature() {

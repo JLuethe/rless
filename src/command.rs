@@ -721,7 +721,9 @@ unsafe extern "C" fn mca_search1() {
                 buf = ecalloc(buflen, ::core::mem::size_of::<::core::ffi::c_char>())
                     as *mut ::core::ffi::c_char;
             }
-            snprintf(buf, buflen, lmsg(lessmsg_id::LM_Sub_X), i);
+            if !crate::lmsg::format_decimal_to_c(lmsg(lessmsg_id::LM_Sub_X), i, buf, buflen) {
+                quit(1);
+            }
             cmd_putstr(buf);
         }
         i += 1;
@@ -1140,12 +1142,14 @@ unsafe extern "C" fn mca_search_char(mut c: ::core::ffi::c_char) -> ::core::ffi:
                 buf = ecalloc(buflen, ::core::mem::size_of::<::core::ffi::c_char>())
                     as *mut ::core::ffi::c_char;
             }
-            snprintf(
+            if !crate::lmsg::format_decimal_to_c(
+                lmsg(lessmsg_id::LM_Sub_pattern_1_X),
+                5,
                 buf,
                 buflen,
-                lmsg(lessmsg_id::LM_Sub_pattern_1_X),
-                5 as ::core::ffi::c_int,
-            );
+            ) {
+                quit(1);
+            }
             clear_bot();
             cmd_putstr(buf);
             flush();

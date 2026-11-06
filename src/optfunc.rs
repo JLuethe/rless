@@ -1313,11 +1313,17 @@ pub unsafe extern "C" fn opt_x(mut r#type: ::core::ffi::c_int, mut s: *const ::c
                 strcat(msg, b" \0".as_ptr() as *const ::core::ffi::c_char);
                 strcat(msg, lmsg(lessmsg_id::LM_and_then));
             }
-            sprintf(
-                msg.offset(strlen(msg) as isize),
-                lmsg(lessmsg_id::LM_every_X_spaces),
-                tabdefault,
-            );
+            let offset = strlen(msg);
+            if offset >= msglen
+                || !crate::lmsg::format_decimal_to_c(
+                    lmsg(lessmsg_id::LM_every_X_spaces),
+                    tabdefault,
+                    msg.add(offset),
+                    msglen - offset,
+                )
+            {
+                quit(1);
+            }
             p.p_string = msg;
             error(b"%s\0".as_ptr() as *const ::core::ffi::c_char, &raw mut p);
             free(msg as *mut ::core::ffi::c_void);

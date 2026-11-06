@@ -444,9 +444,11 @@ pub unsafe extern "C" fn psignals() {
 #[cfg(test)]
 mod notification_tests {
     use super::*;
+    static SIGNAL_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
     #[test]
     fn handler_notifications_preserve_command_count_and_coalesce_state_bits() {
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
             assert_eq!(PENDING.swap(0, Ordering::SeqCst), 0);
             assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 0);
@@ -466,6 +468,7 @@ mod notification_tests {
 
     #[test]
     fn notification_before_wait_registration_still_interrupts_the_wait() {
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
             PENDING.store(0, Ordering::SeqCst);
             lwinch(libc::SIGWINCH);
@@ -480,6 +483,7 @@ mod notification_tests {
 
     #[test]
     fn failed_installation_restores_previous_disposition_and_mask() {
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
             let mut before: libc::sigaction = std::mem::zeroed();
             let mut after: libc::sigaction = std::mem::zeroed();
@@ -538,6 +542,7 @@ mod notification_tests {
 
     #[test]
     fn old_pending_alarm_is_drained_before_a_new_timer() {
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
             let mut alarm_set: libc::sigset_t = std::mem::zeroed();
             let mut old_mask: libc::sigset_t = std::mem::zeroed();
