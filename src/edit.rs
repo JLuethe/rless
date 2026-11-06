@@ -3,6 +3,7 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::os::fd::AsRawFd;
 extern "C" {
     fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn open(
@@ -1378,11 +1379,15 @@ pub unsafe extern "C" fn cat_file() {
 // Hold the verified object through the overwrite/append decision. Opening a
 // pathname again after a prompt lets another process replace its final link.
 unsafe fn open_verified_logfile(filename: *const libc::c_char) -> Result<(libc::c_int, bool), ()> {
+    let (directory, basename) = crate::secure_path::open_parent(filename).map_err(|error| {
+        *libc::__errno_location() = error;
+    })?;
     let mut fd = -1;
     let mut existed = false;
     for _ in 0..4 {
-        fd = libc::open(
-            filename,
+        fd = libc::openat(
+            directory.as_raw_fd(),
+            basename.as_ptr(),
             libc::O_WRONLY | libc::O_CLOEXEC | libc::O_NOFOLLOW | libc::O_NONBLOCK,
         );
         if fd >= 0 {
@@ -1392,8 +1397,9 @@ unsafe fn open_verified_logfile(filename: *const libc::c_char) -> Result<(libc::
         if *libc::__errno_location() != libc::ENOENT {
             return Err(());
         }
-        fd = libc::open(
-            filename,
+        fd = libc::openat(
+            directory.as_raw_fd(),
+            basename.as_ptr(),
             libc::O_WRONLY | libc::O_CREAT | libc::O_EXCL | libc::O_CLOEXEC | libc::O_NOFOLLOW,
             0o600,
         );
@@ -1504,6 +1510,7 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
     let (candidate, existed) = match open_verified_logfile(filename) {
         Ok(result) => result,
         Err(()) => {
+            crate::ch::mark_logfile_failed();
             parg.p_string = filename;
             error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
             return;
@@ -1546,6 +1553,7 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
         }
     }
     if logfile < 0 as ::core::ffi::c_int {
+        crate::ch::mark_logfile_failed();
         close(candidate);
         parg.p_string = filename;
         error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);

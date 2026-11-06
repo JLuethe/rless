@@ -21,6 +21,10 @@ pub fn logfile_failed() -> bool {
     LOG_FAILED.load(Ordering::Relaxed)
 }
 
+pub(crate) fn mark_logfile_failed() {
+    LOG_FAILED.store(true, Ordering::Relaxed);
+}
+
 fn record_log_failure() {
     if !LOG_FAILED.swap(true, Ordering::Relaxed) {
         crate::output::io_error_diagnostic(b"rless: log write or close error\n");

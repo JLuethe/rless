@@ -5,8 +5,8 @@
 use ::c2rust_bitfields;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{
-    ffi::{CStr, CString},
-    os::fd::{AsRawFd, FromRawFd, OwnedFd},
+    ffi::CString,
+    os::fd::{AsRawFd, OwnedFd},
 };
 
 static HISTORY_ERROR_REPORTED: AtomicBool = AtomicBool::new(false);
@@ -2088,35 +2088,8 @@ impl Drop for HistoryTemp {
 }
 
 unsafe fn create_history_temp(path: *const libc::c_char) -> Option<HistoryTemp> {
-    let bytes = CStr::from_ptr(path).to_bytes();
-    let (parent, basename): (&[u8], &[u8]) = match bytes.iter().rposition(|byte| *byte == b'/') {
-        Some(0) => (b"/", &bytes[1..]),
-        Some(index) => (&bytes[..index], &bytes[index + 1..]),
-        None => (b".", bytes),
-    };
-    if basename.is_empty() || basename == b"." || basename == b".." {
-        return None;
-    }
-    let parent = CString::new(parent).ok()?;
-    let destination = CString::new(basename).ok()?;
-    let dirfd = libc::open(
-        parent.as_ptr(),
-        libc::O_RDONLY | libc::O_DIRECTORY | libc::O_NOFOLLOW | libc::O_CLOEXEC,
-    );
-    if dirfd < 0 {
-        return None;
-    }
-    let directory = OwnedFd::from_raw_fd(dirfd);
-    let mut dir_stat: libc::stat = std::mem::zeroed();
-    if libc::fstat(dirfd, &mut dir_stat) != 0 {
-        return None;
-    }
-    let private_directory = dir_stat.st_uid == libc::geteuid() && dir_stat.st_mode & 0o022 == 0;
-    let sticky_directory = dir_stat.st_mode & libc::S_ISVTX != 0
-        && (dir_stat.st_uid == libc::geteuid() || dir_stat.st_uid == 0);
-    if !private_directory && !sticky_directory {
-        return None;
-    }
+    let (directory, destination) = crate::secure_path::open_parent(path).ok()?;
+    let basename = destination.as_bytes();
     for _ in 0..8 {
         let mut random = [0u8; 16];
         let mut filled = 0;

@@ -58,3 +58,4 @@ pub mod version;
 pub mod xbuf;
 
 mod runtime;
+mod secure_path;
