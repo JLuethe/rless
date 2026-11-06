@@ -38,15 +38,12 @@ impl lbool {
     pub const LFALSE: Self = Self(0);
     pub const LTRUE: Self = Self(1);
 }
-pub type __sighandler_t = Option<unsafe extern "C" fn(::core::ffi::c_int) -> ()>;
+pub type __sighandler_t = libc::sighandler_t;
 #[no_mangle]
 pub static mut sigs: ::core::ffi::c_int = 0;
 unsafe extern "C" fn u_interrupt(mut r#type: ::core::ffi::c_int) {
     lbell();
-    signal(
-        2 as ::core::ffi::c_int,
-        Some(u_interrupt as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-    );
+    signal(2 as ::core::ffi::c_int, u_interrupt as __sighandler_t);
     sigs |= (1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int;
     set_filter_pattern(
         ::core::ptr::null::<::core::ffi::c_char>(),
@@ -56,27 +53,18 @@ unsafe extern "C" fn u_interrupt(mut r#type: ::core::ffi::c_int) {
     intio();
 }
 unsafe extern "C" fn stop(mut r#type: ::core::ffi::c_int) {
-    signal(
-        20 as ::core::ffi::c_int,
-        Some(stop as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-    );
+    signal(20 as ::core::ffi::c_int, stop as __sighandler_t);
     sigs |= (1 as ::core::ffi::c_int) << 2 as ::core::ffi::c_int;
     intio();
 }
 unsafe extern "C" fn sigalarm(mut r#type: ::core::ffi::c_int) {
-    signal(
-        14 as ::core::ffi::c_int,
-        Some(sigalarm as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-    );
+    signal(14 as ::core::ffi::c_int, sigalarm as __sighandler_t);
     sigs |= (1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int;
     intio();
 }
 #[no_mangle]
 pub unsafe extern "C" fn lwinch(mut r#type: ::core::ffi::c_int) {
-    signal(
-        28 as ::core::ffi::c_int,
-        Some(lwinch as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-    );
+    signal(28 as ::core::ffi::c_int, lwinch as __sighandler_t);
     sigs |= (1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int;
     intio();
 }
@@ -92,19 +80,13 @@ unsafe extern "C" fn sigusr(mut var: *const ::core::ffi::c_char) {
     intio();
 }
 unsafe extern "C" fn sigusr1(mut r#type: ::core::ffi::c_int) {
-    signal(
-        10 as ::core::ffi::c_int,
-        Some(sigusr1 as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-    );
+    signal(10 as ::core::ffi::c_int, sigusr1 as __sighandler_t);
     sigusr(b"LESS_SIGUSR1\0".as_ptr() as *const ::core::ffi::c_char);
 }
 #[no_mangle]
 pub unsafe extern "C" fn init_signals(mut on: lbool) {
     if on.0 != 0 {
-        signal(
-            2 as ::core::ffi::c_int,
-            Some(u_interrupt as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
+        signal(2 as ::core::ffi::c_int, u_interrupt as __sighandler_t);
         signal(
             20 as ::core::ffi::c_int,
             if secure_allow(
@@ -112,53 +94,26 @@ pub unsafe extern "C" fn init_signals(mut on: lbool) {
             )
             .0 == 0
             {
-                ::core::mem::transmute::<::libc::intptr_t, __sighandler_t>(
-                    1 as ::core::ffi::c_int as ::libc::intptr_t,
-                )
+                libc::SIG_IGN
             } else {
-                Some(stop as unsafe extern "C" fn(::core::ffi::c_int) -> ())
+                stop as __sighandler_t
             },
         );
-        signal(
-            28 as ::core::ffi::c_int,
-            Some(lwinch as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
-        signal(
-            3 as ::core::ffi::c_int,
-            ::core::mem::transmute::<::libc::intptr_t, __sighandler_t>(
-                1 as ::core::ffi::c_int as ::libc::intptr_t,
-            ),
-        );
-        signal(
-            15 as ::core::ffi::c_int,
-            Some(terminate as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
-        signal(
-            1 as ::core::ffi::c_int,
-            Some(terminate as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
-        signal(
-            14 as ::core::ffi::c_int,
-            Some(sigalarm as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
-        signal(
-            10 as ::core::ffi::c_int,
-            Some(sigusr1 as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
+        signal(28 as ::core::ffi::c_int, lwinch as __sighandler_t);
+        signal(3 as ::core::ffi::c_int, libc::SIG_IGN);
+        signal(15 as ::core::ffi::c_int, terminate as __sighandler_t);
+        signal(1 as ::core::ffi::c_int, terminate as __sighandler_t);
+        signal(14 as ::core::ffi::c_int, sigalarm as __sighandler_t);
+        signal(10 as ::core::ffi::c_int, sigusr1 as __sighandler_t);
     } else {
-        signal(2 as ::core::ffi::c_int, None);
-        signal(20 as ::core::ffi::c_int, None);
-        signal(
-            28 as ::core::ffi::c_int,
-            ::core::mem::transmute::<::libc::intptr_t, __sighandler_t>(
-                1 as ::core::ffi::c_int as ::libc::intptr_t,
-            ),
-        );
-        signal(3 as ::core::ffi::c_int, None);
-        signal(15 as ::core::ffi::c_int, None);
-        signal(1 as ::core::ffi::c_int, None);
-        signal(14 as ::core::ffi::c_int, None);
-        signal(10 as ::core::ffi::c_int, None);
+        signal(2 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(20 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(28 as ::core::ffi::c_int, libc::SIG_IGN);
+        signal(3 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(15 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(1 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(14 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(10 as ::core::ffi::c_int, libc::SIG_DFL);
     };
 }
 #[no_mangle]
@@ -170,23 +125,15 @@ pub unsafe extern "C" fn psignals() {
     }
     sigs = 0 as ::core::ffi::c_int;
     if tsignals & (1 as ::core::ffi::c_int) << 2 as ::core::ffi::c_int != 0 {
-        signal(
-            22 as ::core::ffi::c_int,
-            ::core::mem::transmute::<::libc::intptr_t, __sighandler_t>(
-                1 as ::core::ffi::c_int as ::libc::intptr_t,
-            ),
-        );
+        signal(22 as ::core::ffi::c_int, libc::SIG_IGN);
         clear_bot();
         term_deinit();
         flush();
         raw_mode(lbool::LFALSE);
-        signal(22 as ::core::ffi::c_int, None);
-        signal(20 as ::core::ffi::c_int, None);
+        signal(22 as ::core::ffi::c_int, libc::SIG_DFL);
+        signal(20 as ::core::ffi::c_int, libc::SIG_DFL);
         kill(getpid(), 20 as ::core::ffi::c_int);
-        signal(
-            20 as ::core::ffi::c_int,
-            Some(stop as unsafe extern "C" fn(::core::ffi::c_int) -> ()),
-        );
+        signal(20 as ::core::ffi::c_int, stop as __sighandler_t);
         raw_mode(lbool::LTRUE);
         term_init();
         screen_trashed();

@@ -457,7 +457,7 @@ pub union parg {
     pub p_char: ::core::ffi::c_char,
 }
 pub type PARG = parg;
-pub type __sighandler_t = Option<unsafe extern "C" fn(::core::ffi::c_int) -> ()>;
+pub type __sighandler_t = libc::sighandler_t;
 unsafe extern "C" fn print_done_msg(mut donemsg: *const ::core::ffi::c_char) {
     if donemsg.is_null() {
         return;
@@ -642,12 +642,7 @@ unsafe extern "C" fn pipe_data(
     flush();
     raw_mode(lbool::LFALSE);
     init_signals(lbool::LFALSE);
-    signal(
-        13 as ::core::ffi::c_int,
-        ::core::mem::transmute::<::libc::intptr_t, __sighandler_t>(
-            1 as ::core::ffi::c_int as ::libc::intptr_t,
-        ),
-    );
+    signal(13 as ::core::ffi::c_int, libc::SIG_IGN);
     c = -1 as ::core::ffi::c_int;
     while epos == -1 as ::core::ffi::c_int as POSITION || {
         let c2rust_fresh0 = spos;
@@ -672,7 +667,7 @@ unsafe extern "C" fn pipe_data(
         }
     }
     pclose(f);
-    signal(13 as ::core::ffi::c_int, None);
+    signal(13 as ::core::ffi::c_int, libc::SIG_DFL);
     init_signals(lbool::LTRUE);
     raw_mode(lbool::LTRUE);
     print_done_msg(donemsg);

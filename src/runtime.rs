@@ -26,18 +26,47 @@ impl Drop for IoWait {
 #[no_mangle]
 pub unsafe extern "C" fn rless_signal(
     signal: libc::c_int,
-    handler: Option<unsafe extern "C" fn(libc::c_int)>,
-) -> Option<unsafe extern "C" fn(libc::c_int)> {
+    handler: libc::sighandler_t,
+) -> libc::sighandler_t {
     let mut action: libc::sigaction = std::mem::zeroed();
     let mut previous: libc::sigaction = std::mem::zeroed();
-    action.sa_sigaction = handler.map_or(0, |f| f as usize);
+    action.sa_sigaction = handler;
     libc::sigemptyset(&mut action.sa_mask);
     // SA_RESTART would prevent pending reads/opens from returning EINTR.
     action.sa_flags = 0;
     if libc::sigaction(signal, &action, &mut previous) != 0 {
-        return std::mem::transmute(libc::SIG_ERR);
+        return libc::SIG_ERR;
     }
-    std::mem::transmute(previous.sa_sigaction)
+    previous.sa_sigaction
+}
+
+#[cfg(test)]
+mod disposition_tests {
+    use super::*;
+
+    #[test]
+    fn native_signal_sentinels_round_trip_without_rust_function_pointers() {
+        unsafe {
+            let mut original: libc::sigaction = std::mem::zeroed();
+            assert_eq!(
+                libc::sigaction(libc::SIGUSR2, std::ptr::null(), &mut original),
+                0
+            );
+            let old = rless_signal(libc::SIGUSR2, libc::SIG_IGN);
+            assert_ne!(old, libc::SIG_ERR);
+            let mut ignored: libc::sigaction = std::mem::zeroed();
+            assert_eq!(
+                libc::sigaction(libc::SIGUSR2, std::ptr::null(), &mut ignored),
+                0
+            );
+            assert_eq!(ignored.sa_sigaction, libc::SIG_IGN);
+            assert_eq!(rless_signal(-1, libc::SIG_DFL), libc::SIG_ERR);
+            assert_eq!(
+                libc::sigaction(libc::SIGUSR2, &original, std::ptr::null_mut()),
+                0
+            );
+        }
+    }
 }
 
 pub(crate) fn take_interrupt() -> bool {

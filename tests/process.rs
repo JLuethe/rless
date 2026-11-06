@@ -138,3 +138,42 @@ fn an_inherited_ignored_sigpipe_stays_ignored() {
     assert_eq!(result.status.code(), Some(1));
     assert_eq!(result.stderr, b"rless: write error\n");
 }
+
+#[test]
+fn lessmsg_rejects_mismatched_native_format_conversions_before_use() {
+    let work = Work::new();
+    for (index, replacement) in [
+        "unknown_action_X %p %p %p %p %p %p %p %p\n",
+        "unknown_action_X %s %s %s %s %s %s %s %s\n",
+        "unknown_action_X %n\n",
+        "unknown_action_X %1$s\n",
+        "unknown_action_X %*s\n",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let message_path = work.0.join(format!("messages-{index}"));
+        std::fs::write(&message_path, replacement).unwrap();
+        for secure in [false, true] {
+            let mut command = work.command();
+            command
+                .env("LESSMSG", &message_path)
+                .env("LESSKEY_CONTENT", "x definitely-not-an-action");
+            if secure {
+                command
+                    .env("LESSSECURE", "1")
+                    .env("LESSSECURE_ALLOW", "lesskey");
+            }
+            let output = command.arg("--").arg("missing").output().unwrap();
+            assert!(output.status.code().is_some(), "{replacement:?}");
+            let diagnostics = [output.stdout, output.stderr].concat();
+            assert!(
+                diagnostics
+                    .windows(b"invalid message format placeholders".len())
+                    .any(|window| window == b"invalid message format placeholders"),
+                "{replacement:?}: {diagnostics:?}"
+            );
+            assert!(!diagnostics.windows(2).any(|window| window == b"0x"));
+        }
+    }
+}

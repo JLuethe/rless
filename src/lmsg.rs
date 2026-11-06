@@ -3,6 +3,8 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::ffi::CStr;
+use std::sync::OnceLock;
 extern "C" {
     fn free(ptr: *mut ::core::ffi::c_void);
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
@@ -2502,6 +2504,58 @@ unsafe extern "C" fn lmsg_char(
     }
     return mp;
 }
+// Keep the conversion spelling and order of each built-in message. Some
+// consumers pass these bytes to native variadic functions; accepting a new
+// conversion would let a translation read or write an unprovided argument.
+static DEFAULT_FORMATS: OnceLock<Vec<Option<Vec<Vec<u8>>>>> = OnceLock::new();
+
+fn format_signature(bytes: &[u8]) -> Option<Vec<Vec<u8>>> {
+    let mut conversions = Vec::new();
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] != b'%' {
+            index += 1;
+            continue;
+        }
+        let begin = index;
+        index += 1;
+        if index >= bytes.len() {
+            return None;
+        }
+        if bytes[index] == b'%' {
+            index += 1;
+        } else {
+            while index < bytes.len() && !bytes[index].is_ascii_alphabetic() {
+                if bytes[index] == b'%' || bytes[index] == 0 {
+                    return None;
+                }
+                index += 1;
+            }
+            if index == bytes.len() {
+                return None;
+            }
+            index += 1;
+        }
+        conversions.push(bytes[begin..index].to_vec());
+    }
+    Some(conversions)
+}
+
+unsafe fn default_formats() -> &'static [Option<Vec<Vec<u8>>>] {
+    DEFAULT_FORMATS.get_or_init(|| {
+        (0..340)
+            .map(|id| {
+                let ptr = lmsgs[id];
+                if ptr.is_null() {
+                    Some(Vec::new())
+                } else {
+                    format_signature(CStr::from_ptr(ptr).to_bytes())
+                }
+            })
+            .collect()
+    })
+}
+
 unsafe extern "C" fn lmsg_line(
     mut line: *mut ::core::ffi::c_char,
     mut line_size: size_t,
@@ -2550,6 +2604,19 @@ unsafe extern "C" fn lmsg_line(
     {
         mp = lmsg_char(mp, line, line_size, fd, xbuf, lmsg_file, linenum);
     }
+    if id.0 != lessmsg_id::LM_HELP.0 {
+        let bytes = std::slice::from_raw_parts(xbuf_char_data(xbuf).cast::<u8>(), (*xbuf).end);
+        if bytes.contains(&0)
+            || format_signature(bytes).as_ref() != default_formats()[id.0 as usize].as_ref()
+        {
+            lmsg_error(
+                b"invalid message format placeholders\0".as_ptr().cast(),
+                lmsg_file,
+                *linenum,
+            );
+            return lbool::LFALSE;
+        }
+    }
     msg = saven(xbuf_char_data(xbuf), (*xbuf).end);
     if id.0 == lessmsg_id::LM_HELP.0 {
         if owned_help {
@@ -2584,6 +2651,7 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     let mut parg: PARG = parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
     };
+    default_formats();
     if owned_help {
         free(help_data.cast());
         owned_help = false;
@@ -2623,6 +2691,39 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     }
     xbuf_deinit(&raw mut xbuf);
     fclose(fd);
+}
+
+#[cfg(test)]
+mod format_tests {
+    use super::*;
+
+    #[test]
+    fn every_builtin_message_has_a_parseable_format_signature() {
+        let signatures = unsafe { default_formats() };
+        assert_eq!(signatures.len(), 340);
+        for (id, signature) in signatures.iter().enumerate() {
+            assert!(
+                signature.is_some(),
+                "invalid built-in message format at ID {id}"
+            );
+        }
+    }
+
+    #[test]
+    fn extra_or_changed_native_conversions_are_rejected() {
+        let expected = format_signature(b"unknown action: \"%s\"").unwrap();
+        assert_eq!(format_signature(b"action: \"%s\"").unwrap(), expected);
+        for bytes in [
+            b"%p".as_slice(),
+            b"%s %p",
+            b"%s %n",
+            b"%1$s",
+            b"%*s",
+            b"%s %s",
+        ] {
+            assert_ne!(format_signature(bytes).as_ref(), Some(&expected));
+        }
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lmsg(mut id: lessmsg_id) -> *const ::core::ffi::c_char {
