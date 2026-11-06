@@ -4,6 +4,10 @@
 
 use ::c2rust_bitfields;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::{
+    ffi::{CStr, CString},
+    os::fd::{AsRawFd, FromRawFd, OwnedFd},
+};
 
 static HISTORY_ERROR_REPORTED: AtomicBool = AtomicBool::new(false);
 use ::libc;
@@ -2064,6 +2068,191 @@ unsafe fn history_save_error() {
         error(c"rless: cannot save history".as_ptr(), std::ptr::null());
     }
 }
+
+struct HistoryTemp {
+    directory: OwnedFd,
+    temporary: CString,
+    destination: CString,
+    fd: libc::c_int,
+    renamed: bool,
+}
+
+impl Drop for HistoryTemp {
+    fn drop(&mut self) {
+        unsafe {
+            if !self.renamed {
+                libc::unlinkat(self.directory.as_raw_fd(), self.temporary.as_ptr(), 0);
+            }
+        }
+    }
+}
+
+unsafe fn create_history_temp(path: *const libc::c_char) -> Option<HistoryTemp> {
+    let bytes = CStr::from_ptr(path).to_bytes();
+    let (parent, basename): (&[u8], &[u8]) = match bytes.iter().rposition(|byte| *byte == b'/') {
+        Some(0) => (b"/", &bytes[1..]),
+        Some(index) => (&bytes[..index], &bytes[index + 1..]),
+        None => (b".", bytes),
+    };
+    if basename.is_empty() || basename == b"." || basename == b".." {
+        return None;
+    }
+    let parent = CString::new(parent).ok()?;
+    let destination = CString::new(basename).ok()?;
+    let dirfd = libc::open(
+        parent.as_ptr(),
+        libc::O_RDONLY | libc::O_DIRECTORY | libc::O_NOFOLLOW | libc::O_CLOEXEC,
+    );
+    if dirfd < 0 {
+        return None;
+    }
+    let directory = OwnedFd::from_raw_fd(dirfd);
+    let mut dir_stat: libc::stat = std::mem::zeroed();
+    if libc::fstat(dirfd, &mut dir_stat) != 0 {
+        return None;
+    }
+    let private_directory = dir_stat.st_uid == libc::geteuid() && dir_stat.st_mode & 0o022 == 0;
+    let sticky_directory = dir_stat.st_mode & libc::S_ISVTX != 0
+        && (dir_stat.st_uid == libc::geteuid() || dir_stat.st_uid == 0);
+    if !private_directory && !sticky_directory {
+        return None;
+    }
+    for _ in 0..8 {
+        let mut random = [0u8; 16];
+        let mut filled = 0;
+        while filled < random.len() {
+            let count = libc::getrandom(
+                random[filled..].as_mut_ptr().cast(),
+                random.len() - filled,
+                0,
+            );
+            if count < 0 && *libc::__errno_location() == libc::EINTR {
+                continue;
+            }
+            if count <= 0 {
+                return None;
+            }
+            filled += count as usize;
+        }
+        let capacity = basename.len().checked_add(34)?;
+        let mut name = Vec::new();
+        name.try_reserve_exact(capacity).ok()?;
+        name.push(b'.');
+        name.extend_from_slice(basename);
+        name.push(b'.');
+        const HEX: &[u8; 16] = b"0123456789abcdef";
+        for byte in random {
+            name.push(HEX[(byte >> 4) as usize]);
+            name.push(HEX[(byte & 15) as usize]);
+        }
+        let temporary = CString::new(name).ok()?;
+        let fd = libc::openat(
+            directory.as_raw_fd(),
+            temporary.as_ptr(),
+            libc::O_WRONLY | libc::O_CREAT | libc::O_EXCL | libc::O_NOFOLLOW | libc::O_CLOEXEC,
+            0o600,
+        );
+        if fd < 0 && *libc::__errno_location() == libc::EEXIST {
+            continue;
+        }
+        if fd < 0 {
+            return None;
+        }
+        let mut stat: libc::stat = std::mem::zeroed();
+        if libc::fstat(fd, &mut stat) != 0
+            || stat.st_mode & libc::S_IFMT != libc::S_IFREG
+            || stat.st_uid != libc::geteuid()
+            || stat.st_nlink != 1
+        {
+            libc::close(fd);
+            libc::unlinkat(directory.as_raw_fd(), temporary.as_ptr(), 0);
+            return None;
+        }
+        return Some(HistoryTemp {
+            directory,
+            temporary,
+            destination,
+            fd,
+            renamed: false,
+        });
+    }
+    None
+}
+
+#[cfg(test)]
+mod history_temp_tests {
+    use super::create_history_temp;
+    use std::ffi::CString;
+    use std::os::fd::AsRawFd;
+    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::fs::{symlink, PermissionsExt};
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+
+    #[test]
+    fn history_temp_replaces_only_the_destination_link_and_cleans_up() {
+        let directory = std::env::temp_dir().join(format!(
+            "rless-history-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        let victim = directory.join("victim");
+        std::fs::write(&victim, b"protected").unwrap();
+        let history = directory.join("history");
+        symlink(&victim, &history).unwrap();
+        let predictable = directory.join("history.XXXXXX");
+        symlink(&victim, &predictable).unwrap();
+        let path = CString::new(history.as_os_str().as_bytes()).unwrap();
+        let mut temp = unsafe { create_history_temp(path.as_ptr()) }.unwrap();
+        assert_ne!(temp.temporary.as_bytes(), b"history.XXXXXX");
+        let flags = unsafe { libc::fcntl(temp.fd, libc::F_GETFD) };
+        assert_ne!(flags & libc::FD_CLOEXEC, 0);
+        assert_eq!(
+            unsafe { libc::write(temp.fd, b"new".as_ptr().cast(), 3) },
+            3
+        );
+        assert_eq!(unsafe { libc::fsync(temp.fd) }, 0);
+        assert_eq!(unsafe { libc::close(temp.fd) }, 0);
+        assert_eq!(
+            unsafe {
+                libc::renameat(
+                    temp.directory.as_raw_fd(),
+                    temp.temporary.as_ptr(),
+                    temp.directory.as_raw_fd(),
+                    temp.destination.as_ptr(),
+                )
+            },
+            0
+        );
+        temp.renamed = true;
+        drop(temp);
+        assert_eq!(std::fs::read(&victim).unwrap(), b"protected");
+        assert_eq!(std::fs::read(&history).unwrap(), b"new");
+        assert!(std::fs::symlink_metadata(&predictable)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        assert_eq!(
+            std::fs::metadata(&history).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+
+        let temp = unsafe { create_history_temp(path.as_ptr()) }.unwrap();
+        let transient = directory.join(std::ffi::OsStr::from_bytes(temp.temporary.as_bytes()));
+        assert!(transient.exists());
+        assert_eq!(unsafe { libc::close(temp.fd) }, 0);
+        drop(temp);
+        assert!(!transient.exists());
+
+        std::fs::set_permissions(&directory, std::fs::Permissions::from_mode(0o777)).unwrap();
+        assert!(unsafe { create_history_temp(path.as_ptr()) }.is_none());
+        std::fs::set_permissions(&directory, std::fs::Permissions::from_mode(0o700)).unwrap();
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn save_cmdhist() {
     let mut histname: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -2085,30 +2274,15 @@ pub unsafe extern "C" fn save_cmdhist() {
     if histname.is_null() {
         return;
     }
-    let mut template = ::std::ffi::CStr::from_ptr(histname).to_bytes().to_vec();
-    if template.is_empty() {
+    let Some(mut history_temp) = create_history_temp(histname) else {
         history_save_error();
         free(histname as *mut ::core::ffi::c_void);
         return;
-    }
-    template.extend_from_slice(b".XXXXXX\0");
-    // save() gives mkostemp a writable C-owned path; it chooses a fresh name
-    // beside the destination and atomically creates a mode-0600 regular file.
-    let tempname = save(template.as_ptr().cast());
-    let fd = mkostemp(tempname, libc::O_CLOEXEC);
-    if fd < 0 {
-        // No temp file was created: never unlink a guessed or preexisting path.
-        history_save_error();
-        free(tempname as *mut ::core::ffi::c_void);
-        free(histname as *mut ::core::ffi::c_void);
-        return;
-    }
-    let fout = fdopen(fd, b"w\0".as_ptr().cast());
+    };
+    let fout = fdopen(history_temp.fd, b"w\0".as_ptr().cast());
     if fout.is_null() {
-        close(fd);
-        unlink(tempname);
+        close(history_temp.fd);
         history_save_error();
-        free(tempname as *mut ::core::ffi::c_void);
         free(histname as *mut ::core::ffi::c_void);
         return;
     }
@@ -2145,11 +2319,21 @@ pub unsafe extern "C" fn save_cmdhist() {
         lbool(skip_shell as ::core::ffi::c_uint),
     );
     save_marks(fout, b".mark\0".as_ptr() as *const ::core::ffi::c_char);
-    let stream_failed = ferror(fout) != 0;
+    let stream_failed = ferror(fout) != 0 || libc::fflush(fout.cast()) != 0;
+    let sync_failed = !stream_failed && libc::fsync(history_temp.fd) != 0;
     let close_failed = fclose(fout) != 0;
-    let committed = !stream_failed && !close_failed && rename(tempname, histname) == 0;
+    let renamed = !stream_failed
+        && !sync_failed
+        && !close_failed
+        && libc::renameat(
+            history_temp.directory.as_raw_fd(),
+            history_temp.temporary.as_ptr(),
+            history_temp.directory.as_raw_fd(),
+            history_temp.destination.as_ptr(),
+        ) == 0;
+    history_temp.renamed = renamed;
+    let committed = renamed && libc::fsync(history_temp.directory.as_raw_fd()) == 0;
     if !committed {
-        unlink(tempname);
         for entry in modified_entries {
             (*entry).modified = lbool::LTRUE;
         }
@@ -2157,7 +2341,6 @@ pub unsafe extern "C" fn save_cmdhist() {
     } else {
         HISTORY_ERROR_REPORTED.store(false, Ordering::Relaxed);
     }
-    free(tempname as *mut ::core::ffi::c_void);
     free(histname as *mut ::core::ffi::c_void);
 }
 
