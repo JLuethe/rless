@@ -179,6 +179,49 @@ fn lessmsg_rejects_mismatched_native_format_conversions_before_use() {
 }
 
 #[test]
+fn invalid_lessmsg_file_does_not_publish_earlier_replacements() {
+    let work = Work::new();
+    let message_path = work.0.join("partially-invalid-messages");
+    for (payload, replacement_expected) in [
+        (b"unknown_action_X REPLACED %s\n".as_slice(), true),
+        (
+            b"unknown_action_X REPLACED %s\nNo_such_option %n\n".as_slice(),
+            false,
+        ),
+    ] {
+        std::fs::write(&message_path, payload).unwrap();
+        for secure in [false, true] {
+            let mut command = work.command();
+            command
+                .env("LESSMSG", &message_path)
+                .env("LESSKEY_CONTENT", "x definitely-not-an-action");
+            if secure {
+                command
+                    .env("LESSSECURE", "1")
+                    .env("LESSSECURE_ALLOW", "lesskey");
+            }
+            let output = command.arg("--").arg("missing").output().unwrap();
+            let diagnostics = [output.stdout, output.stderr].concat();
+            assert_eq!(
+                diagnostics
+                    .windows(b"REPLACED".len())
+                    .any(|w| w == b"REPLACED"),
+                replacement_expected,
+                "{diagnostics:?}"
+            );
+            if !replacement_expected {
+                assert!(diagnostics
+                    .windows(b"invalid message format placeholders".len())
+                    .any(|w| w == b"invalid message format placeholders"));
+                assert!(diagnostics
+                    .windows(b"unknown action".len())
+                    .any(|w| w == b"unknown action"));
+            }
+        }
+    }
+}
+
+#[test]
 fn empty_lessmsg_replacement_does_not_create_a_null_slice() {
     let work = Work::new();
     let message_path = work.0.join("empty-message");

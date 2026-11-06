@@ -4,10 +4,12 @@
 
 use ::c2rust_bitfields;
 use std::ffi::CStr;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::OnceLock;
 extern "C" {
     fn free(ptr: *mut ::core::ffi::c_void);
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn ferror(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn fopen(
         __filename: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
@@ -2379,11 +2381,13 @@ pub static mut size_help_data: ::core::ffi::c_int = 0;
 // literals; only replacements allocated by saven may be released.
 static mut owned_messages: [bool; 340] = [false; 340];
 static mut owned_help: bool = false;
+static LMSG_PARSE_ERRORS: AtomicUsize = AtomicUsize::new(0);
 unsafe extern "C" fn lmsg_error(
     mut err: *const ::core::ffi::c_char,
     mut lmsg_file: *const ::core::ffi::c_char,
     mut linenum: ::core::ffi::c_int,
 ) {
+    LMSG_PARSE_ERRORS.fetch_add(1, Ordering::Relaxed);
     let mut parg: [PARG; 3] = [parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
     }; 3];
@@ -2625,13 +2629,15 @@ unsafe fn default_formats() -> &'static [Option<Vec<Vec<u8>>>] {
     })
 }
 
-unsafe extern "C" fn lmsg_line(
+unsafe fn lmsg_line(
     mut line: *mut ::core::ffi::c_char,
     mut line_size: size_t,
     mut fd: *mut FILE,
     mut xbuf: *mut xbuffer,
     mut lmsg_file: *const ::core::ffi::c_char,
     mut linenum: *mut ::core::ffi::c_int,
+    staged: &mut [*mut ::core::ffi::c_char],
+    staged_help_len: &mut ::core::ffi::c_int,
 ) -> lbool {
     let mut id: lessmsg_id = lessmsg_id::LM_NULL;
     let mut msg: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -2692,19 +2698,21 @@ unsafe extern "C" fn lmsg_line(
     }
     msg = saven(xbuf_char_data(xbuf), (*xbuf).end);
     if id.0 == lessmsg_id::LM_HELP.0 {
-        if owned_help {
-            free(help_data.cast());
+        if (*xbuf).end > ::core::ffi::c_int::MAX as usize {
+            free(msg.cast());
+            lmsg_error(c"help text too large".as_ptr(), lmsg_file, *linenum);
+            return lbool::LFALSE;
         }
-        help_data = msg;
-        owned_help = true;
-        size_help_data = (*xbuf).end as ::core::ffi::c_int;
+        *staged_help_len = (*xbuf).end as ::core::ffi::c_int;
     } else {
-        if owned_messages[id.0 as usize] {
-            free(lmsgs[id.0 as usize].cast());
-        }
-        lmsgs[id.0 as usize] = msg;
-        owned_messages[id.0 as usize] = true;
+        // Duplicates replace only the pending value. Published pointers stay
+        // valid until the whole translation file has parsed successfully.
     }
+    let previous = staged[id.0 as usize];
+    if !previous.is_null() {
+        free(previous.cast());
+    }
+    staged[id.0 as usize] = msg;
     return lbool::LTRUE;
 }
 #[no_mangle]
@@ -2725,12 +2733,10 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
     };
     default_formats();
-    if owned_help {
-        free(help_data.cast());
-        owned_help = false;
+    if help_data.is_null() {
+        help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
+        size_help_data = size_helpdata;
     }
-    help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
-    size_help_data = size_helpdata;
     if isnullenv(lmsg_file).0 != 0 {
         return;
     }
@@ -2743,6 +2749,10 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
         );
         return;
     }
+    LMSG_PARSE_ERRORS.store(0, Ordering::Relaxed);
+    let mut staged = vec![::core::ptr::null_mut(); 340];
+    let mut staged_help_len = 0;
+    let mut valid = true;
     xbuf_init(&raw mut xbuf);
     linenum = 0 as ::core::ffi::c_int;
     while !fgets(
@@ -2753,17 +2763,61 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     .is_null()
     {
         linenum += 1;
-        lmsg_line(
+        if lmsg_line(
             &raw mut line as *mut ::core::ffi::c_char,
             ::core::mem::size_of::<[::core::ffi::c_char; 512]>(),
             fd,
             &raw mut xbuf,
             lmsg_file,
             &raw mut linenum,
-        );
+            &mut staged,
+            &mut staged_help_len,
+        )
+        .0 == 0
+        {
+            valid = false;
+        }
+    }
+    if ferror(fd) != 0 {
+        lmsg_error(c"read error".as_ptr(), lmsg_file, linenum);
+        valid = false;
     }
     xbuf_deinit(&raw mut xbuf);
-    fclose(fd);
+    if fclose(fd) != 0 {
+        lmsg_error(c"close error".as_ptr(), lmsg_file, linenum);
+        valid = false;
+    }
+    valid &= LMSG_PARSE_ERRORS.load(Ordering::Relaxed) == 0;
+    if valid {
+        if owned_help {
+            free(help_data.cast());
+            owned_help = false;
+            help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
+            size_help_data = size_helpdata;
+        }
+        for (id, replacement) in staged.into_iter().enumerate() {
+            if replacement.is_null() {
+                continue;
+            }
+            if id == lessmsg_id::LM_HELP.0 as usize {
+                help_data = replacement;
+                size_help_data = staged_help_len;
+                owned_help = true;
+            } else {
+                if owned_messages[id] {
+                    free(lmsgs[id].cast());
+                }
+                lmsgs[id] = replacement;
+                owned_messages[id] = true;
+            }
+        }
+    } else {
+        for replacement in staged {
+            if !replacement.is_null() {
+                free(replacement.cast());
+            }
+        }
+    }
 }
 
 #[cfg(test)]
