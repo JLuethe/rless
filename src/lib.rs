@@ -27,6 +27,7 @@ pub mod cvt;
 pub mod decode;
 pub mod edit;
 pub mod evar;
+mod fifo_open;
 pub mod filename;
 pub mod forwback;
 pub mod help;

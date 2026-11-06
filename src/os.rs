@@ -225,6 +225,11 @@ pub unsafe extern "C" fn supports_ctrl_x() -> lbool {
 pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
     let _waiting = crate::runtime::IoWait::new();
     loop {
+        // A termination may have been collected by the caller after the
+        // previous wait ended. Do not block with only `sigs` holding it.
+        if sigs & 64 != 0 {
+            return -2;
+        }
         if crate::runtime::take_interrupt() {
             crate::signal::collect_pending_signals();
             return if fd != tty && sigs & 7 == 0 { -3 } else { -2 };
@@ -286,9 +291,27 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
         if crate::fault::hit(crate::fault::Site::Open) {
             return -1;
         }
-        let result = open(filename, flags);
+        let result = if flags == libc::O_RDONLY {
+            crate::fifo_open::open_pinned_input(filename, flags)
+        } else {
+            open(filename, flags)
+        };
         if result < 0 && *__errno_location() == libc::EINTR {
             continue;
+        }
+        if result >= 0 {
+            crate::signal::collect_pending_signals();
+            if sigs != 0 {
+                let cancel = sigs & 3 != 0;
+                if cancel {
+                    libc::close(result);
+                }
+                psignals();
+                if cancel {
+                    *__errno_location() = libc::EINTR;
+                    return -1;
+                }
+            }
         }
         return result;
     }
