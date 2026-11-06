@@ -143,13 +143,13 @@ unsafe extern "C" fn check_poll(
     mut fd: ::core::ffi::c_int,
     mut tty_0: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
-    let mut poller: [pollfd; 2] = [
-        pollfd {
+    let mut poller: [libc::pollfd; 2] = [
+        libc::pollfd {
             fd: fd,
             events: 0x1 as ::core::ffi::c_short,
             revents: 0 as ::core::ffi::c_short,
         },
-        pollfd {
+        libc::pollfd {
             fd: tty_0,
             events: 0x1 as ::core::ffi::c_short,
             revents: 0 as ::core::ffi::c_short,
@@ -172,7 +172,14 @@ unsafe extern "C" fn check_poll(
     if any_data.0 == 0 {
         return 0 as ::core::ffi::c_int;
     }
-    poll(&raw mut poller as *mut pollfd, 2 as nfds_t, timeout);
+    let ready = crate::runtime::poll_interruptible(poller.as_mut_ptr(), 2 as nfds_t, timeout);
+    if ready < 0 {
+        return if *libc::__errno_location() == libc::EINTR {
+            -3
+        } else {
+            -1
+        };
+    }
     if poller[1usize].revents as ::core::ffi::c_int & 0x1 as ::core::ffi::c_int != 0 {
         let mut ch: ::core::ffi::c_int = getchr();
         if ch < 0 as ::core::ffi::c_int || ch == intr_char as ::core::ffi::c_int {

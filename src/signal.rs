@@ -3,7 +3,7 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::libc;
-use std::sync::atomic::{AtomicBool, AtomicU32, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};
 extern "C" {
     fn setitimer(
         which: libc::c_int,
@@ -53,6 +53,7 @@ static PENDING: AtomicU32 = AtomicU32::new(0);
 static USER_COMMANDS: AtomicUsize = AtomicUsize::new(0);
 static USER_COMMANDS_OVERFLOW: AtomicU32 = AtomicU32::new(0);
 static TIMER_ACTIVE: AtomicBool = AtomicBool::new(false);
+static TIMER_DEADLINE_NS: AtomicU64 = AtomicU64::new(0);
 // Main-thread owned. Asynchronous handlers never access this snapshot.
 static mut STARTUP_ACTIONS: std::mem::MaybeUninit<[libc::sigaction; 8]> =
     std::mem::MaybeUninit::uninit();
@@ -66,6 +67,46 @@ fn notify(bit: u32) {
 
 pub(crate) fn has_pending_notifications() -> bool {
     PENDING.load(Ordering::SeqCst) != 0
+}
+
+unsafe fn monotonic_ns() -> Result<u64, libc::c_int> {
+    let mut time: libc::timespec = std::mem::zeroed();
+    if libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut time) != 0 {
+        return Err(*libc::__errno_location());
+    }
+    if time.tv_sec < 0 || !(0..1_000_000_000).contains(&time.tv_nsec) {
+        return Err(libc::EOVERFLOW);
+    }
+    (time.tv_sec as u64)
+        .checked_mul(1_000_000_000)
+        .and_then(|seconds| seconds.checked_add(time.tv_nsec as u64))
+        .ok_or(libc::EOVERFLOW)
+}
+
+/// A real timer expiry can be coalesced behind an already-pending external
+/// SIGALRM. Bound every blocking wait by the absolute monotonic deadline.
+pub(crate) unsafe fn timer_wait_timeout() -> Result<Option<libc::timespec>, libc::c_int> {
+    if !TIMER_ACTIVE.load(Ordering::SeqCst) {
+        return Ok(None);
+    }
+    let deadline = TIMER_DEADLINE_NS.load(Ordering::SeqCst);
+    if deadline == 0 {
+        return Ok(None);
+    }
+    let now = monotonic_ns()?;
+    if now >= deadline {
+        TIMER_ACTIVE.store(false, Ordering::SeqCst);
+        notify(ALARM);
+        return Ok(Some(libc::timespec {
+            tv_sec: 0,
+            tv_nsec: 0,
+        }));
+    }
+    let remaining = deadline - now;
+    Ok(Some(libc::timespec {
+        tv_sec: (remaining / 1_000_000_000) as libc::time_t,
+        tv_nsec: (remaining % 1_000_000_000) as libc::c_long,
+    }))
 }
 
 unsafe extern "C" fn u_interrupt(_: ::core::ffi::c_int) {
@@ -110,6 +151,10 @@ unsafe extern "C" fn sigusr1(_: ::core::ffi::c_int) {
 /// Transfer asynchronous notifications to the main-thread legacy event mask.
 /// No application state is accessed from the handlers themselves.
 pub unsafe fn collect_pending_signals() {
+    if timer_wait_timeout().is_err() {
+        quit(1);
+        libc::_exit(1);
+    }
     let delivered = PENDING.swap(0, Ordering::SeqCst);
     if delivered & INTERRUPT != 0 {
         lbell();
@@ -154,13 +199,17 @@ unsafe fn transition_mstimer_masked(
     if milliseconds != 0 && TIMER_ACTIVE.load(Ordering::SeqCst) {
         return Err(libc::EBUSY);
     }
+    let old_deadline = TIMER_DEADLINE_NS.load(Ordering::SeqCst);
+    let overdue = old_deadline != 0 && monotonic_ns()? >= old_deadline;
     TIMER_ACTIVE.store(false, Ordering::SeqCst);
+    TIMER_DEADLINE_NS.store(0, Ordering::SeqCst);
     let zero: libc::itimerval = std::mem::zeroed();
     if setitimer(libc::ITIMER_REAL, &zero, std::ptr::null_mut()) != 0 {
         return Err(*libc::__errno_location());
     }
-    let mut fired =
-        PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM != 0 || sigs & ALARM as i32 != 0;
+    let pending_alarm = PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM != 0;
+    let collected_alarm = sigs & ALARM as i32 != 0;
+    let mut fired = overdue || pending_alarm || collected_alarm;
     sigs &= !(ALARM as i32);
     let timeout = libc::timespec {
         tv_sec: 0,
@@ -191,6 +240,9 @@ unsafe fn transition_mstimer_masked(
     if seconds > libc::time_t::MAX as libc::c_ulong {
         return Err(libc::EOVERFLOW);
     }
+    let deadline = monotonic_ns()?
+        .checked_add(milliseconds.checked_mul(1_000_000).ok_or(libc::EOVERFLOW)?)
+        .ok_or(libc::EOVERFLOW)?;
     let timer = libc::itimerval {
         it_interval: libc::timeval {
             tv_sec: 0,
@@ -201,9 +253,11 @@ unsafe fn transition_mstimer_masked(
             tv_usec: ((milliseconds % 1000) * 1000) as libc::suseconds_t,
         },
     };
+    TIMER_DEADLINE_NS.store(deadline, Ordering::SeqCst);
     TIMER_ACTIVE.store(true, Ordering::SeqCst);
     if setitimer(libc::ITIMER_REAL, &timer, std::ptr::null_mut()) != 0 {
         TIMER_ACTIVE.store(false, Ordering::SeqCst);
+        TIMER_DEADLINE_NS.store(0, Ordering::SeqCst);
         return Err(*libc::__errno_location());
     }
     Ok(false)
@@ -610,6 +664,47 @@ mod notification_tests {
             sigalarm(libc::SIGALRM, &mut info, std::ptr::null_mut());
             assert_eq!(PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM, ALARM);
             TIMER_ACTIVE.store(false, Ordering::SeqCst);
+        }
+    }
+
+    #[test]
+    fn blocked_external_alarm_cannot_hide_the_monotonic_deadline() {
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
+        unsafe {
+            let mut alarm_set: libc::sigset_t = std::mem::zeroed();
+            let mut old_mask: libc::sigset_t = std::mem::zeroed();
+            assert_eq!(libc::sigemptyset(&mut alarm_set), 0);
+            assert_eq!(libc::sigaddset(&mut alarm_set, libc::SIGALRM), 0);
+            assert_eq!(
+                libc::sigprocmask(libc::SIG_BLOCK, &alarm_set, &mut old_mask),
+                0
+            );
+            assert_eq!(libc::raise(libc::SIGALRM), 0);
+            let mut pending: libc::sigset_t = std::mem::zeroed();
+            assert_eq!(libc::sigpending(&mut pending), 0);
+            assert_eq!(libc::sigismember(&pending, libc::SIGALRM), 1);
+            let mut pipe = [-1; 2];
+            assert_eq!(libc::pipe2(pipe.as_mut_ptr(), libc::O_CLOEXEC), 0);
+            PENDING.store(0, Ordering::SeqCst);
+            TIMER_DEADLINE_NS.store(monotonic_ns().unwrap() + 20_000_000, Ordering::SeqCst);
+            TIMER_ACTIVE.store(true, Ordering::SeqCst);
+            let started = monotonic_ns().unwrap();
+            let mut byte = 0u8;
+            let result = crate::runtime::read_interruptible(pipe[0], &mut byte, 1);
+            let elapsed = monotonic_ns().unwrap() - started;
+            assert_eq!(result, -1);
+            assert_eq!(*libc::__errno_location(), libc::EINTR);
+            assert!(
+                elapsed >= 10_000_000 && elapsed < 1_000_000_000,
+                "{elapsed}"
+            );
+            assert_eq!(transition_mstimer(0), Ok(true));
+            assert_eq!(libc::close(pipe[0]), 0);
+            assert_eq!(libc::close(pipe[1]), 0);
+            assert_eq!(
+                libc::sigprocmask(libc::SIG_SETMASK, &old_mask, std::ptr::null_mut()),
+                0
+            );
         }
     }
 }

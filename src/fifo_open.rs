@@ -247,23 +247,40 @@ unsafe fn block_owner_signals() -> Result<libc::sigset_t, libc::c_int> {
 
 unsafe fn wait_socket(socket: libc::c_int) -> Result<(), libc::c_int> {
     let saved = block_owner_signals()?;
-    let result = if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
-        || crate::signal::has_pending_notifications()
-        || crate::signal::sigs != 0
-    {
-        Err(libc::EINTR)
-    } else {
+    let result = (|| -> Result<(), libc::c_int> {
+        if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+            || crate::signal::has_pending_notifications()
+            || crate::signal::sigs != 0
+        {
+            return Err(libc::EINTR);
+        }
+        let timeout = crate::signal::timer_wait_timeout()?;
+        if timeout
+            .as_ref()
+            .is_some_and(|value| value.tv_sec == 0 && value.tv_nsec == 0)
+        {
+            return Err(libc::EINTR);
+        }
         let mut descriptor = libc::pollfd {
             fd: socket,
             events: libc::POLLIN,
             revents: 0,
         };
-        if libc::ppoll(&mut descriptor, 1, std::ptr::null(), &saved) < 0 {
-            Err(*libc::__errno_location())
+        let timeout_ptr = timeout
+            .as_ref()
+            .map_or(std::ptr::null(), |value| value as *const libc::timespec);
+        let ready = libc::ppoll(&mut descriptor, 1, timeout_ptr, &saved);
+        if ready < 0 {
+            return Err(*libc::__errno_location());
+        }
+        let due = crate::signal::timer_wait_timeout()?
+            .is_some_and(|value| value.tv_sec == 0 && value.tv_nsec == 0);
+        if ready == 0 || due {
+            Err(libc::EINTR)
         } else {
             Ok(())
         }
-    };
+    })();
     if libc::sigprocmask(libc::SIG_SETMASK, &saved, std::ptr::null_mut()) != 0 {
         crate::pager::quit(1);
         libc::_exit(1);
