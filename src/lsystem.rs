@@ -44,7 +44,7 @@ extern "C" {
     fn error(fmt: *const ::core::ffi::c_char, parg: *const PARG);
     fn position(sindex: ::core::ffi::c_int) -> POSITION;
     fn lwinch(r#type: ::core::ffi::c_int);
-    fn init_signals(on: lbool);
+    fn init_signals(on: lbool) -> ::core::ffi::c_int;
     fn signal(__sig: ::core::ffi::c_int, __handler: __sighandler_t) -> __sighandler_t;
     static mut sigs: ::core::ffi::c_int;
 }
@@ -489,7 +489,10 @@ unsafe fn handoff_error(message: &'static [u8]) {
 }
 
 unsafe fn resume_after_handoff(save_ifile: *mut ::core::ffi::c_void) {
-    init_signals(lbool::LTRUE);
+    if init_signals(lbool::LTRUE) != 0 {
+        handoff_error(b"rless: cannot restore signal handlers after shell\n");
+        ::libc::_exit(1);
+    }
     raw_mode(lbool::LTRUE);
     term_init();
     screen_trashed();
@@ -527,7 +530,12 @@ pub unsafe extern "C" fn lsystem(
     term_deinit();
     flush();
     raw_mode(lbool::LFALSE);
-    init_signals(lbool::LFALSE);
+    if init_signals(lbool::LFALSE) != 0 {
+        close(inp);
+        resume_after_handoff(save_ifile);
+        handoff_error(b"rless: cannot prepare signal handlers for shell\n");
+        return;
+    }
     let tty = crate::ttyin::open_tty_with_ownership();
     let tty_fd = tty.fd;
     if tty_fd < 0 || !replace_stdin(tty_fd) {
@@ -603,7 +611,10 @@ pub unsafe extern "C" fn lsystem(
         ::libc::_exit(1);
     }
     close(inp);
-    init_signals(lbool::LTRUE);
+    if init_signals(lbool::LTRUE) != 0 {
+        handoff_error(b"rless: cannot restore signal handlers after shell\n");
+        ::libc::_exit(1);
+    }
     raw_mode(lbool::LTRUE);
     print_done_msg(donemsg);
     term_init();
@@ -641,7 +652,13 @@ unsafe extern "C" fn pipe_data(
     term_deinit();
     flush();
     raw_mode(lbool::LFALSE);
-    init_signals(lbool::LFALSE);
+    if init_signals(lbool::LFALSE) != 0 {
+        pclose(f);
+        raw_mode(lbool::LTRUE);
+        term_init();
+        handoff_error(b"rless: cannot prepare signal handlers for pipe\n");
+        return -1;
+    }
     signal(13 as ::core::ffi::c_int, libc::SIG_IGN);
     c = -1 as ::core::ffi::c_int;
     while epos == -1 as ::core::ffi::c_int as POSITION || {
@@ -668,7 +685,10 @@ unsafe extern "C" fn pipe_data(
     }
     pclose(f);
     signal(13 as ::core::ffi::c_int, libc::SIG_DFL);
-    init_signals(lbool::LTRUE);
+    if init_signals(lbool::LTRUE) != 0 {
+        handoff_error(b"rless: cannot restore signal handlers after pipe\n");
+        ::libc::_exit(1);
+    }
     raw_mode(lbool::LTRUE);
     print_done_msg(donemsg);
     term_init();

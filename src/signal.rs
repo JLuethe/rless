@@ -96,38 +96,108 @@ pub unsafe fn collect_pending_signals() {
     }
     sigs |= delivered as i32;
 }
+
+#[derive(Clone, Copy)]
+enum Disposition {
+    Default,
+    Ignore,
+    Handler(unsafe extern "C" fn(libc::c_int)),
+}
+
+impl Disposition {
+    fn native(self) -> libc::sighandler_t {
+        match self {
+            Self::Default => libc::SIG_DFL,
+            Self::Ignore => libc::SIG_IGN,
+            Self::Handler(handler) => handler as libc::sighandler_t,
+        }
+    }
+}
+
+// Installation is a single main-thread transaction. Signals in the set stay
+// masked until every disposition succeeds, or all changed actions are restored.
+unsafe fn install_batch(entries: &[(libc::c_int, Disposition)]) -> Result<(), libc::c_int> {
+    if entries.len() > 8 {
+        return Err(libc::EINVAL);
+    }
+    let mut block: libc::sigset_t = std::mem::zeroed();
+    let mut saved_mask: libc::sigset_t = std::mem::zeroed();
+    libc::sigemptyset(&mut block);
+    for (number, _) in entries {
+        if *number > 0 {
+            libc::sigaddset(&mut block, *number);
+        }
+    }
+    if libc::sigprocmask(libc::SIG_BLOCK, &block, &mut saved_mask) != 0 {
+        return Err(*libc::__errno_location());
+    }
+    let mut previous: [libc::sigaction; 8] = std::mem::zeroed();
+    let mut installed = 0;
+    for (number, disposition) in entries {
+        let mut action: libc::sigaction = std::mem::zeroed();
+        action.sa_sigaction = disposition.native();
+        libc::sigemptyset(&mut action.sa_mask);
+        action.sa_flags = 0;
+        if libc::sigaction(*number, &action, &mut previous[installed]) != 0 {
+            let error = *libc::__errno_location();
+            for index in (0..installed).rev() {
+                libc::sigaction(entries[index].0, &previous[index], std::ptr::null_mut());
+            }
+            libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut());
+            return Err(error);
+        }
+        installed += 1;
+    }
+    if libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0 {
+        let error = *libc::__errno_location();
+        for index in (0..installed).rev() {
+            libc::sigaction(entries[index].0, &previous[index], std::ptr::null_mut());
+        }
+        libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut());
+        return Err(error);
+    }
+    Ok(())
+}
+
 #[no_mangle]
-pub unsafe extern "C" fn init_signals(mut on: lbool) {
-    if on.0 != 0 {
-        signal(2 as ::core::ffi::c_int, u_interrupt as __sighandler_t);
-        signal(
-            20 as ::core::ffi::c_int,
-            if secure_allow(
-                ((1 as ::core::ffi::c_int) << 10 as ::core::ffi::c_int) as ::core::ffi::c_uint,
-            )
-            .0 == 0
-            {
-                libc::SIG_IGN
-            } else {
-                stop as __sighandler_t
-            },
-        );
-        signal(28 as ::core::ffi::c_int, lwinch as __sighandler_t);
-        signal(3 as ::core::ffi::c_int, libc::SIG_IGN);
-        signal(15 as ::core::ffi::c_int, terminate as __sighandler_t);
-        signal(1 as ::core::ffi::c_int, terminate as __sighandler_t);
-        signal(14 as ::core::ffi::c_int, sigalarm as __sighandler_t);
-        signal(10 as ::core::ffi::c_int, sigusr1 as __sighandler_t);
+pub unsafe extern "C" fn init_signals(on: lbool) -> libc::c_int {
+    let dispositions = if on.0 != 0 {
+        [
+            (libc::SIGINT, Disposition::Handler(u_interrupt)),
+            (
+                libc::SIGTSTP,
+                if secure_allow(1 << 10).0 == 0 {
+                    Disposition::Ignore
+                } else {
+                    Disposition::Handler(stop)
+                },
+            ),
+            (libc::SIGWINCH, Disposition::Handler(lwinch)),
+            (libc::SIGQUIT, Disposition::Ignore),
+            (libc::SIGTERM, Disposition::Handler(terminate)),
+            (libc::SIGHUP, Disposition::Handler(terminate)),
+            (libc::SIGALRM, Disposition::Handler(sigalarm)),
+            (libc::SIGUSR1, Disposition::Handler(sigusr1)),
+        ]
     } else {
-        signal(2 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(20 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(28 as ::core::ffi::c_int, libc::SIG_IGN);
-        signal(3 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(15 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(1 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(14 as ::core::ffi::c_int, libc::SIG_DFL);
-        signal(10 as ::core::ffi::c_int, libc::SIG_DFL);
+        [
+            (libc::SIGINT, Disposition::Default),
+            (libc::SIGTSTP, Disposition::Default),
+            (libc::SIGWINCH, Disposition::Ignore),
+            (libc::SIGQUIT, Disposition::Default),
+            (libc::SIGTERM, Disposition::Default),
+            (libc::SIGHUP, Disposition::Default),
+            (libc::SIGALRM, Disposition::Default),
+            (libc::SIGUSR1, Disposition::Default),
+        ]
     };
+    match install_batch(&dispositions) {
+        Ok(()) => 0,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            -1
+        }
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn psignals() {
@@ -205,6 +275,44 @@ mod notification_tests {
             assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 2);
             assert_eq!(PENDING.load(Ordering::SeqCst), 0);
             sigs = 0;
+        }
+    }
+
+    #[test]
+    fn failed_installation_restores_previous_disposition_and_mask() {
+        unsafe {
+            let mut before: libc::sigaction = std::mem::zeroed();
+            let mut after: libc::sigaction = std::mem::zeroed();
+            let mut old_mask: libc::sigset_t = std::mem::zeroed();
+            let mut new_mask: libc::sigset_t = std::mem::zeroed();
+            assert_eq!(
+                libc::sigaction(libc::SIGURG, std::ptr::null(), &mut before),
+                0
+            );
+            assert_eq!(
+                libc::sigprocmask(libc::SIG_SETMASK, std::ptr::null(), &mut old_mask),
+                0
+            );
+            assert!(install_batch(&[
+                (libc::SIGURG, Disposition::Ignore),
+                (-1, Disposition::Default)
+            ])
+            .is_err());
+            assert_eq!(
+                libc::sigaction(libc::SIGURG, std::ptr::null(), &mut after),
+                0
+            );
+            assert_eq!(after.sa_sigaction, before.sa_sigaction);
+            assert_eq!(
+                libc::sigprocmask(libc::SIG_SETMASK, std::ptr::null(), &mut new_mask),
+                0
+            );
+            for signal in [libc::SIGURG, libc::SIGINT, libc::SIGTERM, libc::SIGUSR1] {
+                assert_eq!(
+                    libc::sigismember(&new_mask, signal),
+                    libc::sigismember(&old_mask, signal)
+                );
+            }
         }
     }
 }

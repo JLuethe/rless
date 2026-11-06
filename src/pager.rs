@@ -84,7 +84,7 @@ extern "C" {
     fn error(fmt: *const ::core::ffi::c_char, parg: *const PARG);
     fn init_prompt();
     fn init_search();
-    fn init_signals(on: lbool);
+    fn init_signals(on: lbool) -> ::core::ffi::c_int;
     fn findtag(tag: *const ::core::ffi::c_char);
     fn tagsearch() -> POSITION;
     fn edit_tagfile() -> ::core::ffi::c_int;
@@ -781,7 +781,10 @@ unsafe fn main_0(
         );
     }
     open_getchr();
-    init_signals(lbool::LTRUE);
+    if init_signals(lbool::LTRUE) != 0 {
+        crate::output::io_error_diagnostic(b"rless: cannot install signal handlers\n");
+        quit(1);
+    }
     less_start_time = get_time();
     if !tagoption.is_null()
         || strcmp(tags, b"-\0".as_ptr() as *const ::core::ffi::c_char) == 0 as ::core::ffi::c_int
