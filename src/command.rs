@@ -1153,7 +1153,10 @@ unsafe extern "C" fn mca_search_char(mut c: ::core::ffi::c_char) -> ::core::ffi:
             clear_bot();
             cmd_putstr(buf);
             flush();
-            c = getcc();
+            c = match read_prompt_char() {
+                Some(c) => c,
+                None => return 1,
+            };
             if c as ::core::ffi::c_int >= '1' as ::core::ffi::c_int
                 && c as ::core::ffi::c_int <= '0' as ::core::ffi::c_int + 5 as ::core::ffi::c_int
             {
@@ -1587,6 +1590,27 @@ pub unsafe extern "C" fn getcc() -> ::core::ffi::c_char {
         },
         b"\n\0".as_ptr() as *const ::core::ffi::c_char,
     );
+}
+
+// A few command prompts act on a character before returning to the main
+// command loop. Dispatch notifications at the same boundary as ordinary
+// commands, while retaining the character across benign notifications.
+unsafe fn read_prompt_char() -> Option<::core::ffi::c_char> {
+    loop {
+        let c = getcc();
+        crate::signal::collect_pending_signals();
+        if sigs == 0 {
+            return Some(c);
+        }
+        let cancelled = sigs & (1 | 2 | 64) != 0;
+        if !cancelled && c != 0 {
+            ungetcc(c);
+        }
+        psignals();
+        if cancelled {
+            return None;
+        }
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn ungetcc(mut c: ::core::ffi::c_char) {
@@ -2661,7 +2685,10 @@ pub unsafe extern "C" fn commands() {
                             optflag = 1 as ::core::ffi::c_int;
                             optgetname = lbool::LFALSE;
                             mca_opt_toggle();
-                            c = getcc();
+                            c = match read_prompt_char() {
+                                Some(c) => c,
+                                None => continue 's_36,
+                            };
                             msg = opt_toggle_disallowed(c as ::core::ffi::c_int);
                             if msg.is_null() {
                                 continue;
@@ -2726,7 +2753,10 @@ pub unsafe extern "C" fn commands() {
                                     ::core::ptr::null_mut::<::core::ffi::c_void>(),
                                     0 as ::core::ffi::c_int,
                                 );
-                                c = getcc();
+                                c = match read_prompt_char() {
+                                    Some(c) => c,
+                                    None => continue 's_36,
+                                };
                                 make_display();
                                 cmd_exec();
                                 if is_erase_char(c).0 != 0 || is_newline_char(c).0 != 0 {
@@ -2752,7 +2782,10 @@ pub unsafe extern "C" fn commands() {
                                 ::core::ptr::null_mut::<::core::ffi::c_void>(),
                                 0 as ::core::ffi::c_int,
                             );
-                            c = getcc();
+                            c = match read_prompt_char() {
+                                Some(c) => c,
+                                None => continue 's_36,
+                            };
                             cmd_exec();
                             if is_erase_char(c).0 != 0 || is_newline_char(c).0 != 0 {
                                 continue 's_36;
@@ -2768,7 +2801,10 @@ pub unsafe extern "C" fn commands() {
                                 ::core::ptr::null_mut::<::core::ffi::c_void>(),
                                 0 as ::core::ffi::c_int,
                             );
-                            c = getcc();
+                            c = match read_prompt_char() {
+                                Some(c) => c,
+                                None => continue 's_36,
+                            };
                             if is_erase_char(c).0 != 0 || is_newline_char(c).0 != 0 {
                                 continue 's_36;
                             }
