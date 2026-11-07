@@ -2,8 +2,9 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
+use crate::signal_events::SignalEvents;
 use ::libc;
-use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 extern "C" {
     fn setitimer(
         which: libc::c_int,
@@ -49,9 +50,7 @@ const RESIZE: u32 = 1 << 3;
 const ALARM: u32 = 1 << 4;
 const USER_COMMAND: u32 = 1 << 5;
 const TERMINATE: u32 = 1 << 6;
-static PENDING: AtomicU32 = AtomicU32::new(0);
-static USER_COMMANDS: AtomicUsize = AtomicUsize::new(0);
-static USER_COMMANDS_OVERFLOW: AtomicU32 = AtomicU32::new(0);
+static EVENTS: SignalEvents = SignalEvents::new();
 static TIMER_ACTIVE: AtomicBool = AtomicBool::new(false);
 static TIMER_DEADLINE_NS: AtomicU64 = AtomicU64::new(0);
 // Main-thread owned. Asynchronous handlers never access this snapshot.
@@ -61,12 +60,12 @@ static mut STARTUP_ACTIONS_READY: bool = false;
 
 #[inline]
 fn notify(bit: u32) {
-    PENDING.fetch_or(bit, Ordering::SeqCst);
+    EVENTS.publish(bit);
     crate::runtime::interrupt_waiting_io();
 }
 
 pub(crate) fn has_pending_notifications() -> bool {
-    PENDING.load(Ordering::SeqCst) != 0
+    EVENTS.has_pending()
 }
 
 pub(crate) unsafe fn pending_quit_status() -> Option<libc::c_int> {
@@ -153,10 +152,8 @@ unsafe extern "C" fn sigusr(mut var: *const ::core::ffi::c_char) {
     ungetsc(cmd);
 }
 unsafe extern "C" fn sigusr1(_: ::core::ffi::c_int) {
-    if USER_COMMANDS.fetch_add(1, Ordering::SeqCst) == usize::MAX {
-        USER_COMMANDS_OVERFLOW.store(1, Ordering::SeqCst);
-    }
-    notify(USER_COMMAND);
+    EVENTS.publish_command(USER_COMMAND);
+    crate::runtime::interrupt_waiting_io();
 }
 
 /// Transfer asynchronous notifications to the main-thread legacy event mask.
@@ -166,7 +163,7 @@ pub unsafe fn collect_pending_signals() {
         quit(1);
         libc::_exit(1);
     }
-    let delivered = PENDING.swap(0, Ordering::SeqCst);
+    let delivered = EVENTS.take_pending();
     if delivered & INTERRUPT != 0 {
         lbell();
     }
@@ -218,7 +215,7 @@ unsafe fn transition_mstimer_masked(
     if setitimer(libc::ITIMER_REAL, &zero, std::ptr::null_mut()) != 0 {
         return Err(*libc::__errno_location());
     }
-    let pending_alarm = PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM != 0;
+    let pending_alarm = EVENTS.clear_pending(ALARM) != 0;
     let collected_alarm = sigs & ALARM as i32 != 0;
     let mut fired = overdue || pending_alarm || collected_alarm;
     sigs &= !(ALARM as i32);
@@ -457,10 +454,10 @@ pub unsafe extern "C" fn psignals() {
         quit(15);
     }
     if tsignals & USER_COMMAND as i32 != 0 {
-        if USER_COMMANDS_OVERFLOW.swap(0, Ordering::SeqCst) != 0 {
+        if EVENTS.take_overflow() {
             quit(1);
         }
-        for _ in 0..USER_COMMANDS.swap(0, Ordering::SeqCst) {
+        for _ in 0..EVENTS.take_commands() {
             sigusr(b"LESS_SIGUSR1\0".as_ptr() as *const ::core::ffi::c_char);
         }
     }
@@ -504,7 +501,7 @@ pub unsafe extern "C" fn psignals() {
             quit(1);
             libc::_exit(1);
         }
-        PENDING.fetch_and(!STOP, Ordering::SeqCst);
+        EVENTS.clear_pending(STOP);
         if libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0 {
             quit(1);
             libc::_exit(1);
@@ -552,8 +549,8 @@ mod notification_tests {
     fn handler_notifications_preserve_command_count_and_coalesce_state_bits() {
         let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
-            assert_eq!(PENDING.swap(0, Ordering::SeqCst), 0);
-            assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 0);
+            assert_eq!(EVENTS.take_pending(), 0);
+            assert_eq!(EVENTS.take_commands(), 0);
             sigs = 0;
             sigusr1(libc::SIGUSR1);
             sigusr1(libc::SIGUSR1);
@@ -562,8 +559,8 @@ mod notification_tests {
             terminate(libc::SIGTERM);
             collect_pending_signals();
             assert_eq!(sigs as u32, USER_COMMAND | RESIZE | TERMINATE);
-            assert_eq!(USER_COMMANDS.swap(0, Ordering::SeqCst), 2);
-            assert_eq!(PENDING.load(Ordering::SeqCst), 0);
+            assert_eq!(EVENTS.take_commands(), 2);
+            assert!(!EVENTS.has_pending());
             sigs = 0;
         }
     }
@@ -572,7 +569,7 @@ mod notification_tests {
     fn notification_before_wait_registration_still_interrupts_the_wait() {
         let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
-            PENDING.store(0, Ordering::SeqCst);
+            EVENTS.take_pending();
             lwinch(libc::SIGWINCH);
             let waiting = crate::runtime::IoWait::new();
             assert!(crate::runtime::take_interrupt());
@@ -688,15 +685,15 @@ mod notification_tests {
     fn external_alarm_cannot_complete_the_pager_timer() {
         let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
         unsafe {
-            PENDING.store(0, Ordering::SeqCst);
+            EVENTS.take_pending();
             TIMER_ACTIVE.store(true, Ordering::SeqCst);
             let mut info: libc::siginfo_t = std::mem::zeroed();
             info.si_code = libc::SI_USER;
             sigalarm(libc::SIGALRM, &mut info, std::ptr::null_mut());
-            assert_eq!(PENDING.load(Ordering::SeqCst) & ALARM, 0);
+            assert_eq!(EVENTS.pending.load(Ordering::SeqCst) & ALARM, 0);
             info.si_code = libc::SI_KERNEL;
             sigalarm(libc::SIGALRM, &mut info, std::ptr::null_mut());
-            assert_eq!(PENDING.fetch_and(!ALARM, Ordering::SeqCst) & ALARM, ALARM);
+            assert_eq!(EVENTS.clear_pending(ALARM), ALARM);
             TIMER_ACTIVE.store(false, Ordering::SeqCst);
         }
     }
@@ -719,7 +716,7 @@ mod notification_tests {
             assert_eq!(libc::sigismember(&pending, libc::SIGALRM), 1);
             let mut pipe = [-1; 2];
             assert_eq!(libc::pipe2(pipe.as_mut_ptr(), libc::O_CLOEXEC), 0);
-            PENDING.store(0, Ordering::SeqCst);
+            EVENTS.take_pending();
             TIMER_DEADLINE_NS.store(monotonic_ns().unwrap() + 20_000_000, Ordering::SeqCst);
             TIMER_ACTIVE.store(true, Ordering::SeqCst);
             let started = monotonic_ns().unwrap();

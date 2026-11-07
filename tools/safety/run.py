@@ -250,7 +250,7 @@ def initial(args, evidence):
              blocks_final_safety_gate=True, reports=reports))
         evidence.unavailable('sanitizer-findings-open', 'Sanitizer reports require triage and fixes; expected application exits cannot hide them.', 'ASAN')
     # Full-program Miri stops in the native ELF sigaction constructor before any
-    # test runs. Compile the real runtime module in isolation, never a stub.
+    # test runs. Compile the production atomic notification module in isolation.
     evidence.report['boundary_exclusions'] = [dict(profile='MIRI',
         boundary='src/process.rs::remember_sigpipe ELF constructor calls native sigaction',
         reason='Pinned Miri reports unsupported foreign function sigaction on Linux.',
@@ -260,12 +260,12 @@ def initial(args, evidence):
         review_status='independent boundary review pending')]
     for seed in PINS['miri_seeds']:
         seeded = {**env, 'MIRIFLAGS': f'-Zmiri-seed={seed}'}
-        record = evidence.run('miri-runtime-' + str(seed), ['cargo', 'miri', 'test', '--locked', '--offline',
+        record = evidence.run('miri-signal-events-' + str(seed), ['cargo', 'miri', 'test', '--locked', '--offline',
                      '--manifest-path', ROOT / 'tools/safety/components/Cargo.toml', '--lib',
-                     'runtime::tests::nested_key_read_keeps_the_file_read_interruptible', '--', '--exact'],
+                     'signal_events::tests', '--', '--test-threads=1'],
                      env=seeded, timeout=300, profile='MIRI', requirement_ids=['SAFE-VER-003'])
-        output = (args.output / ('miri-runtime-' + str(seed) + '.log')).read_text()
-        if 'running 1 test' not in output or '1 passed; 0 failed' not in output:
+        output = (args.output / ('miri-signal-events-' + str(seed) + '.log')).read_text()
+        if 'running 3 tests' not in output or '3 passed; 0 failed' not in output:
             record['status'] = 'failed'
             record['oracle_error'] = 'Empty or unexpected component test selection'
     evidence.unavailable('miri-unconverted-core', 'Owned buffer/parser/state components are not migrated yet; one atomic regression is not whole-core Miri coverage.', 'MIRI')

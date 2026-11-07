@@ -60,6 +60,7 @@ pub mod screen;
 pub mod search;
 mod shell_process;
 pub mod signal;
+mod signal_events;
 mod stdio_worker;
 pub mod tags;
 pub mod ttyin;
