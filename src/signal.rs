@@ -53,6 +53,9 @@ const TERMINATE: u32 = 1 << 6;
 static EVENTS: SignalEvents = SignalEvents::new();
 static TIMER_ACTIVE: AtomicBool = AtomicBool::new(false);
 static TIMER_DEADLINE_NS: AtomicU64 = AtomicU64::new(0);
+// True only while main has queued its self-stop but has not returned from the
+// suspension transition. A terminating handler may cancel that pending stop.
+static STOP_TRANSITION: AtomicBool = AtomicBool::new(false);
 // Main-thread owned. Asynchronous handlers never access this snapshot.
 static mut STARTUP_ACTIONS: std::mem::MaybeUninit<[libc::sigaction; 8]> =
     std::mem::MaybeUninit::uninit();
@@ -149,6 +152,15 @@ pub unsafe extern "C" fn lwinch(_: ::core::ffi::c_int) {
 }
 unsafe extern "C" fn terminate(_: ::core::ffi::c_int) {
     notify(TERMINATE);
+    if STOP_TRANSITION.load(Ordering::SeqCst) {
+        // SIGCONT cancels a pending SIGTSTP. A termination that arrives after
+        // the main thread's last check but before the default stop is taken
+        // must not leave the pager suspended with its exit event unhandled.
+        // kill/getpid and errno access are async-signal-safe on this target.
+        let saved_errno = *libc::__errno_location();
+        let _ = libc::kill(libc::getpid(), libc::SIGCONT);
+        *libc::__errno_location() = saved_errno;
+    }
 }
 unsafe extern "C" fn early_interrupt(_: libc::c_int) {
     libc::_exit(2);
@@ -575,15 +587,30 @@ pub unsafe extern "C" fn psignals() {
         // SIGTSTP notifications received while restoring the terminal belong
         // to this same stop transition. The self-sent default stop and any
         // kernel-pending external stop coalesce while SIGTSTP is blocked.
+        STOP_TRANSITION.store(true, Ordering::SeqCst);
         if kill(getpid(), libc::SIGTSTP) != 0 {
             quit(1);
             libc::_exit(1);
+        }
+        // A termination may have been published inside kill(), before the
+        // self-stop existed for SIGCONT to cancel. Restore our TSTP handler
+        // before unmasking that queued stop, then perform normal cleanup.
+        if EVENTS.pending.load(Ordering::SeqCst) & TERMINATE != 0 {
+            if libc::sigaction(libc::SIGTSTP, &saved_st, std::ptr::null_mut()) != 0 {
+                libc::_exit(1);
+            }
+            STOP_TRANSITION.store(false, Ordering::SeqCst);
+            if libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0 {
+                libc::_exit(1);
+            }
+            quit(15);
         }
         EVENTS.clear_pending(STOP);
         if libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0 {
             quit(1);
             libc::_exit(1);
         }
+        STOP_TRANSITION.store(false, Ordering::SeqCst);
         // After SIGCONT, reinstall the handler before admitting another stop.
         if libc::sigprocmask(libc::SIG_BLOCK, &stop_set, std::ptr::null_mut()) != 0
             || libc::sigaction(libc::SIGTSTP, &saved_st, std::ptr::null_mut()) != 0
@@ -591,6 +618,9 @@ pub unsafe extern "C" fn psignals() {
         {
             quit(1);
             libc::_exit(1);
+        }
+        if EVENTS.pending.load(Ordering::SeqCst) & TERMINATE != 0 {
+            quit(15);
         }
         raw_mode(lbool::LTRUE);
         term_init();
