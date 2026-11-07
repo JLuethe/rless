@@ -45,6 +45,9 @@ struct Worker {
     bytes: [u8; CHUNK],
     start: usize,
     end: usize,
+    position: i64,
+    regular: bool,
+    restart_read: bool,
 }
 
 struct Abandoned {
@@ -55,7 +58,10 @@ struct Abandoned {
 // None reserves a handle while its owner is outside the map performing a
 // cancellable wait. Signal dispatch may reenter close without locking it.
 static INPUTS: Mutex<Option<HashMap<i32, Option<Worker>>>> = Mutex::new(None);
-static ABANDONED: Mutex<Option<Abandoned>> = Mutex::new(None);
+// One interrupted read owner and its attempted replacement can both remain
+// in uninterruptible kernel I/O. Keep exactly two identities so cleanup can
+// finish without spawning an unbounded number of stranded workers.
+static ABANDONED: Mutex<[Option<Abandoned>; 2]> = Mutex::new([None, None]);
 
 unsafe fn errno() -> i32 {
     *libc::__errno_location()
@@ -75,23 +81,32 @@ unsafe fn ready(pidfd: i32, timeout: i32) -> bool {
 }
 
 unsafe fn check_abandoned() -> Result<(), i32> {
-    let mut slot = ABANDONED.lock().map_err(|_| libc::EOWNERDEAD)?;
-    let Some(child) = slot.as_ref() else {
-        return Ok(());
-    };
-    if !ready(child.pidfd.as_raw_fd(), 0) {
-        return Err(libc::EBUSY);
+    let mut slots = ABANDONED.lock().map_err(|_| libc::EOWNERDEAD)?;
+    let mut busy = false;
+    for slot in slots.iter_mut() {
+        let Some(child) = slot.as_ref() else {
+            continue;
+        };
+        if !ready(child.pidfd.as_raw_fd(), 0) {
+            busy = true;
+            continue;
+        }
+        let got = libc::waitpid(
+            child.pid,
+            std::ptr::null_mut(),
+            libc::__WCLONE | libc::WNOHANG,
+        );
+        if got == child.pid || got < 0 && errno() == libc::ECHILD {
+            *slot = None;
+        } else {
+            busy = true;
+        }
     }
-    let got = libc::waitpid(
-        child.pid,
-        std::ptr::null_mut(),
-        libc::__WCLONE | libc::WNOHANG,
-    );
-    if got != child.pid && !(got < 0 && errno() == libc::ECHILD) {
-        return Err(libc::EBUSY);
+    if busy {
+        Err(libc::EBUSY)
+    } else {
+        Ok(())
     }
-    *slot = None;
-    Ok(())
 }
 
 unsafe fn stop(worker: &mut Worker) {
@@ -114,10 +129,10 @@ unsafe fn stop(worker: &mut Worker) {
     if got == worker.pid || (got < 0 && errno() == libc::ECHILD && exited) {
         return;
     }
-    let mut slot = ABANDONED.lock().unwrap_or_else(|_| libc::_exit(1));
-    if slot.is_some() {
+    let mut slots = ABANDONED.lock().unwrap_or_else(|_| libc::_exit(1));
+    let Some(slot) = slots.iter_mut().find(|slot| slot.is_none()) else {
         libc::_exit(1);
-    }
+    };
     *slot = Some(Abandoned {
         pid: worker.pid,
         pidfd,
@@ -207,12 +222,48 @@ unsafe fn child(
         );
         libc::_exit(0);
     }
-    let file = libc::open(path, libc::O_RDONLY | libc::O_CLOEXEC);
-    let failure = if file < 0 { errno() } else { 0 };
-    if !send_reply(3, if file < 0 { -1 } else { 0 }, failure, &[]) {
+    let opened = libc::open(path, libc::O_RDONLY | libc::O_CLOEXEC);
+    let file = if opened >= 0 && opened != 5 {
+        let duplicated = libc::dup3(opened, 5, libc::O_CLOEXEC);
+        let failure = if duplicated < 0 { errno() } else { 0 };
+        libc::close(opened);
+        if failure != 0 {
+            set_errno(failure);
+        }
+        duplicated
+    } else {
+        opened
+    };
+    let open_failure = if file < 0 { errno() } else { 0 };
+    // Classify the opened inode before the first read. The binary-file probe
+    // can read before ch_init asks for its size, so a later stat is too late
+    // to decide whether an interrupted read can be restarted safely.
+    let mut status: libc::stat = std::mem::zeroed();
+    let metadata_failure = if file >= 0 && libc::fstat(file, &mut status) != 0 {
+        errno()
+    } else {
+        0
+    };
+    let failure = if open_failure != 0 {
+        open_failure
+    } else {
+        metadata_failure
+    };
+    let mode = status.st_mode.to_ne_bytes();
+    let mode_bytes = if failure == 0 { &mode[..] } else { &[][..] };
+    if !send_reply(
+        3,
+        if failure != 0 {
+            -1
+        } else {
+            mode_bytes.len() as i64
+        },
+        failure,
+        mode_bytes,
+    ) {
         libc::_exit(2);
     }
-    if file < 0 {
+    if failure != 0 {
         libc::_exit(0);
     }
     let mut bytes = [0u8; CHUNK];
@@ -360,6 +411,9 @@ unsafe fn launch(path: *const libc::c_char, action: PathAction) -> Result<Worker
                 bytes: [0; CHUNK],
                 start: 0,
                 end: 0,
+                position: 0,
+                regular: false,
+                restart_read: false,
             };
             stop(&mut worker);
             return Err(error);
@@ -373,6 +427,9 @@ unsafe fn launch(path: *const libc::c_char, action: PathAction) -> Result<Worker
         bytes: [0; CHUNK],
         start: 0,
         end: 0,
+        position: 0,
+        regular: false,
+        restart_read: false,
     })
 }
 
@@ -461,6 +518,10 @@ unsafe fn send(worker: &mut Worker, request: Request) -> Result<(), i32> {
             return Err(reply.error);
         }
         if pending.command == READ {
+            worker.position = worker
+                .position
+                .checked_add(reply.count)
+                .ok_or(libc::EOVERFLOW)?;
             worker.start = 0;
             worker.end = reply.count as usize;
         }
@@ -502,6 +563,63 @@ unsafe fn operation(
     } else {
         Ok(reply.count as usize)
     }
+}
+
+// A path-backed regular read may be trapped in an uninterruptible filesystem
+// callback after SIGWINCH. Reopen the exact inode through the still-live
+// worker's descriptor, then seek to the last accepted byte before retiring
+// that worker. Never use the user-controlled pathname a second time.
+unsafe fn restart_interrupted_regular_read(worker: &mut Worker) -> Result<(), i32> {
+    if !worker.restart_read {
+        return Ok(());
+    }
+    check_abandoned()?;
+    let path =
+        std::ffi::CString::new(format!("/proc/{}/fd/5", worker.pid)).map_err(|_| libc::EINVAL)?;
+    let mut replacement = launch(path.as_ptr(), PathAction::Open)?;
+    let mut mode = [0u8; std::mem::size_of::<libc::mode_t>()];
+    let opened = receive(
+        replacement.socket.as_raw_fd(),
+        None,
+        mode.as_mut_ptr(),
+        mode.len(),
+    );
+    match opened {
+        Ok(reply)
+            if reply.error == 0
+                && reply.count == mode.len() as i64
+                && libc::mode_t::from_ne_bytes(mode) & libc::S_IFMT == libc::S_IFREG => {}
+        Ok(reply) => {
+            stop(&mut replacement);
+            return Err(if reply.error != 0 {
+                reply.error
+            } else {
+                libc::EPROTO
+            });
+        }
+        Err(error) => {
+            stop(&mut replacement);
+            return Err(error);
+        }
+    }
+    if worker.position != 0 {
+        let mut bytes = [0u8; 8];
+        let seeked = operation(
+            &mut replacement,
+            request(SEEK, 0, worker.position, libc::SEEK_SET),
+            bytes.as_mut_ptr(),
+            bytes.len(),
+        );
+        if !matches!(seeked, Ok(8)) || i64::from_ne_bytes(bytes) != worker.position {
+            stop(&mut replacement);
+            return Err(seeked.err().unwrap_or(libc::EIO));
+        }
+    }
+    replacement.position = worker.position;
+    replacement.regular = true;
+    stop(worker);
+    *worker = replacement;
+    Ok(())
 }
 
 unsafe fn with_worker<T>(
@@ -645,8 +763,14 @@ pub(crate) unsafe fn open(path: *const libc::c_char) -> i32 {
             return -1;
         }
     };
+    let mut mode = [0u8; std::mem::size_of::<libc::mode_t>()];
     let opened = loop {
-        match receive(worker.socket.as_raw_fd(), None, std::ptr::null_mut(), 0) {
+        match receive(
+            worker.socket.as_raw_fd(),
+            None,
+            mode.as_mut_ptr(),
+            mode.len(),
+        ) {
             Err(libc::EINTR) => {
                 crate::runtime::take_interrupt();
                 crate::signal::collect_pending_signals();
@@ -659,6 +783,7 @@ pub(crate) unsafe fn open(path: *const libc::c_char) -> i32 {
         }
     };
     let error = match opened {
+        Ok(reply) if reply.error == 0 && reply.count != mode.len() as i64 => libc::EPROTO,
         Ok(reply) => reply.error,
         Err(error) => error,
     };
@@ -667,6 +792,7 @@ pub(crate) unsafe fn open(path: *const libc::c_char) -> i32 {
         set_errno(error);
         return -1;
     }
+    worker.regular = libc::mode_t::from_ne_bytes(mode) & libc::S_IFMT == libc::S_IFREG;
     let fd = worker.socket.as_raw_fd();
     let mut guard = match INPUTS.lock() {
         Ok(guard) => guard,
@@ -712,6 +838,7 @@ unsafe fn read_impl(fd: i32, output: *mut u8, length: usize, watch_terminal: boo
         length
     };
     let result = with_worker(fd, |worker| {
+        restart_interrupted_regular_read(worker)?;
         if worker.start == worker.end {
             if !worker
                 .pending
@@ -742,17 +869,28 @@ unsafe fn read_impl(fd: i32, output: *mut u8, length: usize, watch_terminal: boo
                 }
             }
             let mut fresh = [0u8; CHUNK];
-            let reply = receive(
+            let reply = match receive(
                 worker.socket.as_raw_fd(),
                 worker.pending,
                 fresh.as_mut_ptr(),
                 CHUNK,
-            )?;
+            ) {
+                Ok(reply) => reply,
+                Err(libc::EINTR) if worker.regular => {
+                    worker.restart_read = true;
+                    return Err(libc::EINTR);
+                }
+                Err(error) => return Err(error),
+            };
             worker.pending = None;
             if reply.error != 0 {
                 return Err(reply.error);
             }
             let count = reply.count as usize;
+            worker.position = worker
+                .position
+                .checked_add(reply.count)
+                .ok_or(libc::EOVERFLOW)?;
             worker.bytes[..count].copy_from_slice(&fresh[..count]);
             worker.start = 0;
             worker.end = count;
@@ -785,7 +923,9 @@ pub(crate) unsafe fn seek(fd: i32, offset: i64, whence: i32) -> i64 {
         }
         worker.start = 0;
         worker.end = 0;
-        Ok(i64::from_ne_bytes(bytes))
+        let position = i64::from_ne_bytes(bytes);
+        worker.position = position;
+        Ok(position)
     });
     match result {
         Ok(value) => value,
@@ -807,6 +947,7 @@ pub(crate) unsafe fn stat(fd: i32, output: *mut libc::stat) -> i32 {
         if count != std::mem::size_of::<libc::stat>() {
             return Err(libc::EPROTO);
         }
+        worker.regular = (*output).st_mode & libc::S_IFMT == libc::S_IFREG;
         Ok(0)
     });
     match result {
