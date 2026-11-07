@@ -2,8 +2,9 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
-use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
+use std::os::fd::{AsRawFd, OwnedFd};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 
 extern "C" {
     fn write(__fd: ::core::ffi::c_int, __buf: *const ::core::ffi::c_void, __n: size_t) -> ssize_t;
@@ -492,6 +493,17 @@ static mut outfd: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
 // must still attempt its output even after a previous write failed.
 static OUTPUT_FAILED: AtomicBool = AtomicBool::new(false);
 
+struct PreparedOutput {
+    source: libc::c_int,
+    private: Option<OwnedFd>,
+    socket: bool,
+}
+
+// set_output is the only pager-side transition of the output descriptor. A
+// prepared private file description can serve every buffered flush until that
+// transition; repeated fork/SCM handshakes would delay interactive screens.
+static PREPARED_OUTPUT: Mutex<Option<PreparedOutput>> = Mutex::new(None);
+
 pub fn output_failed() -> bool {
     OUTPUT_FAILED.load(Ordering::Relaxed)
 }
@@ -501,27 +513,17 @@ pub fn output_failed() -> bool {
 pub fn io_error_diagnostic(message: &[u8]) {
     unsafe {
         let saved_errno = *libc::__errno_location();
-        let mut original: libc::stat = std::mem::zeroed();
-        if libc::fstat(2, &mut original) != 0 {
-            *libc::__errno_location() = saved_errno;
-            return;
-        }
-        let kind = original.st_mode & libc::S_IFMT;
-        let private = if kind == libc::S_IFIFO || kind == libc::S_IFCHR {
-            match reopen_nonblocking_writer(2, &original) {
-                Ok(fd) => Some(fd),
-                Err(_) => {
-                    *libc::__errno_location() = saved_errno;
-                    return;
-                }
+        let (private, socket) = match crate::output_worker::prepare(2) {
+            Ok(value) => value,
+            Err(_) => {
+                *libc::__errno_location() = saved_errno;
+                return;
             }
-        } else {
-            None
         };
         let target = private.as_ref().map_or(2, AsRawFd::as_raw_fd);
         let mut remaining = message;
         while !remaining.is_empty() {
-            let result = if kind == libc::S_IFSOCK {
+            let result = if socket {
                 libc::send(
                     target,
                     remaining.as_ptr().cast(),
@@ -539,76 +541,6 @@ pub fn io_error_diagnostic(message: &[u8]) {
             }
         }
         *libc::__errno_location() = saved_errno;
-    }
-}
-
-// A dup shares O_NONBLOCK with the caller's descriptor. Reopen a character
-// device or pipe through procfs to keep the caller's status flags unchanged.
-unsafe fn reopen_nonblocking_writer(
-    fd: libc::c_int,
-    original: &libc::stat,
-) -> Result<OwnedFd, libc::c_int> {
-    let flags = libc::fcntl(fd, libc::F_GETFL);
-    if flags < 0 {
-        return Err(*libc::__errno_location());
-    }
-    if flags & libc::O_ACCMODE == libc::O_RDONLY || flags & libc::O_PATH != 0 {
-        return Err(libc::EBADF);
-    }
-    let prefix = b"/proc/self/fd/";
-    let mut path = [0u8; 32];
-    path[..prefix.len()].copy_from_slice(prefix);
-    let mut digits = [0u8; 10];
-    let mut value = fd as u32;
-    let mut count = 0;
-    loop {
-        digits[count] = b'0' + (value % 10) as u8;
-        count += 1;
-        value /= 10;
-        if value == 0 {
-            break;
-        }
-    }
-    for (index, digit) in digits[..count].iter().rev().enumerate() {
-        path[prefix.len() + index] = *digit;
-    }
-    let reopened = libc::open(
-        path.as_ptr().cast(),
-        libc::O_WRONLY | libc::O_NONBLOCK | libc::O_CLOEXEC | libc::O_NOCTTY,
-    );
-    if reopened < 0 {
-        return Err(*libc::__errno_location());
-    }
-    let private = OwnedFd::from_raw_fd(reopened);
-    let mut verified: libc::stat = std::mem::zeroed();
-    if libc::fstat(reopened, &mut verified) != 0 {
-        return Err(*libc::__errno_location());
-    }
-    if verified.st_mode & libc::S_IFMT != original.st_mode & libc::S_IFMT
-        || verified.st_dev != original.st_dev
-        || verified.st_ino != original.st_ino
-        || verified.st_rdev != original.st_rdev
-    {
-        return Err(libc::ESTALE);
-    }
-    Ok(private)
-}
-
-// A full terminal or redirected pipe cannot trap the pager in write(2) after
-// SIGTERM. A socket uses per-call MSG_DONTWAIT; reopening a pipe/character
-// device gives us a private nonblocking file description without changing the
-// caller's status flags. Verify the reopened object before using it.
-unsafe fn nonblocking_output(fd: libc::c_int) -> Result<(Option<OwnedFd>, bool), libc::c_int> {
-    let mut original: libc::stat = std::mem::zeroed();
-    if libc::fstat(fd, &mut original) != 0 {
-        return Err(*libc::__errno_location());
-    }
-    match original.st_mode & libc::S_IFMT {
-        libc::S_IFCHR | libc::S_IFIFO => {
-            reopen_nonblocking_writer(fd, &original).map(|fd| (Some(fd), false))
-        }
-        libc::S_IFSOCK => Ok((None, true)),
-        _ => Ok((None, false)),
     }
 }
 
@@ -631,16 +563,39 @@ unsafe fn flush_buffer() -> bool {
         return true;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
-    let (private, socket) = match nonblocking_output(outfd) {
-        Ok(value) => value,
-        Err(error) => {
-            *libc::__errno_location() = error;
+    let mut prepared = match PREPARED_OUTPUT.lock() {
+        Ok(guard) => guard,
+        Err(_) => {
+            *libc::__errno_location() = libc::EOWNERDEAD;
             record_output_failure();
             return false;
         }
     };
-    let target = private.as_ref().map_or(outfd, AsRawFd::as_raw_fd);
-    let nonblocking = private.is_some() || socket;
+    if prepared
+        .as_ref()
+        .is_none_or(|target| target.source != outfd)
+    {
+        let (private, socket) = match crate::output_worker::prepare(outfd) {
+            Ok(value) => value,
+            Err(error) => {
+                *libc::__errno_location() = error;
+                record_output_failure();
+                return false;
+            }
+        };
+        *prepared = Some(PreparedOutput {
+            source: outfd,
+            private,
+            socket,
+        });
+    }
+    let prepared_output = prepared.as_ref().unwrap();
+    let target = prepared_output
+        .private
+        .as_ref()
+        .map_or(outfd, AsRawFd::as_raw_fd);
+    let socket = prepared_output.socket;
+    let nonblocking = prepared_output.private.is_some() || socket;
     // A regular-file write can return EINTR after a handled signal too. Keep
     // it in the wait set so a successful interruption is never retried into a
     // later write after termination was requested.
@@ -747,6 +702,9 @@ unsafe fn flush_buffer() -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn set_output(mut fd: ::core::ffi::c_int, mut no_term_init: lbool) {
     flush();
+    if let Ok(mut prepared) = PREPARED_OUTPUT.lock() {
+        *prepared = None;
+    }
     outfd = fd;
     if no_term_init.0 != 0 {
         term_init_ever = lbool::LTRUE;

@@ -51,6 +51,7 @@ pub mod option;
 pub mod opttbl;
 pub mod os;
 pub mod output;
+mod output_worker;
 pub mod pager;
 pub mod pattern;
 pub mod position;
