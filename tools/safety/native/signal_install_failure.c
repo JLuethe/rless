@@ -16,6 +16,7 @@ static int trace_fd = -1;
 static int armed;
 static int fired;
 static int fail_signal = SIGWINCH;
+static int handoff_mode;
 
 static void trace(const char *message)
 {
@@ -57,6 +58,7 @@ __attribute__((constructor)) static void install_probe(void)
     value = getenv("RLESS_SIGNAL_INSTALL_FAIL_SIGNAL");
     if (value != NULL)
         fail_signal = atoi(value);
+    handoff_mode = getenv("RLESS_SIGNAL_INSTALL_HANDOFF") != NULL;
     real_sigaction = dlsym(RTLD_NEXT, "sigaction");
     if (real_sigaction == NULL ||
         sigprocmask(SIG_SETMASK, NULL, &original_mask) != 0)
@@ -70,13 +72,25 @@ __attribute__((constructor)) static void install_probe(void)
               "inherited-winch-ignored\n" : "inherited-winch-unexpected\n");
     if (atexit(check_restoration) != 0)
         return;
-    armed = 1;
+    armed = !handoff_mode;
 }
 
 int sigaction(int number, const struct sigaction *action, struct sigaction *previous)
 {
     if (real_sigaction == NULL)
         real_sigaction = dlsym(RTLD_NEXT, "sigaction");
+    if (handoff_mode && !armed && number == SIGUSR1 && action != NULL) {
+        int result = real_sigaction(number, action, previous);
+        if (result == 0) {
+            for (size_t index = 0; index < sizeof handled / sizeof handled[0]; index++) {
+                if (real_sigaction(handled[index], NULL, &original[index]) != 0)
+                    return result;
+            }
+            armed = 1;
+            trace("startup-armed\n");
+        }
+        return result;
+    }
     if (armed && !fired && number == fail_signal && action != NULL) {
         fired = 1;
         trace("hit\n");
