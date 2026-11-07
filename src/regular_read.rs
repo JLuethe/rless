@@ -11,6 +11,10 @@ enum Operation {
     Read,
     Stat,
     Isatty,
+    Seek {
+        offset: libc::off_t,
+        whence: libc::c_int,
+    },
     ReopenedRead(FileIdentity),
 }
 
@@ -180,6 +184,14 @@ unsafe fn child_read(
     } else if matches!(operation, Operation::Isatty) {
         bytes[0] = (libc::isatty(3) == 1) as u8;
         1
+    } else if let Operation::Seek { offset, whence } = operation {
+        let position = libc::lseek(3, offset, whence);
+        if position < 0 {
+            -1
+        } else {
+            bytes[..8].copy_from_slice(&position.to_ne_bytes());
+            8
+        }
     } else if let Operation::ReopenedRead(expected) = operation {
         child_reopened_read(bytes.as_mut_ptr(), length, expected)
     } else {
@@ -449,7 +461,7 @@ unsafe fn read_worker(
                     return -1;
                 }
             };
-            if libc::lseek(input, next, libc::SEEK_SET) != next {
+            if seek_mutating_with_mask(input, next, libc::SEEK_SET, saved_mask) != next {
                 return -1;
             }
         }
@@ -463,7 +475,7 @@ pub(crate) unsafe fn read_positioned(
     length: usize,
     saved_mask: &libc::sigset_t,
 ) -> isize {
-    let offset = libc::lseek(input, 0, libc::SEEK_CUR);
+    let offset = seek_with_mask(input, 0, libc::SEEK_CUR, saved_mask);
     if offset < 0 {
         return -1;
     }
@@ -475,6 +487,160 @@ pub(crate) unsafe fn read_positioned(
         saved_mask,
         Operation::Read,
     )
+}
+
+pub(crate) unsafe fn seek_with_mask(
+    input: libc::c_int,
+    offset: libc::off_t,
+    whence: libc::c_int,
+    saved_mask: &libc::sigset_t,
+) -> libc::off_t {
+    // Preserve lseek(2)'s EBADF for invalid inherited descriptors instead of
+    // treating the child's failed dup as a malformed worker reply.
+    if libc::fcntl(input, libc::F_GETFD) < 0 {
+        return -1;
+    }
+    let mut reply = [0u8; 8];
+    let count = read_worker(
+        input,
+        reply.as_mut_ptr(),
+        reply.len(),
+        None,
+        saved_mask,
+        Operation::Seek { offset, whence },
+    );
+    if count == reply.len() as isize {
+        libc::off_t::from_ne_bytes(reply)
+    } else {
+        if count >= 0 {
+            *libc::__errno_location() = libc::EPROTO;
+        }
+        -1
+    }
+}
+
+/// A successful lseek changes the shared open-file description before its
+/// worker reply arrives. Once launched, an interruption cannot be reported as
+/// retryable: the offset may already have moved. Give the child a short,
+/// signal-masked grace period to acknowledge completion. A missing reply is a
+/// permanent I/O failure, so no caller silently retries from an unknown
+/// offset. A pending event before launch leaves the offset untouched.
+unsafe fn seek_mutating_with_mask(
+    input: libc::c_int,
+    offset: libc::off_t,
+    whence: libc::c_int,
+    saved_mask: &libc::sigset_t,
+) -> libc::off_t {
+    if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+        || crate::signal::has_pending_notifications()
+    {
+        *libc::__errno_location() = libc::EINTR;
+        return -1;
+    }
+    if let Some(timeout) = match crate::signal::timer_wait_timeout() {
+        Ok(value) => value,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            return -1;
+        }
+    } {
+        if timeout.tv_sec == 0 && timeout.tv_nsec == 0 {
+            *libc::__errno_location() = libc::EINTR;
+            return -1;
+        }
+    }
+    if libc::fcntl(input, libc::F_GETFD) < 0 {
+        return -1;
+    }
+    if let Err(error) = check_abandoned() {
+        *libc::__errno_location() = error;
+        return -1;
+    }
+    let worker = match launch(input, None, 8, Operation::Seek { offset, whence }) {
+        Ok(worker) => worker,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            return -1;
+        }
+    };
+    let mut descriptor = libc::pollfd {
+        fd: worker.socket.as_raw_fd(),
+        events: libc::POLLIN,
+        revents: 0,
+    };
+    let timeout = match crate::signal::timer_wait_timeout() {
+        Ok(value) => value,
+        // The commit may already have happened. A clock failure cannot make
+        // an unbounded wait safe; take the same bounded receipt path.
+        Err(_) => Some(libc::timespec {
+            tv_sec: 0,
+            tv_nsec: 0,
+        }),
+    };
+    let expired = timeout
+        .as_ref()
+        .is_some_and(|value| value.tv_sec == 0 && value.tv_nsec == 0);
+    let ready = if expired {
+        0
+    } else {
+        libc::ppoll(
+            &mut descriptor,
+            1,
+            timeout
+                .as_ref()
+                .map_or(std::ptr::null(), |value| value as *const libc::timespec),
+            saved_mask,
+        )
+    };
+    if ready <= 0 {
+        // Handled signals remain blocked in this parent for at most 100 ms.
+        // The child may already have changed the offset, so do not retry a
+        // timed-out or interrupted commit as though it had not happened.
+        descriptor.revents = 0;
+        if libc::poll(&mut descriptor, 1, 100) <= 0 {
+            *libc::__errno_location() = libc::EIO;
+            return -1;
+        }
+    }
+    if descriptor.revents & libc::POLLIN == 0 {
+        *libc::__errno_location() = libc::EIO;
+        return -1;
+    }
+    let mut reply = [0u8; 8];
+    let result = receive(worker.socket.as_raw_fd(), reply.as_mut_ptr(), reply.len());
+    match result {
+        Ok(8) => libc::off_t::from_ne_bytes(reply),
+        // An error reply from lseek is unambiguous; the offset did not move.
+        Err(error) if error != libc::EAGAIN => {
+            *libc::__errno_location() = error;
+            -1
+        }
+        _ => {
+            *libc::__errno_location() = libc::EIO;
+            -1
+        }
+    }
+}
+
+pub(crate) unsafe fn seek_interruptible(
+    input: libc::c_int,
+    offset: libc::off_t,
+    whence: libc::c_int,
+) -> libc::off_t {
+    let _wait = crate::runtime::IoWait::new();
+    let saved = match crate::runtime::block_handled_signals() {
+        Ok(saved) => saved,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            return -1;
+        }
+    };
+    let _restore = crate::runtime::RestoreMask(saved);
+    if whence == libc::SEEK_CUR && offset == 0 {
+        seek_with_mask(input, offset, whence, &saved)
+    } else {
+        seek_mutating_with_mask(input, offset, whence, &saved)
+    }
 }
 
 pub(crate) unsafe fn read_unpositioned(

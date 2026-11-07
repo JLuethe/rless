@@ -888,7 +888,7 @@ pub(crate) unsafe fn seek_or_native(fd: i32, offset: i64, whence: i32) -> i64 {
     if contains(fd) {
         seek(fd, offset, whence)
     } else {
-        libc::lseek(fd, offset, whence)
+        crate::regular_read::seek_interruptible(fd, offset, whence)
     }
 }
 
