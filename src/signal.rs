@@ -235,11 +235,22 @@ unsafe fn transition_mstimer_masked(
         tv_sec: 0,
         tv_nsec: 0,
     };
-    loop {
+    // The old timer is disarmed, but its process-pending expiry may be queued
+    // behind repeated thread-directed external SIGALRM deliveries. Rearming
+    // is safe only after observing the old SI_KERNEL expiry or an empty queue.
+    // A continuing sender could otherwise keep this zero-timeout drain busy
+    // forever, so fail the rearm in a bounded number of receives instead of
+    // aliasing a late old expiry to the next timer operation.
+    let mut old_expiry_removed = false;
+    for _ in 0..64 {
         let mut info: libc::siginfo_t = std::mem::zeroed();
         let received = libc::sigtimedwait(alarm_set, &mut info, &timeout);
         if received == libc::SIGALRM {
-            fired |= info.si_code == libc::SI_KERNEL;
+            if info.si_code == libc::SI_KERNEL {
+                fired = true;
+                old_expiry_removed = true;
+                break;
+            }
             continue;
         }
         if received < 0 {
@@ -248,6 +259,7 @@ unsafe fn transition_mstimer_masked(
                 continue;
             }
             if error == libc::EAGAIN {
+                old_expiry_removed = true;
                 break;
             }
             return Err(error);
@@ -255,6 +267,9 @@ unsafe fn transition_mstimer_masked(
     }
     if milliseconds == 0 {
         return Ok(fired);
+    }
+    if !old_expiry_removed {
+        return Err(libc::EBUSY);
     }
     let seconds = milliseconds / 1000;
     if seconds > libc::time_t::MAX as libc::c_ulong {
@@ -607,6 +622,26 @@ pub unsafe extern "C" fn psignals() {
 mod notification_tests {
     use super::*;
     static SIGNAL_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+    #[test]
+    fn continuing_external_alarm_stream_refuses_rearm() {
+        // The native interposer in test_rearm_flood.py supplies repeated
+        // SI_USER observations. Without it this test does not change signal
+        // state or claim that a storm was exercised.
+        if std::env::var_os("RLESS_TEST_REARM_FLOOD").is_none() {
+            return;
+        }
+        let _serial = SIGNAL_TEST_LOCK.lock().unwrap();
+        unsafe {
+            EVENTS.take_pending();
+            sigs = 0;
+            TIMER_ACTIVE.store(false, Ordering::SeqCst);
+            TIMER_DEADLINE_NS.store(0, Ordering::SeqCst);
+            assert_eq!(transition_mstimer(60_000), Err(libc::EBUSY));
+            assert!(!TIMER_ACTIVE.load(Ordering::SeqCst));
+            assert_eq!(TIMER_DEADLINE_NS.load(Ordering::SeqCst), 0);
+        }
+    }
 
     #[test]
     fn handler_notifications_preserve_command_count_and_coalesce_state_bits() {
