@@ -1504,6 +1504,17 @@ unsafe extern "C" fn getccu(mut timeout_ms: ::core::ffi::c_ulong) -> ::core::ffi
     while c == 0 as ::core::ffi::c_int && sigs == 0 as ::core::ffi::c_int {
         if ungot.is_null() {
             c = getchr_timeout(timeout_ms);
+            // A signal can arrive after the terminal read has returned but
+            // before its byte reaches the command dispatcher. Deliver the
+            // notification first. Benign events retain that byte for the
+            // next command read; interrupt and termination discard it.
+            crate::signal::collect_pending_signals();
+            if sigs != 0 {
+                if c >= 0 && sigs & (1 | 2 | 64) == 0 {
+                    ungetcc(c as ::core::ffi::c_char);
+                }
+                return 0;
+            }
             if c == -4 as ::core::ffi::c_int {
                 return -1 as ::core::ffi::c_int;
             }
@@ -1886,7 +1897,13 @@ pub unsafe extern "C" fn commands() {
                     if c as ::core::ffi::c_int == -3 as ::core::ffi::c_int {
                         continue 's_36;
                     }
+                    // Cover delivery after getcc() returned, including an
+                    // already completed newline that would start a helper.
+                    crate::signal::collect_pending_signals();
                     if sigs != 0 {
+                        if newaction == 101 && c != 0 && sigs & (1 | 2 | 64) == 0 {
+                            ungetcc(c);
+                        }
                         continue 's_36;
                     }
                     if newaction != 101 as ::core::ffi::c_int {
