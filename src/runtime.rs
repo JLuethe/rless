@@ -224,7 +224,11 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
         }
     };
     let _restore = RestoreMask(saved);
-    if IO_INTERRUPTED.load(Ordering::SeqCst) {
+    // Some callers (notably the helper status wait after closing a stream)
+    // enter here without an IoWait registration. A handler can publish an
+    // event after their last check but before this mask transition, leaving
+    // IO_INTERRUPTED clear. Inspect the event itself before sleeping.
+    if IO_INTERRUPTED.load(Ordering::SeqCst) || crate::signal::has_pending_notifications() {
         *libc::__errno_location() = libc::EINTR;
         return -1;
     }
@@ -374,6 +378,52 @@ pub(crate) unsafe fn poll_interruptible(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pending_notification_without_io_wait_interrupts_read() {
+        const CHILD: &str = "RLESS_TEST_PENDING_READ_CHILD";
+        if std::env::var_os(CHILD).is_some() {
+            unsafe {
+                assert_eq!(IO_WAITING.load(Ordering::SeqCst), 0);
+                let mut pipe = [-1; 2];
+                assert_eq!(libc::pipe2(pipe.as_mut_ptr(), libc::O_CLOEXEC), 0);
+                // Model delivery after a caller's signal check, before it
+                // enters read_interruptible, with no IoWait registered.
+                crate::signal::lwinch(0);
+                assert!(crate::signal::has_pending_notifications());
+                let mut byte = 0u8;
+                assert_eq!(read_interruptible(pipe[0], &mut byte, 1), -1);
+                assert_eq!(*libc::__errno_location(), libc::EINTR);
+                libc::close(pipe[0]);
+                libc::close(pipe[1]);
+            }
+            return;
+        }
+
+        let mut child = std::process::Command::new(std::env::current_exe().unwrap())
+            .arg("pending_notification_without_io_wait_interrupts_read")
+            .env(CHILD, "1")
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        loop {
+            if let Some(status) = child.try_wait().unwrap() {
+                assert!(
+                    status.success(),
+                    "isolated pending-read check failed: {status}"
+                );
+                break;
+            }
+            if std::time::Instant::now() >= deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                panic!("pending notification left a read asleep");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+    }
 
     #[test]
     fn nested_key_read_keeps_the_file_read_interruptible() {
