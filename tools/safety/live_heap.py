@@ -92,6 +92,11 @@ def scenario(site, cycles):
             event['heap_checkpoint'] = 'warmup' if cycle == 2 else f'cycle-{cycle}'
         events.append(event)
     events.append({'send':'q'})
+    # A READY prompt can precede completion of an output-worker write. Heap
+    # checkpoints must follow a real terminal-input wait, not its ack ppoll.
+    for event in events:
+        if 'await' in event:
+            event['require_terminal_input'] = True
     return pager(events)
 
 

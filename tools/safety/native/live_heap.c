@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 static int trace_fd = -1;
+static pid_t pager_pid;
 extern size_t __sanitizer_get_current_allocated_bytes(void);
 extern ssize_t __real_read(int, void *, size_t);
 extern int __real_ppoll(struct pollfd *, nfds_t, const struct timespec *, const sigset_t *);
@@ -29,6 +30,7 @@ __attribute__((constructor)) static void configure(void)
     long value = strtol(text, &end, 10);
     if (*end || errno || value < 3 || value > INT32_MAX) _exit(122);
     trace_fd = (int)value;
+    pager_pid = getpid();
     struct stat status;
     int flags = fcntl(trace_fd, F_GETFD);
     if (flags < 0 || fstat(trace_fd, &status) || !S_ISFIFO(status.st_mode) ||
@@ -38,7 +40,10 @@ __attribute__((constructor)) static void configure(void)
 
 static void sample(int fd, uint64_t call, uint64_t argument)
 {
-    if (trace_fd >= 0 && isatty(fd)) {
+    /* Cancellable read workers inherit this shim but close the pager's trace
+     * pipe before entering native read. Only the original pager has an
+     * observable live-heap checkpoint; child samples are not part of it. */
+    if (trace_fd >= 0 && getpid() == pager_pid && isatty(fd)) {
         if (sequence == UINT64_MAX) _exit(122);
         uint64_t bytes = __sanitizer_get_current_allocated_bytes();
         uint64_t ordinal = ++sequence;
