@@ -30,7 +30,6 @@ extern "C" {
         __oflag: ::core::ffi::c_int,
         ...
     ) -> ::core::ffi::c_int;
-    fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn __ctype_b_loc() -> *mut *const ::core::ffi::c_ushort;
     fn atoi(__nptr: *const ::core::ffi::c_char) -> ::core::ffi::c_int;
     fn free(__ptr: *mut ::core::ffi::c_void);
@@ -623,9 +622,11 @@ unsafe extern "C" fn gettagtype() -> ::core::ffi::c_int {
     if strcmp(tags, b"-\0".as_ptr() as *const ::core::ffi::c_char) == 0 as ::core::ffi::c_int {
         return C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int;
     }
-    f = crate::os::iopen(tags, libc::O_RDONLY);
-    if f >= 0 as ::core::ffi::c_int {
-        close(f);
+    // A FUSE close can wait for a server response. Use the path-backed stdio
+    // worker for this existence probe as well as for the later tags read.
+    let stream = crate::interruptible_stdio::rless_fopen_read(tags, c"r".as_ptr());
+    if !stream.is_null() {
+        fclose(stream.cast());
         return C2Rust_Unnamed_0::T_CTAGS.0 as ::core::ffi::c_int;
     }
     return C2Rust_Unnamed_0::T_GTAGS.0 as ::core::ffi::c_int;

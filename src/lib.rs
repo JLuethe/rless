@@ -59,6 +59,7 @@ pub mod screen;
 pub mod search;
 mod shell_process;
 pub mod signal;
+mod stdio_worker;
 pub mod tags;
 pub mod ttyin;
 pub mod version;

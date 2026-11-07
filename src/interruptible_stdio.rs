@@ -140,12 +140,7 @@ pub unsafe extern "C" fn rless_fopen_read(
         *libc::__errno_location() = libc::EINVAL;
         return std::ptr::null_mut();
     }
-    let _waiting = crate::runtime::IoWait::new();
-    let fd = crate::fifo_open::open_pinned_input(path, libc::O_RDONLY);
-    if fd < 0 {
-        return std::ptr::null_mut();
-    }
-    stream_from_fd(OwnedFd::from_raw_fd(fd))
+    crate::stdio_worker::open(path)
 }
 
 #[no_mangle]
