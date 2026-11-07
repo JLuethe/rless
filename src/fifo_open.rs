@@ -2,82 +2,94 @@
 use std::ffi::CString;
 use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
 use std::sync::atomic::Ordering;
+use std::sync::Mutex;
+
+// A killed open can remain in an uninterruptible kernel wait. Keep at most
+// one such pidfd and refuse another worker until the child exits.
+static ABANDONED: Mutex<Option<OwnedFd>> = Mutex::new(None);
+
+unsafe fn exited(pidfd: libc::c_int, timeout_ms: libc::c_int) -> Result<bool, libc::c_int> {
+    let mut descriptor = libc::pollfd {
+        fd: pidfd,
+        events: libc::POLLIN,
+        revents: 0,
+    };
+    let ready = libc::poll(&mut descriptor, 1, timeout_ms);
+    if ready < 0 {
+        return Err(*libc::__errno_location());
+    }
+    if ready == 0 {
+        return Ok(false);
+    }
+    if descriptor.revents & libc::POLLIN == 0 {
+        return Err(libc::EIO);
+    }
+    let mut info: libc::siginfo_t = std::mem::zeroed();
+    if libc::waitid(
+        libc::P_PIDFD,
+        pidfd as libc::id_t,
+        &mut info,
+        libc::WEXITED | libc::WNOHANG,
+    ) != 0
+    {
+        if *libc::__errno_location() == libc::ECHILD {
+            return Ok(true);
+        }
+        return Err(*libc::__errno_location());
+    }
+    Ok(info.si_pid() != 0)
+}
+
+unsafe fn check_abandoned() -> Result<(), libc::c_int> {
+    let mut slot = ABANDONED.lock().map_err(|_| libc::EIO)?;
+    if let Some(pidfd) = slot.as_ref() {
+        if !exited(pidfd.as_raw_fd(), 0)? {
+            return Err(libc::EBUSY);
+        }
+        *slot = None;
+    }
+    Ok(())
+}
 
 #[repr(align(8))]
 struct Control([u8; 64]);
 
 struct Worker {
-    pid: libc::pid_t,
-    pidfd: OwnedFd,
+    pidfd: Option<OwnedFd>,
     socket: OwnedFd,
 }
 
 impl Worker {
-    unsafe fn finish(&mut self) -> Result<(), libc::c_int> {
-        let mut status = 0;
-        loop {
-            let result = libc::waitpid(self.pid, &mut status, 0);
-            if result == self.pid {
-                self.pid = 0;
-                return if libc::WIFEXITED(status) && libc::WEXITSTATUS(status) == 0 {
-                    Ok(())
-                } else {
-                    Err(libc::EIO)
-                };
-            }
-            if result < 0 && *libc::__errno_location() == libc::EINTR {
-                continue;
-            }
-            if result < 0 && *libc::__errno_location() == libc::ECHILD {
-                self.pid = 0;
-                return Ok(());
-            }
-            return Err(*libc::__errno_location());
-        }
-    }
-
     unsafe fn cancel(&mut self) {
-        if self.pid > 0 {
-            // A pidfd names the original child even if SIGCHLD was inherited
-            // as ignored and the numeric PID has already been recycled.
-            let killed = libc::syscall(
-                libc::SYS_pidfd_send_signal,
-                self.pidfd.as_raw_fd(),
-                libc::SIGKILL,
-                std::ptr::null::<libc::siginfo_t>(),
-                0,
-            );
-            if killed != 0 {
-                let error = *libc::__errno_location();
-                if error == libc::ESRCH {
-                    // The pidfd's original process is already gone. Never
-                    // wait on a possibly recycled numeric PID.
-                    let mut status = 0;
-                    loop {
-                        let result = libc::waitpid(self.pid, &mut status, libc::WNOHANG);
-                        if result < 0 && *libc::__errno_location() == libc::EINTR {
-                            continue;
-                        }
-                        break;
-                    }
-                    self.pid = 0;
-                    return;
-                }
-                // Waiting after a failed kill could block forever in FIFO
-                // open. Exiting also delivers the child's parent-death signal.
-                crate::signal::collect_pending_signals();
-                let status = if crate::signal::sigs & 64 != 0 { 15 } else { 1 };
-                crate::pager::quit(status);
-                libc::_exit(status);
+        let Some(pidfd) = self.pidfd.take() else {
+            return;
+        };
+        // The pidfd cannot select a recycled numeric PID even if SIGCHLD is
+        // inherited as ignored. Never wait unboundedly after SIGKILL.
+        let _ = libc::syscall(
+            libc::SYS_pidfd_send_signal,
+            pidfd.as_raw_fd(),
+            libc::SIGKILL,
+            std::ptr::null::<libc::siginfo_t>(),
+            0,
+        );
+        if !matches!(exited(pidfd.as_raw_fd(), 100), Ok(true)) {
+            let mut slot = ABANDONED.lock().unwrap_or_else(|_| libc::_exit(1));
+            if slot.is_some() {
+                libc::_exit(1);
             }
-            let _ = self.finish();
+            *slot = Some(pidfd);
         }
     }
 }
 
 impl Drop for Worker {
     fn drop(&mut self) {
-        unsafe { self.cancel() }
+        unsafe {
+            let error = *libc::__errno_location();
+            self.cancel();
+            *libc::__errno_location() = error;
+        }
     }
 }
 
@@ -289,6 +301,7 @@ unsafe fn wait_socket(socket: libc::c_int) -> Result<(), libc::c_int> {
 }
 
 unsafe fn open_worker(anchor: OwnedFd, flags: libc::c_int) -> Result<libc::c_int, libc::c_int> {
+    check_abandoned()?;
     let mut sockets = [-1; 2];
     if libc::socketpair(
         libc::AF_UNIX,
@@ -360,11 +373,19 @@ unsafe fn open_worker(anchor: OwnedFd, flags: libc::c_int) -> Result<libc::c_int
         }
         return Err(fork_error);
     }
+    if pidfd < 0 {
+        libc::kill(pid, libc::SIGKILL);
+        libc::waitpid(pid, std::ptr::null_mut(), libc::WNOHANG);
+        if restore_error != 0 {
+            crate::pager::quit(1);
+            libc::_exit(1);
+        }
+        return Err(libc::EIO);
+    }
     drop(child_socket);
     drop(anchor);
     let mut worker = Worker {
-        pid,
-        pidfd: OwnedFd::from_raw_fd(pidfd),
+        pidfd: Some(OwnedFd::from_raw_fd(pidfd)),
         socket: parent_socket,
     };
     if restore_error != 0 {

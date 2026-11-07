@@ -967,10 +967,21 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
         repaint();
         flush();
     }
+    // The remaining file and history cleanup may block in a hostile native
+    // filesystem. Restore termios before entering either operation.
+    raw_mode(lbool::LFALSE);
+    if status == 15 || status == 2 {
+        crate::ch::abort_logfile();
+    }
     edit(::core::ptr::null_mut::<::core::ffi::c_void>() as *mut ::core::ffi::c_char);
     save_cmdhist();
-    raw_mode(lbool::LFALSE);
     close_getchr();
+    crate::diagnostic_broker::finish();
+    // A termination delivered during any exit path, including a failing
+    // history diagnostic, still determines the final signal status.
+    if let Some(pending) = crate::signal::pending_quit_status() {
+        status = pending;
+    }
     // Include failures from the final flush/terminal teardown, without hiding
     // a more specific primary error (for example SIGTERM's status 15).
     if status == 0
@@ -978,6 +989,8 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
             || crate::ch::logfile_failed()
             || crate::ch::buffer_allocation_failed()
             || crate::ch::input_read_failed()
+            || crate::lsystem::pipe_io_failed()
+            || crate::cmdbuf::history_persistence_failed()
             || crate::screen::terminal_failed())
     {
         status = 1;
@@ -991,6 +1004,9 @@ pub unsafe extern "C" fn secure_allow(mut features: ::core::ffi::c_uint) -> lboo
     );
 }
 pub fn main() {
+    if crate::diagnostic_broker::prepare().is_err() {
+        ::std::process::exit(1);
+    }
     #[cfg(feature = "safety-injection")]
     if let Err(error) = crate::fault::initialize() {
         eprintln!("rless safety injection: {error}");
@@ -1009,9 +1025,11 @@ pub fn main() {
         .chain(::core::iter::once(::core::ptr::null_mut()))
         .collect();
     unsafe {
-        ::std::process::exit(main_0(
+        let status = main_0(
             (args_ptrs.len() - 1) as ::core::ffi::c_int,
             args_ptrs.as_mut_ptr() as *mut *const ::core::ffi::c_char,
-        ) as i32)
+        ) as i32;
+        crate::diagnostic_broker::finish();
+        ::std::process::exit(status)
     }
 }

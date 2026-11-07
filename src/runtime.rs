@@ -52,6 +52,11 @@ pub unsafe extern "C" fn rless_signal(
     previous.sa_sigaction
 }
 
+// Keep the exported wrapper's Rust signature identical to the native signal
+// ABI. An Option<fn> can fabricate callable values for SIG_IGN and SIG_ERR
+// even when the machine representation happens to match.
+const _: unsafe extern "C" fn(libc::c_int, libc::sighandler_t) -> libc::sighandler_t = rless_signal;
+
 #[cfg(test)]
 mod disposition_tests {
     use super::*;
@@ -85,7 +90,7 @@ pub(crate) fn take_interrupt() -> bool {
     IO_INTERRUPTED.swap(false, Ordering::SeqCst)
 }
 
-struct RestoreMask(libc::sigset_t);
+pub(crate) struct RestoreMask(pub(crate) libc::sigset_t);
 
 impl Drop for RestoreMask {
     fn drop(&mut self) {
@@ -100,7 +105,7 @@ impl Drop for RestoreMask {
     }
 }
 
-unsafe fn block_handled_signals() -> Result<libc::sigset_t, libc::c_int> {
+pub(crate) unsafe fn block_handled_signals() -> Result<libc::sigset_t, libc::c_int> {
     let mut handled: libc::sigset_t = std::mem::zeroed();
     let mut saved: libc::sigset_t = std::mem::zeroed();
     if libc::sigemptyset(&mut handled) != 0 {
@@ -283,8 +288,15 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
     } else if status.st_mode & libc::S_IFMT == libc::S_IFSOCK {
         // recv has a per-call nonblocking flag and leaves shared fd flags alone.
         libc::recv(fd, buffer.cast(), len, libc::MSG_DONTWAIT)
+    } else if matches!(status.st_mode & libc::S_IFMT, libc::S_IFREG | libc::S_IFBLK) {
+        // Regular and block files can stall after poll reports them readable.
+        // Keep the pager out of that syscall and commit the shared offset only
+        // after accepting the worker result.
+        crate::regular_read::read_positioned(fd, buffer, len, &saved)
     } else {
-        libc::read(fd, buffer.cast(), len)
+        // Non-tty character devices can ignore O_NONBLOCK. The worker keeps
+        // a driver stall out of the pager's signal-mask critical section.
+        crate::regular_read::read_unpositioned(fd, buffer, len, &saved)
     }
 }
 

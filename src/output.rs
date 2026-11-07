@@ -2,6 +2,7 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
+use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 extern "C" {
@@ -498,17 +499,122 @@ pub fn output_failed() -> bool {
 // Do not enter error()/putstr()/flush() here: their output may be the failing
 // stream. This allocation-free, best-effort stderr path cannot recurse.
 pub fn io_error_diagnostic(message: &[u8]) {
-    let mut remaining = message;
-    while !remaining.is_empty() {
-        let result = unsafe { libc::write(2, remaining.as_ptr().cast(), remaining.len()) };
-        if result > 0 {
-            remaining = &remaining[result as usize..];
-        } else if result < 0 && unsafe { *libc::__errno_location() } == libc::EINTR {
-            continue;
+    unsafe {
+        let saved_errno = *libc::__errno_location();
+        let mut original: libc::stat = std::mem::zeroed();
+        if libc::fstat(2, &mut original) != 0 {
+            *libc::__errno_location() = saved_errno;
+            return;
+        }
+        let kind = original.st_mode & libc::S_IFMT;
+        let private = if kind == libc::S_IFIFO || kind == libc::S_IFCHR {
+            match reopen_nonblocking_writer(2, &original) {
+                Ok(fd) => Some(fd),
+                Err(_) => {
+                    *libc::__errno_location() = saved_errno;
+                    return;
+                }
+            }
         } else {
+            None
+        };
+        let target = private.as_ref().map_or(2, AsRawFd::as_raw_fd);
+        let mut remaining = message;
+        while !remaining.is_empty() {
+            let result = if kind == libc::S_IFSOCK {
+                libc::send(
+                    target,
+                    remaining.as_ptr().cast(),
+                    remaining.len(),
+                    libc::MSG_DONTWAIT | libc::MSG_NOSIGNAL,
+                )
+            } else {
+                libc::write(target, remaining.as_ptr().cast(), remaining.len())
+            };
+            if result > 0 {
+                remaining = &remaining[result as usize..];
+            } else {
+                // Diagnostics never wait for a full terminal, pipe or socket.
+                break;
+            }
+        }
+        *libc::__errno_location() = saved_errno;
+    }
+}
+
+// A dup shares O_NONBLOCK with the caller's descriptor. Reopen a character
+// device or pipe through procfs to keep the caller's status flags unchanged.
+unsafe fn reopen_nonblocking_writer(
+    fd: libc::c_int,
+    original: &libc::stat,
+) -> Result<OwnedFd, libc::c_int> {
+    let flags = libc::fcntl(fd, libc::F_GETFL);
+    if flags < 0 {
+        return Err(*libc::__errno_location());
+    }
+    if flags & libc::O_ACCMODE == libc::O_RDONLY || flags & libc::O_PATH != 0 {
+        return Err(libc::EBADF);
+    }
+    let prefix = b"/proc/self/fd/";
+    let mut path = [0u8; 32];
+    path[..prefix.len()].copy_from_slice(prefix);
+    let mut digits = [0u8; 10];
+    let mut value = fd as u32;
+    let mut count = 0;
+    loop {
+        digits[count] = b'0' + (value % 10) as u8;
+        count += 1;
+        value /= 10;
+        if value == 0 {
             break;
         }
     }
+    for (index, digit) in digits[..count].iter().rev().enumerate() {
+        path[prefix.len() + index] = *digit;
+    }
+    let reopened = libc::open(
+        path.as_ptr().cast(),
+        libc::O_WRONLY | libc::O_NONBLOCK | libc::O_CLOEXEC | libc::O_NOCTTY,
+    );
+    if reopened < 0 {
+        return Err(*libc::__errno_location());
+    }
+    let private = OwnedFd::from_raw_fd(reopened);
+    let mut verified: libc::stat = std::mem::zeroed();
+    if libc::fstat(reopened, &mut verified) != 0 {
+        return Err(*libc::__errno_location());
+    }
+    if verified.st_mode & libc::S_IFMT != original.st_mode & libc::S_IFMT
+        || verified.st_dev != original.st_dev
+        || verified.st_ino != original.st_ino
+        || verified.st_rdev != original.st_rdev
+    {
+        return Err(libc::ESTALE);
+    }
+    Ok(private)
+}
+
+// A full PTY output queue cannot trap the pager in write(2) after SIGTERM.
+// Verify the reopened object because descriptor numbers can be reused.
+unsafe fn private_terminal_writer(fd: libc::c_int) -> Result<Option<OwnedFd>, libc::c_int> {
+    if crate::pager::is_tty.0 == 0 {
+        return Ok(None);
+    }
+    let mut original: libc::stat = std::mem::zeroed();
+    if libc::fstat(fd, &mut original) != 0 {
+        return Err(*libc::__errno_location());
+    }
+    if original.st_mode & libc::S_IFMT != libc::S_IFCHR {
+        return Ok(None);
+    }
+    reopen_nonblocking_writer(fd, &original).map(Some)
+}
+
+unsafe fn record_output_failure() {
+    if !OUTPUT_FAILED.swap(true, Ordering::Relaxed) {
+        io_error_diagnostic(b"rless: write error\n");
+    }
+    screen_trashed();
 }
 
 #[no_mangle]
@@ -523,8 +629,25 @@ unsafe fn flush_buffer() -> bool {
         return true;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
+    let private = match private_terminal_writer(outfd) {
+        Ok(value) => value,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            record_output_failure();
+            return false;
+        }
+    };
+    let target = private.as_ref().map_or(outfd, AsRawFd::as_raw_fd);
+    let _waiting = private.as_ref().map(|_| crate::runtime::IoWait::new());
     let mut written = 0;
     while written < n {
+        if private.is_some()
+            && (crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+                || crate::signal::has_pending_notifications())
+        {
+            screen_trashed();
+            return false;
+        }
         #[cfg(feature = "safety-injection")]
         let injected_failure = crate::fault::hit(crate::fault::Site::Write);
         #[cfg(not(feature = "safety-injection"))]
@@ -541,7 +664,7 @@ unsafe fn flush_buffer() -> bool {
             -1
         } else {
             write(
-                outfd,
+                target,
                 (&raw const obuf).cast::<u8>().add(written).cast(),
                 write_len,
             )
@@ -549,12 +672,46 @@ unsafe fn flush_buffer() -> bool {
         if result > 0 {
             written += result as usize;
         } else if result < 0 && *libc::__errno_location() == libc::EINTR {
-            continue;
-        } else {
-            if !OUTPUT_FAILED.swap(true, Ordering::Relaxed) {
-                io_error_diagnostic(b"rless: write error\n");
+            if private.is_some()
+                && (crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+                    || crate::signal::has_pending_notifications())
+            {
+                screen_trashed();
+                return false;
             }
-            screen_trashed();
+            continue;
+        } else if result < 0
+            && private.is_some()
+            && (*libc::__errno_location() == libc::EAGAIN
+                || *libc::__errno_location() == libc::EWOULDBLOCK)
+        {
+            let mut descriptor = libc::pollfd {
+                fd: target,
+                events: libc::POLLOUT,
+                revents: 0,
+            };
+            let timeout = if crate::pager::quitting.0 != 0 {
+                100
+            } else {
+                -1
+            };
+            let ready = crate::runtime::poll_interruptible(&mut descriptor, 1, timeout);
+            if ready == 0 {
+                // Exit-time terminal escapes cannot be delivered while the
+                // consumer refuses to read. Continue with termios cleanup.
+                screen_trashed();
+                return false;
+            }
+            if ready < 0 {
+                if *libc::__errno_location() == libc::EINTR {
+                    screen_trashed();
+                    return false;
+                }
+                record_output_failure();
+                return false;
+            }
+        } else {
+            record_output_failure();
             return false;
         }
     }
@@ -1073,6 +1230,12 @@ pub unsafe extern "C" fn query(
     }
     less_printf(fmt, parg);
     c = getchr();
+    if c == -2 {
+        // A startup query may run before terminal initialization. Its
+        // noninteractive newline drain must not turn an interrupted read
+        // into an endless sequence of interrupted reads.
+        return c;
+    }
     if interactive().0 != 0 {
         lower_left();
         flush();
@@ -1083,6 +1246,9 @@ pub unsafe extern "C" fn query(
         let mut eol: ::core::ffi::c_int = c;
         while eol != '\n' as ::core::ffi::c_int && eol != '\r' as ::core::ffi::c_int {
             eol = getchr();
+            if eol == -2 {
+                return eol;
+            }
         }
     }
     if c == 'Q' as ::core::ffi::c_int {

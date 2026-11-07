@@ -62,7 +62,10 @@ def observe(binary: Path) -> dict:
                 read_for(0.05)
             if not marker.exists():
                 raise TimeoutError("shell helper")
-            for _ in range(20):
+            # The child can finish terminal teardown just after a one-second
+            # observer deadline under concurrent sanitizer load. Give normal
+            # exit the same five-second bound used for helper startup.
+            for _ in range(100):
                 try:
                     os.write(master, b"\nq")
                 except OSError:

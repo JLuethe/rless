@@ -181,20 +181,73 @@ def run(binary, output, *, retained=None):
         check(o['files']['history']['sha256'] != sha(old), 'history not rewritten')
         check(o['files']['history']['mode'] == 0o600, 'history not private')
     observe('history-baseline', history, history_ok)
+    named_history = json.loads(json.dumps(history))
+    named_history['env']['RLESS_BOUNDARY_NO_TMPFILE'] = '1'
+    observe('history-named-baseline', named_history, history_ok)
+    startup_read = pager(events=[{'await': ['READY']}, {'send': 'q'}],
+                         env={'LESSHISTFILE': '{ROOT}/history'})
+    startup_read['files']['history'] = {
+        'text': '.less-history-file:\n.search\n"prior\n', 'mode': 0o600,
+    }
+    def startup_read_failure(o):
+        check(o['status'] == 1 and o['termios_restored'], 'startup history read failure exited successfully')
+        hit(o)
+        check(o['files']['history']['sha256'] == sha(startup_read['files']['history']['text'].encode()),
+              'startup read failure changed history')
+    observe('hist-startup-read-eio', fault(startup_read, shim, 'hist-read-eio'), startup_read_failure)
+    late_read = pager(text='line 1\n' * 25 + 'secretprefix here\n' + 'line 2\n' * 30,
+                      events=[{'await': ['READY']},
+                              {'send': '/\x1bk\n',
+                               'await': ['READY', 'No previous regular expression', '(press RETURN)'],
+                               'snapshot': True}, {'send': 'q'}],
+                      env={'LESSHISTFILE': '{ROOT}/history'})
+    late_read['files']['history'] = {
+        'text': '.less-history-file:\n.search\n"secretprefix\n"other\n', 'mode': 0o600,
+    }
+    def late_read_failure(o):
+        check(o['status'] == 1 and o['termios_restored'], 'late history read failure lost exit status')
+        hit(o)
+        rows = o['checkpoints'][0]['rows']
+        check(rows[0].startswith('line 1'), 'partial history entry became searchable')
+        check('No previous regular expression' in rows[-1], 'partial history search was recalled')
+    observe('hist-late-read-eio', fault(late_read, shim, 'hist-read-eio-late'), late_read_failure)
     for plan in ('hist-fdopen', 'hist-write', 'hist-ferror', 'hist-fclose', 'hist-rename'):
         def verify(o):
-            healthy(o)
+            check(o['status'] == 1 and o['termios_restored'], 'history persistence failure exited successfully')
             hit(o)
             check(o['files']['history']['sha256'] == sha(old), 'old history replaced')
             check(not any(x.startswith(('history.', '.history.')) for x in o['files']), 'temporary history leaked')
         observe(plan, fault(history, shim, plan), verify)
+        observe('named-' + plan, fault(named_history, shim, plan), verify)
+
+    def history_durability_failure(o):
+        check(o['status'] == 1 and o['termios_restored'], 'directory sync failure lost exit status or terminal')
+        hit(o)
+        check(o['files']['history']['sha256'] != sha(old), 'rename did not commit before sync fault')
+        check(not any(x.startswith(('history.', '.history.')) for x in o['files']), 'committed history left a temporary')
+    observe('hist-dir-fsync', fault(history, shim, 'hist-dir-fsync'), history_durability_failure)
+    observe('named-hist-dir-fsync', fault(named_history, shim, 'hist-dir-fsync'),
+            history_durability_failure)
+
+    unreadable_history = json.loads(json.dumps(history))
+    unreadable_history['files']['history'] = {
+        'text': '.less-history-file:\n.search\n"prior\n', 'mode': 0o600,
+    }
+    prior = unreadable_history['files']['history']['text'].encode()
+    def history_read_failure(o):
+        check(o['status'] == 1 and o['termios_restored'], 'history read failure exited successfully')
+        hit(o)
+        check(o['files']['history']['sha256'] == sha(prior), 'read error replaced prior history')
+        check(not any(x.startswith(('history.', '.history.')) for x in o['files']), 'read error left a temporary')
+    observe('hist-read-eio', fault(unreadable_history, shim, 'hist-read-eio'), history_read_failure)
 
     # run_v2 fixture files cannot express symlinks. Set up an isolated PTY
     # directly to verify both success and rollback against an old symlink.
     for plan in ('baseline', 'hist-rename'):
         name = 'history-symlink-' + plan
         def verify_symlink(o, plan=plan):
-            healthy(o)
+            check(o['status'] == (0 if plan == 'baseline' else 1) and o['termios_restored'],
+                  'history symlink case lost exit status or terminal')
             effect = o['symlink_effects']
             check(effect['victim_sha256'] == sha(old), 'symlink target modified')
             check(effect['temporary_names'] == [], 'temporary file left')
@@ -224,7 +277,8 @@ def run(binary, output, *, retained=None):
                     env.update(json.loads(Path(safety).read_text()))
                 argv = [str(binary), '-PsREADY', '-PmREADY', '-PMREADY', 'i']
                 o = run_pty(argv, env, work, history, lambda data: data.replace(directory.encode(), b'{ROOT}'))
-                healthy(o)
+                check(o['status'] == (0 if plan == 'baseline' else 1) and o['termios_restored'],
+                      'history symlink case lost exit status or terminal')
                 check((work / 'victim').read_bytes() == old, 'symlink target modified')
                 check(not any(x.name.startswith(('history.', '.history.')) for x in work.iterdir()), 'temporary file left')
                 if plan == 'baseline':
@@ -255,7 +309,7 @@ def run(binary, output, *, retained=None):
                                                'src/pager.rs', 'src/position.rs', 'src/screen.rs')},
                    asan_environment=bool(os.environ.get('RLESS_SAFETY_ENV')))
     if retained is not None:
-        check(set(retained) == set(results) and len(results) == 30, 'missing or extra boundary cases')
+        check(set(retained) == set(results) and len(results) == 41, 'missing or extra boundary cases')
     else:
         (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
         print(json.dumps(summary))

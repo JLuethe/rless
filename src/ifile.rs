@@ -15,6 +15,7 @@ extern "C" {
     fn lrealpath(path: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn unmark(ifile: *mut ::core::ffi::c_void);
     fn mark_check_ifile(ifile: *mut ::core::ffi::c_void);
+    fn rless_pcancel_read(stream: *mut FILE) -> ::core::ffi::c_int;
     static mut curr_ifile: *mut ::core::ffi::c_void;
     static mut old_ifile: *mut ::core::ffi::c_void;
 }
@@ -166,8 +167,15 @@ pub unsafe extern "C" fn del_ifile(mut h: *mut ::core::ffi::c_void) {
     if h == old_ifile {
         old_ifile = ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
-    crate::ch::dispose_ifile_state(h);
     p = h as *mut ifile;
+    // CH_KEEPOPEN retains a LESSOPEN pipe across navigation. Deletion ends
+    // that lifetime, even though close_file deliberately kept it for revisit.
+    let helper = (*p).h_altpipe;
+    (*p).h_altpipe = ::core::ptr::null_mut();
+    if !helper.is_null() {
+        let _ = rless_pcancel_read(helper);
+    }
+    crate::ch::dispose_ifile_state(h);
     unlink_ifile(p);
     free((*p).h_rfilename as *mut ::core::ffi::c_void);
     free((*p).h_filename as *mut ::core::ffi::c_void);

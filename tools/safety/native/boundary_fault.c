@@ -7,15 +7,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 #include <sys/syscall.h>
 #include <termios.h>
 #include <unistd.h>
 
-static int fired;
+/* A read fault can now fire in a cancellable child. Keep the one-shot marker
+ * shared with the parent and later workers so the campaign remains exact. */
+static volatile int *fired;
+
+__attribute__((constructor)) static void initialize_fault_state(void) {
+    void *state = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE,
+                       MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (state == MAP_FAILED) _exit(127);
+    fired = state;
+}
 static int terminal_calls;
 static int swaps;
 static int tty_opens;
+static int history_reads;
 static FILE *history_stream;
+static int unnamed_history_fd = -1;
 
 static int plan(const char *name) {
     const char *value = getenv("RLESS_BOUNDARY_PLAN");
@@ -23,7 +36,7 @@ static int plan(const char *name) {
 }
 
 static void hit(void) {
-    if (fired++) return;
+    if (__sync_lock_test_and_set(fired, 1)) return;
     const char *path = getenv("RLESS_BOUNDARY_TRACE");
     if (!path) _exit(123);
     int fd = syscall(SYS_openat, AT_FDCWD, path, O_WRONLY | O_APPEND | O_CLOEXEC, 0);
@@ -42,12 +55,38 @@ static int named(int fd, const char *suffix) {
     return strcmp(base, suffix) == 0;
 }
 
+ssize_t read(int fd, void *data, size_t count) {
+    ssize_t (*real_call)(int, void *, size_t) = dlsym(RTLD_NEXT, "read");
+    if (!real_call) _exit(125);
+    if (plan("hist-read-eio-late") && named(fd, "history")) {
+        if (++history_reads == 1) return real_call(fd, data, count < 48 ? count : 48);
+        hit(); errno = EIO; return -1;
+    }
+    if (plan("hist-read-eio") && named(fd, "history")) {
+        hit(); errno = EIO; return -1;
+    }
+    return real_call(fd, data, count);
+}
+
+ssize_t pread(int fd, void *data, size_t count, off_t offset) {
+    ssize_t (*real_call)(int, void *, size_t, off_t) = dlsym(RTLD_NEXT, "pread");
+    if (!real_call) _exit(125);
+    if (plan("hist-read-eio-late") && named(fd, "history")) {
+        if (offset == 0) return real_call(fd, data, count < 48 ? count : 48, offset);
+        hit(); errno = EIO; return -1;
+    }
+    if (plan("hist-read-eio") && named(fd, "history")) {
+        hit(); errno = EIO; return -1;
+    }
+    return real_call(fd, data, count, offset);
+}
+
 ssize_t write(int fd, const void *data, size_t count) {
     ssize_t (*real_call)(int, const void *, size_t) = dlsym(RTLD_NEXT, "write");
     if (!real_call) _exit(125);
     if (named(fd, "capture")) {
-        if (plan("log-short") && !fired && count > 3) { hit(); return real_call(fd, data, 3); }
-        if (plan("log-eintr") && !fired) { hit(); errno = EINTR; return -1; }
+        if (plan("log-short") && !*fired && count > 3) { hit(); return real_call(fd, data, 3); }
+        if (plan("log-eintr") && !*fired) { hit(); errno = EINTR; return -1; }
         if (plan("log-eio") || plan("log-enospc")) {
             hit(); errno = plan("log-eio") ? EIO : ENOSPC; return -1;
         }
@@ -135,6 +174,37 @@ static int history_temporary(const char *path) {
     return strncmp(base, ".history.", 9) == 0 || strncmp(base, "history.", 8) == 0;
 }
 
+int openat(int dirfd, const char *path, int flags, ...) {
+    int (*real_call)(int, const char *, int, ...) = dlsym(RTLD_NEXT, "openat");
+    if (!real_call) _exit(125);
+    mode_t mode = 0;
+    if ((flags & O_CREAT) || (flags & O_TMPFILE) == O_TMPFILE) {
+        va_list args;
+        va_start(args, flags);
+        mode = va_arg(args, int);
+        va_end(args);
+    }
+    if ((flags & O_TMPFILE) == O_TMPFILE && getenv("RLESS_BOUNDARY_NO_TMPFILE")) {
+        errno = EOPNOTSUPP; return -1;
+    }
+    if (plan("hist-otmpfile-unsupported") && (flags & O_TMPFILE) == O_TMPFILE) {
+        hit(); errno = EOPNOTSUPP; return -1;
+    }
+    int fd = real_call(dirfd, path, flags, mode);
+    if (fd >= 0 && (flags & O_TMPFILE) == O_TMPFILE) unnamed_history_fd = fd;
+    return fd;
+}
+
+int fsync(int fd) {
+    int (*real_call)(int) = dlsym(RTLD_NEXT, "fsync");
+    if (!real_call) _exit(125);
+    struct stat metadata;
+    if (plan("hist-dir-fsync") && fstat(fd, &metadata) == 0 && S_ISDIR(metadata.st_mode)) {
+        hit(); errno = EIO; return -1;
+    }
+    return real_call(fd);
+}
+
 FILE *fdopen(int fd, const char *mode) {
     FILE *(*real_call)(int, const char *) = dlsym(RTLD_NEXT, "fdopen");
     if (!real_call) _exit(125);
@@ -145,7 +215,7 @@ FILE *fdopen(int fd, const char *mode) {
         ssize_t n = syscall(SYS_readlinkat, AT_FDCWD, proc, path, sizeof path - 1);
         if (n >= 0) {
             path[n] = 0;
-            if (history_temporary(path)) {
+            if (history_temporary(path) || fd == unnamed_history_fd) {
                 if (plan("hist-fdopen")) { hit(); errno = EMFILE; return NULL; }
                 history_stream = real_call(fd, mode);
                 if (history_stream && plan("hist-write")) {

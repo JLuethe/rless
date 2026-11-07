@@ -31,20 +31,30 @@ fn record_log_failure() {
     }
 }
 
-// The caller lends a live input-buffer range. On failure, relinquish the log
-// descriptor and saved filename once, so exit cannot drain an endless stream
-// into a log that has already stopped accepting bytes.
+// The caller lends a live input-buffer range. The child owns the verified
+// logfile descriptor; the pager only sends bounded byte packets. On failure,
+// drop the session once so exit cannot drain an endless source into it.
 unsafe fn write_log_buffer(data: *const u8, length: usize) -> bool {
     let mut written = 0;
     while written < length {
-        let result = write(logfile, data.add(written).cast(), length - written);
+        let result = crate::log_process::write(data.add(written), length - written);
         if result > 0 && result as usize <= length - written {
             written += result as usize;
         } else if result < 0 && *libc::__errno_location() == libc::EINTR {
-            continue;
+            if sigs == 0 && !crate::signal::has_pending_notifications() {
+                continue;
+            }
+            // The abandoned helper may still be inside an uninterruptible
+            // filesystem request. Do not start another write on this log.
+            LOG_FAILED.store(true, Ordering::Relaxed);
+            crate::log_process::cancel();
+            logfile = -1;
+            free(namelogfile.cast());
+            namelogfile = std::ptr::null_mut();
+            return false;
         } else {
             record_log_failure();
-            close(logfile);
+            crate::log_process::cancel();
             logfile = -1;
             free(namelogfile.cast());
             namelogfile = std::ptr::null_mut();
@@ -56,7 +66,6 @@ unsafe fn write_log_buffer(data: *const u8, length: usize) -> bool {
 extern "C" {
     fn lseek(__fd: ::core::ffi::c_int, __offset: __off_t, __whence: ::core::ffi::c_int) -> __off_t;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn write(__fd: ::core::ffi::c_int, __buf: *const ::core::ffi::c_void, __n: size_t) -> ssize_t;
     fn calloc(__nmemb: size_t, __size: size_t) -> *mut ::core::ffi::c_void;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn ecalloc(count: size_t, size: size_t) -> *mut ::core::ffi::c_void;
@@ -813,16 +822,31 @@ pub unsafe extern "C" fn end_logfile() {
             }
         }
     }
-    if logfile >= 0 && close(logfile) < 0 {
-        // On Linux close relinquishes the descriptor even when it reports an
-        // error; retrying could close an unrelated newly reused descriptor.
-        record_log_failure();
+    if logfile >= 0 {
+        if let Err(error) = crate::log_process::finish() {
+            if error == libc::EINTR && (sigs != 0 || crate::signal::has_pending_notifications()) {
+                LOG_FAILED.store(true, Ordering::Relaxed);
+            } else {
+                record_log_failure();
+            }
+        }
     }
     logfile = -1 as ::core::ffi::c_int;
     free(namelogfile as *mut ::core::ffi::c_void);
     namelogfile = ::core::ptr::null_mut::<::core::ffi::c_char>();
     putstr(b"\n\0".as_ptr() as *const ::core::ffi::c_char);
     flush();
+}
+
+pub(crate) unsafe fn abort_logfile() {
+    // A signal can arrive while the verified child is waiting at the
+    // overwrite prompt, before the legacy active sentinel is published.
+    crate::log_process::cancel();
+    if logfile >= 0 {
+        logfile = -1;
+        free(namelogfile.cast());
+        namelogfile = std::ptr::null_mut();
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn sync_logfile() {

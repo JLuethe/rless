@@ -10,6 +10,7 @@ extern "C" {
     fn free(ptr: *mut ::core::ffi::c_void);
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn ferror(__stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_fopen_read"]
     fn fopen(
         __filename: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,

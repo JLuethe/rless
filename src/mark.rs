@@ -888,6 +888,39 @@ unsafe extern "C" fn cmarkf(
 }
 #[no_mangle]
 pub unsafe extern "C" fn save_marks(mut fout: *mut FILE, mut hdr: *const ::core::ffi::c_char) {
+    prepare_saved_marks();
+    fprintf(fout, b"%s\n\0".as_ptr() as *const ::core::ffi::c_char, hdr);
+    let mut i: ::core::ffi::c_int = 0;
+    while i < 2 as ::core::ffi::c_int * 26 as ::core::ffi::c_int + 2 as ::core::ffi::c_int {
+        let mut filename: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
+        let mut m_0: *mut mark = (&raw mut file_marks as *mut mark).offset(i as isize);
+        let mut pos_str: [::core::ffi::c_char; 23] = [0; 23];
+        if mark_is_set(m_0).0 != 0 {
+            postoa(
+                (*m_0).m_scrpos.pos,
+                &raw mut pos_str as *mut ::core::ffi::c_char,
+                10,
+            );
+            filename = (*m_0).m_filename;
+            if filename.is_null() {
+                filename = get_real_filename((*m_0).m_ifile);
+            }
+            if strcmp(filename, b"-\0".as_ptr() as *const ::core::ffi::c_char) != 0 {
+                fprintf(
+                    fout,
+                    b"m %c %d %s %s\n\0".as_ptr() as *const ::core::ffi::c_char,
+                    mark_letter(i) as ::core::ffi::c_int,
+                    (*m_0).m_scrpos.ln,
+                    &raw mut pos_str as *mut ::core::ffi::c_char,
+                    filename,
+                );
+            }
+        }
+        i += 1;
+    }
+}
+
+pub(crate) unsafe fn prepare_saved_marks() {
     let mut i: ::core::ffi::c_int = 0;
     if perma_marks != 0 {
         i = 0 as ::core::ffi::c_int;
@@ -904,37 +937,6 @@ pub unsafe extern "C" fn save_marks(mut fout: *mut FILE, mut hdr: *const ::core:
             }
             i += 1;
         }
-    }
-    fprintf(fout, b"%s\n\0".as_ptr() as *const ::core::ffi::c_char, hdr);
-    i = 0 as ::core::ffi::c_int;
-    while i < 2 as ::core::ffi::c_int * 26 as ::core::ffi::c_int + 2 as ::core::ffi::c_int {
-        let mut filename: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
-        let mut m_0: *mut mark = (&raw mut file_marks as *mut mark).offset(i as isize);
-        let mut pos_str: [::core::ffi::c_char; 23] = [0; 23];
-        if mark_is_set(m_0).0 != 0 {
-            postoa(
-                (*m_0).m_scrpos.pos,
-                &raw mut pos_str as *mut ::core::ffi::c_char,
-                10 as ::core::ffi::c_int,
-            );
-            filename = (*m_0).m_filename;
-            if filename.is_null() {
-                filename = get_real_filename((*m_0).m_ifile);
-            }
-            if strcmp(filename, b"-\0".as_ptr() as *const ::core::ffi::c_char)
-                != 0 as ::core::ffi::c_int
-            {
-                fprintf(
-                    fout,
-                    b"m %c %d %s %s\n\0".as_ptr() as *const ::core::ffi::c_char,
-                    mark_letter(i) as ::core::ffi::c_int,
-                    (*m_0).m_scrpos.ln,
-                    &raw mut pos_str as *mut ::core::ffi::c_char,
-                    filename,
-                );
-            }
-        }
-        i += 1;
     }
 }
 #[no_mangle]

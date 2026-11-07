@@ -3,7 +3,7 @@
   "specification_version": "1.0.0",
   "files": {
     "compat/cases/behavior.json": "ba9d188d96f4154bd4284d2aa547d02fd30e06afeeb1d58fce89e56ce0b6b71e",
-    "compat/cases/integration.json": "a0debe50f5c67260bf75ae03f38dfd5ce3eee133d031162c11f5b50c9a8bbd8e",
+    "compat/cases/integration.json": "18eb4c4c4a0aec9cebb404f971c54a7a91c9738a2378a89342b25141ab1cfabc",
     "compat/cases/interactions.json": "900cfe8c0a56fa71eb5f120011b39294e85a659283cceb12c62197b0d78cf161",
     "compat/cases/options.json": "962004b2bf2cd485cf453d03e40c198ce6500503bbd3b4df3bf5071fabe33e10",
     "compat/expected-behavior.json": "da773283e9c54deb46dbb294d94acf0a508cba54ff2cf17018c60d059fd6d8c9",

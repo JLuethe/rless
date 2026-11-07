@@ -5,7 +5,15 @@
 use ::c2rust_bitfields;
 extern "C" {
     static mut stdin: *mut FILE;
+    fn rless_stdin_read() -> *mut FILE;
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn ferror(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn fgets(
+        __s: *mut ::core::ffi::c_char,
+        __n: ::core::ffi::c_int,
+        __stream: *mut FILE,
+    ) -> *mut ::core::ffi::c_char;
+    #[link_name = "rless_fopen_read"]
     fn fopen(
         __filename: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
@@ -16,11 +24,6 @@ extern "C" {
         __format: *const ::core::ffi::c_char,
         ...
     ) -> ::core::ffi::c_int;
-    fn fgets(
-        __s: *mut ::core::ffi::c_char,
-        __n: ::core::ffi::c_int,
-        __stream: *mut FILE,
-    ) -> *mut ::core::ffi::c_char;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn strncpy(
         __dest: *mut ::core::ffi::c_char,
@@ -1648,7 +1651,10 @@ pub unsafe extern "C" fn parse_lesskey(
     if strcmp(lesskey_file, b"-\0".as_ptr() as *const ::core::ffi::c_char)
         == 0 as ::core::ffi::c_int
     {
-        desc = stdin;
+        desc = rless_stdin_read();
+        if desc.is_null() {
+            errors = -1;
+        }
     } else {
         desc = fopen(lesskey_file, b"r\0".as_ptr() as *const ::core::ffi::c_char);
         if desc.is_null() {
@@ -1666,8 +1672,10 @@ pub unsafe extern "C" fn parse_lesskey(
             linenum += 1;
             parse_line(&raw mut line as *mut ::core::ffi::c_char, tables);
         }
-        if desc != stdin {
-            fclose(desc);
+        let read_failed = ferror(desc) != 0;
+        let close_failed = fclose(desc) != 0;
+        if read_failed || close_failed {
+            errors = -1;
         }
     }
     free(lesskey_file as *mut ::core::ffi::c_void);

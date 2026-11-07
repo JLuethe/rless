@@ -10,6 +10,7 @@ import pty
 import signal
 import subprocess
 import tempfile
+import termios
 import time
 
 
@@ -25,15 +26,19 @@ def observe(binary: Path) -> dict:
         trace = work / "helper-hit"
         helper = work / "helper"
         helper.write_text(
-            '#!/bin/sh\nprintf hit > "$RLESS_HELPER_TRACE"\nexec sleep 30\n'
+            '#!/bin/sh\nprintf "hit %s" "$$" > "$RLESS_HELPER_TRACE"\nexec sleep 30\n'
         )
         helper.chmod(0o700)
         master, slave = pty.openpty()
+        original_termios = termios.tcgetattr(slave)
         env = dict(
             PATH="/usr/bin:/bin", HOME=directory, TERM="xterm-256color",
             LC_ALL="C", LESSHISTFILE="-",
             LESSOPEN=f"|{helper} %s", RLESS_HELPER_TRACE=str(trace),
         )
+        for name in ("ASAN_OPTIONS", "LSAN_OPTIONS", "ASAN_SYMBOLIZER_PATH"):
+            if name in os.environ:
+                env[name] = os.environ[name]
         process = subprocess.Popen(
             [str(binary), str(data)], stdin=slave, stdout=slave, stderr=slave,
             start_new_session=True, close_fds=True, env=env,
@@ -45,7 +50,8 @@ def observe(binary: Path) -> dict:
                    and process.poll() is None):
                 time.sleep(0.01)
             hit = trace.read_bytes() if trace.exists() else b""
-            if hit == b"hit" and process.poll() is None:
+            helper_pid = (int(hit.split()[1]) if hit.startswith(b"hit ") else None)
+            if helper_pid is not None and process.poll() is None:
                 os.kill(process.pid, signal.SIGTERM)
                 try:
                     process.wait(timeout=1)
@@ -56,10 +62,22 @@ def observe(binary: Path) -> dict:
                          if process.poll() is None else None)
             except FileNotFoundError:
                 wchan = None
+            helper_alive = False
+            if helper_pid is not None:
+                try:
+                    helper_status = Path(f"/proc/{helper_pid}/status").read_text()
+                    helper_alive = not any(
+                        line.startswith("State:") and "Z" in line.split()[1]
+                        for line in helper_status.splitlines()
+                    )
+                except FileNotFoundError:
+                    pass
             return dict(
                 binary=str(binary), binary_sha256=sha(binary.read_bytes()),
-                helper_sha256=sha(helper.read_bytes()), helper_hit=hit == b"hit",
-                status=process.poll(), wchan=wchan,
+                helper_sha256=sha(helper.read_bytes()),
+                helper_hit=helper_pid is not None, helper_pid=helper_pid,
+                helper_alive=helper_alive, status=process.poll(), wchan=wchan,
+                terminal_restored=termios.tcgetattr(master) == original_termios,
             )
         finally:
             try:

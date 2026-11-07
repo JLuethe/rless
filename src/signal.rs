@@ -69,6 +69,17 @@ pub(crate) fn has_pending_notifications() -> bool {
     PENDING.load(Ordering::SeqCst) != 0
 }
 
+pub(crate) unsafe fn pending_quit_status() -> Option<libc::c_int> {
+    collect_pending_signals();
+    if sigs & TERMINATE as libc::c_int != 0 {
+        Some(15)
+    } else if sigs & INTERRUPT as libc::c_int != 0 && quit_on_intr != 0 {
+        Some(2)
+    } else {
+        None
+    }
+}
+
 unsafe fn monotonic_ns() -> Result<u64, libc::c_int> {
     let mut time: libc::timespec = std::mem::zeroed();
     if libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut time) != 0 {

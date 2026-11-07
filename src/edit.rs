@@ -5,7 +5,7 @@
 use ::c2rust_bitfields;
 use std::os::fd::AsRawFd;
 extern "C" {
-    fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_pclose_read(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn open(
         __file: *const ::core::ffi::c_char,
         __oflag: ::core::ffi::c_int,
@@ -824,7 +824,7 @@ pub unsafe extern "C" fn close_pipe(mut pipefd: *mut FILE) {
     if pipefd.is_null() {
         return;
     }
-    status = pclose(pipefd);
+    status = rless_pclose_read(pipefd);
     if status == -1 as ::core::ffi::c_int {
         p = errno_message(b"pclose\0".as_ptr() as *const ::core::ffi::c_char);
         parg.p_string = p;
@@ -950,6 +950,7 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
     let mut f: ::core::ffi::c_int = 0;
     let mut answer: ::core::ffi::c_int = 0;
     let mut chflags: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
+    let mut tty_checked_before_probe = false;
     let mut filename: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut open_filename: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut alt_filename: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -1046,6 +1047,17 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                         return edit_error(filename, alt_filename, altpipe, ifile);
                     } else {
                         chflags |= 0o1 as ::core::ffi::c_int;
+                        // A read probe may leave an outstanding request in a
+                        // hostile filesystem. Check the opened descriptor for
+                        // a tty before starting that cancellable read; an
+                        // isatty ioctl afterward could wait behind it.
+                        if force_open == 0 && isatty(f) != 0 {
+                            close(f);
+                            parg.p_string = filename;
+                            error(lmsg(lessmsg_id::LM_X_is_a_terminal), &raw mut parg);
+                            return edit_error(filename, alt_filename, altpipe, ifile);
+                        }
+                        tty_checked_before_probe = true;
                         if bin_file(f, &raw mut nread).0 != 0
                             && is_tty.0 != 0
                             && force_open == 0
@@ -1068,11 +1080,21 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                 }
             }
         }
-        if force_open == 0 && f >= 0 as ::core::ffi::c_int && isatty(f) != 0 {
+        if !tty_checked_before_probe
+            && force_open == 0
+            && f >= 0 as ::core::ffi::c_int
+            && isatty(f) != 0
+        {
             let mut parg_0: PARG = parg {
                 p_string: ::core::ptr::null::<::core::ffi::c_char>(),
             };
             parg_0.p_string = filename;
+            // A pathname can change after bad_file's stat. If the pinned open
+            // resolves to a terminal, release that newly owned descriptor;
+            // CH_KEEPOPEN still borrows fd 0 and must remain untouched.
+            if chflags & 0o1 != 0 {
+                close(f);
+            }
             error(lmsg(lessmsg_id::LM_X_is_a_terminal), &raw mut parg_0);
             return edit_error(filename, alt_filename, altpipe, ifile);
         }
@@ -1378,7 +1400,9 @@ pub unsafe extern "C" fn cat_file() {
 
 // Hold the verified object through the overwrite/append decision. Opening a
 // pathname again after a prompt lets another process replace its final link.
-unsafe fn open_verified_logfile(filename: *const libc::c_char) -> Result<(libc::c_int, bool), ()> {
+pub(crate) unsafe fn open_verified_logfile(
+    filename: *const libc::c_char,
+) -> Result<(libc::c_int, bool), ()> {
     let (directory, basename) = crate::secure_path::open_parent(filename).map_err(|error| {
         *libc::__errno_location() = error;
     })?;
@@ -1507,15 +1531,21 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
     if ch_getflags() & 0o1 as ::core::ffi::c_int != 0 {
         return;
     }
-    let (candidate, existed) = match open_verified_logfile(filename) {
-        Ok(result) => result,
-        Err(()) => {
+    let existed = match crate::log_process::open(filename) {
+        Ok(existed) => existed,
+        Err(_) => {
             crate::ch::mark_logfile_failed();
-            parg.p_string = filename;
-            error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+            if !crate::signal::has_pending_notifications() {
+                parg.p_string = filename;
+                error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+            }
             return;
         }
     };
+    if sigs != 0 || crate::signal::has_pending_notifications() {
+        crate::log_process::cancel();
+        return;
+    }
     if !existed || force_logfile != 0 {
         answer = 'O' as ::core::ffi::c_int;
     } else {
@@ -1523,25 +1553,30 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
         answer = query(lmsg(lessmsg_id::LM_X_exists), &raw mut parg);
     }
     loop {
+        // query() returns the interrupted-read sentinel while a signal is
+        // pending. Re-prompting here would keep consuming that sentinel and
+        // prevent the main loop from dispatching SIGTERM or SIGWINCH.
+        if answer == -2 || sigs != 0 || crate::signal::has_pending_notifications() {
+            crate::log_process::cancel();
+            return;
+        }
         match answer {
             79 | 111 => {
-                if libc::ftruncate(candidate, 0) == 0
-                    && libc::lseek(candidate, 0, libc::SEEK_SET) >= 0
-                {
-                    logfile = candidate;
+                if crate::log_process::configure(true).is_ok() {
+                    // Legacy global is an active-log sentinel. The actual
+                    // filesystem descriptor lives only in the child.
+                    logfile = 0;
                 }
                 break;
             }
             65 | 97 => {
-                let flags = libc::fcntl(candidate, libc::F_GETFL);
-                if flags >= 0 && libc::fcntl(candidate, libc::F_SETFL, flags | libc::O_APPEND) == 0
-                {
-                    logfile = candidate;
+                if crate::log_process::configure(false).is_ok() {
+                    logfile = 0;
                 }
                 break;
             }
             68 | 100 => {
-                close(candidate);
+                crate::log_process::cancel();
                 return;
             }
             _ => {
@@ -1554,9 +1589,11 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
     }
     if logfile < 0 as ::core::ffi::c_int {
         crate::ch::mark_logfile_failed();
-        close(candidate);
-        parg.p_string = filename;
-        error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+        crate::log_process::cancel();
+        if !crate::signal::has_pending_notifications() {
+            parg.p_string = filename;
+            error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+        }
         return;
     }
 }

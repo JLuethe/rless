@@ -37,8 +37,13 @@ def validate_evidence(result, output, binary, *, expected=None):
             raise ValueError('stdin witness differs from retained raw bytes')
         closed = expected == 'stdin-close' and name == 'delete'
         leaked = expected == 'stdin-leak' and name == 'delete'
-        if trace != (b'ready\nclose 0\n' if closed else b'ready\n'):
-            raise ValueError('borrowed standard descriptor was closed' if not closed else 'stdin-close mutant did not close exactly fd0')
+        if closed:
+            # Once fd0 is wrongly released, later cleanup may close that
+            # vacant slot again. Every observed close must still be fd0.
+            if re.fullmatch(rb'ready\n(?:close 0\n)+', trace) is None:
+                raise ValueError('stdin-close mutant did not close fd0')
+        elif trace != b'ready\n':
+            raise ValueError('borrowed standard descriptor was closed')
         if case.get('status') != (87 if leaked else 0) or case.get('termios_restored') is not True:
             raise ValueError('stdin deletion status or terminal restoration failed')
         if leaked:

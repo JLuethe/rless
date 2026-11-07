@@ -17,11 +17,13 @@ extern "C" {
     ) -> ::core::ffi::c_int;
     fn getc(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn fileno(__stream: *mut FILE) -> ::core::ffi::c_int;
-    fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
-    fn popen(
+    fn rless_pclose_read(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_helper_fd(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_popen_read(
         __command: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
     ) -> *mut FILE;
+    fn iread(fd: ::core::ffi::c_int, buf: *mut ::core::ffi::c_uchar, len: size_t) -> ssize_t;
     fn open(
         __file: *const ::core::ffi::c_char,
         __oflag: ::core::ffi::c_int,
@@ -29,8 +31,6 @@ extern "C" {
     ) -> ::core::ffi::c_int;
     fn lseek(__fd: ::core::ffi::c_int, __offset: __off_t, __whence: ::core::ffi::c_int) -> __off_t;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn read(__fd: ::core::ffi::c_int, __buf: *mut ::core::ffi::c_void, __nbytes: size_t)
-        -> ssize_t;
     fn calloc(__nmemb: size_t, __size: size_t) -> *mut ::core::ffi::c_void;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn realpath(
@@ -58,6 +58,7 @@ extern "C" {
         -> *mut ::core::ffi::c_char;
     fn strlen(__s: *const ::core::ffi::c_char) -> size_t;
     fn xbuf_init(xbuf: *mut xbuffer);
+    fn xbuf_deinit(xbuf: *mut xbuffer);
     fn xbuf_add_char(xbuf: *mut xbuffer, c: ::core::ffi::c_char);
     fn save(s: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn ecalloc(count: size_t, size: size_t) -> *mut ::core::ffi::c_void;
@@ -903,9 +904,13 @@ pub unsafe extern "C" fn bin_file(mut f: ::core::ffi::c_int, mut n: *mut ssize_t
     {
         return lbool::LFALSE;
     }
-    *n = read(
+    // This probe happens before ch_init and can stall after a regular file
+    // reported readiness. It must join the same cancellable read protocol as
+    // the main input path, including a signal immediately before the syscall.
+    let _waiting = crate::runtime::IoWait::new();
+    *n = crate::runtime::read_interruptible(
         f,
-        &raw mut data as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        (&raw mut data as *mut ::core::ffi::c_char).cast(),
         ::core::mem::size_of::<[::core::ffi::c_char; 256]>(),
     );
     if *n <= umax as ssize_t {
@@ -958,13 +963,31 @@ pub unsafe extern "C" fn readfd(mut fd: *mut FILE) -> *mut ::core::ffi::c_char {
         init_size: 0,
     };
     xbuf_init(&raw mut xbuf);
-    loop {
-        let mut ch: ::core::ffi::c_int = 0;
-        ch = getc(fd);
-        if ch == '\n' as ::core::ffi::c_int || ch == -1 as ::core::ffi::c_int {
+    let input = rless_helper_fd(fd);
+    if input < 0 {
+        xbuf_deinit(&raw mut xbuf);
+        return ::core::ptr::null_mut();
+    }
+    let mut chunk = [0u8; 4096];
+    'read_line: loop {
+        let read = iread(input, chunk.as_mut_ptr(), chunk.len());
+        if read == -3 {
+            crate::signal::psignals();
+            continue;
+        }
+        if read < 0 {
+            xbuf_deinit(&raw mut xbuf);
+            return ::core::ptr::null_mut();
+        }
+        if read == 0 {
             break;
         }
-        xbuf_add_char(&raw mut xbuf, ch as ::core::ffi::c_char);
+        for &ch in &chunk[..read as usize] {
+            if ch == b'\n' {
+                break 'read_line;
+            }
+            xbuf_add_char(&raw mut xbuf, ch as ::core::ffi::c_char);
+        }
     }
     xbuf_add_char(&raw mut xbuf, '\0' as ::core::ffi::c_char);
     return xbuf.data as *mut ::core::ffi::c_char;
@@ -976,7 +999,7 @@ unsafe extern "C" fn shellcmd(mut cmd: *const ::core::ffi::c_char) -> *mut FILE 
     if isnullenv(shell).0 == 0 {
         let mut copt: *const ::core::ffi::c_char = shell_coption();
         if copt.is_null() {
-            fd = popen(cmd, b"r\0".as_ptr() as *const ::core::ffi::c_char);
+            fd = rless_popen_read(cmd, b"r\0".as_ptr() as *const ::core::ffi::c_char);
         } else {
             let mut esccmd: *mut ::core::ffi::c_char = shell_quote(cmd);
             if esccmd.is_null() {
@@ -1001,13 +1024,13 @@ unsafe extern "C" fn shellcmd(mut cmd: *const ::core::ffi::c_char) -> *mut FILE 
                     copt,
                     esccmd,
                 );
-                fd = popen(scmd, b"r\0".as_ptr() as *const ::core::ffi::c_char);
+                fd = rless_popen_read(scmd, b"r\0".as_ptr() as *const ::core::ffi::c_char);
                 free(scmd as *mut ::core::ffi::c_void);
                 free(esccmd as *mut ::core::ffi::c_void);
             }
         }
     } else {
-        fd = popen(cmd, b"r\0".as_ptr() as *const ::core::ffi::c_char);
+        fd = rless_popen_read(cmd, b"r\0".as_ptr() as *const ::core::ffi::c_char);
     }
     return fd;
 }
@@ -1076,7 +1099,10 @@ pub unsafe extern "C" fn lglob(
         return filename;
     }
     gfilename = readfd(fd);
-    pclose(fd);
+    rless_pclose_read(fd);
+    if gfilename.is_null() {
+        return filename;
+    }
     if *gfilename as ::core::ffi::c_int == '\0' as ::core::ffi::c_int {
         free(gfilename as *mut ::core::ffi::c_void);
         return filename;
@@ -1187,9 +1213,16 @@ pub unsafe extern "C" fn open_altfile(
     if returnfd != 0 {
         let mut c: ::core::ffi::c_uchar = 0;
         let mut f: ::core::ffi::c_int = 0;
-        f = fileno(fd);
-        if read(f, &raw mut c as *mut ::core::ffi::c_void, 1 as size_t) != 1 as ssize_t {
-            let mut status: ::core::ffi::c_int = pclose(fd);
+        f = rless_helper_fd(fd);
+        let first_byte = loop {
+            let result = iread(f, &raw mut c, 1 as size_t);
+            if result != -3 {
+                break result;
+            }
+            crate::signal::psignals();
+        };
+        if first_byte != 1 as ssize_t {
+            let mut status: ::core::ffi::c_int = rless_pclose_read(fd);
             if returnfd > 1 as ::core::ffi::c_int && status == 0 as ::core::ffi::c_int {
                 *pfd = ::core::ptr::null_mut::<FILE>();
                 *pf = -1 as ::core::ffi::c_int;
@@ -1205,7 +1238,10 @@ pub unsafe extern "C" fn open_altfile(
         return save(b"-\0".as_ptr() as *const ::core::ffi::c_char);
     }
     cmd = readfd(fd);
-    pclose(fd);
+    rless_pclose_read(fd);
+    if cmd.is_null() {
+        return ::core::ptr::null_mut();
+    }
     if *cmd as ::core::ffi::c_int == '\0' as ::core::ffi::c_int {
         free(cmd as *mut ::core::ffi::c_void);
         return ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -1259,7 +1295,7 @@ pub unsafe extern "C" fn close_altfile(
     fd = shellcmd(cmd);
     free(cmd as *mut ::core::ffi::c_void);
     if !fd.is_null() {
-        pclose(fd);
+        rless_pclose_read(fd);
     }
 }
 #[no_mangle]

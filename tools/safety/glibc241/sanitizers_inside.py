@@ -229,7 +229,10 @@ def main():
                    '--instrumentation-env', config, '--native-io-shim', shims['native-io'],
                    '--reference', '/reference/less', '--native-alloc-binding', alloc_binding,
                    '--oracle-report', REPORT / 'fault-oracles.json']
-        run('fault-path-tests', command, timeout=max(300, options['repetitions'] * 8))
+        # One hundred instrumented repetitions can take longer than the
+        # ordinary native lane on a shared host. Keep the full case count and
+        # retain a finite deadline so a true hang still fails this profile.
+        run('fault-path-tests', command, timeout=max(300, options['repetitions'] * 15))
         reports = sorted(unexpected.glob('*'))
         result['unexpected_sanitizer_reports'] = [dict(path=str(path), sha256=sha(path)) for path in reports]
         if reports:

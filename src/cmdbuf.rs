@@ -5,11 +5,21 @@
 use ::c2rust_bitfields;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{
-    ffi::CString,
-    os::fd::{AsRawFd, OwnedFd},
+    ffi::{CStr, CString},
+    os::fd::{AsRawFd, FromRawFd, OwnedFd},
 };
 
 static HISTORY_ERROR_REPORTED: AtomicBool = AtomicBool::new(false);
+static HISTORY_SAVE_FAILED: AtomicBool = AtomicBool::new(false);
+static HISTORY_READ_FAILED: AtomicBool = AtomicBool::new(false);
+static HISTORY_DURABILITY_FAILED: AtomicBool = AtomicBool::new(false);
+static HISTORY_EXIT_INTERRUPTED: AtomicBool = AtomicBool::new(false);
+
+pub fn history_persistence_failed() -> bool {
+    HISTORY_SAVE_FAILED.load(Ordering::Relaxed)
+        || HISTORY_READ_FAILED.load(Ordering::Relaxed)
+        || HISTORY_DURABILITY_FAILED.load(Ordering::Relaxed)
+}
 use ::libc;
 extern "C" {
     fn mkostemp(
@@ -25,6 +35,7 @@ extern "C" {
         __new: *const ::core::ffi::c_char,
     ) -> ::core::ffi::c_int;
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_fopen_read"]
     fn fopen(
         __filename: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
@@ -1814,7 +1825,7 @@ unsafe extern "C" fn read_cmdhist2(
     mut uparam: *mut ::core::ffi::c_void,
     mut skip_search: ::core::ffi::c_int,
     mut skip_shell: ::core::ffi::c_int,
-) {
+) -> bool {
     let mut ml: *mut mlist = ::core::ptr::null_mut::<mlist>();
     let mut line: [::core::ffi::c_char; 2048] = [0; 2048];
     let mut filename: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -1822,12 +1833,12 @@ unsafe extern "C" fn read_cmdhist2(
     let mut skip: *mut ::core::ffi::c_int = ::core::ptr::null_mut::<::core::ffi::c_int>();
     filename = histfile_name(lbool::LTRUE);
     if filename.is_null() {
-        return;
+        return true;
     }
     f = fopen(filename, b"r\0".as_ptr() as *const ::core::ffi::c_char);
     free(filename as *mut ::core::ffi::c_void);
     if f.is_null() {
-        return;
+        return *libc::__errno_location() == libc::ENOENT;
     }
     if fgets(
         &raw mut line as *mut ::core::ffi::c_char,
@@ -1841,8 +1852,9 @@ unsafe extern "C" fn read_cmdhist2(
             strlen(b".less-history-file:\0".as_ptr() as *const ::core::ffi::c_char),
         ) != 0 as ::core::ffi::c_int
     {
-        fclose(f);
-        return;
+        let read_failed = ferror(f) != 0;
+        let close_failed = fclose(f) != 0;
+        return !read_failed && !close_failed;
     }
     while !fgets(
         &raw mut line as *mut ::core::ffi::c_char,
@@ -1909,7 +1921,9 @@ unsafe extern "C" fn read_cmdhist2(
             );
         }
     }
-    fclose(f);
+    let read_failed = ferror(f) != 0;
+    let close_failed = fclose(f) != 0;
+    !read_failed && !close_failed
 }
 unsafe extern "C" fn read_cmdhist(
     mut action: Option<
@@ -1922,13 +1936,13 @@ unsafe extern "C" fn read_cmdhist(
     mut uparam: *mut ::core::ffi::c_void,
     mut skip_search: lbool,
     mut skip_shell: lbool,
-) {
+) -> bool {
     if secure_allow(((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int) as ::core::ffi::c_uint).0
         == 0
     {
-        return;
+        return true;
     }
-    read_cmdhist2(
+    let read_ok = read_cmdhist2(
         action,
         uparam,
         skip_search.0 as ::core::ffi::c_int,
@@ -1939,6 +1953,7 @@ unsafe extern "C" fn read_cmdhist(
         ::core::ptr::null_mut::<mlist>(),
         ::core::ptr::null::<::core::ffi::c_char>(),
     );
+    read_ok
 }
 unsafe extern "C" fn addhist_init(
     mut uparam: *mut ::core::ffi::c_void,
@@ -1951,21 +1966,40 @@ unsafe extern "C" fn addhist_init(
         restore_mark(string);
     }
 }
+unsafe extern "C" fn stage_hist_init(
+    uparam: *mut ::core::ffi::c_void,
+    ml: *mut mlist,
+    string: *const ::core::ffi::c_char,
+) {
+    if !string.is_null() {
+        let staged = &mut *uparam.cast::<Vec<(*mut mlist, CString)>>();
+        staged.push((ml, CStr::from_ptr(string).to_owned()));
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn init_cmdhist() {
-    read_cmdhist(
+    // A late read failure must not publish a valid prefix of the old file.
+    let mut staged: Vec<(*mut mlist, CString)> = Vec::new();
+    if !read_cmdhist(
         Some(
-            addhist_init
+            stage_hist_init
                 as unsafe extern "C" fn(
                     *mut ::core::ffi::c_void,
                     *mut mlist,
                     *const ::core::ffi::c_char,
                 ) -> (),
         ),
-        ::core::ptr::null_mut::<::core::ffi::c_void>(),
+        (&mut staged as *mut Vec<(*mut mlist, CString)>).cast(),
         lbool(0 as ::core::ffi::c_int as ::core::ffi::c_uint),
         lbool(0 as ::core::ffi::c_int as ::core::ffi::c_uint),
-    );
+    ) {
+        HISTORY_READ_FAILED.store(true, Ordering::Relaxed);
+        crate::output::io_error_diagnostic(b"rless: cannot read history\n");
+    } else {
+        for (ml, string) in staged {
+            addhist_init(std::ptr::null_mut(), ml, string.as_ptr());
+        }
+    }
 }
 unsafe extern "C" fn write_mlist_header(mut ml: *mut mlist, mut f: *mut FILE) {
     if ml == &raw mut mlist_search {
@@ -2039,24 +2073,19 @@ unsafe extern "C" fn histfile_modified() -> lbool {
     }
     return lbool::LFALSE;
 }
-unsafe fn modified_history_entries() -> Vec<*mut mlist> {
-    let mut entries = Vec::new();
+unsafe fn clear_modified_history_entries() {
     for head in [&raw mut mlist_search, &raw mut mlist_shell] {
-        if (*head).modified.0 != 0 {
-            entries.push(head);
-        }
+        (*head).modified = lbool::LFALSE;
         let mut entry = (*head).next;
         while !(*entry).string.is_null() {
-            if (*entry).modified.0 != 0 {
-                entries.push(entry);
-            }
+            (*entry).modified = lbool::LFALSE;
             entry = (*entry).next;
         }
     }
-    entries
 }
 
 unsafe fn history_save_error() {
+    HISTORY_SAVE_FAILED.store(true, Ordering::Relaxed);
     // Preserve dirty state for retry without repeatedly overwriting the live
     // screen. A successful save rearms reporting for a later distinct outage.
     if HISTORY_ERROR_REPORTED.swap(true, Ordering::Relaxed) {
@@ -2074,51 +2103,169 @@ struct HistoryTemp {
     temporary: CString,
     destination: CString,
     fd: libc::c_int,
+    link_fd: Option<OwnedFd>,
+    linked: bool,
     renamed: bool,
 }
 
 impl Drop for HistoryTemp {
     fn drop(&mut self) {
         unsafe {
-            if !self.renamed {
+            if self.linked && !self.renamed {
                 libc::unlinkat(self.directory.as_raw_fd(), self.temporary.as_ptr(), 0);
             }
         }
     }
 }
 
+unsafe fn random_history_name(basename: &[u8]) -> Option<CString> {
+    // Leave room for the leading dot, separator and 128-bit suffix even when
+    // the destination itself uses Linux's full 255-byte component length.
+    let basename = &basename[..basename.len().min(221)];
+    let mut random = [0u8; 16];
+    let mut filled = 0;
+    while filled < random.len() {
+        let count = libc::getrandom(
+            random[filled..].as_mut_ptr().cast(),
+            random.len() - filled,
+            0,
+        );
+        if count < 0 && *libc::__errno_location() == libc::EINTR {
+            continue;
+        }
+        if count <= 0 {
+            return None;
+        }
+        filled += count as usize;
+    }
+    let capacity = basename.len().checked_add(34)?;
+    let mut name = Vec::new();
+    name.try_reserve_exact(capacity).ok()?;
+    name.push(b'.');
+    name.extend_from_slice(basename);
+    name.push(b'.');
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    for byte in random {
+        name.push(HEX[(byte >> 4) as usize]);
+        name.push(HEX[(byte & 15) as usize]);
+    }
+    CString::new(name).ok()
+}
+
+unsafe fn create_announced_named_history_temp(
+    directory: OwnedFd,
+    destination: CString,
+    socket: libc::c_int,
+) -> Option<HistoryTemp> {
+    for _ in 0..8 {
+        let temporary = random_history_name(destination.as_bytes())?;
+        // The parent learns the pinned directory and unpredictable name before
+        // openat can stall. If a signal kills the child immediately after a
+        // successful create, it can still clean up this exact name.
+        if !crate::history_worker::announce_prepare(socket, directory.as_raw_fd(), &temporary) {
+            return None;
+        }
+        let fd = libc::openat(
+            directory.as_raw_fd(),
+            temporary.as_ptr(),
+            libc::O_WRONLY | libc::O_CREAT | libc::O_EXCL | libc::O_NOFOLLOW | libc::O_CLOEXEC,
+            0o600,
+        );
+        if fd < 0 && *libc::__errno_location() == libc::EEXIST {
+            continue;
+        }
+        if fd < 0 {
+            return None;
+        }
+        let mut stat: libc::stat = std::mem::zeroed();
+        if libc::fchmod(fd, 0o600) != 0
+            || libc::fstat(fd, &mut stat) != 0
+            || stat.st_mode & libc::S_IFMT != libc::S_IFREG
+            || stat.st_mode & 0o7777 != 0o600
+            || stat.st_uid != libc::geteuid()
+            || stat.st_nlink != 1
+        {
+            libc::close(fd);
+            libc::unlinkat(directory.as_raw_fd(), temporary.as_ptr(), 0);
+            return None;
+        }
+        let temp = HistoryTemp {
+            directory,
+            temporary,
+            destination,
+            fd,
+            link_fd: None,
+            linked: true,
+            renamed: false,
+        };
+        if !crate::history_worker::announce_temp(
+            socket,
+            temp.directory.as_raw_fd(),
+            temp.fd,
+            &temp.temporary,
+        ) {
+            libc::close(temp.fd);
+            return None;
+        }
+        return Some(temp);
+    }
+    None
+}
+
+unsafe fn create_worker_history_temp(
+    path: *const libc::c_char,
+    socket: libc::c_int,
+) -> Option<(HistoryTemp, bool)> {
+    let (directory, destination) = crate::secure_path::open_parent(path).ok()?;
+    let temporary = random_history_name(destination.as_bytes())?;
+    // Prefer an unnamed inode, which cannot be stranded if cancellation wins
+    // during writing or fsync. The announced named path below covers filesystems
+    // that do not support O_TMPFILE.
+    let fd = libc::openat(
+        directory.as_raw_fd(),
+        c".".as_ptr(),
+        libc::O_TMPFILE | libc::O_RDWR | libc::O_CLOEXEC,
+        0o600,
+    );
+    if fd < 0 {
+        return create_announced_named_history_temp(directory, destination, socket)
+            .map(|temp| (temp, true));
+    }
+    let mut stat: libc::stat = std::mem::zeroed();
+    if libc::fchmod(fd, 0o600) != 0
+        || libc::fstat(fd, &mut stat) != 0
+        || stat.st_mode & libc::S_IFMT != libc::S_IFREG
+        || stat.st_mode & 0o7777 != 0o600
+        || stat.st_uid != libc::geteuid()
+        || stat.st_nlink != 0
+    {
+        libc::close(fd);
+        return None;
+    }
+    let link_fd = libc::fcntl(fd, libc::F_DUPFD_CLOEXEC, 3);
+    if link_fd < 0 {
+        libc::close(fd);
+        return None;
+    }
+    Some((
+        HistoryTemp {
+            directory,
+            temporary,
+            destination,
+            fd,
+            link_fd: Some(OwnedFd::from_raw_fd(link_fd)),
+            linked: false,
+            renamed: false,
+        },
+        false,
+    ))
+}
+
 unsafe fn create_history_temp(path: *const libc::c_char) -> Option<HistoryTemp> {
     let (directory, destination) = crate::secure_path::open_parent(path).ok()?;
     let basename = destination.as_bytes();
     for _ in 0..8 {
-        let mut random = [0u8; 16];
-        let mut filled = 0;
-        while filled < random.len() {
-            let count = libc::getrandom(
-                random[filled..].as_mut_ptr().cast(),
-                random.len() - filled,
-                0,
-            );
-            if count < 0 && *libc::__errno_location() == libc::EINTR {
-                continue;
-            }
-            if count <= 0 {
-                return None;
-            }
-            filled += count as usize;
-        }
-        let capacity = basename.len().checked_add(34)?;
-        let mut name = Vec::new();
-        name.try_reserve_exact(capacity).ok()?;
-        name.push(b'.');
-        name.extend_from_slice(basename);
-        name.push(b'.');
-        const HEX: &[u8; 16] = b"0123456789abcdef";
-        for byte in random {
-            name.push(HEX[(byte >> 4) as usize]);
-            name.push(HEX[(byte & 15) as usize]);
-        }
-        let temporary = CString::new(name).ok()?;
+        let temporary = random_history_name(basename)?;
         let fd = libc::openat(
             directory.as_raw_fd(),
             temporary.as_ptr(),
@@ -2146,6 +2293,8 @@ unsafe fn create_history_temp(path: *const libc::c_char) -> Option<HistoryTemp> 
             temporary,
             destination,
             fd,
+            link_fd: None,
+            linked: true,
             renamed: false,
         });
     }
@@ -2228,6 +2377,69 @@ mod history_temp_tests {
 
 #[no_mangle]
 pub unsafe extern "C" fn save_cmdhist() {
+    if HISTORY_EXIT_INTERRUPTED.load(Ordering::Relaxed) && crate::pager::quitting.0 != 0 {
+        return;
+    }
+    if secure_allow(((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int) as ::core::ffi::c_uint).0
+        == 0
+        || histfile_modified().0 == 0
+    {
+        return;
+    }
+    let mut retries = 0;
+    loop {
+        let report = match crate::history_worker::run_save() {
+            Ok(report) => report,
+            Err(_) => {
+                if crate::signal::pending_quit_status().is_some() {
+                    HISTORY_EXIT_INTERRUPTED.store(true, Ordering::Relaxed);
+                } else {
+                    history_save_error();
+                }
+                return;
+            }
+        };
+        if report.committed {
+            clear_modified_history_entries();
+            crate::mark::prepare_saved_marks();
+            HISTORY_SAVE_FAILED.store(false, Ordering::Relaxed);
+            HISTORY_ERROR_REPORTED.store(false, Ordering::Relaxed);
+        }
+        if report.interrupted {
+            let exit_pending = crate::signal::pending_quit_status().is_some();
+            if exit_pending {
+                HISTORY_EXIT_INTERRUPTED.store(true, Ordering::Relaxed);
+            }
+            if report.committed {
+                HISTORY_DURABILITY_FAILED.store(true, Ordering::Relaxed);
+            } else if crate::pager::quitting.0 != 0 && !exit_pending && retries < 2 {
+                // A resize or timer event during ordinary quit does not
+                // silently discard dirty history. Retry a bounded number of
+                // times; a storm becomes a reported save failure.
+                retries += 1;
+                continue;
+            } else if crate::pager::quitting.0 != 0 && !exit_pending {
+                history_save_error();
+            }
+            return;
+        }
+        match report.code {
+            crate::history_worker::RESULT_SKIPPED => {}
+            crate::history_worker::RESULT_FAILED => history_save_error(),
+            crate::history_worker::RESULT_SYNCED => {
+                HISTORY_DURABILITY_FAILED.store(false, Ordering::Relaxed);
+            }
+            crate::history_worker::RESULT_UNSYNCED => {
+                HISTORY_DURABILITY_FAILED.store(true, Ordering::Relaxed);
+                crate::output::io_error_diagnostic(b"rless: history directory sync failed\n");
+            }
+            _ => history_save_error(),
+        }
+        return;
+    }
+}
+
+pub(crate) unsafe fn save_cmdhist_worker(socket: libc::c_int) -> u8 {
     let mut histname: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut skip_search: ::core::ffi::c_int = 0;
     let mut skip_shell: ::core::ffi::c_int = 0;
@@ -2237,31 +2449,35 @@ pub unsafe extern "C" fn save_cmdhist() {
     };
     let mut s: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut histsize: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    if secure_allow(((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int) as ::core::ffi::c_uint).0
-        == 0
-        || histfile_modified().0 == 0
-    {
-        return;
-    }
     histname = histfile_name(lbool(0 as ::core::ffi::c_int as ::core::ffi::c_uint));
     if histname.is_null() {
-        return;
+        return crate::history_worker::RESULT_SKIPPED;
     }
-    let Some(mut history_temp) = create_history_temp(histname) else {
-        history_save_error();
+    let Some((mut history_temp, already_announced)) = create_worker_history_temp(histname, socket)
+    else {
         free(histname as *mut ::core::ffi::c_void);
-        return;
+        return crate::history_worker::RESULT_FAILED;
     };
+    if !already_announced
+        && !crate::history_worker::announce_temp(
+            socket,
+            history_temp.directory.as_raw_fd(),
+            history_temp.link_fd.as_ref().unwrap().as_raw_fd(),
+            &history_temp.temporary,
+        )
+    {
+        close(history_temp.fd);
+        free(histname as *mut ::core::ffi::c_void);
+        return crate::history_worker::RESULT_FAILED;
+    }
     let fout = fdopen(history_temp.fd, b"w\0".as_ptr().cast());
     if fout.is_null() {
         close(history_temp.fd);
-        history_save_error();
         free(histname as *mut ::core::ffi::c_void);
-        return;
+        return crate::history_worker::RESULT_FAILED;
     }
-    // write_mlist clears dirty bits as it merges existing and new entries.
-    // Restore precisely those bits if the complete file cannot be committed.
-    let modified_entries = modified_history_entries();
+    // The worker mutates only its fork snapshot. The parent clears dirty bits
+    // after receiving the rename-commit notification.
     s = lgetenv(b"LESSHISTSIZE\0".as_ptr() as *const ::core::ffi::c_char);
     if !s.is_null() {
         histsize = atoi(s);
@@ -2278,7 +2494,7 @@ pub unsafe extern "C" fn save_cmdhist() {
     );
     ctx.fout = fout;
     ctx.mlist = ::core::ptr::null_mut::<mlist>();
-    read_cmdhist(
+    let previous_read = read_cmdhist(
         Some(
             copy_hist
                 as unsafe extern "C" fn(
@@ -2292,12 +2508,45 @@ pub unsafe extern "C" fn save_cmdhist() {
         lbool(skip_shell as ::core::ffi::c_uint),
     );
     save_marks(fout, b".mark\0".as_ptr() as *const ::core::ffi::c_char);
-    let stream_failed = ferror(fout) != 0 || libc::fflush(fout.cast()) != 0;
+    let stream_failed = !previous_read || ferror(fout) != 0 || libc::fflush(fout.cast()) != 0;
     let sync_failed = !stream_failed && libc::fsync(history_temp.fd) != 0;
     let close_failed = fclose(fout) != 0;
+    let mut linked = history_temp.linked;
+    if !stream_failed && !sync_failed && !close_failed && !linked {
+        for _ in 0..8 {
+            if libc::linkat(
+                history_temp.link_fd.as_ref().unwrap().as_raw_fd(),
+                c"".as_ptr(),
+                history_temp.directory.as_raw_fd(),
+                history_temp.temporary.as_ptr(),
+                libc::AT_EMPTY_PATH,
+            ) == 0
+            {
+                linked = true;
+                history_temp.linked = true;
+                break;
+            }
+            if *libc::__errno_location() != libc::EEXIST {
+                break;
+            }
+            let Some(name) = random_history_name(history_temp.destination.as_bytes()) else {
+                break;
+            };
+            history_temp.temporary = name;
+            if !crate::history_worker::announce_temp(
+                socket,
+                history_temp.directory.as_raw_fd(),
+                history_temp.link_fd.as_ref().unwrap().as_raw_fd(),
+                &history_temp.temporary,
+            ) {
+                break;
+            }
+        }
+    }
     let renamed = !stream_failed
         && !sync_failed
         && !close_failed
+        && linked
         && libc::renameat(
             history_temp.directory.as_raw_fd(),
             history_temp.temporary.as_ptr(),
@@ -2305,16 +2554,34 @@ pub unsafe extern "C" fn save_cmdhist() {
             history_temp.destination.as_ptr(),
         ) == 0;
     history_temp.renamed = renamed;
-    let committed = renamed && libc::fsync(history_temp.directory.as_raw_fd()) == 0;
-    if !committed {
-        for entry in modified_entries {
-            (*entry).modified = lbool::LTRUE;
-        }
-        history_save_error();
+    if !renamed {
+        free(histname as *mut ::core::ffi::c_void);
+        return crate::history_worker::RESULT_FAILED;
     } else {
-        HISTORY_ERROR_REPORTED.store(false, Ordering::Relaxed);
+        if !crate::history_worker::announce_commit(socket) {
+            free(histname as *mut ::core::ffi::c_void);
+            return crate::history_worker::RESULT_UNSYNCED;
+        }
+        // Rename is the commit point. A directory fsync failure cannot turn
+        // that completed replacement back into the previous file; retain the
+        // committed dirty state and report durability separately.
+        let mut retries = 0;
+        let directory_synced = loop {
+            if libc::fsync(history_temp.directory.as_raw_fd()) == 0 {
+                break true;
+            }
+            if *libc::__errno_location() != libc::EINTR || retries >= 3 {
+                break false;
+            }
+            retries += 1;
+        };
+        free(histname as *mut ::core::ffi::c_void);
+        return if directory_synced {
+            crate::history_worker::RESULT_SYNCED
+        } else {
+            crate::history_worker::RESULT_UNSYNCED
+        };
     }
-    free(histname as *mut ::core::ffi::c_void);
 }
 
 #[repr(C)]

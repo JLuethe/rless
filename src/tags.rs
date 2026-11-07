@@ -5,7 +5,10 @@
 use ::c2rust_bitfields;
 extern "C" {
     static mut stdin: *mut FILE;
+    fn rless_stdin_read() -> *mut FILE;
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn ferror(__stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_fopen_read"]
     fn fopen(
         __filename: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
@@ -15,13 +18,9 @@ extern "C" {
         __format: *const ::core::ffi::c_char,
         ...
     ) -> ::core::ffi::c_int;
-    fn fgetc(__stream: *mut FILE) -> ::core::ffi::c_int;
-    fn fgets(
-        __s: *mut ::core::ffi::c_char,
-        __n: ::core::ffi::c_int,
-        __stream: *mut FILE,
-    ) -> *mut ::core::ffi::c_char;
+    #[link_name = "rless_pclose_read"]
     fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_popen_read"]
     fn popen(
         __command: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
@@ -624,7 +623,7 @@ unsafe extern "C" fn gettagtype() -> ::core::ffi::c_int {
     if strcmp(tags, b"-\0".as_ptr() as *const ::core::ffi::c_char) == 0 as ::core::ffi::c_int {
         return C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int;
     }
-    f = open(tags, 0 as ::core::ffi::c_int);
+    f = crate::os::iopen(tags, libc::O_RDONLY);
     if f >= 0 as ::core::ffi::c_int {
         close(f);
         return C2Rust_Unnamed_0::T_CTAGS.0 as ::core::ffi::c_int;
@@ -639,6 +638,10 @@ pub unsafe extern "C" fn findtag(mut tag: *const ::core::ffi::c_char) {
         result = findctag(tag);
     } else {
         result = findgtag(tag, r#type);
+    }
+    crate::signal::collect_pending_signals();
+    if sigs != 0 {
+        crate::signal::psignals();
     }
     match result {
         tag_result::TAG_NOFILE => {
@@ -731,13 +734,20 @@ unsafe extern "C" fn findctag(mut tag: *const ::core::ffi::c_char) -> tag_result
     cleantags();
     total = 0 as ::core::ffi::c_int;
     taglen = strlen(tag);
-    while !fgets(
-        &raw mut tline as *mut ::core::ffi::c_char,
-        ::core::mem::size_of::<[::core::ffi::c_char; 1024]>() as ::core::ffi::c_int,
-        f,
-    )
-    .is_null()
-    {
+    if taglen >= tline.len() - 1 {
+        fclose(f);
+        return tag_result::TAG_NOTAG;
+    }
+    loop {
+        let line_status = crate::interruptible_stdio::read_line_with_dispatch(f.cast(), &mut tline);
+        if line_status <= 0 {
+            if line_status == -2 {
+                fclose(f);
+                cleantags();
+                return tag_result::TAG_INTR;
+            }
+            break;
+        }
         if tline[0usize] as ::core::ffi::c_int == '!' as ::core::ffi::c_int {
             continue;
         }
@@ -759,6 +769,9 @@ unsafe extern "C" fn findctag(mut tag: *const ::core::ffi::c_char) -> tag_result
             && *p as ::core::ffi::c_int != '\0' as ::core::ffi::c_int
         {
             p = p.offset(1);
+        }
+        if *p == '\0' as ::core::ffi::c_char {
+            continue;
         }
         let c2rust_fresh2 = p;
         p = p.offset(1);
@@ -795,6 +808,9 @@ unsafe extern "C" fn findctag(mut tag: *const ::core::ffi::c_char) -> tag_result
             {
                 if *p as ::core::ffi::c_int == '\\' as ::core::ffi::c_int {
                     p = p.offset(1);
+                    if *p == '\0' as ::core::ffi::c_char {
+                        break;
+                    }
                 }
                 if q != p {
                     let c2rust_fresh4 = p;
@@ -823,7 +839,12 @@ unsafe extern "C" fn findctag(mut tag: *const ::core::ffi::c_char) -> tag_result
         taglist.tl_last = tp as *mut tag;
         total += 1;
     }
-    fclose(f);
+    let read_failed = ferror(f) != 0;
+    let close_failed = fclose(f) != 0;
+    if read_failed || close_failed {
+        cleantags();
+        return tag_result::TAG_NOFILE;
+    }
     if total == 0 as ::core::ffi::c_int {
         return tag_result::TAG_NOTAG;
     }
@@ -920,13 +941,16 @@ unsafe extern "C" fn findgtag(
     cleantags();
     total = 0 as ::core::ffi::c_int;
     if r#type == C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int {
-        fp = stdin;
+        fp = rless_stdin_read();
         // The selected "-" tags filename is owned. Resetting to the borrowed
         // default must release it; the tag search argument has a separate owner.
         if tags != &raw const ztags as *const ::core::ffi::c_char {
             free(tags as *mut ::core::ffi::c_void);
         }
         tags = &raw const ztags as *const ::core::ffi::c_char;
+        if fp.is_null() {
+            return tag_result::TAG_NOFILE;
+        }
     } else {
         let mut command: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
         let mut flag: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -974,19 +998,29 @@ unsafe extern "C" fn findgtag(
         free(command as *mut ::core::ffi::c_void);
     }
     if !fp.is_null() {
-        while !fgets(
-            &raw mut buf as *mut ::core::ffi::c_char,
-            ::core::mem::size_of::<[::core::ffi::c_char; 1024]>() as ::core::ffi::c_int,
-            fp,
-        )
-        .is_null()
-        {
+        loop {
+            let line_status =
+                crate::interruptible_stdio::read_line_with_dispatch(fp.cast(), &mut buf);
+            if line_status <= 0 {
+                if line_status == -2 {
+                    if r#type == C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int {
+                        fclose(fp);
+                    } else {
+                        pclose(fp);
+                    }
+                    cleantags();
+                    return tag_result::TAG_INTR;
+                }
+                break;
+            }
             let mut name: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             let mut file: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             let mut line: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             let mut len: size_t = 0;
             if sigs != 0 {
-                if fp != stdin {
+                if r#type == C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int {
+                    fclose(fp);
+                } else {
                     pclose(fp);
                 }
                 return tag_result::TAG_INTR;
@@ -1000,7 +1034,16 @@ unsafe extern "C" fn findgtag(
             } else {
                 let mut c: ::core::ffi::c_int = 0;
                 loop {
-                    c = fgetc(fp);
+                    c = crate::interruptible_stdio::read_byte_with_dispatch(fp.cast());
+                    if c == -2 {
+                        if r#type == C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int {
+                            fclose(fp);
+                        } else {
+                            pclose(fp);
+                        }
+                        cleantags();
+                        return tag_result::TAG_INTR;
+                    }
                     if !(c != '\n' as ::core::ffi::c_int && c != -1 as ::core::ffi::c_int) {
                         break;
                     }
@@ -1027,11 +1070,15 @@ unsafe extern "C" fn findgtag(
             taglist.tl_last = tp as *mut tag;
             total += 1;
         }
-        if fp != stdin {
-            if pclose(fp) != 0 {
-                curtag = ::core::ptr::null_mut::<tag>();
-                curseq = 0 as ::core::ffi::c_int;
-                total = curseq;
+        let read_failed = ferror(fp) != 0;
+        if r#type == C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int {
+            if fclose(fp) != 0 || read_failed {
+                cleantags();
+                return tag_result::TAG_NOFILE;
+            }
+        } else {
+            if pclose(fp) != 0 || read_failed {
+                cleantags();
                 return tag_result::TAG_NOFILE;
             }
         }
