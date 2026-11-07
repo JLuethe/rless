@@ -287,12 +287,13 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
     if libc::fstat(fd, &mut status) != 0 {
         return -1;
     }
-    if status.st_mode & libc::S_IFMT == libc::S_IFIFO || libc::isatty(fd) == 1 {
+    let kind = status.st_mode & libc::S_IFMT;
+    if kind == libc::S_IFIFO || (kind == libc::S_IFCHR && libc::isatty(fd) == 1) {
         read_reopened_nonblocking(fd, buffer, len, &status)
-    } else if status.st_mode & libc::S_IFMT == libc::S_IFSOCK {
+    } else if kind == libc::S_IFSOCK {
         // recv has a per-call nonblocking flag and leaves shared fd flags alone.
         libc::recv(fd, buffer.cast(), len, libc::MSG_DONTWAIT)
-    } else if matches!(status.st_mode & libc::S_IFMT, libc::S_IFREG | libc::S_IFBLK) {
+    } else if matches!(kind, libc::S_IFREG | libc::S_IFBLK) {
         // Regular and block files can stall after poll reports them readable.
         // Keep the pager out of that syscall and commit the shared offset only
         // after accepting the worker result.
