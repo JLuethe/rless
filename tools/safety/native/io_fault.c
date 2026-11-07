@@ -184,7 +184,10 @@ int open(const char *path, int flags, ...)
             if (source == STDOUT_FILENO || output_fds[source]) output = 1;
         }
     }
-    if (named_input && selected("open", 3)) { errno = EACCES; return -1; }
+    if (named_input && selected_inner("open", 3, getpid() != initial_pid)) {
+        errno = EACCES;
+        return -1;
+    }
     int fd = real_call(path, flags, mode);
     if (input && fd >= 0 && fd < 1024) input_fds[fd] = 1;
     if (output && fd >= 0 && fd < 1024) output_fds[fd] = 1;
@@ -199,7 +202,10 @@ int close(int fd)
     if (input) input_fds[fd] = 0;
     if (fd >= 0 && fd < 1024) output_fds[fd] = 0;
     int result = real_call(fd);
-    if (input && selected("close", 13)) { errno = EIO; return -1; }
+    if (input && selected_inner("close", 13, getpid() != initial_pid)) {
+        errno = EIO;
+        return -1;
+    }
     return result;
 }
 
