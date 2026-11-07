@@ -254,6 +254,20 @@ unsafe fn receive_reply(socket: libc::c_int) -> Result<libc::c_int, libc::c_int>
 }
 
 pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<Prepared, libc::c_int> {
+    prepare_with_timeout(output, None)
+}
+
+// A diagnostic is best effort: its destination may be the full or failing
+// descriptor that reported the original I/O error. Never let this setup wait
+// for that destination indefinitely before normal exit cleanup can begin.
+pub(crate) unsafe fn prepare_diagnostic(output: libc::c_int) -> Result<Prepared, libc::c_int> {
+    prepare_with_timeout(output, Some(200))
+}
+
+unsafe fn prepare_with_timeout(
+    output: libc::c_int,
+    timeout_override_ms: Option<libc::c_int>,
+) -> Result<Prepared, libc::c_int> {
     check_abandoned()?;
     let mut sockets = [-1; 2];
     if libc::socketpair(
@@ -307,10 +321,10 @@ pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<Prepared, libc::c_in
         };
         // Exit-time output is best effort. A driver may keep classification
         // stuck even after the first signal was dispatched.
-        let timeout = if crate::pager::quitting.0 != 0 {
-            100
-        } else {
-            -1
+        let timeout = match timeout_override_ms {
+            Some(timeout) => timeout,
+            None if crate::pager::quitting.0 != 0 => 100,
+            None => -1,
         };
         let ready = crate::runtime::poll_interruptible(&mut descriptor, 1, timeout);
         if ready < 0 {
@@ -334,6 +348,18 @@ pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<Prepared, libc::c_in
 
 impl Worker {
     pub(crate) unsafe fn write(&mut self, bytes: &[u8]) -> Result<(), libc::c_int> {
+        self.write_with_timeout(bytes, None)
+    }
+
+    pub(crate) unsafe fn write_diagnostic(&mut self, bytes: &[u8]) -> Result<(), libc::c_int> {
+        self.write_with_timeout(bytes, Some(200))
+    }
+
+    unsafe fn write_with_timeout(
+        &mut self,
+        bytes: &[u8],
+        timeout_override_ms: Option<libc::c_int>,
+    ) -> Result<(), libc::c_int> {
         if bytes.is_empty() || bytes.len() > 1024 {
             return Err(libc::EINVAL);
         }
@@ -361,10 +387,10 @@ impl Worker {
                 events: libc::POLLIN,
                 revents: 0,
             };
-            let timeout = if crate::pager::quitting.0 != 0 {
-                100
-            } else {
-                -1
+            let timeout = match timeout_override_ms {
+                Some(timeout) => timeout,
+                None if crate::pager::quitting.0 != 0 => 100,
+                None => -1,
             };
             let ready = crate::runtime::poll_interruptible(&mut descriptor, 1, timeout);
             if ready < 0 {

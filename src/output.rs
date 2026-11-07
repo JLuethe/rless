@@ -516,7 +516,7 @@ pub fn output_failed() -> bool {
 pub fn io_error_diagnostic(message: &[u8]) {
     unsafe {
         let saved_errno = *libc::__errno_location();
-        let mut prepared = match crate::output_worker::prepare(2) {
+        let mut prepared = match crate::output_worker::prepare_diagnostic(2) {
             Ok(value) => value,
             Err(_) => {
                 *libc::__errno_location() = saved_errno;
@@ -524,7 +524,7 @@ pub fn io_error_diagnostic(message: &[u8]) {
             }
         };
         if let crate::output_worker::Prepared::Writer(worker) = &mut prepared {
-            let _ = worker.write(message);
+            let _ = worker.write_diagnostic(message);
             *libc::__errno_location() = saved_errno;
             return;
         }
