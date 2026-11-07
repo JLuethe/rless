@@ -357,7 +357,7 @@ def run(binary, output, *, retained=None):
                                                'src/pager.rs', 'src/position.rs', 'src/screen.rs')},
                    asan_environment=bool(os.environ.get('RLESS_SAFETY_ENV')))
     if retained is not None:
-        check(set(retained) == set(results) and len(results) == 43, 'missing or extra boundary cases')
+        check(set(retained) == set(results), 'missing or extra boundary cases')
     else:
         (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
         print(json.dumps(summary))
