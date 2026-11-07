@@ -30,13 +30,16 @@ def read_until(master: int, process: subprocess.Popen, marker: bytes, seconds: f
 
 def descriptor_targets(pid: int) -> dict[str, str]:
     root = Path(f"/proc/{pid}/fd")
-    return {entry.name: os.readlink(entry) for entry in root.iterdir()}
+    try:
+        return {entry.name: os.readlink(entry) for entry in root.iterdir()}
+    except (FileNotFoundError, ProcessLookupError):
+        return {}
 
 
 def process_state(pid: int) -> str:
     try:
         return Path(f"/proc/{pid}/stat").read_text().split()[2]
-    except FileNotFoundError:
+    except (FileNotFoundError, ProcessLookupError):
         return "gone"
 
 
