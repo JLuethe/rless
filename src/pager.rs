@@ -972,12 +972,14 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
     // The remaining file and history cleanup may block in a hostile native
     // filesystem. Restore termios before entering either operation.
     raw_mode(lbool::LFALSE);
+    crate::output::finish_output();
     if status == 15 || status == 2 {
         crate::ch::abort_logfile();
     }
     edit(::core::ptr::null_mut::<::core::ffi::c_void>() as *mut ::core::ffi::c_char);
     save_cmdhist();
     close_getchr();
+    crate::output::finish_output();
     crate::diagnostic_broker::finish();
     // A termination delivered during any exit path, including a failing
     // history diagnostic, still determines the final signal status.
@@ -1036,6 +1038,7 @@ pub fn main() {
             (args_ptrs.len() - 1) as ::core::ffi::c_int,
             args_ptrs.as_mut_ptr() as *mut *const ::core::ffi::c_char,
         ) as i32;
+        crate::output::finish_output();
         crate::diagnostic_broker::finish();
         ::std::process::exit(status)
     }

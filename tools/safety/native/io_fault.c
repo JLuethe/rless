@@ -15,6 +15,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 struct shared_fault_state {
@@ -109,6 +110,28 @@ static int selected(const char *name, unsigned site)
     return selected_inner(name, site, 0);
 }
 
+int dup3(int source, int target, int flags)
+{
+    int (*real_call)(int, int, int) = dlsym(RTLD_NEXT, "dup3");
+    if (!real_call) _exit(125);
+    int result = real_call(source, target, flags);
+    if (result >= 0 && target >= 0 && target < 1024) {
+        int output = source == STDOUT_FILENO ||
+            (source >= 0 && source < 1024 && output_fds[source]);
+        if (!output && getpid() != initial_pid) {
+            /* The output worker first duplicates stdout above fd 16, then
+             * moves that copy to fd 3 while the inherited fd 1 is live. */
+            struct stat from, stdout_info;
+            if (fstat(source, &from) == 0 && fstat(STDOUT_FILENO, &stdout_info) == 0)
+                output = from.st_mode == stdout_info.st_mode &&
+                    from.st_dev == stdout_info.st_dev && from.st_ino == stdout_info.st_ino &&
+                    from.st_rdev == stdout_info.st_rdev;
+        }
+        output_fds[target] = output;
+    }
+    return result;
+}
+
 ssize_t pread(int fd, void *buffer, size_t count, off_t offset)
 {
     ssize_t (*real_call)(int, void *, size_t, off_t) = dlsym(RTLD_NEXT, "pread");
@@ -153,8 +176,9 @@ ssize_t write(int fd, const void *buffer, size_t count)
     ssize_t (*real_call)(int, const void *, size_t) = dlsym(RTLD_NEXT, "write");
     if (!real_call) _exit(125);
     int output = fd == STDOUT_FILENO || (fd >= 0 && fd < 1024 && output_fds[fd]);
-    if (output && selected("write", 4)) { errno = EIO; return -1; }
-    if (output && selected("write-eintr", 4)) { errno = EINTR; return -1; }
+    int defer = getpid() != initial_pid;
+    if (output && selected_inner("write", 4, defer)) { errno = EIO; return -1; }
+    if (output && selected_inner("write-eintr", 4, defer)) { errno = EINTR; return -1; }
     return real_call(fd, buffer, count);
 }
 

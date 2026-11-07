@@ -1,5 +1,5 @@
-//! Classify and privately reopen inherited terminal/pipe output in a
-//! cancellable child. The pager never enters a hostile fstat or procfd open.
+//! Keep inherited non-socket output writes in a cancellable child. The pager
+//! never enters a hostile fstat, write, or worker-owned descriptor close.
 use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
 use std::sync::atomic::Ordering;
 use std::sync::Mutex;
@@ -13,12 +13,14 @@ struct Reply {
     error: libc::c_int,
 }
 
-const DIRECT: libc::c_int = 1;
 const SOCKET: libc::c_int = 2;
-const PRIVATE: libc::c_int = 3;
+const WRITER: libc::c_int = 4;
+const ACK: libc::c_int = 5;
 
-#[repr(align(8))]
-struct Control([u8; 64]);
+pub(crate) enum Prepared {
+    Socket,
+    Writer(Worker),
+}
 
 unsafe fn exited(pidfd: libc::c_int, timeout_ms: libc::c_int) -> Result<bool, libc::c_int> {
     let mut descriptor = libc::pollfd {
@@ -63,7 +65,7 @@ unsafe fn check_abandoned() -> Result<(), libc::c_int> {
     Ok(())
 }
 
-struct Worker {
+pub(crate) struct Worker {
     pidfd: Option<OwnedFd>,
     socket: OwnedFd,
 }
@@ -100,39 +102,85 @@ impl Drop for Worker {
     }
 }
 
-unsafe fn send_reply(
-    socket: libc::c_int,
-    kind: libc::c_int,
-    error: libc::c_int,
-    fd: libc::c_int,
-) -> ! {
+unsafe fn send_packet(socket: libc::c_int, kind: libc::c_int, error: libc::c_int) -> bool {
     let mut reply = Reply { kind, error };
-    let mut vector = libc::iovec {
-        iov_base: (&mut reply as *mut Reply).cast(),
-        iov_len: std::mem::size_of::<Reply>(),
-    };
-    let mut message: libc::msghdr = std::mem::zeroed();
-    message.msg_iov = &mut vector;
-    message.msg_iovlen = 1;
-    let mut control = Control([0; 64]);
-    if fd >= 0 {
-        message.msg_control = control.0.as_mut_ptr().cast();
-        message.msg_controllen = libc::CMSG_SPACE(std::mem::size_of::<libc::c_int>() as _) as _;
-        let header = libc::CMSG_FIRSTHDR(&message);
-        if header.is_null() {
-            libc::_exit(2);
-        }
-        (*header).cmsg_level = libc::SOL_SOCKET;
-        (*header).cmsg_type = libc::SCM_RIGHTS;
-        (*header).cmsg_len = libc::CMSG_LEN(std::mem::size_of::<libc::c_int>() as _) as _;
-        std::ptr::write(libc::CMSG_DATA(header).cast::<libc::c_int>(), fd);
-    }
-    let sent = libc::sendmsg(socket, &message, libc::MSG_NOSIGNAL);
-    libc::_exit(if sent == vector.iov_len as isize {
+    libc::send(
+        socket,
+        (&mut reply as *mut Reply).cast(),
+        std::mem::size_of::<Reply>(),
+        libc::MSG_NOSIGNAL,
+    ) == std::mem::size_of::<Reply>() as isize
+}
+
+unsafe fn send_reply(socket: libc::c_int, kind: libc::c_int, error: libc::c_int) -> ! {
+    libc::_exit(if send_packet(socket, kind, error) {
         0
     } else {
         2
     });
+}
+
+unsafe fn writer_loop(socket: libc::c_int, output: libc::c_int) -> ! {
+    let flags = libc::fcntl(socket, libc::F_GETFL);
+    if flags < 0 || libc::fcntl(socket, libc::F_SETFL, flags & !libc::O_NONBLOCK) < 0 {
+        libc::_exit(2);
+    }
+    let mut bytes = [0u8; 1024];
+    loop {
+        let count = libc::recv(socket, bytes.as_mut_ptr().cast(), bytes.len(), 0);
+        if count == 0 {
+            libc::_exit(0);
+        }
+        if count < 0 {
+            if *libc::__errno_location() == libc::EINTR {
+                continue;
+            }
+            libc::_exit(2);
+        }
+        let mut written = 0usize;
+        let mut error = 0;
+        while written < count as usize {
+            let result = libc::write(
+                output,
+                bytes.as_ptr().add(written).cast(),
+                count as usize - written,
+            );
+            if result > 0 {
+                written += result as usize;
+            } else if result < 0 && *libc::__errno_location() == libc::EINTR {
+                continue;
+            } else if result < 0 && *libc::__errno_location() == libc::EAGAIN {
+                let mut descriptor = libc::pollfd {
+                    fd: output,
+                    events: libc::POLLOUT,
+                    revents: 0,
+                };
+                let ready = libc::poll(&mut descriptor, 1, -1);
+                if ready < 0 && *libc::__errno_location() == libc::EINTR {
+                    continue;
+                }
+                if ready > 0 && descriptor.revents & libc::POLLOUT != 0 {
+                    continue;
+                }
+                error = if ready < 0 {
+                    *libc::__errno_location()
+                } else {
+                    libc::EIO
+                };
+                break;
+            } else {
+                error = if result < 0 {
+                    *libc::__errno_location()
+                } else {
+                    libc::EIO
+                };
+                break;
+            }
+        }
+        if !send_packet(socket, ACK, error) || error != 0 {
+            libc::_exit(1);
+        }
+    }
 }
 
 unsafe fn child_prepare(
@@ -166,100 +214,33 @@ unsafe fn child_prepare(
     libc::close(2);
     let mut original: libc::stat = std::mem::zeroed();
     if libc::fstat(3, &mut original) != 0 {
-        send_reply(4, 0, *libc::__errno_location(), -1);
+        send_reply(4, 0, *libc::__errno_location());
     }
-    match original.st_mode & libc::S_IFMT {
-        libc::S_IFSOCK => send_reply(4, SOCKET, 0, -1),
-        libc::S_IFIFO | libc::S_IFCHR => {
-            let flags = libc::fcntl(3, libc::F_GETFL);
-            if flags < 0 {
-                send_reply(4, 0, *libc::__errno_location(), -1);
-            }
-            if flags & libc::O_ACCMODE == libc::O_RDONLY || flags & libc::O_PATH != 0 {
-                send_reply(4, 0, libc::EBADF, -1);
-            }
-            let private = libc::open(
-                c"/proc/self/fd/3".as_ptr(),
-                libc::O_WRONLY | libc::O_NONBLOCK | libc::O_CLOEXEC | libc::O_NOCTTY,
-            );
-            if private < 0 {
-                send_reply(4, 0, *libc::__errno_location(), -1);
-            }
-            let mut verified: libc::stat = std::mem::zeroed();
-            if libc::fstat(private, &mut verified) != 0 {
-                send_reply(4, 0, *libc::__errno_location(), -1);
-            }
-            if verified.st_mode & libc::S_IFMT != original.st_mode & libc::S_IFMT
-                || verified.st_dev != original.st_dev
-                || verified.st_ino != original.st_ino
-                || verified.st_rdev != original.st_rdev
-            {
-                send_reply(4, 0, libc::ESTALE, -1);
-            }
-            send_reply(4, PRIVATE, 0, private);
-        }
-        _ => send_reply(4, DIRECT, 0, -1),
+    if original.st_mode & libc::S_IFMT == libc::S_IFSOCK {
+        send_reply(4, SOCKET, 0);
     }
+    if !send_packet(4, WRITER, 0) {
+        libc::_exit(2);
+    }
+    writer_loop(4, 3);
 }
 
-unsafe fn receive_reply(socket: libc::c_int) -> Result<(Option<OwnedFd>, bool), libc::c_int> {
+unsafe fn receive_reply(socket: libc::c_int) -> Result<libc::c_int, libc::c_int> {
     let mut reply = Reply::default();
     let mut vector = libc::iovec {
         iov_base: (&mut reply as *mut Reply).cast(),
         iov_len: std::mem::size_of::<Reply>(),
     };
-    let mut control = Control([0; 64]);
     let mut message: libc::msghdr = std::mem::zeroed();
     message.msg_iov = &mut vector;
     message.msg_iovlen = 1;
-    message.msg_control = control.0.as_mut_ptr().cast();
-    message.msg_controllen = control.0.len() as _;
-    let got = libc::recvmsg(
-        socket,
-        &mut message,
-        libc::MSG_CMSG_CLOEXEC | libc::MSG_DONTWAIT,
-    );
+    let got = libc::recvmsg(socket, &mut message, libc::MSG_DONTWAIT);
     if got < 0 {
         return Err(*libc::__errno_location());
     }
-    let mut received_fd = None;
-    let mut valid_control = true;
-    let mut header = libc::CMSG_FIRSTHDR(&message);
-    while !header.is_null() {
-        let base = libc::CMSG_LEN(0) as usize;
-        let length = (*header).cmsg_len as usize;
-        let start = header as usize - control.0.as_ptr() as usize;
-        if start > control.0.len()
-            || start > message.msg_controllen as usize
-            || length < base
-            || length > message.msg_controllen as usize - start
-        {
-            valid_control = false;
-            break;
-        }
-        if (*header).cmsg_level == libc::SOL_SOCKET && (*header).cmsg_type == libc::SCM_RIGHTS {
-            let bytes = length - base;
-            if bytes % std::mem::size_of::<libc::c_int>() != 0 {
-                valid_control = false;
-            }
-            for index in 0..bytes / std::mem::size_of::<libc::c_int>() {
-                let fd = std::ptr::read(libc::CMSG_DATA(header).cast::<libc::c_int>().add(index));
-                if received_fd.is_none() {
-                    received_fd = Some(OwnedFd::from_raw_fd(fd));
-                } else {
-                    libc::close(fd);
-                    valid_control = false;
-                }
-            }
-        } else {
-            valid_control = false;
-        }
-        header = libc::CMSG_NXTHDR(&message, header);
-    }
     if got != vector.iov_len as isize
         || message.msg_flags & (libc::MSG_TRUNC | libc::MSG_CTRUNC) != 0
-        || !valid_control
-        || (reply.error != 0 && (reply.kind != 0 || received_fd.is_some()))
+        || (reply.error != 0 && reply.kind != 0)
     {
         return Err(libc::EPROTO);
     }
@@ -267,14 +248,12 @@ unsafe fn receive_reply(socket: libc::c_int) -> Result<(Option<OwnedFd>, bool), 
         return Err(reply.error);
     }
     match reply.kind {
-        DIRECT if received_fd.is_none() => Ok((None, false)),
-        SOCKET if received_fd.is_none() => Ok((None, true)),
-        PRIVATE if received_fd.is_some() => Ok((received_fd, false)),
+        SOCKET | WRITER => Ok(reply.kind),
         _ => Err(libc::EPROTO),
     }
 }
 
-pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<(Option<OwnedFd>, bool), libc::c_int> {
+pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<Prepared, libc::c_int> {
     check_abandoned()?;
     let mut sockets = [-1; 2];
     if libc::socketpair(
@@ -326,9 +305,8 @@ pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<(Option<OwnedFd>, bo
             events: libc::POLLIN,
             revents: 0,
         };
-        // Exit-time terminal escapes are best effort. A driver may keep a
-        // reopened PTY stuck even after the first signal was dispatched, so
-        // give each teardown preparation the same finite budget as POLLOUT.
+        // Exit-time output is best effort. A driver may keep classification
+        // stuck even after the first signal was dispatched.
         let timeout = if crate::pager::quitting.0 != 0 {
             100
         } else {
@@ -346,7 +324,81 @@ pub(crate) unsafe fn prepare(output: libc::c_int) -> Result<(Option<OwnedFd>, bo
         }
         match receive_reply(worker.socket.as_raw_fd()) {
             Err(libc::EAGAIN) => continue,
-            result => return result,
+            Ok(SOCKET) => return Ok(Prepared::Socket),
+            Ok(WRITER) => return Ok(Prepared::Writer(worker)),
+            Ok(_) => return Err(libc::EPROTO),
+            Err(error) => return Err(error),
+        }
+    }
+}
+
+impl Worker {
+    pub(crate) unsafe fn write(&mut self, bytes: &[u8]) -> Result<(), libc::c_int> {
+        if bytes.is_empty() || bytes.len() > 1024 {
+            return Err(libc::EINVAL);
+        }
+        let _waiting = crate::runtime::IoWait::new();
+        if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+            || crate::signal::has_pending_notifications()
+        {
+            return Err(libc::EINTR);
+        }
+        let sent = libc::send(
+            self.socket.as_raw_fd(),
+            bytes.as_ptr().cast(),
+            bytes.len(),
+            libc::MSG_DONTWAIT | libc::MSG_NOSIGNAL,
+        );
+        if sent < 0 {
+            return Err(*libc::__errno_location());
+        }
+        if sent as usize != bytes.len() {
+            return Err(libc::EIO);
+        }
+        loop {
+            let mut descriptor = libc::pollfd {
+                fd: self.socket.as_raw_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            };
+            let timeout = if crate::pager::quitting.0 != 0 {
+                100
+            } else {
+                -1
+            };
+            let ready = crate::runtime::poll_interruptible(&mut descriptor, 1, timeout);
+            if ready < 0 {
+                return Err(*libc::__errno_location());
+            }
+            if ready == 0 || descriptor.revents & libc::POLLIN == 0 {
+                return Err(libc::EIO);
+            }
+            let mut reply = Reply::default();
+            let mut vector = libc::iovec {
+                iov_base: (&mut reply as *mut Reply).cast(),
+                iov_len: std::mem::size_of::<Reply>(),
+            };
+            let mut message: libc::msghdr = std::mem::zeroed();
+            message.msg_iov = &mut vector;
+            message.msg_iovlen = 1;
+            let got = libc::recvmsg(self.socket.as_raw_fd(), &mut message, libc::MSG_DONTWAIT);
+            if got < 0 && *libc::__errno_location() == libc::EAGAIN {
+                continue;
+            }
+            if got < 0 {
+                return Err(*libc::__errno_location());
+            }
+            if got != vector.iov_len as isize
+                || message.msg_flags & (libc::MSG_TRUNC | libc::MSG_CTRUNC) != 0
+                || reply.kind != ACK
+            {
+                return Err(libc::EPROTO);
+            }
+            return if reply.error == 0 {
+                Ok(())
+            } else {
+                Err(reply.error)
+            };
         }
     }
 }

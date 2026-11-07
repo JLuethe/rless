@@ -246,10 +246,12 @@ def require_observation(actual, expected, trace, site, ordinal=1):
 
 
 def resource_identity(checkpoint, allow_input_switch=False):
-    """Keep descriptor kinds and multiplicity across input worker restarts."""
+    """Keep descriptor kinds and multiplicity across managed worker restarts."""
     descriptors = checkpoint['descriptors']
-    if sum(name.startswith('socket:[') for name in descriptors) != 1:
-        raise ValueError('expected one active input-worker socket')
+    if sum(name.startswith('socket:[') for name in descriptors) != 2:
+        raise ValueError('expected one input-worker and one output-worker socket')
+    if descriptors.count('anon_inode:[pidfd]') != 2:
+        raise ValueError('expected two managed worker pidfds')
     return sorted(
         '{INPUT}' if allow_input_switch and name in ('{ROOT}/i', '{ROOT}/j')
         else '{INPUT_SOCKET}' if name.startswith('socket:[')
@@ -258,10 +260,11 @@ def resource_identity(checkpoint, allow_input_switch=False):
 
 
 def input_worker_children(checkpoint):
-    """One active path-backed input owns one worker; no helper may accumulate."""
+    """One input and one output worker may live; no helper may accumulate."""
     children = checkpoint.get('children')
-    return (isinstance(children, list) and len(children) == 1
-            and isinstance(children[0], str) and children[0].isdigit())
+    return (isinstance(children, list) and len(children) == 2
+            and len(set(children)) == 2
+            and all(isinstance(child, str) and child.isdigit() for child in children))
 
 
 class ActualFaultPaths(unittest.TestCase):

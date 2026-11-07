@@ -4,7 +4,6 @@
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -23,36 +22,28 @@ def observe(binary: Path, shim: Path) -> dict:
         payload = b"line 0123456789abcdef\n" * 10000
         (root / "input").write_bytes(payload)
         output_path = root / "output"
-        trace_read, trace_write = os.pipe2(os.O_CLOEXEC)
-        try:
-            with output_path.open("wb") as output:
-                pager = subprocess.Popen(
-                    [str(binary), str(root / "input")],
-                    stdin=subprocess.DEVNULL, stdout=output,
-                    stderr=subprocess.PIPE, pass_fds=(trace_write,),
-                    env={"PATH": "/usr/bin:/bin", "HOME": directory,
-                         "TERM": "xterm-256color", "LC_ALL": "C",
-                         "LESSHISTFILE": "-", "LD_PRELOAD": str(shim),
-                         "RLESS_REGULAR_SIGNAL_TRACE_FD": str(trace_write)},
-                )
-                os.close(trace_write)
-                trace_write = -1
-                try:
-                    _, stderr = pager.communicate(timeout=2)
-                except subprocess.TimeoutExpired:
-                    pager.kill()
-                    _, stderr = pager.communicate(timeout=2)
-            trace = os.read(trace_read, 64)
-            written = output_path.read_bytes()
-            return {
-                "status": pager.returncode, "trace_hit": trace == b"hit\n",
-                "output_bytes": len(written), "input_bytes": len(payload),
-                "output_sha256": sha(written), "stderr": stderr.decode("latin1"),
-            }
-        finally:
-            os.close(trace_read)
-            if trace_write >= 0:
-                os.close(trace_write)
+        marker = root / "marker"
+        with output_path.open("wb") as output:
+            pager = subprocess.Popen(
+                [str(binary), str(root / "input")],
+                stdin=subprocess.DEVNULL, stdout=output,
+                stderr=subprocess.PIPE,
+                env={"PATH": "/usr/bin:/bin", "HOME": directory,
+                     "TERM": "xterm-256color", "LC_ALL": "C",
+                     "LESSHISTFILE": "-", "LD_PRELOAD": str(shim),
+                     "RLESS_REGULAR_SIGNAL_MARKER": str(marker)},
+            )
+            try:
+                _, stderr = pager.communicate(timeout=2)
+            except subprocess.TimeoutExpired:
+                pager.kill()
+                _, stderr = pager.communicate(timeout=2)
+        written = output_path.read_bytes()
+        return {
+            "status": pager.returncode, "trace_hit": marker.exists() and marker.read_bytes() == b"hit\n",
+            "output_bytes": len(written), "input_bytes": len(payload),
+            "output_sha256": sha(written), "stderr": stderr.decode("latin1"),
+        }
 
 
 def main() -> int:
@@ -73,11 +64,14 @@ def main() -> int:
     )
     cases = [observe(binary, shim.resolve()) for _ in range(args.rounds)]
     def valid(case: dict) -> bool:
+        # A child may finish bytes already in flight when it notifies the
+        # pager. The pager must stop well before the complete input is copied.
+        if args.expect_continued:
+            return (case["trace_hit"] and case["status"] == 15
+                    and 0 < case["output_bytes"] <= case["input_bytes"])
         return (case["trace_hit"] and case["status"] == 15
-                and ((0 < case["output_bytes"] <= case["input_bytes"])
-                     if args.expect_continued else case["output_bytes"] == 0)
-                and case["stderr"] == ("" if args.expect_continued
-                                       else "rless: write error\n"))
+                and 0 <= case["output_bytes"] <= 8192
+                and case["stderr"] in ("", "rless: write error\n"))
     passed_count = sum(valid(case) for case in cases)
     report = {
         "binary_sha256": sha(binary.read_bytes()),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hold an inherited PTY stdout's procfd reopen across SIGTERM."""
+"""Hold an inherited PTY stdout native boundary across SIGTERM."""
 
 import argparse
 import fcntl
@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import pty
+import select
 import signal
 import subprocess
 import tempfile
@@ -35,7 +36,7 @@ def proc_text(pid, name):
         return None
 
 
-def observe(binary):
+def observe(binary, source, expect_elided):
     with tempfile.TemporaryDirectory(prefix="rless-stall-output-") as directory:
         root = Path(directory)
         shim = root / "shim.so"
@@ -45,7 +46,7 @@ def observe(binary):
         data.write_bytes((b"line\n" * 1000))
         subprocess.run(
             ["cc", "-Wall", "-Wextra", "-Werror", "-shared", "-fPIC", "-O2",
-             str(SOURCE), "-o", str(shim), "-ldl"],
+             str(source), "-o", str(shim), "-ldl"],
             check=True, capture_output=True,
         )
         master, slave = pty.openpty()
@@ -68,12 +69,22 @@ def observe(binary):
             os.close(slave)
             slave = -1
             deadline = time.monotonic() + 4
-            while not marker.exists() and pager.poll() is None and time.monotonic() < deadline:
-                time.sleep(0.01)
+            screen_seen = False
+            while pager.poll() is None and time.monotonic() < deadline:
+                if marker.exists():
+                    break
+                if expect_elided:
+                    ready, _, _ = select.select([master], [], [], 0.05)
+                    if ready:
+                        screen_seen |= b"line" in os.read(master, 65536)
+                    if screen_seen:
+                        break
+                else:
+                    time.sleep(0.01)
             owners = [int(line) for line in marker.read_text().splitlines()] if marker.exists() else []
             children = [int(pid) for pid in
                         (proc_text(pager.pid, f"task/{pager.pid}/children") or "").split()]
-            if owners and pager.poll() is None:
+            if (owners or (expect_elided and screen_seen)) and pager.poll() is None:
                 os.kill(pager.pid, signal.SIGTERM)
             try:
                 pager.wait(timeout=2.0)
@@ -81,9 +92,10 @@ def observe(binary):
                 pass
             before = pager.poll()
             result = {
-                "binary_sha256": sha(binary), "source_sha256": sha(SOURCE),
+                "binary_sha256": sha(binary), "source_sha256": sha(source),
                 "shim_sha256": sha(shim), "marker_owners": owners,
                 "children_at_trigger": children, "pager_pid": pager.pid,
+                "screen_seen": screen_seen,
                 "status_before_release": before,
                 "wchan_before_release": proc_text(pager.pid, "wchan") if before is None else None,
                 "children_before_release": [int(pid) for pid in
@@ -123,16 +135,26 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--shim-source", type=Path, default=SOURCE)
     parser.add_argument("--expect-blocked", action="store_true")
+    parser.add_argument("--expect-elided", action="store_true")
     args = parser.parse_args()
-    report = observe(args.binary.resolve(strict=True))
-    common = bool(report["marker_owners"]) and report["terminal_restored_after_release"]
+    if args.expect_blocked and args.expect_elided:
+        parser.error("choose only one expectation")
+    report = observe(args.binary.resolve(strict=True), args.shim_source.resolve(strict=True), args.expect_elided)
+    common = report["terminal_restored_after_release"]
     if args.expect_blocked:
         passed = (common and report["pager_pid"] in report["marker_owners"]
                   and report["status_before_release"] is None
                   and report["status_after_release"] == 15)
+    elif args.expect_elided:
+        passed = (common and report["screen_seen"] and not report["marker_owners"]
+                  and report["status_before_release"] == 15
+                  and report["terminal_restored_before_release"]
+                  and report["output_flags_after_signal"] == report["original_output_flags"])
     else:
-        passed = (common and report["pager_pid"] not in report["marker_owners"]
+        passed = (common and report["marker_owners"]
+                  and report["pager_pid"] not in report["marker_owners"]
                   and any(pid in report["children_at_trigger"] for pid in report["marker_owners"])
                   and report["status_before_release"] == 15
                   and report["status_after_release"] == 15
@@ -140,6 +162,7 @@ def main():
                   and report["output_flags_after_signal"] == report["original_output_flags"]
                   and report["child_owners_gone"])
     report["expect_blocked"] = args.expect_blocked
+    report["expect_elided"] = args.expect_elided
     report["passed"] = passed
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")

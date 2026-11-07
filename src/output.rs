@@ -2,12 +2,10 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
-use std::os::fd::{AsRawFd, OwnedFd};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 
 extern "C" {
-    fn write(__fd: ::core::ffi::c_int, __buf: *const ::core::ffi::c_void, __n: size_t) -> ssize_t;
     fn strcpy(
         __dest: *mut ::core::ffi::c_char,
         __src: *const ::core::ffi::c_char,
@@ -495,14 +493,19 @@ static OUTPUT_FAILED: AtomicBool = AtomicBool::new(false);
 
 struct PreparedOutput {
     source: libc::c_int,
-    private: Option<OwnedFd>,
-    socket: bool,
+    target: crate::output_worker::Prepared,
 }
 
 // set_output is the only pager-side transition of the output descriptor. A
-// prepared private file description can serve every buffered flush until that
-// transition; repeated fork/SCM handshakes would delay interactive screens.
+// writer session can serve every buffered flush until that transition;
+// starting a child for every flush would delay interactive screens.
 static PREPARED_OUTPUT: Mutex<Option<PreparedOutput>> = Mutex::new(None);
+
+pub(crate) fn finish_output() {
+    if let Ok(mut prepared) = PREPARED_OUTPUT.lock() {
+        *prepared = None;
+    }
+}
 
 pub fn output_failed() -> bool {
     OUTPUT_FAILED.load(Ordering::Relaxed)
@@ -513,26 +516,26 @@ pub fn output_failed() -> bool {
 pub fn io_error_diagnostic(message: &[u8]) {
     unsafe {
         let saved_errno = *libc::__errno_location();
-        let (private, socket) = match crate::output_worker::prepare(2) {
+        let mut prepared = match crate::output_worker::prepare(2) {
             Ok(value) => value,
             Err(_) => {
                 *libc::__errno_location() = saved_errno;
                 return;
             }
         };
-        let target = private.as_ref().map_or(2, AsRawFd::as_raw_fd);
+        if let crate::output_worker::Prepared::Writer(worker) = &mut prepared {
+            let _ = worker.write(message);
+            *libc::__errno_location() = saved_errno;
+            return;
+        }
         let mut remaining = message;
         while !remaining.is_empty() {
-            let result = if socket {
-                libc::send(
-                    target,
-                    remaining.as_ptr().cast(),
-                    remaining.len(),
-                    libc::MSG_DONTWAIT | libc::MSG_NOSIGNAL,
-                )
-            } else {
-                libc::write(target, remaining.as_ptr().cast(), remaining.len())
-            };
+            let result = libc::send(
+                2,
+                remaining.as_ptr().cast(),
+                remaining.len(),
+                libc::MSG_DONTWAIT | libc::MSG_NOSIGNAL,
+            );
             if result > 0 {
                 remaining = &remaining[result as usize..];
             } else {
@@ -575,7 +578,7 @@ unsafe fn flush_buffer() -> bool {
         .as_ref()
         .is_none_or(|target| target.source != outfd)
     {
-        let (private, socket) = match crate::output_worker::prepare(outfd) {
+        let target = match crate::output_worker::prepare(outfd) {
             Ok(value) => value,
             Err(error) => {
                 *libc::__errno_location() = error;
@@ -585,20 +588,51 @@ unsafe fn flush_buffer() -> bool {
         };
         *prepared = Some(PreparedOutput {
             source: outfd,
-            private,
-            socket,
+            target,
         });
     }
-    let prepared_output = prepared.as_ref().unwrap();
-    let target = prepared_output
-        .private
-        .as_ref()
-        .map_or(outfd, AsRawFd::as_raw_fd);
-    let socket = prepared_output.socket;
-    let nonblocking = prepared_output.private.is_some() || socket;
-    // A regular-file write can return EINTR after a handled signal too. Keep
-    // it in the wait set so a successful interruption is never retried into a
-    // later write after termination was requested.
+    if let crate::output_worker::Prepared::Writer(worker) = &mut prepared.as_mut().unwrap().target {
+        let bytes = std::slice::from_raw_parts((&raw const obuf).cast::<u8>(), n);
+        let mut written = 0;
+        while written < n {
+            #[cfg(feature = "safety-injection")]
+            let injected_failure = crate::fault::hit(crate::fault::Site::Write);
+            #[cfg(not(feature = "safety-injection"))]
+            let injected_failure = false;
+            #[cfg(feature = "safety-injection")]
+            let write_len = if crate::fault::hit(crate::fault::Site::WriteShort) {
+                ((n - written) / 2).max(1)
+            } else {
+                n - written
+            };
+            #[cfg(not(feature = "safety-injection"))]
+            let write_len = n - written;
+            let outcome = if injected_failure {
+                Err(*libc::__errno_location())
+            } else {
+                worker.write(&bytes[written..written + write_len])
+            };
+            if outcome.is_ok() {
+                written += write_len;
+                continue;
+            }
+            let error = outcome.unwrap_err();
+            *prepared = None;
+            *libc::__errno_location() = error;
+            if error == libc::EPIPE {
+                libc::raise(libc::SIGPIPE);
+            }
+            if error == libc::EINTR && crate::pager::is_tty.0 != 0 {
+                screen_trashed();
+            } else {
+                record_output_failure();
+            }
+            return false;
+        }
+        return true;
+    }
+    // Socket output uses per-call nonblocking sends and the inherited SIGPIPE
+    // disposition. Other output classes are acknowledged by the writer child.
     let _waiting = crate::runtime::IoWait::new();
     let mut written = 0;
     while written < n {
@@ -626,18 +660,12 @@ unsafe fn flush_buffer() -> bool {
         let write_len = n - written;
         let result = if injected_failure {
             -1
-        } else if socket {
+        } else {
             libc::send(
-                target,
+                outfd,
                 (&raw const obuf).cast::<u8>().add(written).cast(),
                 write_len,
                 libc::MSG_DONTWAIT,
-            )
-        } else {
-            write(
-                target,
-                (&raw const obuf).cast::<u8>().add(written).cast(),
-                write_len,
             )
         };
         if result > 0 {
@@ -655,12 +683,11 @@ unsafe fn flush_buffer() -> bool {
             }
             continue;
         } else if result < 0
-            && nonblocking
             && (*libc::__errno_location() == libc::EAGAIN
                 || *libc::__errno_location() == libc::EWOULDBLOCK)
         {
             let mut descriptor = libc::pollfd {
-                fd: target,
+                fd: outfd,
                 events: libc::POLLOUT,
                 revents: 0,
             };

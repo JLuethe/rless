@@ -6,7 +6,11 @@ import re
 from native_alloc import ElfTargets
 
 SOURCE = Path(__file__).resolve().parent / 'native/io_fault.c'
-SYMBOL = r'_ZN5rless6screen13inc_costcount17h[0-9a-f]{16}E'
+# Rust 1.99 emits v0 mangling for this private callback on the host, while
+# the pinned 1.90 toolchain emits legacy mangling. The ELF binding below still
+# requires exactly one matching symbol and checks its exact binary hash.
+SYMBOL = (r'(?:_ZN5rless6screen13inc_costcount17h[0-9a-f]{16}E'
+          r'|_RNvNtC[A-Za-z0-9_]+_5rless6screen13inc_costcount)')
 
 
 def sha(path):
