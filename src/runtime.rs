@@ -288,7 +288,16 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
         return -1;
     }
     let kind = status.st_mode & libc::S_IFMT;
-    if kind == libc::S_IFIFO || (kind == libc::S_IFCHR && libc::isatty(fd) == 1) {
+    let is_tty = if kind == libc::S_IFCHR {
+        let value = crate::regular_read::isatty_with_mask(fd, &saved);
+        if value < 0 {
+            return -1;
+        }
+        value == 1
+    } else {
+        false
+    };
+    if kind == libc::S_IFIFO || is_tty {
         read_reopened_nonblocking(fd, buffer, len, &status)
     } else if kind == libc::S_IFSOCK {
         // recv has a per-call nonblocking flag and leaves shared fd flags alone.

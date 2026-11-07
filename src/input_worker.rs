@@ -904,7 +904,7 @@ pub(crate) unsafe fn isatty_or_native(fd: i32) -> i32 {
     if contains(fd) {
         isatty(fd)
     } else {
-        libc::isatty(fd)
+        crate::regular_read::isatty_interruptible(fd)
     }
 }
 

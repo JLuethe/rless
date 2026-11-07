@@ -5,6 +5,13 @@ use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
 use std::sync::{atomic::Ordering, Mutex};
 
 const CHUNK: usize = 8192;
+
+#[derive(Clone, Copy)]
+enum Operation {
+    Read,
+    Stat,
+    Isatty,
+}
 // A killed read can remain in an uninterruptible kernel wait. Retain its
 // pidfd and refuse another worker until it exits, rather than accumulating
 // children or waiting indefinitely in pager cleanup.
@@ -109,7 +116,7 @@ unsafe fn child_read(
     input: libc::c_int,
     offset: Option<libc::off_t>,
     length: usize,
-    stat_only: bool,
+    operation: Operation,
     parent_pid: libc::pid_t,
 ) -> ! {
     libc::close(parent_socket);
@@ -130,7 +137,7 @@ unsafe fn child_read(
     libc::close(1);
     libc::close(2);
     let mut bytes = [0u8; CHUNK];
-    let count = if stat_only {
+    let count = if matches!(operation, Operation::Stat) {
         let mut status = std::mem::MaybeUninit::<libc::stat>::uninit();
         // fstat need not write native padding. The reply transports the full
         // layout as bytes, so initialize every byte before passing it to C.
@@ -150,6 +157,9 @@ unsafe fn child_read(
         } else {
             -1
         }
+    } else if matches!(operation, Operation::Isatty) {
+        bytes[0] = (libc::isatty(3) == 1) as u8;
+        1
     } else {
         match offset {
             Some(position) => libc::pread(3, bytes.as_mut_ptr().cast(), length, position),
@@ -192,7 +202,7 @@ unsafe fn launch(
     input: libc::c_int,
     offset: Option<libc::off_t>,
     length: usize,
-    stat_only: bool,
+    operation: Operation,
 ) -> Result<Worker, libc::c_int> {
     let mut sockets = [-1; 2];
     if libc::socketpair(
@@ -226,7 +236,7 @@ unsafe fn launch(
             input,
             offset,
             length,
-            stat_only,
+            operation,
             parent_pid,
         );
     }
@@ -290,14 +300,14 @@ unsafe fn read_worker(
     length: usize,
     offset: Option<libc::off_t>,
     saved_mask: &libc::sigset_t,
-    stat_only: bool,
+    operation: Operation,
 ) -> isize {
     if let Err(error) = check_abandoned() {
         *libc::__errno_location() = error;
         return -1;
     }
     let length = length.min(CHUNK);
-    let mut worker = match launch(input, offset, length, stat_only) {
+    let mut worker = match launch(input, offset, length, operation) {
         Ok(worker) => worker,
         Err(error) => {
             *libc::__errno_location() = error;
@@ -391,7 +401,14 @@ pub(crate) unsafe fn read_positioned(
     if offset < 0 {
         return -1;
     }
-    read_worker(input, buffer, length, Some(offset), saved_mask, false)
+    read_worker(
+        input,
+        buffer,
+        length,
+        Some(offset),
+        saved_mask,
+        Operation::Read,
+    )
 }
 
 pub(crate) unsafe fn read_unpositioned(
@@ -400,7 +417,7 @@ pub(crate) unsafe fn read_unpositioned(
     length: usize,
     saved_mask: &libc::sigset_t,
 ) -> isize {
-    read_worker(input, buffer, length, None, saved_mask, false)
+    read_worker(input, buffer, length, None, saved_mask, Operation::Read)
 }
 
 /// Keep a hostile descriptor's metadata query out of the pager. In particular,
@@ -422,7 +439,7 @@ pub(crate) unsafe fn stat_with_mask(
         size,
         None,
         saved_mask,
-        true,
+        Operation::Stat,
     );
     if count == size as isize {
         output.write(result.assume_init());
@@ -449,4 +466,33 @@ pub(crate) unsafe fn stat_interruptible(
     };
     let _restore = crate::runtime::RestoreMask(saved);
     stat_with_mask(input, output, &saved)
+}
+
+pub(crate) unsafe fn isatty_with_mask(
+    input: libc::c_int,
+    saved_mask: &libc::sigset_t,
+) -> libc::c_int {
+    let mut value = 0u8;
+    let count = read_worker(input, &mut value, 1, None, saved_mask, Operation::Isatty);
+    if count == 1 && value <= 1 {
+        value as libc::c_int
+    } else {
+        if count >= 0 {
+            *libc::__errno_location() = libc::EPROTO;
+        }
+        -1
+    }
+}
+
+pub(crate) unsafe fn isatty_interruptible(input: libc::c_int) -> libc::c_int {
+    let _wait = crate::runtime::IoWait::new();
+    let saved = match crate::runtime::block_handled_signals() {
+        Ok(saved) => saved,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            return -1;
+        }
+    };
+    let _restore = crate::runtime::RestoreMask(saved);
+    isatty_with_mask(input, &saved)
 }

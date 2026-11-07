@@ -14,7 +14,6 @@ extern "C" {
     fn creat(__file: *const ::core::ffi::c_char, __mode: mode_t) -> ::core::ffi::c_int;
     fn lseek(__fd: ::core::ffi::c_int, __offset: __off_t, __whence: ::core::ffi::c_int) -> __off_t;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn isatty(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn strcmp(
         __s1: *const ::core::ffi::c_char,
@@ -1382,7 +1381,7 @@ pub unsafe extern "C" fn reopen_curr_ifile() {
 }
 #[no_mangle]
 pub unsafe extern "C" fn edit_stdin() -> ::core::ffi::c_int {
-    if isatty(fd0) != 0 {
+    if crate::input_worker::isatty_or_native(fd0) != 0 {
         error(
             lmsg(lessmsg_id::LM_Missing_filename),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
