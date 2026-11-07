@@ -191,6 +191,13 @@ int openat(int dirfd, const char *path, int flags, ...) {
         hit(); errno = EOPNOTSUPP; return -1;
     }
     int fd = real_call(dirfd, path, flags, mode);
+    if (fd < 0 && errno == ENOENT && plan("log-missing-symlink") &&
+        strcmp(path, "capture") == 0 && !(flags & O_CREAT) && !*fired) {
+        /* Replace the missing pathname after the first lookup, before the
+         * caller's O_EXCL creation. The destination must stay untouched. */
+        if (syscall(SYS_symlinkat, "victim", dirfd, "capture") != 0) _exit(125);
+        hit(); errno = ENOENT; return -1;
+    }
     if (fd >= 0 && (flags & O_TMPFILE) == O_TMPFILE) unnamed_history_fd = fd;
     return fd;
 }

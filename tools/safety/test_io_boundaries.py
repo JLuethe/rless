@@ -91,6 +91,23 @@ def run(binary, output, *, retained=None):
             if plan != 'baseline': hit(o)
         observe(plan, log if plan == 'baseline' else fault(log, shim, plan), verify)
 
+    missing_log = fault(log, shim, 'log-missing-symlink')
+    missing_log['files']['victim'] = {'text': 'VICTIM\n'}
+    missing_log['events'] = [
+        {'await': ['Press RETURN to continue']},
+        {'send': '\n', 'await': ['READY']},
+        {'close_stream': True}, {'send': 'q'},
+    ]
+    def missing_log_race(o):
+        hit(o)
+        check(o['status'] == 1 and o['termios_restored'],
+              'missing-log replacement did not report failure and restore terminal')
+        check(o['files']['victim']['sha256'] == sha(b'VICTIM\n'),
+              'missing-log replacement wrote to the symlink target')
+        check(o['files']['capture']['sha256'] == sha(b'VICTIM\n'),
+              'missing-log replacement did not preserve the attacker symlink')
+    observe('log-missing-to-symlink', missing_log, missing_log_race)
+
     endless = fault(log, shim, 'log-eio')
     endless['events'] = [{'await': ['READY']}, {'send': 'q'}]
     def check_endless(o):
