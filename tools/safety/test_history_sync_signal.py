@@ -23,6 +23,15 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def alive(pid: int) -> bool:
+    try:
+        status = Path(f"/proc/{pid}/status").read_text()
+    except (FileNotFoundError, ProcessLookupError):
+        return False
+    return not any(line.startswith("State:") and line.split()[1] in ("Z", "X", "x")
+                   for line in status.splitlines())
+
+
 def observe(binary: Path, library: Path, mode: str, stage: str, delivery: str,
             signal_group: bool, no_tmpfile: bool) -> dict:
     with tempfile.TemporaryDirectory(prefix="rless-history-sync-") as directory:
@@ -55,7 +64,10 @@ def observe(binary: Path, library: Path, mode: str, stage: str, delivery: str,
             while b"needle" not in output and pager.poll() is None and time.monotonic() < deadline:
                 ready, _, _ = select.select([master], [], [], 0.05)
                 if ready:
-                    output.extend(os.read(master, 65536))
+                    try:
+                        output.extend(os.read(master, 65536))
+                    except OSError:
+                        break
             if pager.poll() is None:
                 if mode == "quit":
                     os.write(master, b"/needle\n")
@@ -64,11 +76,25 @@ def observe(binary: Path, library: Path, mode: str, stage: str, delivery: str,
                 else:
                     os.write(master, b"ma")
             deadline = time.monotonic() + 3
-            while not trace.exists() and pager.poll() is None and time.monotonic() < deadline:
+            def ready_marker() -> bool:
+                if not trace.exists():
+                    return False
+                value = trace.read_bytes()
+                return value == b"hit\n" if stage != "verify" else (
+                    value.startswith(b"hit ") and value.endswith(b"\n")
+                    and value[4:-1].isdigit())
+            while not ready_marker() and pager.poll() is None and time.monotonic() < deadline:
                 ready, _, _ = select.select([master], [], [], 0.01)
                 if ready:
-                    output.extend(os.read(master, 65536))
-            if trace.exists() and pager.poll() is None:
+                    try:
+                        output.extend(os.read(master, 65536))
+                    except OSError:
+                        break
+            marker = trace.read_bytes() if trace.exists() else b""
+            verifier_pid = None
+            if stage == "verify" and marker.startswith(b"hit "):
+                verifier_pid = int(marker[4:].strip())
+            if ready_marker() and pager.poll() is None:
                 delivered = {"int": signal.SIGINT, "term": signal.SIGTERM,
                              "winch": signal.SIGWINCH}[delivery]
                 if signal_group:
@@ -89,7 +115,12 @@ def observe(binary: Path, library: Path, mode: str, stage: str, delivery: str,
                     except subprocess.TimeoutExpired:
                         pass
             return {
-                "fsync_hit": trace.read_bytes() == b"hit\n" if trace.exists() else False,
+                "fsync_hit": marker == b"hit\n" if stage != "verify" else verifier_pid is not None,
+                "verifier_pid": verifier_pid,
+                "verifier_alive_after_signal": alive(verifier_pid) if verifier_pid is not None else None,
+                "verifier_reaped_after_signal": (
+                    not Path(f"/proc/{verifier_pid}").exists()
+                    if verifier_pid is not None else None),
                 "status_after_signal": pager.poll(),
                 "alive_after_winch": alive_after_winch,
                 "wchan": (Path(f"/proc/{pager.pid}/wchan").read_text().strip()
@@ -114,7 +145,7 @@ def main() -> int:
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--mode", choices=("quit", "autosave"), default="quit")
-    parser.add_argument("--stage", choices=("fsync", "created", "linked", "directory"), default="fsync")
+    parser.add_argument("--stage", choices=("fsync", "created", "linked", "directory", "verify"), default="fsync")
     parser.add_argument("--signal", choices=("term", "int", "winch"), default="term")
     parser.add_argument("--rounds", type=int, default=1)
     parser.add_argument("--signal-group", action="store_true")
@@ -128,6 +159,8 @@ def main() -> int:
         parser.error("--rounds must be positive")
     if args.signal == "winch" and args.mode != "autosave":
         parser.error("SIGWINCH control requires --mode autosave")
+    if args.stage == "verify" and (args.mode != "quit" or args.signal != "term"):
+        parser.error("stalled verification control requires quit and SIGTERM")
     binary = args.binary.resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="rless-history-shim-") as directory:
         library = Path(directory) / "history_sync_stall.so"
@@ -151,10 +184,14 @@ def main() -> int:
                     and case["status_after_signal"] == 0
                     and case["terminal_restored"] and not case["temporary_names"]
                     and case["history_committed"])
-        return (case["fsync_hit"] and case["status_after_signal"] ==
+        return (case["fsync_hit"]
+                and (args.stage != "verify" or (
+                    not case["verifier_alive_after_signal"]
+                    and case["verifier_reaped_after_signal"]))
+                and case["status_after_signal"] ==
                 (2 if args.signal == "int" else 15)
                 and case["terminal_restored"] and not case["temporary_names"]
-                and case["history_committed"] == (args.stage == "directory"))
+                and case["history_committed"] == (args.stage in ("directory", "verify")))
     passed_count = sum(valid(case) for case in cases)
     passed = passed_count == args.rounds
     result = {"binary_sha256": sha(binary), "shim_sha256": sha(SHIM),
