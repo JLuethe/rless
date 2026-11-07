@@ -2162,7 +2162,12 @@ unsafe fn create_announced_named_history_temp(
         // The parent learns the pinned directory and unpredictable name before
         // openat can stall. If a signal kills the child immediately after a
         // successful create, it can still clean up this exact name.
-        if !crate::history_worker::announce_prepare(socket, directory.as_raw_fd(), &temporary) {
+        if !crate::history_worker::announce_prepare(
+            socket,
+            directory.as_raw_fd(),
+            &temporary,
+            &destination,
+        ) {
             return None;
         }
         let fd = libc::openat(
@@ -2203,6 +2208,7 @@ unsafe fn create_announced_named_history_temp(
             temp.directory.as_raw_fd(),
             temp.fd,
             &temp.temporary,
+            &temp.destination,
         ) {
             libc::close(temp.fd);
             return None;
@@ -2464,6 +2470,7 @@ pub(crate) unsafe fn save_cmdhist_worker(socket: libc::c_int) -> u8 {
             history_temp.directory.as_raw_fd(),
             history_temp.link_fd.as_ref().unwrap().as_raw_fd(),
             &history_temp.temporary,
+            &history_temp.destination,
         )
     {
         close(history_temp.fd);
@@ -2538,6 +2545,7 @@ pub(crate) unsafe fn save_cmdhist_worker(socket: libc::c_int) -> u8 {
                 history_temp.directory.as_raw_fd(),
                 history_temp.link_fd.as_ref().unwrap().as_raw_fd(),
                 &history_temp.temporary,
+                &history_temp.destination,
             ) {
                 break;
             }

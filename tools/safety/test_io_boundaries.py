@@ -228,9 +228,15 @@ def run(binary, output, *, retained=None):
     observe('hist-dir-fsync', fault(history, shim, 'hist-dir-fsync'), history_durability_failure)
     observe('named-hist-dir-fsync', fault(named_history, shim, 'hist-dir-fsync'),
             history_durability_failure)
-    for name, original in (('hist-postcommit-exit', history),
-                           ('named-hist-postcommit-exit', named_history)):
-        case = fault(original, shim, 'hist-postcommit-exit')
+    for name, original, plan in (
+        ('hist-postcommit-exit', history, 'hist-postcommit-exit'),
+        ('named-hist-postcommit-exit', named_history, 'hist-postcommit-exit'),
+        ('hist-after-rename-exit', history, 'hist-after-rename-exit'),
+        ('named-hist-after-rename-exit', named_history, 'hist-after-rename-exit'),
+        ('hist-rename-post-error', history, 'hist-rename-post-error'),
+        ('named-hist-rename-post-error', named_history, 'hist-rename-post-error'),
+    ):
+        case = fault(original, shim, plan)
         case['include_transcript'] = True
         def committed_worker_exit(o):
             history_durability_failure(o)
@@ -240,6 +246,19 @@ def run(binary, output, *, retained=None):
             check(b'rless: cannot save history' not in transcript,
                   'post-rename worker exit retained dirty save-failure state')
         observe(name, case, committed_worker_exit)
+
+    stalled_verify = fault(history, shim, 'hist-after-rename-verify-stall')
+    stalled_verify['include_transcript'] = True
+    stalled_verify['env']['RLESS_BOUNDARY_VERIFY_TRACE'] = '{ROOT}/verify-hit'
+    stalled_verify['files']['verify-hit'] = {'text': ''}
+    def bounded_unknown_commit(o):
+        history_durability_failure(o)
+        check(o['files']['verify-hit']['sha256'] == sha(b'hit\n'),
+              'in-flight destination verification was not observed')
+        transcript = base64.b64decode(o['transcript_b64'])
+        check(b'rless: cannot save history' in transcript,
+              'unverified rename was reported as durable')
+    observe('hist-after-rename-verify-stall', stalled_verify, bounded_unknown_commit)
 
     unreadable_history = json.loads(json.dumps(history))
     unreadable_history['files']['history'] = {

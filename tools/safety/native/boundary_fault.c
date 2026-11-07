@@ -271,5 +271,32 @@ int renameat(int olddirfd, const char *source, int newdirfd, const char *dest) {
     if (plan("hist-rename") && history_temporary(source) && strcmp(dest, "history") == 0) {
         hit(); errno = EIO; return -1;
     }
-    return real_call(olddirfd, source, newdirfd, dest);
+    int result = real_call(olddirfd, source, newdirfd, dest);
+    if (result == 0 && plan("hist-rename-post-error") &&
+        history_temporary(source) && strcmp(dest, "history") == 0) {
+        hit(); errno = EIO; return -1;
+    }
+    if (result == 0 && (plan("hist-after-rename-exit") ||
+                        plan("hist-after-rename-verify-stall")) &&
+        history_temporary(source) && strcmp(dest, "history") == 0) {
+        /* Crash after the rename syscall, before the COMMIT packet. */
+        hit(); _exit(94);
+    }
+    return result;
+}
+
+int fstatat(int dirfd, const char *path, struct stat *out, int flags) {
+    int (*real_call)(int, const char *, struct stat *, int) = dlsym(RTLD_NEXT, "fstatat");
+    if (!real_call) _exit(125);
+    if (plan("hist-after-rename-verify-stall") && *fired &&
+        strcmp(path, "history") == 0) {
+        const char *trace = getenv("RLESS_BOUNDARY_VERIFY_TRACE");
+        if (!trace) _exit(123);
+        int fd = syscall(SYS_openat, AT_FDCWD, trace,
+                         O_WRONLY | O_APPEND | O_CLOEXEC, 0);
+        if (fd < 0 || syscall(SYS_write, fd, "hit\n", 4) != 4) _exit(124);
+        syscall(SYS_close, fd);
+        for (;;) pause();
+    }
+    return real_call(dirfd, path, out, flags);
 }

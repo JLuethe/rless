@@ -268,7 +268,7 @@ def validate_external_report(path, root=ROOT, *, reference_context=None, tool_ho
     boundary_path = checked(outer['results']['boundary-suite'])
     boundary = json.loads(boundary_path.read_text())
     require(replay_boundaries(binaries['normal'], boundary_path.parent, retained=boundary), 'retained boundary assertions failed')
-    # Every one of the thirty recorded cases must reject a wrong status. This
+    # Every recorded case must reject a wrong status. This
     # re-runs assertions, rather than trusting a negative-control count.
     for name in boundary:
         changed = copy.deepcopy(boundary)

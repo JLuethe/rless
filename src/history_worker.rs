@@ -8,6 +8,7 @@ static ABANDONED: Mutex<Option<OwnedFd>> = Mutex::new(None);
 // A cleanup stuck in the filesystem retains one worker. A later save fails
 // closed instead of creating an unbounded sequence of temporary files.
 static CLEANUP_PENDING: Mutex<Option<OwnedFd>> = Mutex::new(None);
+static VERIFY_PENDING: Mutex<Option<OwnedFd>> = Mutex::new(None);
 
 const TEMP: u8 = 1;
 const COMMIT: u8 = 2;
@@ -24,7 +25,9 @@ struct Packet {
     kind: u8,
     code: u8,
     length: u16,
+    destination_length: u16,
     name: [u8; 256],
+    destination: [u8; 256],
 }
 
 impl Packet {
@@ -33,7 +36,9 @@ impl Packet {
             kind,
             code,
             length: 0,
+            destination_length: 0,
             name: [0; 256],
+            destination: [0; 256],
         }
     }
 }
@@ -51,6 +56,7 @@ struct Temp {
     directory: OwnedFd,
     file: Option<OwnedFd>,
     name: CString,
+    destination: CString,
     renamed: bool,
 }
 
@@ -102,6 +108,160 @@ unsafe fn check_cleanup_pending() -> Result<(), libc::c_int> {
         *slot = None;
     }
     Ok(())
+}
+
+unsafe fn check_verify_pending() -> Result<(), libc::c_int> {
+    let mut slot = VERIFY_PENDING.lock().map_err(|_| libc::EOWNERDEAD)?;
+    if let Some(pidfd) = slot.as_ref() {
+        if !exited(pidfd.as_raw_fd(), 0) {
+            return Err(libc::EBUSY);
+        }
+        *slot = None;
+    }
+    Ok(())
+}
+
+unsafe fn verify_child(
+    parent_socket: libc::c_int,
+    child_socket: libc::c_int,
+    parent_pid: libc::pid_t,
+    temp: &Temp,
+) -> ! {
+    libc::close(parent_socket);
+    let mut blocked: libc::sigset_t = std::mem::zeroed();
+    if libc::sigfillset(&mut blocked) != 0
+        || libc::sigprocmask(libc::SIG_SETMASK, &blocked, std::ptr::null_mut()) != 0
+        || libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL) != 0
+        || libc::getppid() != parent_pid
+    {
+        libc::_exit(2);
+    }
+    let socket = libc::fcntl(child_socket, libc::F_DUPFD_CLOEXEC, 16);
+    let directory = libc::fcntl(temp.directory.as_raw_fd(), libc::F_DUPFD_CLOEXEC, 16);
+    let Some(owned_file) = temp.file.as_ref() else {
+        libc::_exit(2);
+    };
+    let file = libc::fcntl(owned_file.as_raw_fd(), libc::F_DUPFD_CLOEXEC, 16);
+    if socket < 0
+        || directory < 0
+        || file < 0
+        || libc::dup3(socket, 3, libc::O_CLOEXEC) < 0
+        || libc::dup3(directory, 4, libc::O_CLOEXEC) < 0
+        || libc::dup3(file, 5, libc::O_CLOEXEC) < 0
+        || libc::syscall(libc::SYS_close_range, 6u32, u32::MAX, 0u32) != 0
+    {
+        libc::_exit(2);
+    }
+    libc::close(0);
+    libc::close(1);
+    libc::close(2);
+    let mut original: libc::stat = std::mem::zeroed();
+    let mut destination: libc::stat = std::mem::zeroed();
+    let matched = libc::fstat(5, &mut original) == 0
+        && libc::fstatat(
+            4,
+            temp.destination.as_ptr(),
+            &mut destination,
+            libc::AT_SYMLINK_NOFOLLOW,
+        ) == 0
+        && original.st_dev == destination.st_dev
+        && original.st_ino == destination.st_ino
+        && destination.st_mode & libc::S_IFMT == libc::S_IFREG
+        && destination.st_uid == libc::geteuid()
+        && destination.st_nlink == 1;
+    let answer = matched as u8;
+    let _ = libc::send(3, (&answer as *const u8).cast(), 1, libc::MSG_NOSIGNAL);
+    libc::_exit(0);
+}
+
+unsafe fn verify_commit(temp: &Temp) -> Result<bool, libc::c_int> {
+    if temp.file.is_none() {
+        return Ok(false);
+    }
+    let mut sockets = [-1; 2];
+    if libc::socketpair(
+        libc::AF_UNIX,
+        libc::SOCK_SEQPACKET | libc::SOCK_CLOEXEC | libc::SOCK_NONBLOCK,
+        0,
+        sockets.as_mut_ptr(),
+    ) != 0
+    {
+        return Err(*libc::__errno_location());
+    }
+    let parent_socket = OwnedFd::from_raw_fd(sockets[0]);
+    let child_socket = OwnedFd::from_raw_fd(sockets[1]);
+    let parent_pid = libc::getpid();
+    let mut pidfd = -1;
+    let pid = libc::syscall(
+        libc::SYS_clone,
+        (libc::CLONE_PIDFD | libc::SIGCHLD) as libc::c_ulong,
+        0usize,
+        &mut pidfd as *mut libc::c_int,
+        0usize,
+        0usize,
+    ) as libc::pid_t;
+    if pid == 0 {
+        verify_child(
+            parent_socket.as_raw_fd(),
+            child_socket.as_raw_fd(),
+            parent_pid,
+            temp,
+        );
+    }
+    if pid < 0 {
+        return Err(*libc::__errno_location());
+    }
+    drop(child_socket);
+    if pidfd < 0 {
+        libc::kill(pid, libc::SIGKILL);
+        libc::waitpid(pid, std::ptr::null_mut(), libc::WNOHANG);
+        return Err(libc::EIO);
+    }
+    let pidfd = OwnedFd::from_raw_fd(pidfd);
+    let result = loop {
+        let mut descriptor = libc::pollfd {
+            fd: parent_socket.as_raw_fd(),
+            events: libc::POLLIN,
+            revents: 0,
+        };
+        let ready = crate::runtime::poll_interruptible(&mut descriptor, 1, 1000);
+        if ready < 0 {
+            break Err(*libc::__errno_location());
+        }
+        if ready == 0 {
+            break Err(libc::ETIMEDOUT);
+        }
+        let mut answer = 0u8;
+        let received = libc::recv(
+            parent_socket.as_raw_fd(),
+            (&mut answer as *mut u8).cast(),
+            1,
+            libc::MSG_DONTWAIT,
+        );
+        if received < 0 && *libc::__errno_location() == libc::EAGAIN {
+            continue;
+        }
+        break if received == 1 && answer <= 1 {
+            Ok(answer == 1)
+        } else {
+            Err(libc::EPROTO)
+        };
+    };
+    let _ = libc::syscall(
+        libc::SYS_pidfd_send_signal,
+        pidfd.as_raw_fd(),
+        libc::SIGKILL,
+        std::ptr::null::<libc::siginfo_t>(),
+        0,
+    );
+    if !exited(pidfd.as_raw_fd(), 100) {
+        let mut slot = VERIFY_PENDING.lock().unwrap_or_else(|_| libc::_exit(1));
+        if slot.is_some() {
+            libc::_exit(1);
+        }
+        *slot = Some(pidfd);
+    }
+    result
 }
 
 unsafe fn cleanup_child(temp: &Temp, pending_pidfd: Option<libc::c_int>) -> ! {
@@ -243,6 +403,40 @@ unsafe fn start_cleanup(temp: Temp, pending_pidfd: Option<libc::c_int>) {
     }
 }
 
+fn packet_component(bytes: &[u8]) -> Result<CString, libc::c_int> {
+    if bytes.is_empty()
+        || bytes == b"."
+        || bytes == b".."
+        || bytes.contains(&b'/')
+        || bytes.contains(&0)
+    {
+        return Err(libc::EPROTO);
+    }
+    let mut owned = Vec::new();
+    owned
+        .try_reserve_exact(bytes.len() + 1)
+        .map_err(|_| libc::ENOMEM)?;
+    owned.extend_from_slice(bytes);
+    owned.push(0);
+    CString::from_vec_with_nul(owned).map_err(|_| libc::EPROTO)
+}
+
+fn packet_names(packet: &Packet) -> Result<(CString, CString), libc::c_int> {
+    if packet.length == 0
+        || packet.length > 255
+        || packet.destination_length == 0
+        || packet.destination_length > 255
+    {
+        return Err(libc::EPROTO);
+    }
+    let name = packet_component(&packet.name[..packet.length as usize])?;
+    let destination = packet_component(&packet.destination[..packet.destination_length as usize])?;
+    if name == destination {
+        return Err(libc::EPROTO);
+    }
+    Ok((name, destination))
+}
+
 impl Worker {
     unsafe fn drain_on_interrupt(&mut self, committed: &mut bool) {
         // A signal can win ppoll just after the child queued its temporary
@@ -260,25 +454,27 @@ impl Worker {
                 Err(_) => break,
             };
             match packet.kind {
-                PREPARE if packet.length > 0 && packet.length <= 255 && !*committed => {
+                PREPARE if !*committed => {
                     if let Some([directory, _duplicate]) = fds {
-                        if let Ok(name) = CString::new(&packet.name[..packet.length as usize]) {
+                        if let Ok((name, destination)) = packet_names(&packet) {
                             self.temp = Some(Temp {
                                 directory,
                                 file: None,
                                 name,
+                                destination,
                                 renamed: false,
                             });
                         }
                     }
                 }
-                TEMP if packet.length > 0 && packet.length <= 255 && !*committed => {
+                TEMP if !*committed => {
                     if let Some([directory, file]) = fds {
-                        if let Ok(name) = CString::new(&packet.name[..packet.length as usize]) {
+                        if let Ok((name, destination)) = packet_names(&packet) {
                             self.temp = Some(Temp {
                                 directory,
                                 file: Some(file),
                                 name,
+                                destination,
                                 renamed: false,
                             });
                         }
@@ -368,13 +564,19 @@ pub(crate) unsafe fn announce_temp(
     directory: libc::c_int,
     file: libc::c_int,
     name: &CString,
+    destination: &CString,
 ) -> bool {
-    if name.as_bytes().len() > 255 {
+    if name.as_bytes().len() > 255
+        || destination.as_bytes().is_empty()
+        || destination.as_bytes().len() > 255
+    {
         return false;
     }
     let mut packet = Packet::new(TEMP, 0);
     packet.length = name.as_bytes().len() as u16;
+    packet.destination_length = destination.as_bytes().len() as u16;
     packet.name[..name.as_bytes().len()].copy_from_slice(name.as_bytes());
+    packet.destination[..destination.as_bytes().len()].copy_from_slice(destination.as_bytes());
     if !send_packet(socket, &packet, Some([directory, file])) {
         return false;
     }
@@ -386,13 +588,19 @@ pub(crate) unsafe fn announce_prepare(
     socket: libc::c_int,
     directory: libc::c_int,
     name: &CString,
+    destination: &CString,
 ) -> bool {
-    if name.as_bytes().len() > 255 {
+    if name.as_bytes().len() > 255
+        || destination.as_bytes().is_empty()
+        || destination.as_bytes().len() > 255
+    {
         return false;
     }
     let mut packet = Packet::new(PREPARE, 0);
     packet.length = name.as_bytes().len() as u16;
+    packet.destination_length = destination.as_bytes().len() as u16;
     packet.name[..name.as_bytes().len()].copy_from_slice(name.as_bytes());
+    packet.destination[..destination.as_bytes().len()].copy_from_slice(destination.as_bytes());
     if !send_packet(socket, &packet, Some([directory, directory])) {
         return false;
     }
@@ -529,24 +737,56 @@ unsafe fn receive(socket: libc::c_int) -> Result<(Packet, Option<[OwnedFd; 2]>),
     Ok((packet, fds))
 }
 
-fn save_error_after_commit(error: libc::c_int, committed: bool) -> Result<Report, libc::c_int> {
+unsafe fn save_error_after_commit(
+    worker: &mut Worker,
+    error: libc::c_int,
+    committed: bool,
+) -> Result<Report, libc::c_int> {
     if committed {
         // A received COMMIT proves rename completed. A worker crash, socket
         // error, or malformed final packet can still leave directory fsync
         // unconfirmed, but it cannot make the old history live again.
-        Ok(Report {
+        return Ok(Report {
             code: UNSYNCED,
             committed: true,
             interrupted: false,
-        })
-    } else {
-        Err(error)
+        });
     }
+    // The worker can exit between a successful renameat and its COMMIT
+    // notification. Once the worker is terminal, compare the pinned new inode
+    // with the destination through a second cancellable child. No pathname
+    // operation may block the pager's signal dispatcher.
+    if let (Some(pidfd), Some(temp)) = (worker.pidfd.as_ref(), worker.temp.as_mut()) {
+        let _ = libc::syscall(
+            libc::SYS_pidfd_send_signal,
+            pidfd.as_raw_fd(),
+            libc::SIGKILL,
+            std::ptr::null::<libc::siginfo_t>(),
+            0,
+        );
+        let mut descriptor = libc::pollfd {
+            fd: pidfd.as_raw_fd(),
+            events: libc::POLLIN,
+            revents: 0,
+        };
+        let stopped = crate::runtime::poll_interruptible(&mut descriptor, 1, 100) > 0
+            && exited(pidfd.as_raw_fd(), 0);
+        if temp.file.is_some() && stopped && verify_commit(temp).unwrap_or(false) {
+            temp.renamed = true;
+            return Ok(Report {
+                code: UNSYNCED,
+                committed: true,
+                interrupted: false,
+            });
+        }
+    }
+    Err(error)
 }
 
 pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
     check_abandoned()?;
     check_cleanup_pending()?;
+    check_verify_pending()?;
     let mut sockets = [-1; 2];
     if libc::socketpair(
         libc::AF_UNIX,
@@ -608,7 +848,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     interrupted: true,
                 });
             }
-            return save_error_after_commit(*libc::__errno_location(), committed);
+            return save_error_after_commit(&mut worker, *libc::__errno_location(), committed);
         }
         if ready == 0 {
             continue;
@@ -624,17 +864,17 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     interrupted: true,
                 });
             }
-            Err(error) => return save_error_after_commit(error, committed),
+            Err(error) => return save_error_after_commit(&mut worker, error, committed),
         };
         match packet.kind {
-            PREPARE if !committed && packet.length > 0 && packet.length <= 255 && fds.is_some() => {
-                let name = CString::new(&packet.name[..packet.length as usize])
-                    .map_err(|_| libc::EPROTO)?;
+            PREPARE if !committed && fds.is_some() => {
+                let (name, destination) = packet_names(&packet)?;
                 let [directory, _duplicate] = fds.unwrap();
                 worker.temp = Some(Temp {
                     directory,
                     file: None,
                     name,
+                    destination,
                     renamed: false,
                 });
                 let ack = PREPARE;
@@ -645,17 +885,17 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     libc::MSG_NOSIGNAL,
                 ) != 1
                 {
-                    return save_error_after_commit(libc::EIO, committed);
+                    return save_error_after_commit(&mut worker, libc::EIO, committed);
                 }
             }
-            TEMP if !committed && packet.length > 0 && packet.length <= 255 && fds.is_some() => {
-                let name = CString::new(&packet.name[..packet.length as usize])
-                    .map_err(|_| libc::EPROTO)?;
+            TEMP if !committed && fds.is_some() => {
+                let (name, destination) = packet_names(&packet)?;
                 let [directory, file] = fds.unwrap();
                 worker.temp = Some(Temp {
                     directory,
                     file: Some(file),
                     name,
+                    destination,
                     renamed: false,
                 });
                 let ack = TEMP;
@@ -666,7 +906,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     libc::MSG_NOSIGNAL,
                 ) != 1
                 {
-                    return save_error_after_commit(libc::EIO, committed);
+                    return save_error_after_commit(&mut worker, libc::EIO, committed);
                 }
             }
             COMMIT
@@ -681,7 +921,15 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                 && matches!(packet.code, SKIPPED | FAILED | SYNCED | UNSYNCED) =>
             {
                 if committed != matches!(packet.code, SYNCED | UNSYNCED) {
-                    return save_error_after_commit(libc::EPROTO, committed);
+                    return save_error_after_commit(&mut worker, libc::EPROTO, committed);
+                }
+                if packet.code == FAILED && !committed {
+                    // A filesystem may report an error after completing the
+                    // rename. The worker's FAILED packet cannot rule out that
+                    // side effect; compare the retained inode after it exits.
+                    if let Ok(report) = save_error_after_commit(&mut worker, libc::EIO, false) {
+                        return Ok(report);
+                    }
                 }
                 return Ok(Report {
                     code: packet.code,
@@ -689,7 +937,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     interrupted: false,
                 });
             }
-            _ => return save_error_after_commit(libc::EPROTO, committed),
+            _ => return save_error_after_commit(&mut worker, libc::EPROTO, committed),
         }
     }
 }
@@ -703,6 +951,21 @@ pub(crate) const RESULT_UNSYNCED: u8 = UNSYNCED;
 mod rights_tests {
     use super::*;
     use std::os::fd::AsRawFd;
+
+    #[test]
+    fn announced_history_names_cannot_escape_the_pinned_directory() {
+        let mut packet = Packet::new(TEMP, 0);
+        packet.length = 4;
+        packet.name[..4].copy_from_slice(b".tmp");
+        packet.destination_length = 7;
+        packet.destination[..7].copy_from_slice(b"history");
+        assert!(packet_names(&packet).is_ok());
+        packet.name[..4].copy_from_slice(b"../x");
+        assert!(packet_names(&packet).is_err());
+        packet.name[..4].copy_from_slice(b".tmp");
+        packet.destination[..7].copy_from_slice(b"../file");
+        assert!(packet_names(&packet).is_err());
+    }
 
     #[test]
     fn malformed_rights_release_every_installed_descriptor() {
