@@ -529,6 +529,21 @@ unsafe fn receive(socket: libc::c_int) -> Result<(Packet, Option<[OwnedFd; 2]>),
     Ok((packet, fds))
 }
 
+fn save_error_after_commit(error: libc::c_int, committed: bool) -> Result<Report, libc::c_int> {
+    if committed {
+        // A received COMMIT proves rename completed. A worker crash, socket
+        // error, or malformed final packet can still leave directory fsync
+        // unconfirmed, but it cannot make the old history live again.
+        Ok(Report {
+            code: UNSYNCED,
+            committed: true,
+            interrupted: false,
+        })
+    } else {
+        Err(error)
+    }
+}
+
 pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
     check_abandoned()?;
     check_cleanup_pending()?;
@@ -593,7 +608,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     interrupted: true,
                 });
             }
-            return Err(*libc::__errno_location());
+            return save_error_after_commit(*libc::__errno_location(), committed);
         }
         if ready == 0 {
             continue;
@@ -609,7 +624,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     interrupted: true,
                 });
             }
-            Err(error) => return Err(error),
+            Err(error) => return save_error_after_commit(error, committed),
         };
         match packet.kind {
             PREPARE if !committed && packet.length > 0 && packet.length <= 255 && fds.is_some() => {
@@ -630,7 +645,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     libc::MSG_NOSIGNAL,
                 ) != 1
                 {
-                    return Err(libc::EIO);
+                    return save_error_after_commit(libc::EIO, committed);
                 }
             }
             TEMP if !committed && packet.length > 0 && packet.length <= 255 && fds.is_some() => {
@@ -651,7 +666,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     libc::MSG_NOSIGNAL,
                 ) != 1
                 {
-                    return Err(libc::EIO);
+                    return save_error_after_commit(libc::EIO, committed);
                 }
             }
             COMMIT
@@ -666,7 +681,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                 && matches!(packet.code, SKIPPED | FAILED | SYNCED | UNSYNCED) =>
             {
                 if committed != matches!(packet.code, SYNCED | UNSYNCED) {
-                    return Err(libc::EPROTO);
+                    return save_error_after_commit(libc::EPROTO, committed);
                 }
                 return Ok(Report {
                     code: packet.code,
@@ -674,7 +689,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                     interrupted: false,
                 });
             }
-            _ => return Err(libc::EPROTO),
+            _ => return save_error_after_commit(libc::EPROTO, committed),
         }
     }
 }

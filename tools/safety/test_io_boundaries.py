@@ -228,6 +228,18 @@ def run(binary, output, *, retained=None):
     observe('hist-dir-fsync', fault(history, shim, 'hist-dir-fsync'), history_durability_failure)
     observe('named-hist-dir-fsync', fault(named_history, shim, 'hist-dir-fsync'),
             history_durability_failure)
+    for name, original in (('hist-postcommit-exit', history),
+                           ('named-hist-postcommit-exit', named_history)):
+        case = fault(original, shim, 'hist-postcommit-exit')
+        case['include_transcript'] = True
+        def committed_worker_exit(o):
+            history_durability_failure(o)
+            transcript = base64.b64decode(o['transcript_b64'])
+            check(b'rless: history directory sync failed' in transcript,
+                  'post-rename worker exit was treated as an uncommitted save')
+            check(b'rless: cannot save history' not in transcript,
+                  'post-rename worker exit retained dirty save-failure state')
+        observe(name, case, committed_worker_exit)
 
     unreadable_history = json.loads(json.dumps(history))
     unreadable_history['files']['history'] = {
@@ -309,7 +321,7 @@ def run(binary, output, *, retained=None):
                                                'src/pager.rs', 'src/position.rs', 'src/screen.rs')},
                    asan_environment=bool(os.environ.get('RLESS_SAFETY_ENV')))
     if retained is not None:
-        check(set(retained) == set(results) and len(results) == 41, 'missing or extra boundary cases')
+        check(set(retained) == set(results) and len(results) == 43, 'missing or extra boundary cases')
     else:
         (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
         print(json.dumps(summary))

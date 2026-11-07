@@ -374,6 +374,8 @@ def run_pty(argv, env, work, case, norm, *, checkpoint_observer=None):
         final['rows'] = [line.replace(str(work), '{ROOT}') for line in final['rows']]
         observed = dict(status=status, checkpoints=checkpoints, final_terminal=final,
                         termios_restored=before == after)
+        if case.get('include_transcript'):
+            observed['transcript_b64'] = b64(norm(bytes(transcript)))
         if resource_checkpoints:
             observed['resource_checkpoints'] = resource_checkpoints
         return observed

@@ -199,6 +199,11 @@ int fsync(int fd) {
     int (*real_call)(int) = dlsym(RTLD_NEXT, "fsync");
     if (!real_call) _exit(125);
     struct stat metadata;
+    if (plan("hist-postcommit-exit") && fstat(fd, &metadata) == 0 && S_ISDIR(metadata.st_mode)) {
+        /* Directory fsync follows the rename and COMMIT packet. Simulate a
+         * worker that exits before it can report the durability result. */
+        hit(); _exit(93);
+    }
     if (plan("hist-dir-fsync") && fstat(fd, &metadata) == 0 && S_ISDIR(metadata.st_mode)) {
         hit(); errno = EIO; return -1;
     }
