@@ -84,6 +84,11 @@ def observe(binary: Path) -> dict:
             if (root / "helper.pid").exists():
                 helper_pid = int((root / "helper.pid").read_text())
             before = descriptor_targets(process.pid) if process.poll() is None else {}
+            # The helper's stdout is the parent's retained LESSOPEN read end.
+            # Compare the kernel pipe identity, since unrelated worker FDs may
+            # replace the released FDs when the next file opens.
+            helper_pipe = (descriptor_targets(helper_pid).get("1")
+                           if helper_pid is not None else None)
             if b"READY" in first and process.poll() is None:
                 os.write(master, b":d\n")
             second = read_until(master, process, b"READY", 4)
@@ -109,6 +114,9 @@ def observe(binary: Path) -> dict:
                 "fd0_after": after.get("0"),
                 "fd_count_before": len(before),
                 "fd_count_after": len(after),
+                "helper_pipe_target": helper_pipe,
+                "helper_pipe_owned_before": helper_pipe is not None and helper_pipe in before.values(),
+                "helper_pipe_owned_after": helper_pipe is not None and helper_pipe in after.values(),
                 "helper_state_after_delete": state,
                 "status": process.poll(),
                 "terminal_restored": termios.tcgetattr(master) == original,
@@ -140,10 +148,13 @@ def main() -> int:
               and result["terminal_restored"]
               and result["fd0_before"] == result["fd0_after"])
     if args.expect_leak:
-        passed = common and result["helper_state_after_delete"] not in {"gone", "Z"}
+        passed = (common and result["helper_state_after_delete"] not in {"gone", "Z"}
+                  and result["helper_pipe_owned_before"]
+                  and result["helper_pipe_owned_after"])
     else:
         passed = (common and result["helper_state_after_delete"] in {"gone", "Z"}
-                  and result["fd_count_after"] <= result["fd_count_before"])
+                  and result["helper_pipe_owned_before"]
+                  and not result["helper_pipe_owned_after"])
     result["expected_outcome_observed"] = bool(passed)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
