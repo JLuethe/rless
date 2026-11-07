@@ -246,9 +246,22 @@ def require_observation(actual, expected, trace, site, ordinal=1):
 
 
 def resource_identity(checkpoint, allow_input_switch=False):
-    """Keep descriptor-target multiplicity; only the declared i/j switch varies."""
-    return sorted('{INPUT}' if allow_input_switch and name in ('{ROOT}/i', '{ROOT}/j') else name
-                  for name in checkpoint['descriptors'])
+    """Keep descriptor kinds and multiplicity across input worker restarts."""
+    descriptors = checkpoint['descriptors']
+    if sum(name.startswith('socket:[') for name in descriptors) != 1:
+        raise ValueError('expected one active input-worker socket')
+    return sorted(
+        '{INPUT}' if allow_input_switch and name in ('{ROOT}/i', '{ROOT}/j')
+        else '{INPUT_SOCKET}' if name.startswith('socket:[')
+        else name for name in descriptors
+    )
+
+
+def input_worker_children(checkpoint):
+    """One active path-backed input owns one worker; no helper may accumulate."""
+    children = checkpoint.get('children')
+    return (isinstance(children, list) and len(children) == 1
+            and isinstance(children[0], str) and children[0].isdigit())
 
 
 class ActualFaultPaths(unittest.TestCase):
@@ -597,7 +610,7 @@ class ActualFaultPaths(unittest.TestCase):
                 checkpoints = observed.pop('resource_checkpoints')
                 self.assertTrue(checkpoints)
                 for checkpoint in checkpoints:
-                    self.assertEqual(checkpoint['children'], [])
+                    self.assertTrue(input_worker_children(checkpoint))
                     self.assertEqual(resource_identity(checkpoint), resource_identity(checkpoints[0]))
                 self.assertNotIn(f'child{ordinal}.out', observed['files'])
                 for number in set(range(1, 4)) - {ordinal}:
@@ -675,7 +688,7 @@ class ActualFaultPaths(unittest.TestCase):
             resources = actual['resource_checkpoints']
             for checkpoint in resources:
                 self.assertEqual(resource_identity(checkpoint), resource_identity(resources[0]))
-                self.assertEqual(checkpoint['children'], [])
+                self.assertTrue(input_worker_children(checkpoint))
 
     def test_repeated_file_and_child_failures_conserve_live_process_resources(self):
         events = [{'await': ['READY'], 'resources': True}]
@@ -698,7 +711,7 @@ class ActualFaultPaths(unittest.TestCase):
             for checkpoint in checkpoints:
                 self.assertEqual(len(checkpoint['descriptors']), expected_fds)
                 self.assertEqual(resource_identity(checkpoint), resource_identity(checkpoints[0]))
-                self.assertEqual(checkpoint['children'], [])
+                self.assertTrue(input_worker_children(checkpoint))
 
     def test_reserve_failure_before_parser_growth_has_controlled_oom(self):
         result, trace = pipe_run(INJECTED, 'reserve:1', argv=['--lesskey-content=#env\nLESS=-N'])
@@ -749,7 +762,7 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertGreaterEqual(len(observed['resource_checkpoints']), REPETITIONS + 1)
                 for checkpoint in observed['resource_checkpoints']:
                     self.assertEqual(len(checkpoint['descriptors']), expected_count)
-                    self.assertEqual(checkpoint['children'], [])
+                    self.assertTrue(input_worker_children(checkpoint))
                     self.assertEqual(resource_identity(checkpoint, site == 'close'),
                                      resource_identity(observed['resource_checkpoints'][0], site == 'close'))
 
@@ -769,7 +782,7 @@ class ActualFaultPaths(unittest.TestCase):
             checkpoints = observed.pop('resource_checkpoints')
             self.assertEqual(len(checkpoints), REPETITIONS + 1)
             for checkpoint in checkpoints:
-                self.assertEqual(checkpoint['children'], [])
+                self.assertTrue(input_worker_children(checkpoint))
                 self.assertEqual(resource_identity(checkpoint), resource_identity(checkpoints[0]))
             self.assertTrue(observed['termios_restored'])
             self.assertEqual(observed['status'], 0)
@@ -1131,7 +1144,7 @@ def validate_oracle_report(report, expected_selectors=None):
                     descriptors = checkpoint.get('descriptors')
                     if (not isinstance(descriptors, list) or not descriptors
                             or not all(isinstance(item, str) for item in descriptors)
-                            or checkpoint.get('children') != []):
+                            or not input_worker_children(checkpoint)):
                         raise ValueError('invalid descriptor observation or unreaped child')
                     counts.append(len(descriptors))
                 if len(set(counts)) != 1:
