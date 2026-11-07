@@ -1006,12 +1006,17 @@ pub unsafe extern "C" fn secure_allow(mut features: ::core::ffi::c_uint) -> lboo
     );
 }
 pub fn main() {
+    if unsafe { crate::signal::init_early_signals() }.is_err() {
+        ::std::process::exit(1);
+    }
     if crate::diagnostic_broker::prepare().is_err() {
+        unsafe { crate::signal::restore_early_signals() };
         ::std::process::exit(1);
     }
     #[cfg(feature = "safety-injection")]
     if let Err(error) = crate::fault::initialize() {
         eprintln!("rless safety injection: {error}");
+        unsafe { crate::signal::restore_early_signals() };
         ::std::process::exit(2);
     }
     let mut args_strings: Vec<Vec<u8>> = ::std::env::args_os()

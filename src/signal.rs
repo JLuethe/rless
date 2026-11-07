@@ -57,6 +57,12 @@ static TIMER_DEADLINE_NS: AtomicU64 = AtomicU64::new(0);
 static mut STARTUP_ACTIONS: std::mem::MaybeUninit<[libc::sigaction; 8]> =
     std::mem::MaybeUninit::uninit();
 static mut STARTUP_ACTIONS_READY: bool = false;
+// main installs these before any configuration or diagnostic-broker I/O. The
+// full pager installation replaces them before raw terminal mode is entered.
+// Save the actual inherited dispositions, not these temporary handlers.
+static mut EARLY_ACTIONS: std::mem::MaybeUninit<[libc::sigaction; 8]> =
+    std::mem::MaybeUninit::uninit();
+static mut EARLY_ACTIONS_READY: bool = false;
 
 #[inline]
 fn notify(bit: u32) {
@@ -143,6 +149,12 @@ pub unsafe extern "C" fn lwinch(_: ::core::ffi::c_int) {
 }
 unsafe extern "C" fn terminate(_: ::core::ffi::c_int) {
     notify(TERMINATE);
+}
+unsafe extern "C" fn early_interrupt(_: libc::c_int) {
+    libc::_exit(2);
+}
+unsafe extern "C" fn early_terminate(_: libc::c_int) {
+    libc::_exit(15);
 }
 unsafe extern "C" fn sigusr(mut var: *const ::core::ffi::c_char) {
     let mut cmd: *const ::core::ffi::c_char = lgetenv(var);
@@ -299,6 +311,45 @@ unsafe fn install_batch(
     install_batch_inner(entries, restore_actions, None)
 }
 
+/// Cover startup configuration, stdio and helper setup before pager state is
+/// initialized. No terminal mode or pager-owned file state exists yet, so an
+/// asynchronous exit does not need the normal main-loop cleanup path.
+pub(crate) unsafe fn init_early_signals() -> Result<(), libc::c_int> {
+    if EARLY_ACTIONS_READY {
+        return Ok(());
+    }
+    let entries = [
+        (libc::SIGINT, Disposition::Handler(early_interrupt)),
+        (libc::SIGTERM, Disposition::Handler(early_terminate)),
+        (libc::SIGHUP, Disposition::Handler(early_terminate)),
+    ];
+    let previous = install_batch(&entries, None)?;
+    std::ptr::write(
+        (&raw mut EARLY_ACTIONS).cast::<[libc::sigaction; 8]>(),
+        previous,
+    );
+    EARLY_ACTIONS_READY = true;
+    Ok(())
+}
+
+/// Restore startup inheritance if setup fails before the full pager signal
+/// transaction has taken ownership of those dispositions.
+pub(crate) unsafe fn restore_early_signals() {
+    if !EARLY_ACTIONS_READY {
+        return;
+    }
+    let entries = [
+        (libc::SIGINT, Disposition::Default),
+        (libc::SIGTERM, Disposition::Default),
+        (libc::SIGHUP, Disposition::Default),
+    ];
+    let original = std::ptr::read((&raw const EARLY_ACTIONS).cast::<[libc::sigaction; 8]>());
+    if install_batch(&entries, Some(&original)).is_err() {
+        libc::_exit(1);
+    }
+    EARLY_ACTIONS_READY = false;
+}
+
 unsafe fn restore_batch(
     entries: &[(libc::c_int, Disposition)],
     previous: &[libc::sigaction; 8],
@@ -427,15 +478,27 @@ pub unsafe extern "C" fn init_signals(on: lbool) -> libc::c_int {
     match install_batch(&dispositions, original.as_ref()) {
         Ok(previous) => {
             if on.0 != 0 && !STARTUP_ACTIONS_READY {
+                let mut inherited = previous;
+                if EARLY_ACTIONS_READY {
+                    let early =
+                        std::ptr::read((&raw const EARLY_ACTIONS).cast::<[libc::sigaction; 8]>());
+                    inherited[0] = early[0];
+                    inherited[4] = early[1];
+                    inherited[5] = early[2];
+                }
                 std::ptr::write(
                     (&raw mut STARTUP_ACTIONS).cast::<[libc::sigaction; 8]>(),
-                    previous,
+                    inherited,
                 );
                 STARTUP_ACTIONS_READY = true;
+                EARLY_ACTIONS_READY = false;
             }
             0
         }
         Err(error) => {
+            if on.0 != 0 && !STARTUP_ACTIONS_READY {
+                restore_early_signals();
+            }
             *libc::__errno_location() = error;
             -1
         }
