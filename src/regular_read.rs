@@ -11,6 +11,26 @@ enum Operation {
     Read,
     Stat,
     Isatty,
+    ReopenedRead(FileIdentity),
+}
+
+#[derive(Clone, Copy)]
+struct FileIdentity {
+    mode: libc::mode_t,
+    dev: libc::dev_t,
+    ino: libc::ino_t,
+    rdev: libc::dev_t,
+}
+
+impl From<&libc::stat> for FileIdentity {
+    fn from(value: &libc::stat) -> Self {
+        Self {
+            mode: value.st_mode,
+            dev: value.st_dev,
+            ino: value.st_ino,
+            rdev: value.st_rdev,
+        }
+    }
 }
 // A killed read can remain in an uninterruptible kernel wait. Retain its
 // pidfd and refuse another worker until it exits, rather than accumulating
@@ -160,6 +180,8 @@ unsafe fn child_read(
     } else if matches!(operation, Operation::Isatty) {
         bytes[0] = (libc::isatty(3) == 1) as u8;
         1
+    } else if let Operation::ReopenedRead(expected) = operation {
+        child_reopened_read(bytes.as_mut_ptr(), length, expected)
     } else {
         match offset {
             Some(position) => libc::pread(3, bytes.as_mut_ptr().cast(), length, position),
@@ -196,6 +218,50 @@ unsafe fn child_read(
             2
         },
     );
+}
+
+unsafe fn child_reopened_read(buffer: *mut u8, length: usize, expected: FileIdentity) -> isize {
+    let flags = libc::fcntl(3, libc::F_GETFL);
+    if flags < 0 {
+        return -1;
+    }
+    if flags & libc::O_ACCMODE == libc::O_WRONLY || flags & libc::O_PATH != 0 {
+        *libc::__errno_location() = libc::EBADF;
+        return -1;
+    }
+    // A dup would share O_NONBLOCK with the caller. Reopen the inherited
+    // descriptor in this child so the final read has private nonblocking
+    // flags, while a stalled open, metadata query or close cannot pin the
+    // pager with its handled signals masked.
+    let private = libc::open(
+        c"/proc/self/fd/3".as_ptr(),
+        libc::O_RDONLY | libc::O_NONBLOCK | libc::O_CLOEXEC | libc::O_NOCTTY,
+    );
+    if private < 0 {
+        return -1;
+    }
+    let mut reopened: libc::stat = std::mem::zeroed();
+    let stat_result = libc::fstat(private, &mut reopened);
+    if stat_result != 0
+        || reopened.st_mode & libc::S_IFMT != expected.mode & libc::S_IFMT
+        || reopened.st_dev != expected.dev
+        || reopened.st_ino != expected.ino
+        || reopened.st_rdev != expected.rdev
+    {
+        let error = if stat_result != 0 {
+            *libc::__errno_location()
+        } else {
+            libc::ESTALE
+        };
+        libc::close(private);
+        *libc::__errno_location() = error;
+        return -1;
+    }
+    let result = libc::read(private, buffer.cast(), length);
+    let error = *libc::__errno_location();
+    libc::close(private);
+    *libc::__errno_location() = error;
+    result
 }
 
 unsafe fn launch(
@@ -418,6 +484,23 @@ pub(crate) unsafe fn read_unpositioned(
     saved_mask: &libc::sigset_t,
 ) -> isize {
     read_worker(input, buffer, length, None, saved_mask, Operation::Read)
+}
+
+pub(crate) unsafe fn read_reopened_nonblocking(
+    input: libc::c_int,
+    buffer: *mut u8,
+    length: usize,
+    original: &libc::stat,
+    saved_mask: &libc::sigset_t,
+) -> isize {
+    read_worker(
+        input,
+        buffer,
+        length,
+        None,
+        saved_mask,
+        Operation::ReopenedRead(FileIdentity::from(original)),
+    )
 }
 
 /// Keep a hostile descriptor's metadata query out of the pager. In particular,

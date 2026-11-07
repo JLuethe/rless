@@ -130,72 +130,6 @@ pub(crate) unsafe fn block_handled_signals() -> Result<libc::sigset_t, libc::c_i
     Ok(saved)
 }
 
-/// A dup shares the original open file description, including O_NONBLOCK.
-/// Reopening a pipe or terminal through procfs gives this read its own status
-/// flags while retaining the same input source. A competing reader may consume
-/// readiness after ppoll, so the final read itself must be nonblocking.
-unsafe fn read_reopened_nonblocking(
-    fd: i32,
-    buffer: *mut u8,
-    len: usize,
-    original: &libc::stat,
-) -> isize {
-    let flags = libc::fcntl(fd, libc::F_GETFL);
-    if flags < 0 {
-        return -1;
-    }
-    if flags & libc::O_ACCMODE == libc::O_WRONLY || flags & libc::O_PATH != 0 {
-        *libc::__errno_location() = libc::EBADF;
-        return -1;
-    }
-    let prefix = b"/proc/self/fd/";
-    let mut path = [0u8; 32];
-    path[..prefix.len()].copy_from_slice(prefix);
-    let mut digits = [0u8; 10];
-    let mut value = fd as u32;
-    let mut count = 0;
-    loop {
-        digits[count] = b'0' + (value % 10) as u8;
-        count += 1;
-        value /= 10;
-        if value == 0 {
-            break;
-        }
-    }
-    for (index, digit) in digits[..count].iter().rev().enumerate() {
-        path[prefix.len() + index] = *digit;
-    }
-    let private = libc::open(
-        path.as_ptr().cast(),
-        libc::O_RDONLY | libc::O_NONBLOCK | libc::O_CLOEXEC | libc::O_NOCTTY,
-    );
-    if private < 0 {
-        return -1;
-    }
-    let mut reopened: libc::stat = std::mem::zeroed();
-    let stat_result = libc::fstat(private, &mut reopened);
-    if stat_result != 0
-        || reopened.st_mode & libc::S_IFMT != original.st_mode & libc::S_IFMT
-        || reopened.st_dev != original.st_dev
-        || reopened.st_ino != original.st_ino
-        || reopened.st_rdev != original.st_rdev
-    {
-        let error = if stat_result != 0 {
-            *libc::__errno_location()
-        } else {
-            libc::ESTALE
-        };
-        libc::close(private);
-        *libc::__errno_location() = error;
-        return -1;
-    }
-    let result = libc::read(private, buffer.cast(), len);
-    let error = *libc::__errno_location();
-    libc::close(private);
-    *libc::__errno_location() = error;
-    result
-}
-
 /// Atomically unblock signals while waiting for readable input. A separate
 /// flag check followed by read has a lost-wakeup race if SIGWINCH arrives in
 /// between them; the descriptor could then block with an unprocessed resize.
@@ -298,7 +232,7 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
         false
     };
     if kind == libc::S_IFIFO || is_tty {
-        read_reopened_nonblocking(fd, buffer, len, &status)
+        crate::regular_read::read_reopened_nonblocking(fd, buffer, len, &status, &saved)
     } else if kind == libc::S_IFSOCK {
         // recv has a per-call nonblocking flag and leaves shared fd flags alone.
         libc::recv(fd, buffer.cast(), len, libc::MSG_DONTWAIT)
