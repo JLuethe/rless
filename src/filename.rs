@@ -1448,6 +1448,13 @@ pub unsafe extern "C" fn filesize(mut f: ::core::ffi::c_int) -> POSITION {
     if crate::input_worker::stat_or_native(f, (&raw mut statbuf).cast()) >= 0 {
         return statbuf.st_size;
     }
+    // An inherited descriptor has no managed seek worker. After metadata
+    // failure, a direct SEEK_END could block again on the same filesystem.
+    if !crate::input_worker::contains(f)
+        || matches!(*libc::__errno_location(), libc::EINTR | libc::EBUSY)
+    {
+        return -1;
+    }
     return seek_filesize(f);
 }
 #[no_mangle]

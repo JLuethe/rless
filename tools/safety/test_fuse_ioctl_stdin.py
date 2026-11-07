@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prove a FUSE stdin tty ioctl cannot hold the pager past SIGTERM."""
+"""Probe stalled FUSE stdin ioctl and metadata requests across SIGTERM."""
 
 import argparse
 import fcntl
@@ -35,7 +35,7 @@ def proc_text(pid, name):
         return None
 
 
-def observe(binary):
+def observe(binary, stall_getattr):
     with tempfile.TemporaryDirectory(prefix="rless-fuse-ioctl-stdin-") as directory:
         root = Path(directory)
         mount = root / "mount"
@@ -49,9 +49,12 @@ def observe(binary):
             ["cc", "-Wall", "-Wextra", "-Werror", "-O2", str(SOURCE),
              "-o", str(server_binary), *flags], check=True, capture_output=True,
         )
+        server_env = {"PATH": "/usr/bin:/bin", "RLESS_IOCTL_MARKER": str(marker)}
+        if stall_getattr:
+            server_env["RLESS_STALL_GETATTR"] = str(stall_getattr)
         server = subprocess.Popen(
             [str(server_binary), "-f", "-s", str(mount)],
-            env={"PATH": "/usr/bin:/bin", "RLESS_IOCTL_MARKER": str(marker)},
+            env=server_env,
             stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             start_new_session=True,
         )
@@ -80,13 +83,17 @@ def observe(binary):
             events = []
             while pager.poll() is None and time.monotonic() < deadline:
                 events = marker.read_text().splitlines() if marker.exists() else []
-                if "read" in events or any(item.startswith("ioctl 2 ") for item in events):
+                trigger = (f"getattr {stall_getattr}" in events if stall_getattr else
+                           "read" in events or any(item.startswith("ioctl 2 ") for item in events))
+                if trigger:
                     break
                 time.sleep(0.01)
             first_ioctl = any(item.startswith("ioctl 1 ") for item in events)
             second_ioctl = any(item.startswith("ioctl 2 ") for item in events)
             read_reached = "read" in events
-            if first_ioctl and (second_ioctl or read_reached) and pager.poll() is None:
+            triggered = (f"getattr {stall_getattr}" in events if stall_getattr else
+                         second_ioctl or read_reached)
+            if first_ioctl and triggered and pager.poll() is None:
                 os.kill(pager.pid, signal.SIGTERM)
             try:
                 pager.wait(timeout=0.75)
@@ -107,6 +114,7 @@ def observe(binary):
                 "source_sha256": sha(SOURCE),
                 "server_sha256": sha(server_binary),
                 "events": events, "first_ioctl": first_ioctl,
+                "stall_getattr": stall_getattr, "triggered": triggered,
                 "second_ioctl": second_ioctl, "read_reached": read_reached,
                 "status_before_release": before,
                 "wchan_before_release": wchan,
@@ -141,16 +149,26 @@ def main():
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expect-blocked", action="store_true")
+    parser.add_argument("--stall-getattr", type=int, choices=(2, 3, 4), default=0)
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
-    report = observe(binary)
-    common = (report["first_ioctl"] and report["terminal_restored_after_release"]
+    report = observe(binary, args.stall_getattr)
+    common = (report["first_ioctl"] and report["triggered"]
+              and report["terminal_restored_after_release"]
               and report["status_after_release"] == 15)
-    if args.expect_blocked:
+    if args.expect_blocked and args.stall_getattr:
+        passed = (common and report["status_before_release"] is None
+                  and report["wchan_before_release"] == "request_wait_answer"
+                  and (report["syscall_before_release"] or "").startswith("5 0x0 ")
+                  and report["children_before_release"] == "")
+    elif args.expect_blocked:
         passed = (common and report["second_ioctl"] and not report["read_reached"]
                   and report["status_before_release"] is None
                   and report["wchan_before_release"] == "request_wait_answer"
                   and (report["syscall_before_release"] or "").startswith("16 0x0 "))
+    elif args.stall_getattr:
+        passed = (common and report["status_before_release"] == 15
+                  and report["terminal_restored_before_release"])
     else:
         passed = (common and not report["second_ioctl"] and report["read_reached"]
                   and report["status_before_release"] == 15

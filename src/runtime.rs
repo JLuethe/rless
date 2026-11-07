@@ -284,7 +284,7 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
     // ppoll readiness is only a hint: another reader can drain a pipe before
     // we get here. Never block on that pipe while handled signals are masked.
     let mut status: libc::stat = std::mem::zeroed();
-    if libc::fstat(fd, &mut status) != 0 {
+    if crate::regular_read::stat_with_mask(fd, &mut status, &saved) != 0 {
         return -1;
     }
     let kind = status.st_mode & libc::S_IFMT;

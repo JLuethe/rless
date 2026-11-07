@@ -109,6 +109,7 @@ unsafe fn child_read(
     input: libc::c_int,
     offset: Option<libc::off_t>,
     length: usize,
+    stat_only: bool,
     parent_pid: libc::pid_t,
 ) -> ! {
     libc::close(parent_socket);
@@ -129,9 +130,31 @@ unsafe fn child_read(
     libc::close(1);
     libc::close(2);
     let mut bytes = [0u8; CHUNK];
-    let count = match offset {
-        Some(position) => libc::pread(3, bytes.as_mut_ptr().cast(), length, position),
-        None => libc::read(3, bytes.as_mut_ptr().cast(), length),
+    let count = if stat_only {
+        let mut status = std::mem::MaybeUninit::<libc::stat>::uninit();
+        // fstat need not write native padding. The reply transports the full
+        // layout as bytes, so initialize every byte before passing it to C.
+        std::ptr::write_bytes(
+            status.as_mut_ptr().cast::<u8>(),
+            0,
+            std::mem::size_of::<libc::stat>(),
+        );
+        let result = libc::fstat(3, status.as_mut_ptr());
+        if result == 0 {
+            std::ptr::copy_nonoverlapping(
+                status.as_ptr().cast::<u8>(),
+                bytes.as_mut_ptr(),
+                std::mem::size_of::<libc::stat>(),
+            );
+            std::mem::size_of::<libc::stat>() as isize
+        } else {
+            -1
+        }
+    } else {
+        match offset {
+            Some(position) => libc::pread(3, bytes.as_mut_ptr().cast(), length, position),
+            None => libc::read(3, bytes.as_mut_ptr().cast(), length),
+        }
     };
     let mut reply = Reply {
         count: count as i64,
@@ -169,6 +192,7 @@ unsafe fn launch(
     input: libc::c_int,
     offset: Option<libc::off_t>,
     length: usize,
+    stat_only: bool,
 ) -> Result<Worker, libc::c_int> {
     let mut sockets = [-1; 2];
     if libc::socketpair(
@@ -202,6 +226,7 @@ unsafe fn launch(
             input,
             offset,
             length,
+            stat_only,
             parent_pid,
         );
     }
@@ -265,13 +290,14 @@ unsafe fn read_worker(
     length: usize,
     offset: Option<libc::off_t>,
     saved_mask: &libc::sigset_t,
+    stat_only: bool,
 ) -> isize {
     if let Err(error) = check_abandoned() {
         *libc::__errno_location() = error;
         return -1;
     }
     let length = length.min(CHUNK);
-    let mut worker = match launch(input, offset, length) {
+    let mut worker = match launch(input, offset, length, stat_only) {
         Ok(worker) => worker,
         Err(error) => {
             *libc::__errno_location() = error;
@@ -365,7 +391,7 @@ pub(crate) unsafe fn read_positioned(
     if offset < 0 {
         return -1;
     }
-    read_worker(input, buffer, length, Some(offset), saved_mask)
+    read_worker(input, buffer, length, Some(offset), saved_mask, false)
 }
 
 pub(crate) unsafe fn read_unpositioned(
@@ -374,5 +400,53 @@ pub(crate) unsafe fn read_unpositioned(
     length: usize,
     saved_mask: &libc::sigset_t,
 ) -> isize {
-    read_worker(input, buffer, length, None, saved_mask)
+    read_worker(input, buffer, length, None, saved_mask, false)
+}
+
+/// Keep a hostile descriptor's metadata query out of the pager. In particular,
+/// fstat on an inherited FUSE stdin can wait for a userspace filesystem.
+pub(crate) unsafe fn stat_with_mask(
+    input: libc::c_int,
+    output: *mut libc::stat,
+    saved_mask: &libc::sigset_t,
+) -> libc::c_int {
+    let mut result = std::mem::MaybeUninit::<libc::stat>::uninit();
+    let size = std::mem::size_of::<libc::stat>();
+    if size > CHUNK {
+        *libc::__errno_location() = libc::EOVERFLOW;
+        return -1;
+    }
+    let count = read_worker(
+        input,
+        result.as_mut_ptr().cast(),
+        size,
+        None,
+        saved_mask,
+        true,
+    );
+    if count == size as isize {
+        output.write(result.assume_init());
+        0
+    } else {
+        if count >= 0 {
+            *libc::__errno_location() = libc::EPROTO;
+        }
+        -1
+    }
+}
+
+pub(crate) unsafe fn stat_interruptible(
+    input: libc::c_int,
+    output: *mut libc::stat,
+) -> libc::c_int {
+    let _wait = crate::runtime::IoWait::new();
+    let saved = match crate::runtime::block_handled_signals() {
+        Ok(saved) => saved,
+        Err(error) => {
+            *libc::__errno_location() = error;
+            return -1;
+        }
+    };
+    let _restore = crate::runtime::RestoreMask(saved);
+    stat_with_mask(input, output, &saved)
 }

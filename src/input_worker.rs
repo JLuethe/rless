@@ -896,7 +896,7 @@ pub(crate) unsafe fn stat_or_native(fd: i32, output: *mut libc::stat) -> i32 {
     if contains(fd) {
         stat(fd, output)
     } else {
-        libc::fstat(fd, output)
+        crate::regular_read::stat_interruptible(fd, output)
     }
 }
 
