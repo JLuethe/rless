@@ -1,6 +1,9 @@
 //! Owned shell handoff. A child supervisor owns the shell process group and
 //! kills it if the pager dies while the terminal belongs to that group.
 use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
+use std::time::{Duration, Instant};
+
+const SETUP_TIMEOUT: Duration = Duration::from_secs(5);
 
 unsafe fn errno() -> libc::c_int {
     *libc::__errno_location()
@@ -242,7 +245,71 @@ impl Drop for Worker {
                 std::ptr::null::<libc::siginfo_t>(),
                 0,
             );
+            let mut descriptor = libc::pollfd {
+                fd: self.pidfd.as_raw_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            };
+            // SIGKILL cannot finish a task held in uninterruptible kernel I/O.
+            // Give an ordinary child time to exit without letting cleanup hang.
+            libc::poll(&mut descriptor, 1, 100);
             libc::waitpid(self.pid, std::ptr::null_mut(), libc::WNOHANG);
+        }
+    }
+}
+
+unsafe fn wait_ready(worker: &Worker) -> Result<(), libc::c_int> {
+    let deadline = Instant::now() + SETUP_TIMEOUT;
+    loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return Err(libc::ETIMEDOUT);
+        }
+        let timeout = remaining.as_millis().max(1).min(i32::MAX as u128) as i32;
+        let mut descriptors = [
+            libc::pollfd {
+                fd: worker.socket.as_raw_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            },
+            libc::pollfd {
+                fd: worker.pidfd.as_raw_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            },
+        ];
+        let polled = libc::poll(
+            descriptors.as_mut_ptr(),
+            descriptors.len() as libc::nfds_t,
+            timeout,
+        );
+        if polled < 0 {
+            if errno() == libc::EINTR {
+                continue;
+            }
+            return Err(errno());
+        }
+        if polled == 0 {
+            continue;
+        }
+        if descriptors[0].revents != 0 {
+            let mut ready = 0u8;
+            let received = libc::recv(
+                worker.socket.as_raw_fd(),
+                (&mut ready as *mut u8).cast(),
+                1,
+                libc::MSG_DONTWAIT,
+            );
+            if received == 1 && ready == b'R' {
+                return Ok(());
+            }
+            if received < 0 && errno() == libc::EAGAIN {
+                continue;
+            }
+            return Err(if received < 0 { errno() } else { libc::EIO });
+        }
+        if descriptors[1].revents != 0 {
+            return Err(libc::EIO);
         }
     }
 }
@@ -320,17 +387,7 @@ pub(crate) unsafe fn run(command: *const libc::c_char) -> Result<(), libc::c_int
         socket: parent_socket,
         armed: true,
     };
-    let mut ready = 0u8;
-    if libc::recv(
-        worker.socket.as_raw_fd(),
-        (&mut ready as *mut u8).cast(),
-        1,
-        0,
-    ) != 1
-        || ready != b'R'
-    {
-        return Err(libc::EIO);
-    }
+    wait_ready(&worker)?;
     let foreground = Foreground::hand_to(pid)?;
     let go = b'G';
     if libc::send(
