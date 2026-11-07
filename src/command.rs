@@ -1794,6 +1794,19 @@ unsafe extern "C" fn get_pipe_pos(
     }
     loop {
         c = getcc();
+        // This nested prompt does not return through the main command-loop
+        // signal check. Dispatch before interpreting the byte, or a pending
+        // termination makes getcc() return zero forever while we ring the
+        // bell in this loop.
+        crate::signal::collect_pending_signals();
+        if sigs != 0 {
+            let cancelled = sigs & (1 | 2 | 64) != 0;
+            psignals();
+            if cancelled {
+                return -1;
+            }
+            continue;
+        }
         if spec_char as ::core::ffi::c_int != '\0' as ::core::ffi::c_int
             && c as ::core::ffi::c_int == spec_char as ::core::ffi::c_int
         {

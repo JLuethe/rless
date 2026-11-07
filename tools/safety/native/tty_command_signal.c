@@ -12,8 +12,9 @@ ssize_t read(int fd, void *buffer, size_t length)
     ssize_t result = real_read(fd, buffer, length);
     const char *mode = getenv("RLESS_TTY_COMMAND_MODE");
     int resize = mode != NULL && strcmp(mode, "resize") == 0;
+    int pipe_prompt = mode != NULL && strcmp(mode, "pipe_prompt") == 0;
     int number = resize ? SIGWINCH : SIGTERM;
-    char target = resize ? 'q' : '\n';
+    char target = resize ? 'q' : pipe_prompt ? '1' : '\n';
     if (!fired && result == 1 && ((char *) buffer)[0] == target && isatty(fd)) {
         fired = 1;
         const char *text = getenv("RLESS_TTY_COMMAND_TRACE_FD");

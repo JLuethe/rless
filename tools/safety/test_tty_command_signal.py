@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check command dispatch after SIGTERM and preserve a key after SIGWINCH."""
+"""Check command dispatch and nested prompts after terminal signals."""
 
 import argparse
 import fcntl
@@ -63,6 +63,7 @@ def observe(binary: Path, shim: Path, mode: str) -> dict:
                         break
             if ready:
                 command = (b"q" if mode == "resize" else
+                           b"|\x0e1" if mode == "pipe_prompt" else
                            b"!printf x > " + os.fsencode(marker) + b"\n")
                 os.write(master, command)
             trace = bytearray()
@@ -83,8 +84,18 @@ def observe(binary: Path, shim: Path, mode: str) -> dict:
                     os.write(master, b"\nq")
                 except OSError:
                     pass
+            if trace and mode == "pipe_prompt":
+                # A broken nested prompt repeatedly rings the bell after
+                # getcc() returns zero for the pending termination.
+                until = time.monotonic() + 0.1
+                while time.monotonic() < until and pager.poll() is None:
+                    if select.select([master], [], [], 0.01)[0]:
+                        try:
+                            output.extend(os.read(master, 65536))
+                        except OSError:
+                            break
             try:
-                pager.wait(timeout=3)
+                pager.wait(timeout=2 if mode == "pipe_prompt" else 3)
                 timed_out = False
             except subprocess.TimeoutExpired:
                 pager.kill()
@@ -97,6 +108,7 @@ def observe(binary: Path, shim: Path, mode: str) -> dict:
                 "status": pager.returncode, "timed_out": timed_out,
                 "helper_ran": marker.exists(),
                 "terminal_restored": before == after,
+                "bell_count": output.count(7),
                 "output_sha256": digest(output),
                 "output_tail": bytes(output[-200:]).decode("latin1"),
             }
@@ -116,7 +128,10 @@ def main() -> int:
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--rounds", type=int, default=1)
+    parser.add_argument("--modes", nargs="+", choices=("terminate", "resize", "pipe_prompt"),
+                        default=("terminate", "resize", "pipe_prompt"))
     parser.add_argument("--expect-helper-after-signal", action="store_true")
+    parser.add_argument("--expect-prompt-hang", action="store_true")
     args = parser.parse_args()
     if args.rounds < 1:
         parser.error("rounds must be positive")
@@ -128,10 +143,14 @@ def main() -> int:
          str(SOURCE), "-ldl", "-o", str(shim)], check=True,
     )
     cases = [observe(binary, shim.resolve(), mode)
-             for mode in ("terminate", "resize") for _ in range(args.rounds)]
+             for mode in args.modes for _ in range(args.rounds)]
     def valid(case: dict) -> bool:
-        return (case["ready"] and case["trace"] == "hit-blocked\n"
-                and case["status"] == (0 if case["mode"] == "resize" else 15)
+        if not case["ready"] or case["trace"] != "hit-blocked\n":
+            return False
+        if case["mode"] == "pipe_prompt" and args.expect_prompt_hang:
+            return (case["timed_out"] and case["bell_count"] > 0
+                    and not case["helper_ran"])
+        return (case["status"] == (0 if case["mode"] == "resize" else 15)
                 and not case["timed_out"]
                 and case["helper_ran"] == (args.expect_helper_after_signal
                                            if case["mode"] == "terminate" else False)
@@ -143,6 +162,8 @@ def main() -> int:
         "shim_source_sha256": digest(SOURCE.read_bytes()),
         "shim_sha256": digest(shim.read_bytes()),
         "expect_helper_after_signal": args.expect_helper_after_signal,
+        "expect_prompt_hang": args.expect_prompt_hang,
+        "modes": args.modes,
         "rounds_per_mode": args.rounds, "passed_count": passed_count,
         "passed": passed_count == len(cases), "cases": cases,
     }
