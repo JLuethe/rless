@@ -664,7 +664,7 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                     if (*thisfile).flags & 0o1 as ::core::ffi::c_int == 0 {
                         return '?' as ::core::ffi::c_int;
                     }
-                    if lseek((*thisfile).file, pos, 0 as ::core::ffi::c_int)
+                    if crate::input_worker::seek_or_native((*thisfile).file, pos, 0)
                         == -1 as ::core::ffi::c_int as off_t
                     {
                         error(
@@ -1136,7 +1136,7 @@ pub unsafe extern "C" fn ch_flush() {
             filesize((*thisfile).file)
         };
     }
-    if lseek(
+    if crate::input_worker::seek_or_native(
         (*thisfile).file,
         0 as ::core::ffi::c_int as __off_t,
         0 as ::core::ffi::c_int,
@@ -1193,7 +1193,7 @@ unsafe extern "C" fn ch_delbufs() {
 #[no_mangle]
 pub unsafe extern "C" fn seekable(mut f: ::core::ffi::c_int) -> lbool {
     return lbool(
-        (lseek(
+        (crate::input_worker::seek_or_native(
             f,
             1 as ::core::ffi::c_int as __off_t,
             0 as ::core::ffi::c_int,
@@ -1265,7 +1265,7 @@ pub unsafe extern "C" fn ch_close() {
         if (*thisfile).file >= 0 as ::core::ffi::c_int
             && (*thisfile).flags & (0o4 as ::core::ffi::c_int | 0o10 as ::core::ffi::c_int) == 0
         {
-            close((*thisfile).file);
+            crate::input_worker::close_or_native((*thisfile).file);
             // Linux may report a close failure after releasing the descriptor.
             // Never skip the actual close or retry a potentially reused FD.
             #[cfg(feature = "safety-injection")]
@@ -1301,7 +1301,7 @@ pub unsafe fn dispose_ifile_state(ifile: *mut ::core::ffi::c_void) {
     }
     // CH_KEEPOPEN lends stdin; CH_POPEN/CH_HELPFILE have separate owners.
     if (*state).file >= 0 && (*state).flags & (0o2 | 0o4 | 0o10) == 0 {
-        close((*state).file);
+        crate::input_worker::close_or_native((*state).file);
     }
     free(state.cast());
 }

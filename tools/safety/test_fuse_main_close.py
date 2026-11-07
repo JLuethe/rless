@@ -29,7 +29,7 @@ def proc_text(pid: int, name: str) -> str | None:
         return None
 
 
-def observe(binary: Path) -> dict:
+def observe(binary: Path, mode: str) -> dict:
     with tempfile.TemporaryDirectory(prefix="rless-fuse-main-close-") as directory:
         root = Path(directory)
         mountpoint = root / "mount"
@@ -49,7 +49,9 @@ def observe(binary: Path) -> dict:
             env={
                 "PATH": "/usr/bin:/bin",
                 "RLESS_FUSE_MARKER": str(marker),
-                "RLESS_FUSE_CONTENTS": "first line\n",
+                "RLESS_FUSE_CONTENTS": ("first line\n" if mode == "close"
+                                        else "first line\n" + "fill line\n" * 10000),
+                "RLESS_FUSE_STALL_KIND": "close" if mode == "close" else "read",
             },
             stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             start_new_session=True,
@@ -89,7 +91,7 @@ def observe(binary: Path) -> dict:
             if displayed and pager.poll() is None:
                 os.kill(server.pid, signal.SIGUSR2)
                 time.sleep(0.05)
-                os.write(master, b"q")
+                os.write(master, b"q" if mode == "close" else b"G")
             deadline = time.monotonic() + 4
             while (not marker.exists() and pager.poll() is None
                    and time.monotonic() < deadline):
@@ -97,17 +99,24 @@ def observe(binary: Path) -> dict:
             hit = marker.exists() and marker.read_bytes() == b"hit\n"
             before_signal = pager.poll()
             if hit and before_signal is None:
-                os.kill(pager.pid, signal.SIGTERM)
+                if mode == "close":
+                    os.kill(pager.pid, signal.SIGTERM)
+                else:
+                    os.write(master, b"\x18")
+                    time.sleep(0.1)
+                    os.write(master, b"q")
             try:
                 pager.wait(timeout=0.75)
             except subprocess.TimeoutExpired:
                 pass
             result = {
                 "binary_sha256": sha(binary),
+                "mode": mode,
                 "fixture_sha256": sha(SOURCE),
                 "server_sha256": sha(server_binary),
                 "displayed": displayed,
-                "flush_hit": hit,
+                "operation_hit": hit,
+                "flush_hit": hit if mode == "close" else False,
                 "status_before_signal": before_signal,
                 "status_before_release": pager.poll(),
                 "wchan_before_release": proc_text(pager.pid, "wchan"),
@@ -153,17 +162,19 @@ def main() -> int:
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expect-blocked", action="store_true")
+    parser.add_argument("--mode", choices=("close", "key"), default="close")
     args = parser.parse_args()
-    result = observe(args.binary.resolve(strict=True))
-    common = (result["displayed"] and result["flush_hit"]
+    result = observe(args.binary.resolve(strict=True), args.mode)
+    expected_status = 15 if args.mode == "close" else 0
+    common = (result["displayed"] and result["operation_hit"]
               and result["status_before_signal"] is None
-              and result["status_after_release"] == 15
+              and result["status_after_release"] == expected_status
               and result["terminal_restored_after_release"])
     if args.expect_blocked:
         passed = (common and result["status_before_release"] is None
-                  and result["wchan_before_release"] == "request_wait_answer")
+                  and (args.mode == "key" or result["wchan_before_release"] == "request_wait_answer"))
     else:
-        passed = (common and result["status_before_release"] == 15
+        passed = (common and result["status_before_release"] == expected_status
                   and result["terminal_restored_before_release"])
     result["expected_outcome_observed"] = bool(passed)
     args.output.parent.mkdir(parents=True, exist_ok=True)

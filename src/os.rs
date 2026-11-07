@@ -203,6 +203,18 @@ unsafe extern "C" fn check_poll(
     }
     return 0 as ::core::ffi::c_int;
 }
+pub(crate) unsafe fn poll_managed_input(fd: i32) -> i32 {
+    if is_tty.0 == 0 || fd == tty || use_poll.0 == 0 || quit_if_one_screen != 0 && one_screen.0 != 0
+    {
+        return 0;
+    }
+    let result = check_poll(fd, tty);
+    if result == -2 {
+        sigs |= 2;
+        getcc_clear();
+    }
+    result
+}
 #[no_mangle]
 pub unsafe extern "C" fn ttyin_ready() -> lbool {
     if use_poll.0 == 0 {
@@ -244,6 +256,7 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
         flush();
         if is_tty.0 != 0
             && fd != tty
+            && !crate::input_worker::contains(fd)
             && use_poll.0 != 0
             && !(quit_if_one_screen != 0 && one_screen.0 != 0)
         {
@@ -260,7 +273,14 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
             crate::signal::collect_pending_signals();
             return if fd != tty && sigs & 7 == 0 { -3 } else { -2 };
         }
-        let n = crate::runtime::read_interruptible(fd, buf, len);
+        let n = if crate::input_worker::contains(fd) {
+            crate::input_worker::read_with_terminal(fd, buf, len)
+        } else {
+            crate::runtime::read_interruptible(fd, buf, len)
+        };
+        if n == -2 || n == -3 {
+            return n;
+        }
         if n >= 0 {
             if fd != tty && n > 0 {
                 polling_ok();
@@ -299,7 +319,7 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
             return -1;
         }
         let result = if flags == libc::O_RDONLY {
-            crate::fifo_open::open_pinned_input(filename, flags)
+            crate::input_worker::open(filename)
         } else {
             open(filename, flags)
         };
@@ -311,7 +331,7 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
             if sigs != 0 {
                 let cancel = sigs & 3 != 0;
                 if cancel {
-                    libc::close(result);
+                    crate::input_worker::close_or_native(result);
                 }
                 psignals();
                 if cancel {

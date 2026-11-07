@@ -98,7 +98,6 @@ extern "C" {
     fn undo_osc8() -> lbool;
     fn clr_hilite();
     fn set_header(pos: POSITION);
-    fn stat(__file: *const ::core::ffi::c_char, __buf: *mut stat) -> ::core::ffi::c_int;
     static mut new_file: lbool;
     static mut every_first_cmd: *mut ::core::ffi::c_char;
     static mut force_open: ::core::ffi::c_int;
@@ -558,6 +557,12 @@ impl lessmsg_id {
 }
 pub type less_off_t = off_t;
 pub type less_stat_t = stat;
+const _: () = {
+    assert!(std::mem::size_of::<less_stat_t>() == std::mem::size_of::<libc::stat>());
+    assert!(std::mem::align_of::<less_stat_t>() == std::mem::align_of::<libc::stat>());
+    assert!(std::mem::offset_of!(less_stat_t, st_ino) == std::mem::offset_of!(libc::stat, st_ino));
+    assert!(std::mem::offset_of!(less_stat_t, st_dev) == std::mem::offset_of!(libc::stat, st_dev));
+};
 pub type POSITION = less_off_t;
 pub type LINENUM = off_t;
 #[derive(Copy, Clone)]
@@ -1051,8 +1056,8 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                         // hostile filesystem. Check the opened descriptor for
                         // a tty before starting that cancellable read; an
                         // isatty ioctl afterward could wait behind it.
-                        if force_open == 0 && isatty(f) != 0 {
-                            close(f);
+                        if force_open == 0 && crate::input_worker::isatty_or_native(f) != 0 {
+                            crate::input_worker::close_or_native(f);
                             parg.p_string = filename;
                             error(lmsg(lessmsg_id::LM_X_is_a_terminal), &raw mut parg);
                             return edit_error(filename, alt_filename, altpipe, ifile);
@@ -1072,7 +1077,7 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                             if answer != 'y' as ::core::ffi::c_int
                                 && answer != 'Y' as ::core::ffi::c_int
                             {
-                                close(f);
+                                crate::input_worker::close_or_native(f);
                                 return edit_error(filename, alt_filename, altpipe, ifile);
                             }
                         }
@@ -1083,7 +1088,7 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
         if !tty_checked_before_probe
             && force_open == 0
             && f >= 0 as ::core::ffi::c_int
-            && isatty(f) != 0
+            && crate::input_worker::isatty_or_native(f) != 0
         {
             let mut parg_0: PARG = parg {
                 p_string: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -1093,7 +1098,7 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
             // resolves to a terminal, release that newly owned descriptor;
             // CH_KEEPOPEN still borrows fd 0 and must remain untouched.
             if chflags & 0o1 != 0 {
-                close(f);
+                crate::input_worker::close_or_native(f);
             }
             error(lmsg(lessmsg_id::LM_X_is_a_terminal), &raw mut parg_0);
             return edit_error(filename, alt_filename, altpipe, ifile);
@@ -1157,7 +1162,8 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                 },
                 __glibc_reserved: [0; 3],
             };
-            let mut r: ::core::ffi::c_int = stat(open_filename, &raw mut statbuf);
+            let mut r: ::core::ffi::c_int =
+                crate::input_worker::stat_or_native(f, (&raw mut statbuf).cast());
             if r == 0 as ::core::ffi::c_int {
                 curr_ino = statbuf.st_ino as ino_t;
                 curr_dev = statbuf.st_dev as dev_t;

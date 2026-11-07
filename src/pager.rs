@@ -732,6 +732,12 @@ unsafe fn main_0(
     if isnullenv(editproto).0 != 0 {
         editproto = b"%E ?lm+%lm. %g\0".as_ptr() as *const ::core::ffi::c_char;
     }
+    // File-list construction resolves attacker-controlled paths. Install the
+    // notification handlers before a filesystem can stall that work.
+    if init_signals(lbool::LTRUE) != 0 {
+        crate::output::io_error_diagnostic(b"rless: cannot install signal handlers\n");
+        quit(1);
+    }
     ifile = ::core::ptr::null_mut::<::core::ffi::c_void>();
     if dohelp.0 != 0 {
         ifile = get_ifile(
@@ -781,10 +787,6 @@ unsafe fn main_0(
         );
     }
     open_getchr();
-    if init_signals(lbool::LTRUE) != 0 {
-        crate::output::io_error_diagnostic(b"rless: cannot install signal handlers\n");
-        quit(1);
-    }
     less_start_time = get_time();
     if !tagoption.is_null()
         || strcmp(tags, b"-\0".as_ptr() as *const ::core::ffi::c_char) == 0 as ::core::ffi::c_int

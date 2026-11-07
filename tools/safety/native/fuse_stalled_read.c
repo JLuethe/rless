@@ -12,11 +12,25 @@
 
 static volatile sig_atomic_t released;
 static const char *marker;
+static const char *stall_kind;
 
 static void release_read(int number)
 {
     (void)number;
     released = 1;
+}
+
+static void stall(void)
+{
+    int fd = open(marker, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+    if (fd >= 0) {
+        (void)write(fd, "hit\n", 4);
+        (void)close(fd);
+    }
+    while (!released) {
+        struct timespec delay = {0, 10000000};
+        nanosleep(&delay, NULL);
+    }
 }
 
 static int stalled_getattr(const char *path, struct stat *out,
@@ -28,6 +42,8 @@ static int stalled_getattr(const char *path, struct stat *out,
         out->st_mode = S_IFDIR | 0700;
         out->st_nlink = 2;
     } else if (strcmp(path, "/input") == 0) {
+        if (strcmp(stall_kind, "stat") == 0)
+            stall();
         out->st_mode = S_IFREG | 0600;
         out->st_nlink = 1;
         out->st_size = 1000;
@@ -51,15 +67,8 @@ static int stalled_read(const char *path, char *buffer, size_t size, off_t offse
     (void)info;
     if (strcmp(path, "/input") != 0)
         return -ENOENT;
-    int fd = open(marker, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
-    if (fd >= 0) {
-        (void)write(fd, "hit\n", 4);
-        (void)close(fd);
-    }
-    while (!released) {
-        struct timespec delay = {0, 10000000};
-        nanosleep(&delay, NULL);
-    }
+    if (strcmp(stall_kind, "read") == 0)
+        stall();
     static const char line[] = "fuse line\n";
     if (offset >= 1000)
         return 0;
@@ -73,7 +82,9 @@ static int stalled_read(const char *path, char *buffer, size_t size, off_t offse
 int main(int argc, char **argv)
 {
     marker = getenv("RLESS_FUSE_MARKER");
-    if (marker == NULL)
+    stall_kind = getenv("RLESS_FUSE_STALL_KIND");
+    if (marker == NULL || stall_kind == NULL ||
+        (strcmp(stall_kind, "read") != 0 && strcmp(stall_kind, "stat") != 0))
         return 2;
     struct sigaction action = {.sa_handler = release_read};
     sigemptyset(&action.sa_mask);

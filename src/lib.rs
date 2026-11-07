@@ -36,6 +36,7 @@ mod helper_process;
 mod history_worker;
 pub mod ifile;
 pub mod input;
+mod input_worker;
 mod interruptible_stdio;
 pub mod jump;
 pub mod lesskey_parse;

@@ -28,7 +28,7 @@ def proc_text(pid: int, name: str) -> str | None:
         return None
 
 
-def observe(binary: Path) -> dict:
+def observe(binary: Path, kind: str) -> dict:
     with tempfile.TemporaryDirectory(prefix="rless-fuse-stall-") as directory:
         root = Path(directory)
         mountpoint = root / "mount"
@@ -41,7 +41,8 @@ def observe(binary: Path) -> dict:
                         "-o", str(server_binary), *fuse_flags], check=True, capture_output=True)
         server = subprocess.Popen(
             [str(server_binary), "-f", "-s", str(mountpoint)],
-            env={"PATH": "/usr/bin:/bin", "RLESS_FUSE_MARKER": str(marker)},
+            env={"PATH": "/usr/bin:/bin", "RLESS_FUSE_MARKER": str(marker),
+                 "RLESS_FUSE_STALL_KIND": kind},
             stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, start_new_session=True,
         )
         pager = None
@@ -76,6 +77,8 @@ def observe(binary: Path) -> dict:
             result = {
                 "binary_sha256": sha(binary), "source_sha256": sha(SOURCE),
                 "server_sha256": sha(server_binary), "mount_success": True,
+                "operation": kind,
+                "operation_hit": marker.read_bytes() == b"hit\n" if marker.exists() else False,
                 "read_hit": marker.read_bytes() == b"hit\n" if marker.exists() else False,
                 "worker_pids": children,
                 "worker_states_before_release": [proc_text(pid, "status") for pid in children],
@@ -90,6 +93,13 @@ def observe(binary: Path) -> dict:
             except subprocess.TimeoutExpired:
                 pass
             result["pager_status_after_release"] = pager.poll()
+            child_deadline = time.monotonic() + 1
+            while (any(Path(f"/proc/{pid}").exists() for pid in children)
+                   and time.monotonic() < child_deadline):
+                time.sleep(0.01)
+            result["children_gone_after_release"] = all(
+                not Path(f"/proc/{pid}").exists() for pid in children
+            )
             return result
         finally:
             try:
@@ -117,19 +127,23 @@ def main() -> int:
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expect-blocked", action="store_true")
+    parser.add_argument("--kind", choices=("read", "stat"), default="read")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
-    result = observe(binary)
+    result = observe(binary, args.kind)
     if args.expect_blocked:
-        passed = (result["read_hit"] and result["worker_pids"]
+        expected_after_release = -signal.SIGTERM if args.kind == "stat" else 15
+        passed = (result["operation_hit"]
+                  and (result["worker_pids"] or args.kind == "stat")
                   and result["pager_status_before_release"] is None
                   and result["pager_wchan_before_release"] == "request_wait_answer"
-                  and result["pager_status_after_release"] == 15
+                  and result["pager_status_after_release"] == expected_after_release
                   and result["terminal_restored"])
     else:
-        passed = (result["read_hit"] and result["worker_pids"]
+        passed = (result["operation_hit"] and result["worker_pids"]
                   and result["pager_status_before_release"] == 15
                   and result["pager_status_after_release"] == 15
+                  and result["children_gone_after_release"]
                   and result["terminal_restored"])
     result["expected_outcome_observed"] = bool(passed)
     args.output.parent.mkdir(parents=True, exist_ok=True)

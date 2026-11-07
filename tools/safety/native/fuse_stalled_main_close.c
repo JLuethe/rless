@@ -14,6 +14,7 @@ static volatile sig_atomic_t released;
 static volatile sig_atomic_t armed;
 static const char *marker;
 static const char *contents;
+static const char *stall_kind;
 
 static void release_close(int number) { (void)number; released = 1; }
 static void arm_close(int number) { (void)number; armed = 1; }
@@ -50,8 +51,8 @@ static int probe_getattr(const char *path, struct stat *out, struct fuse_file_in
 
 static int probe_open(const char *path, struct fuse_file_info *info)
 {
-    (void)info;
     if (strcmp(path, "/input") != 0) return -ENOENT;
+    info->direct_io = 1;
     return 0;
 }
 
@@ -60,6 +61,8 @@ static int probe_read(const char *path, char *buf, size_t size, off_t offset,
 {
     (void)info;
     if (strcmp(path, "/input") != 0) return -ENOENT;
+    if (armed && strcmp(stall_kind, "read") == 0)
+        emit_hit_and_wait();
     size_t len = strlen(contents);
     if (offset < 0 || (size_t)offset >= len) return 0;
     if (size > len - (size_t)offset) size = len - (size_t)offset;
@@ -71,7 +74,7 @@ static int probe_flush(const char *path, struct fuse_file_info *info)
 {
     (void)info;
     if (strcmp(path, "/input") != 0) return -ENOENT;
-    if (!armed) return 0;
+    if (!armed || strcmp(stall_kind, "close") != 0) return 0;
     emit_hit_and_wait();
     return 0;
 }
@@ -80,7 +83,10 @@ int main(int argc, char **argv)
 {
     marker = getenv("RLESS_FUSE_MARKER");
     contents = getenv("RLESS_FUSE_CONTENTS");
-    if (!marker || !contents) return 2;
+    stall_kind = getenv("RLESS_FUSE_STALL_KIND");
+    if (!stall_kind) stall_kind = "close";
+    if (!marker || !contents ||
+        (strcmp(stall_kind, "read") != 0 && strcmp(stall_kind, "close") != 0)) return 2;
     struct sigaction action = {.sa_handler = release_close};
     sigemptyset(&action.sa_mask);
     if (sigaction(SIGUSR1, &action, NULL) != 0) return 2;

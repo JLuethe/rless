@@ -24,6 +24,7 @@ struct shared_fault_state {
 };
 
 static struct shared_fault_state *shared;
+static pid_t initial_pid;
 static int input_fds[1024];
 static int output_fds[1024];
 static int (*current_putc)(int);
@@ -33,6 +34,7 @@ __attribute__((constructor)) static void initialize_shared_state(void)
     shared = mmap(NULL, sizeof *shared, PROT_READ | PROT_WRITE,
                   MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (shared == MAP_FAILED) _exit(125);
+    initial_pid = getpid();
 }
 
 struct callback_target { uintptr_t offset, address; int found; };
@@ -136,9 +138,12 @@ ssize_t read(int fd, void *buffer, size_t count)
     ssize_t (*real_call)(int, void *, size_t) = dlsym(RTLD_NEXT, "read");
     if (!real_call) _exit(125);
     if (fd == STDIN_FILENO || (fd >= 0 && fd < 1024 && input_fds[fd])) {
-        if (selected("read", 2)) { errno = EIO; return -1; }
-        if (selected("read-eintr", 14)) { errno = EINTR; return -1; }
-        if (selected("read-short", 15) && count > 1) count = 1;
+        /* A managed input worker closes the inherited trace descriptor. Its
+         * parent emits the shared marker after receiving the read reply. */
+        int defer = getpid() != initial_pid;
+        if (selected_inner("read", 2, defer)) { errno = EIO; return -1; }
+        if (selected_inner("read-eintr", 14, defer)) { errno = EINTR; return -1; }
+        if (selected_inner("read-short", 15, defer) && count > 1) count = 1;
     }
     return real_call(fd, buffer, count);
 }
