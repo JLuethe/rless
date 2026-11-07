@@ -641,12 +641,14 @@ unsafe fn flush_buffer() -> bool {
     };
     let target = private.as_ref().map_or(outfd, AsRawFd::as_raw_fd);
     let nonblocking = private.is_some() || socket;
-    let _waiting = nonblocking.then(crate::runtime::IoWait::new);
+    // A regular-file write can return EINTR after a handled signal too. Keep
+    // it in the wait set so a successful interruption is never retried into a
+    // later write after termination was requested.
+    let _waiting = crate::runtime::IoWait::new();
     let mut written = 0;
     while written < n {
-        if nonblocking
-            && (crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
-                || crate::signal::has_pending_notifications())
+        if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+            || crate::signal::has_pending_notifications()
         {
             if crate::pager::is_tty.0 == 0 {
                 record_output_failure();
@@ -686,9 +688,8 @@ unsafe fn flush_buffer() -> bool {
         if result > 0 {
             written += result as usize;
         } else if result < 0 && *libc::__errno_location() == libc::EINTR {
-            if nonblocking
-                && (crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
-                    || crate::signal::has_pending_notifications())
+            if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+                || crate::signal::has_pending_notifications()
             {
                 if crate::pager::is_tty.0 == 0 {
                     record_output_failure();
@@ -717,7 +718,11 @@ unsafe fn flush_buffer() -> bool {
             if ready == 0 {
                 // Exit-time terminal escapes cannot be delivered while the
                 // consumer refuses to read. Continue with termios cleanup.
-                screen_trashed();
+                if crate::pager::is_tty.0 == 0 {
+                    record_output_failure();
+                } else {
+                    screen_trashed();
+                }
                 return false;
             }
             if ready < 0 {
