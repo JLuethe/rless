@@ -24,6 +24,7 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--signal", choices=("SIGINT", "SIGWINCH", "SIGUSR1"),
                         default="SIGWINCH")
+    parser.add_argument("--inherit-ignored-winch", action="store_true")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -44,10 +45,14 @@ def main() -> int:
                 "RLESS_SIGNAL_INSTALL_TRACE_FD": str(writer),
                 "RLESS_SIGNAL_INSTALL_FAIL_SIGNAL": str(getattr(signal, args.signal)),
             }
+            if args.inherit_ignored_winch:
+                env["RLESS_SIGNAL_INSTALL_EXPECT_IGNORED"] = "1"
             process = subprocess.run(
                 [str(binary), str(input_path)], stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
                 pass_fds=(writer,), timeout=5,
+                preexec_fn=(lambda: signal.signal(signal.SIGWINCH, signal.SIG_IGN))
+                if args.inherit_ignored_winch else None,
             )
             os.close(writer)
             writer = -1
@@ -61,13 +66,16 @@ def main() -> int:
         "shim_source_sha256": digest(SOURCE), "shim_sha256": digest(shim),
         "status": process.returncode, "trace": trace,
         "failed_signal": args.signal,
+        "inherited_ignored_winch": args.inherit_ignored_winch,
         "stdout_sha256": hashlib.sha256(process.stdout).hexdigest(),
         "stdout_len": len(process.stdout),
         "stderr_tail": process.stderr[-200:].decode("latin1"),
     }
+    expected_trace = ("inherited-winch-ignored\n" if args.inherit_ignored_winch else "")
+    expected_trace += "hit\nactions-restored\nmask-restored\n"
     report["passed"] = (
         process.returncode == 1 and process.stdout == b"" and
-        trace == "hit\nactions-restored\nmask-restored\n"
+        trace == expected_trace
     )
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report))

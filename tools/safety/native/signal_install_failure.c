@@ -65,6 +65,9 @@ __attribute__((constructor)) static void install_probe(void)
         if (real_sigaction(handled[index], NULL, &original[index]) != 0)
             return;
     }
+    if (getenv("RLESS_SIGNAL_INSTALL_EXPECT_IGNORED") != NULL)
+        trace(original[2].sa_handler == SIG_IGN ?
+              "inherited-winch-ignored\n" : "inherited-winch-unexpected\n");
     if (atexit(check_restoration) != 0)
         return;
     armed = 1;
