@@ -913,6 +913,12 @@ pub unsafe extern "C" fn bin_file(mut f: ::core::ffi::c_int, mut n: *mut ssize_t
         (&raw mut data as *mut ::core::ffi::c_char).cast(),
         ::core::mem::size_of::<[::core::ffi::c_char; 256]>(),
     );
+    if *n < 0 && !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+        crate::ch::mark_input_probe_failed();
+        if crate::pager::is_tty.0 != 0 {
+            crate::output::io_error_diagnostic(b"rless: read error\n");
+        }
+    }
     if *n <= umax as ssize_t {
         return lbool::LFALSE;
     }

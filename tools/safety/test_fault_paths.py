@@ -1,5 +1,6 @@
 """Real pager fault/recovery paths. Whole acceptance coverage remains partial."""
 import argparse
+import base64
 import copy
 from contextlib import ExitStack, contextmanager
 import hashlib
@@ -304,6 +305,23 @@ class ActualFaultPaths(unittest.TestCase):
                                  (1, f'rless: {site} error\n'.encode()))
                 width = 8192 if site == 'read' else 1023
                 self.assertEqual(actual.stdout, payload[:width * (ordinal - 1)])
+
+    def test_named_input_probe_read_error_is_not_lost_by_later_success(self):
+        payload = b'line\n' * 400
+        for ordinal in (1, 2):
+            actual, trace = pipe_run(NORMAL, argv=['i'], files={'i': payload},
+                                     native_plan=f'read:{ordinal}')
+            self.assertEqual(trace, marker(2, ordinal, b'RNT1'))
+            self.assertEqual(actual.returncode, 1)
+            self.assertEqual(actual.stderr, b'rless: read error\n')
+            self.assertEqual(actual.stdout, payload if ordinal == 1 else b'')
+        case = pager()
+        case['include_transcript'] = True
+        interactive, trace = pty_run(NORMAL, case, native_plan='read:1')
+        self.assertEqual(trace, marker(2, 1, b'RNT1'))
+        self.assertEqual(interactive['status'], 1)
+        self.assertTrue(interactive['termios_restored'])
+        self.assertIn(b'rless: read error', base64.b64decode(interactive['transcript_b64']))
 
     def test_write_error_reports_failure_without_discarding_status(self):
         result, trace = pipe_run(INJECTED, 'write:1')
@@ -977,6 +995,7 @@ def contracts():
         'test_pipe_failure_termination_reaps_process_and_child_group': entry(('alloc', 'read', 'write', 'reserve', 'read-eintr', 'read-short', 'write-short'), controls=('fired', 'termination-cleanup'), findings=('M0-IO-001', 'M0-IO-002')),
         'test_native_io_errors_match_rust_hooks_and_document_legacy_divergence': entry(('read', 'write'), controls=('fired', 'native-counterpart', 'unfaulted'), findings=('M0-IO-001', 'M0-IO-002')),
         'test_second_read_and_write_ordinals_are_distinct_native_errors': entry(('read', 'write'), (1, 2), ('fired', 'native-counterpart', 'ordinal-separation'), findings=('M0-IO-001', 'M0-IO-002')),
+        'test_named_input_probe_read_error_is_not_lost_by_later_success': entry(('read',), (1, 2), ('fired', 'native-counterpart', 'ordinal-separation'), findings=('M0-IO-001',)),
         'test_read_failure_survives_later_successful_file': entry(('read',), controls=('fired', 'native-counterpart'), findings=('M0-IO-001',)),
         'test_write_failure_stops_unbounded_input_and_broken_stderr': entry(('write',), controls=('fired', 'native-counterpart', 'termination-cleanup'), findings=('M0-IO-002',)),
         'test_final_flush_failure_changes_success_and_preserves_primary_status': entry(('write',), (1, 2), ('fired', 'native-counterpart'), findings=('M0-IO-002',)),

@@ -17,6 +17,13 @@ pub fn input_read_failed() -> bool {
     INPUT_READ_FAILED.load(Ordering::Relaxed)
 }
 
+// The binary-file probe runs before ch_init, so its permanent read failure
+// must survive a later successful data read and the interactive file reset.
+pub(crate) unsafe fn mark_input_probe_failed() {
+    read_error = lbool::LTRUE;
+    INPUT_READ_FAILED.store(true, Ordering::Relaxed);
+}
+
 pub fn logfile_failed() -> bool {
     LOG_FAILED.load(Ordering::Relaxed)
 }
