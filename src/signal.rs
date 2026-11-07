@@ -458,6 +458,15 @@ pub unsafe extern "C" fn psignals() {
         let mut default: libc::sigaction = std::mem::zeroed();
         let mut saved_tt: libc::sigaction = std::mem::zeroed();
         let mut saved_st: libc::sigaction = std::mem::zeroed();
+        let mut stop_set: libc::sigset_t = std::mem::zeroed();
+        let mut saved_mask: libc::sigset_t = std::mem::zeroed();
+        if libc::sigemptyset(&mut stop_set) != 0
+            || libc::sigaddset(&mut stop_set, libc::SIGTSTP) != 0
+            || libc::sigprocmask(libc::SIG_BLOCK, &stop_set, &mut saved_mask) != 0
+        {
+            quit(1);
+            libc::_exit(1);
+        }
         ignore.sa_sigaction = libc::SIG_IGN;
         default.sa_sigaction = libc::SIG_DFL;
         if libc::sigemptyset(&mut ignore.sa_mask) != 0
@@ -477,9 +486,23 @@ pub unsafe extern "C" fn psignals() {
             quit(1);
             libc::_exit(1);
         }
-        let stop_result = kill(getpid(), libc::SIGTSTP);
-        let restore_result = libc::sigaction(libc::SIGTSTP, &saved_st, std::ptr::null_mut());
-        if stop_result != 0 || restore_result != 0 {
+        // SIGTSTP notifications received while restoring the terminal belong
+        // to this same stop transition. The self-sent default stop and any
+        // kernel-pending external stop coalesce while SIGTSTP is blocked.
+        if kill(getpid(), libc::SIGTSTP) != 0 {
+            quit(1);
+            libc::_exit(1);
+        }
+        PENDING.fetch_and(!STOP, Ordering::SeqCst);
+        if libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0 {
+            quit(1);
+            libc::_exit(1);
+        }
+        // After SIGCONT, reinstall the handler before admitting another stop.
+        if libc::sigprocmask(libc::SIG_BLOCK, &stop_set, std::ptr::null_mut()) != 0
+            || libc::sigaction(libc::SIGTSTP, &saved_st, std::ptr::null_mut()) != 0
+            || libc::sigprocmask(libc::SIG_SETMASK, &saved_mask, std::ptr::null_mut()) != 0
+        {
             quit(1);
             libc::_exit(1);
         }

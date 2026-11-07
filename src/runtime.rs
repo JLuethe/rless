@@ -126,20 +126,21 @@ unsafe fn block_handled_signals() -> Result<libc::sigset_t, libc::c_int> {
 }
 
 /// A dup shares the original open file description, including O_NONBLOCK.
-/// Reopening a pipe through procfs gives this read its own status flags while
-/// retaining the same pipe buffer. A competing reader may consume readiness
-/// after ppoll, so the final read itself must be nonblocking.
-unsafe fn read_fifo_nonblocking(fd: i32, buffer: *mut u8, len: usize) -> isize {
+/// Reopening a pipe or terminal through procfs gives this read its own status
+/// flags while retaining the same input source. A competing reader may consume
+/// readiness after ppoll, so the final read itself must be nonblocking.
+unsafe fn read_reopened_nonblocking(
+    fd: i32,
+    buffer: *mut u8,
+    len: usize,
+    original: &libc::stat,
+) -> isize {
     let flags = libc::fcntl(fd, libc::F_GETFL);
     if flags < 0 {
         return -1;
     }
     if flags & libc::O_ACCMODE == libc::O_WRONLY || flags & libc::O_PATH != 0 {
         *libc::__errno_location() = libc::EBADF;
-        return -1;
-    }
-    let mut original: libc::stat = std::mem::zeroed();
-    if libc::fstat(fd, &mut original) != 0 {
         return -1;
     }
     let prefix = b"/proc/self/fd/";
@@ -169,9 +170,10 @@ unsafe fn read_fifo_nonblocking(fd: i32, buffer: *mut u8, len: usize) -> isize {
     let mut reopened: libc::stat = std::mem::zeroed();
     let stat_result = libc::fstat(private, &mut reopened);
     if stat_result != 0
-        || reopened.st_mode & libc::S_IFMT != libc::S_IFIFO
+        || reopened.st_mode & libc::S_IFMT != original.st_mode & libc::S_IFMT
         || reopened.st_dev != original.st_dev
         || reopened.st_ino != original.st_ino
+        || reopened.st_rdev != original.st_rdev
     {
         let error = if stat_result != 0 {
             *libc::__errno_location()
@@ -276,8 +278,11 @@ pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) ->
     if libc::fstat(fd, &mut status) != 0 {
         return -1;
     }
-    if status.st_mode & libc::S_IFMT == libc::S_IFIFO {
-        read_fifo_nonblocking(fd, buffer, len)
+    if status.st_mode & libc::S_IFMT == libc::S_IFIFO || libc::isatty(fd) == 1 {
+        read_reopened_nonblocking(fd, buffer, len, &status)
+    } else if status.st_mode & libc::S_IFMT == libc::S_IFSOCK {
+        // recv has a per-call nonblocking flag and leaves shared fd flags alone.
+        libc::recv(fd, buffer.cast(), len, libc::MSG_DONTWAIT)
     } else {
         libc::read(fd, buffer.cast(), len)
     }
