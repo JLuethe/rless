@@ -594,20 +594,22 @@ unsafe fn reopen_nonblocking_writer(
     Ok(private)
 }
 
-// A full PTY output queue cannot trap the pager in write(2) after SIGTERM.
-// Verify the reopened object because descriptor numbers can be reused.
-unsafe fn private_terminal_writer(fd: libc::c_int) -> Result<Option<OwnedFd>, libc::c_int> {
-    if crate::pager::is_tty.0 == 0 {
-        return Ok(None);
-    }
+// A full terminal or redirected pipe cannot trap the pager in write(2) after
+// SIGTERM. A socket uses per-call MSG_DONTWAIT; reopening a pipe/character
+// device gives us a private nonblocking file description without changing the
+// caller's status flags. Verify the reopened object before using it.
+unsafe fn nonblocking_output(fd: libc::c_int) -> Result<(Option<OwnedFd>, bool), libc::c_int> {
     let mut original: libc::stat = std::mem::zeroed();
     if libc::fstat(fd, &mut original) != 0 {
         return Err(*libc::__errno_location());
     }
-    if original.st_mode & libc::S_IFMT != libc::S_IFCHR {
-        return Ok(None);
+    match original.st_mode & libc::S_IFMT {
+        libc::S_IFCHR | libc::S_IFIFO => {
+            reopen_nonblocking_writer(fd, &original).map(|fd| (Some(fd), false))
+        }
+        libc::S_IFSOCK => Ok((None, true)),
+        _ => Ok((None, false)),
     }
-    reopen_nonblocking_writer(fd, &original).map(Some)
 }
 
 unsafe fn record_output_failure() {
@@ -629,7 +631,7 @@ unsafe fn flush_buffer() -> bool {
         return true;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
-    let private = match private_terminal_writer(outfd) {
+    let (private, socket) = match nonblocking_output(outfd) {
         Ok(value) => value,
         Err(error) => {
             *libc::__errno_location() = error;
@@ -638,14 +640,19 @@ unsafe fn flush_buffer() -> bool {
         }
     };
     let target = private.as_ref().map_or(outfd, AsRawFd::as_raw_fd);
-    let _waiting = private.as_ref().map(|_| crate::runtime::IoWait::new());
+    let nonblocking = private.is_some() || socket;
+    let _waiting = nonblocking.then(crate::runtime::IoWait::new);
     let mut written = 0;
     while written < n {
-        if private.is_some()
+        if nonblocking
             && (crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
                 || crate::signal::has_pending_notifications())
         {
-            screen_trashed();
+            if crate::pager::is_tty.0 == 0 {
+                record_output_failure();
+            } else {
+                screen_trashed();
+            }
             return false;
         }
         #[cfg(feature = "safety-injection")]
@@ -662,6 +669,13 @@ unsafe fn flush_buffer() -> bool {
         let write_len = n - written;
         let result = if injected_failure {
             -1
+        } else if socket {
+            libc::send(
+                target,
+                (&raw const obuf).cast::<u8>().add(written).cast(),
+                write_len,
+                libc::MSG_DONTWAIT,
+            )
         } else {
             write(
                 target,
@@ -672,16 +686,20 @@ unsafe fn flush_buffer() -> bool {
         if result > 0 {
             written += result as usize;
         } else if result < 0 && *libc::__errno_location() == libc::EINTR {
-            if private.is_some()
+            if nonblocking
                 && (crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
                     || crate::signal::has_pending_notifications())
             {
-                screen_trashed();
+                if crate::pager::is_tty.0 == 0 {
+                    record_output_failure();
+                } else {
+                    screen_trashed();
+                }
                 return false;
             }
             continue;
         } else if result < 0
-            && private.is_some()
+            && nonblocking
             && (*libc::__errno_location() == libc::EAGAIN
                 || *libc::__errno_location() == libc::EWOULDBLOCK)
         {
@@ -704,7 +722,11 @@ unsafe fn flush_buffer() -> bool {
             }
             if ready < 0 {
                 if *libc::__errno_location() == libc::EINTR {
-                    screen_trashed();
+                    if crate::pager::is_tty.0 == 0 {
+                        record_output_failure();
+                    } else {
+                        screen_trashed();
+                    }
                     return false;
                 }
                 record_output_failure();
