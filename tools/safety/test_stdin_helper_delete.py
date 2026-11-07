@@ -31,9 +31,17 @@ def read_until(master: int, process: subprocess.Popen, marker: bytes, seconds: f
 def descriptor_targets(pid: int) -> dict[str, str]:
     root = Path(f"/proc/{pid}/fd")
     try:
-        return {entry.name: os.readlink(entry) for entry in root.iterdir()}
+        entries = list(root.iterdir())
     except (FileNotFoundError, ProcessLookupError):
         return {}
+    targets = {}
+    for entry in entries:
+        try:
+            targets[entry.name] = os.readlink(entry)
+        except (FileNotFoundError, ProcessLookupError):
+            # A transient worker descriptor may close during enumeration.
+            continue
+    return targets
 
 
 def process_state(pid: int) -> str:
