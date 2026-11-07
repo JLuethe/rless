@@ -1825,6 +1825,9 @@ unsafe extern "C" fn get_pipe_pos(
         crate::signal::collect_pending_signals();
         if sigs != 0 {
             let cancelled = sigs & (1 | 2 | 64) != 0;
+            if !cancelled && c != 0 {
+                ungetcc(c);
+            }
             psignals();
             if cancelled {
                 return -1;

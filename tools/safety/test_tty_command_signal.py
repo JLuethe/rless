@@ -65,7 +65,7 @@ def observe(binary: Path, shim: Path, mode: str) -> dict:
                         break
             if ready:
                 command = (b"q" if mode == "resize" else
-                           b"|\x0e1" if mode == "pipe_prompt" else
+                           b"|\x0e1" if mode in ("pipe_prompt", "pipe_resize") else
                            b"ma" if mode in ("mark_prompt", "mark_resize", "mark_user") else
                            b"!printf x > " + os.fsencode(marker) + b"\n")
                 os.write(master, command)
@@ -89,7 +89,11 @@ def observe(binary: Path, shim: Path, mode: str) -> dict:
                     pass
             if trace and mode == "mark_resize":
                 os.write(master, b"'aq")
-            if trace and mode in ("pipe_prompt", "mark_prompt", "mark_resize", "mark_user"):
+            if trace and mode == "pipe_resize":
+                # Complete the line-number prompt, then the empty pipe
+                # command, then quit the pager.
+                os.write(master, b"\n\nq")
+            if trace and mode in ("pipe_prompt", "pipe_resize", "mark_prompt", "mark_resize", "mark_user"):
                 # Capture the nested prompt's output after the signal. The
                 # pipe prompt may otherwise ring the bell indefinitely.
                 until = time.monotonic() + 0.1
@@ -100,7 +104,7 @@ def observe(binary: Path, shim: Path, mode: str) -> dict:
                         except OSError:
                             break
             try:
-                pager.wait(timeout=2 if mode in ("pipe_prompt", "mark_prompt", "mark_resize", "mark_user") else 3)
+                pager.wait(timeout=2 if mode in ("pipe_prompt", "pipe_resize", "mark_prompt", "mark_resize", "mark_user") else 3)
                 timed_out = False
             except subprocess.TimeoutExpired:
                 pager.kill()
@@ -134,8 +138,8 @@ def main() -> int:
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--rounds", type=int, default=1)
-    parser.add_argument("--modes", nargs="+", choices=("terminate", "resize", "pipe_prompt", "mark_prompt", "mark_resize", "mark_user"),
-                        default=("terminate", "resize", "pipe_prompt", "mark_prompt", "mark_resize", "mark_user"))
+    parser.add_argument("--modes", nargs="+", choices=("terminate", "resize", "pipe_prompt", "pipe_resize", "mark_prompt", "mark_resize", "mark_user"),
+                        default=("terminate", "resize", "pipe_prompt", "pipe_resize", "mark_prompt", "mark_resize", "mark_user"))
     parser.add_argument("--expect-helper-after-signal", action="store_true")
     parser.add_argument("--expect-prompt-hang", action="store_true")
     args = parser.parse_args()
@@ -156,7 +160,7 @@ def main() -> int:
         if case["mode"] == "pipe_prompt" and args.expect_prompt_hang:
             return (case["timed_out"] and case["bell_count"] > 0
                     and not case["helper_ran"])
-        return (case["status"] == (0 if case["mode"] in ("resize", "mark_resize", "mark_user") else 15)
+        return (case["status"] == (0 if case["mode"] in ("resize", "pipe_resize", "mark_resize", "mark_user") else 15)
                 and not case["timed_out"]
                 and not (case["mode"] in ("mark_prompt", "mark_resize", "mark_user") and case["invalid_mark_seen"])
                 and case["helper_ran"] == (args.expect_helper_after_signal

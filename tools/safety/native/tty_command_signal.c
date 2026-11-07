@@ -15,9 +15,10 @@ ssize_t read(int fd, void *buffer, size_t length)
     int mark_resize = mode != NULL && strcmp(mode, "mark_resize") == 0;
     int mark_user = mode != NULL && strcmp(mode, "mark_user") == 0;
     int pipe_prompt = mode != NULL && strcmp(mode, "pipe_prompt") == 0;
+    int pipe_resize = mode != NULL && strcmp(mode, "pipe_resize") == 0;
     int mark_prompt = mode != NULL && strcmp(mode, "mark_prompt") == 0;
-    int number = mark_user ? SIGUSR1 : resize || mark_resize ? SIGWINCH : SIGTERM;
-    char target = resize ? 'q' : pipe_prompt ? '1' : mark_prompt || mark_resize || mark_user ? 'a' : '\n';
+    int number = mark_user ? SIGUSR1 : resize || mark_resize || pipe_resize ? SIGWINCH : SIGTERM;
+    char target = resize ? 'q' : pipe_prompt || pipe_resize ? '1' : mark_prompt || mark_resize || mark_user ? 'a' : '\n';
     if (!fired && result == 1 && ((char *) buffer)[0] == target && isatty(fd)) {
         fired = 1;
         const char *text = getenv("RLESS_TTY_COMMAND_TRACE_FD");
