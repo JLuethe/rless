@@ -636,7 +636,12 @@ unsafe fn with_worker<T>(
             .take()
             .ok_or(libc::EBUSY)?
     };
-    let result = action(&mut worker);
+    // A resize can lead directly to a stat or seek during repaint. Retire an
+    // interrupted regular read before any operation can queue behind it.
+    let result = match restart_interrupted_regular_read(&mut worker) {
+        Ok(()) => action(&mut worker),
+        Err(error) => Err(error),
+    };
     let mut guard = match INPUTS.lock() {
         Ok(guard) => guard,
         Err(_) => {
@@ -838,7 +843,6 @@ unsafe fn read_impl(fd: i32, output: *mut u8, length: usize, watch_terminal: boo
         length
     };
     let result = with_worker(fd, |worker| {
-        restart_interrupted_regular_read(worker)?;
         if worker.start == worker.end {
             if !worker
                 .pending
