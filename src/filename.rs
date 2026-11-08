@@ -37,6 +37,7 @@ extern "C" {
     fn getc(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn fileno(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn rless_pclose_read(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_pcancel_read(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn rless_helper_fd(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn rless_popen_read(
         __command: *const ::core::ffi::c_char,
@@ -1147,7 +1148,14 @@ pub unsafe extern "C" fn lglob(
         return filename;
     }
     gfilename = readfd(fd);
-    check_helper_close(rless_pclose_read(fd));
+    // A failed read has no remaining consumer. The helper may still be alive
+    // after its output pipe is closed, so do not wait for its normal exit.
+    let status = if gfilename.is_null() {
+        rless_pcancel_read(fd)
+    } else {
+        rless_pclose_read(fd)
+    };
+    check_helper_close(status);
     if gfilename.is_null() {
         return filename;
     }
@@ -1270,12 +1278,19 @@ pub unsafe extern "C" fn open_altfile(
             crate::signal::psignals();
         };
         if first_byte != 1 as ssize_t {
-            let mut status: ::core::ffi::c_int = rless_pclose_read(fd);
+            let status: ::core::ffi::c_int = if first_byte < 0 {
+                rless_pcancel_read(fd)
+            } else {
+                rless_pclose_read(fd)
+            };
             if first_byte == -1 {
                 record_helper_io_failure();
             }
             check_helper_close(status);
-            if returnfd > 1 as ::core::ffi::c_int && status == 0 as ::core::ffi::c_int {
+            if first_byte == 0
+                && returnfd > 1 as ::core::ffi::c_int
+                && status == 0 as ::core::ffi::c_int
+            {
                 *pfd = ::core::ptr::null_mut::<FILE>();
                 *pf = -1 as ::core::ffi::c_int;
                 return save(
@@ -1290,7 +1305,12 @@ pub unsafe extern "C" fn open_altfile(
         return save(b"-\0".as_ptr() as *const ::core::ffi::c_char);
     }
     cmd = readfd(fd);
-    check_helper_close(rless_pclose_read(fd));
+    let status = if cmd.is_null() {
+        rless_pcancel_read(fd)
+    } else {
+        rless_pclose_read(fd)
+    };
+    check_helper_close(status);
     if cmd.is_null() {
         return ::core::ptr::null_mut();
     }
