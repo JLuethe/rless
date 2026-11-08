@@ -2159,6 +2159,23 @@ unsafe fn create_announced_named_history_temp(
 ) -> Option<HistoryTemp> {
     for _ in 0..8 {
         let temporary = random_history_name(destination.as_bytes())?;
+        // PREPARE lets the parent remove a file created by an openat that
+        // finishes after cancellation. Do not announce a name that already
+        // belongs to someone else: without an opened fd the cleanup child
+        // cannot distinguish that inode from our newly created one.
+        let mut existing: libc::stat = std::mem::zeroed();
+        if libc::fstatat(
+            directory.as_raw_fd(),
+            temporary.as_ptr(),
+            &mut existing,
+            libc::AT_SYMLINK_NOFOLLOW,
+        ) == 0
+        {
+            continue;
+        }
+        if *libc::__errno_location() != libc::ENOENT {
+            return None;
+        }
         // The parent learns the pinned directory and unpredictable name before
         // openat can stall. If a signal kills the child immediately after a
         // successful create, it can still clean up this exact name.
