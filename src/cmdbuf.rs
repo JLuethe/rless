@@ -2103,6 +2103,8 @@ struct HistoryTemp {
     temporary: CString,
     destination: CString,
     fd: libc::c_int,
+    device: libc::dev_t,
+    inode: libc::ino_t,
     link_fd: Option<OwnedFd>,
     linked: bool,
     renamed: bool,
@@ -2112,7 +2114,22 @@ impl Drop for HistoryTemp {
     fn drop(&mut self) {
         unsafe {
             if self.linked && !self.renamed {
-                libc::unlinkat(self.directory.as_raw_fd(), self.temporary.as_ptr(), 0);
+                // A replaced name is not our cleanup target. The directory
+                // policy in open_parent excludes replacement by another UID;
+                // this check also avoids deleting a deterministic same-UID
+                // collision that was installed before cleanup began.
+                let mut named: libc::stat = std::mem::zeroed();
+                if libc::fstatat(
+                    self.directory.as_raw_fd(),
+                    self.temporary.as_ptr(),
+                    &mut named,
+                    libc::AT_SYMLINK_NOFOLLOW,
+                ) == 0
+                    && named.st_dev == self.device
+                    && named.st_ino == self.inode
+                {
+                    libc::unlinkat(self.directory.as_raw_fd(), self.temporary.as_ptr(), 0);
+                }
             }
         }
     }
@@ -2224,6 +2241,8 @@ unsafe fn create_announced_named_history_temp(
             temporary,
             destination,
             fd,
+            device: stat.st_dev,
+            inode: stat.st_ino,
             link_fd: None,
             linked: true,
             renamed: false,
@@ -2292,6 +2311,8 @@ unsafe fn create_worker_history_temp(
             temporary,
             destination,
             fd,
+            device: stat.st_dev,
+            inode: stat.st_ino,
             link_fd: Some(OwnedFd::from_raw_fd(link_fd)),
             linked: false,
             renamed: false,
@@ -2332,6 +2353,8 @@ unsafe fn create_history_temp(path: *const libc::c_char) -> Option<HistoryTemp> 
             temporary,
             destination,
             fd,
+            device: stat.st_dev,
+            inode: stat.st_ino,
             link_fd: None,
             linked: true,
             renamed: false,
@@ -2406,6 +2429,19 @@ mod history_temp_tests {
         assert_eq!(unsafe { libc::close(temp.fd) }, 0);
         drop(temp);
         assert!(!transient.exists());
+
+        // A failed save may drop its temp after another process has replaced
+        // that name. Cleanup must leave the replacement inode alone.
+        let temp = unsafe { create_history_temp(path.as_ptr()) }.unwrap();
+        let transient = directory.join(std::ffi::OsStr::from_bytes(temp.temporary.as_bytes()));
+        let moved = directory.join("former-temp");
+        std::fs::rename(&transient, &moved).unwrap();
+        std::fs::write(&transient, b"unrelated").unwrap();
+        assert_eq!(unsafe { libc::close(temp.fd) }, 0);
+        drop(temp);
+        assert_eq!(std::fs::read(&transient).unwrap(), b"unrelated");
+        std::fs::remove_file(&transient).unwrap();
+        std::fs::remove_file(&moved).unwrap();
 
         std::fs::set_permissions(&directory, std::fs::Permissions::from_mode(0o777)).unwrap();
         assert!(unsafe { create_history_temp(path.as_ptr()) }.is_none());
