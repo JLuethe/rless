@@ -49,7 +49,7 @@ int openat(int directory, const char *path, int flags, ...)
     }
     int result = original(directory, path, flags, mode);
     if (getenv("RLESS_COLLISION_PROBE") && result == -1 && errno == EEXIST &&
-        path && strncmp(path, ".historyX.", 10) == 0 && (flags & O_EXCL)) {
+        strncmp(path, ".historyX.", 10) == 0 && (flags & O_EXCL)) {
         int saved = errno;
         mark("open-collision\n");
         (void)kill(getppid(), SIGTERM);
@@ -64,7 +64,7 @@ int fstatat(int directory, const char *path, struct stat *out, int flags)
     static int (*original)(int, const char *, struct stat *, int);
     if (!original) original = dlsym(RTLD_NEXT, "fstatat");
     int result = original(directory, path, out, flags);
-    if (getenv("RLESS_COLLISION_PROBE") && result == 0 && path &&
+    if (getenv("RLESS_COLLISION_PROBE") && result == 0 &&
         strncmp(path, ".historyX.", 10) == 0) mark("stat-collision\n");
     return result;
 }
