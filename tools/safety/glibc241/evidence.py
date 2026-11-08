@@ -16,6 +16,21 @@ from native_alloc import RUSTFLAGS as ALLOC_RUSTFLAGS, CFLAGS as ALLOC_CFLAGS, v
 
 PROCEDURE = 'REFERENCE-GLIBC-2.41-ASAN-OFFLINE-v1'
 
+# The pinned environment lock predates the GNU regex register probe. Retain
+# its original hash while requiring every added field and its exact value.
+REGEX_PROBE_EXTENSION = dict(
+    regs_fixed=2, regoff_bytes=4, registers_bytes=24,
+    registers_start_offset=8, registers_end_offset=16,
+    regs_flag_byte_offset=56, regs_fixed_mask=4,
+    fixed_register_probe=True,
+)
+
+
+def abi_probe_matches(actual, locked):
+    return (all(key not in locked or locked[key] == value
+                for key, value in REGEX_PROBE_EXTENSION.items())
+            and actual == {**locked, **REGEX_PROBE_EXTENSION})
+
 
 def require(condition, message):
     if not condition:
@@ -111,7 +126,7 @@ def validate_asan_report(path, root=ROOT):
     require(inner == outer['result'], 'altered nested report')
     require(inner['status'] == 'passed' and inner['procedure'] == PROCEDURE and
             inner['source_manifest_sha256'] == outer['source_manifest_sha256'], 'wrong inner snapshot/procedure')
-    require(inner['runtime'] == 'glibc 2.41' and inner['header_probe'] == lock['header_probe'], 'wrong runtime or ABI layout')
+    require(inner['runtime'] == 'glibc 2.41' and abi_probe_matches(inner['header_probe'], lock['header_probe']), 'wrong runtime or ABI layout')
     require(inner['instrumentation_scope'] == PINS['instrumentation_scope'], 'instrumentation scope changed')
     for name, digest in inner['environment_manifests'].items():
         file = checked(work / 'report' / name, digest)
@@ -313,7 +328,7 @@ def validate_native_report(path, root=ROOT):
     inner_path = checked(work / 'report/result.json', outer['inner_report_sha256'])
     inner = json.loads(inner_path.read_text())
     require(inner == outer['result'] and inner['status'] == 'passed' and inner['runtime'] == 'glibc 2.41'
-            and inner['header_probe'] == lock['header_probe'], 'native target identity mismatch')
+            and abi_probe_matches(inner['header_probe'], lock['header_probe']), 'native target identity mismatch')
     for target, digest in inner['evidence_files'].items():
         checked(work_path(target, work), digest)
     environment = json.loads((work / 'report/environment.json').read_text())
