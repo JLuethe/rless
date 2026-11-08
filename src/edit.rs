@@ -829,6 +829,7 @@ pub unsafe extern "C" fn close_pipe(mut pipefd: *mut FILE) {
         return;
     }
     status = rless_pclose_read(pipefd);
+    crate::filename::check_helper_close(status);
     if status == -1 as ::core::ffi::c_int {
         p = errno_message(b"pclose\0".as_ptr() as *const ::core::ffi::c_char);
         parg.p_string = p;

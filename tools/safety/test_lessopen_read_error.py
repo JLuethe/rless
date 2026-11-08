@@ -16,7 +16,7 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def observe(binary, library, mode, inject, empty=False):
+def observe(binary, library, mode, inject, empty=False, close_error=False):
     with tempfile.TemporaryDirectory(prefix="rless-lessopen-read-") as directory:
         root = Path(directory)
         original = root / "original"
@@ -50,6 +50,9 @@ def observe(binary, library, mode, inject, empty=False):
         }
         if inject:
             environment["LD_PRELOAD"] = str(library)
+        if close_error:
+            environment.pop("RLESS_LESSOPEN_READ_LENGTH")
+            environment["RLESS_LESSOPEN_CLOSE_ERROR"] = "1"
         result = subprocess.run(
             [str(binary), str(original)], env=environment, cwd=root,
             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -68,6 +71,7 @@ def main():
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--expect-vulnerable", action="store_true")
+    parser.add_argument("--expect-vulnerable-close", action="store_true")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="rless-lessopen-shim-") as directory:
@@ -94,10 +98,21 @@ def main():
             else:
                 passed &= fault["status"] == 1
                 passed &= "input preprocessor I/O error" in fault["stderr"]
+        close_fault = observe(binary, library, "pipe", True, close_error=True)
+        cases["pipe-close"] = close_fault
+        passed &= close_fault["ready"] and close_fault["hit"]
+        passed &= close_fault["stdout"].startswith("ALTERNATE\n")
+        passed &= "pclose: Input/output error" in close_fault["stdout"]
+        if args.expect_vulnerable or args.expect_vulnerable_close:
+            passed &= close_fault["status"] == 0
+        else:
+            passed &= close_fault["status"] == 1
+            passed &= "input preprocessor I/O error" in close_fault["stderr"]
         report = {
             "binary_sha256": sha(binary), "shim_source_sha256": sha(SOURCE),
             "shim_sha256": sha(library), "test_sha256": sha(Path(__file__)),
             "expect_vulnerable": args.expect_vulnerable,
+            "expect_vulnerable_close": args.expect_vulnerable_close,
             "cases": cases, "expected_observed": bool(passed),
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)

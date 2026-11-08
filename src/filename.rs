@@ -17,7 +17,7 @@ fn record_helper_io_failure() {
     }
 }
 
-unsafe fn check_helper_close(status: i32) {
+pub(crate) unsafe fn check_helper_close(status: i32) {
     if status == -1 && !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
         record_helper_io_failure();
     }
