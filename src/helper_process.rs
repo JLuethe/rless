@@ -606,10 +606,10 @@ pub unsafe extern "C" fn rless_pclose_read(stream: *mut libc::FILE) -> libc::c_i
     close_helper(stream, true)
 }
 
-// A retained LESSOPEN pipe has no consumer once its ifile is deleted. Cancel
-// the owned process group instead of waiting for a helper that may never end.
-#[no_mangle]
-pub unsafe extern "C" fn rless_pcancel_read(stream: *mut libc::FILE) -> libc::c_int {
+// A stream with no remaining consumer must cancel its owned process group.
+// Signal first so fclose cannot block flushing a write stream to a stalled
+// helper. The read variant is also used when deleting retained LESSOPEN input.
+unsafe fn cancel_helper(stream: *mut libc::FILE, read_mode: bool) -> libc::c_int {
     if stream.is_null() {
         set_error(libc::EINVAL);
         return -1;
@@ -620,16 +620,16 @@ pub unsafe extern "C" fn rless_pcancel_read(stream: *mut libc::FILE) -> libc::c_
     };
     let Some(index) = registry
         .iter()
-        .position(|entry| entry.stream == stream as usize && entry.read_mode)
+        .position(|entry| entry.stream == stream as usize && entry.read_mode == read_mode)
     else {
         set_error(libc::EINVAL);
         return -1;
     };
     let mut helper = registry.swap_remove(index);
     drop(registry);
+    signal_helper(&helper);
     let closed = libc::fclose(stream);
     let close_error = if closed != 0 { error() } else { 0 };
-    signal_helper(&helper);
     let reaped = reap_helper(&mut helper);
     drop(helper);
     if close_error != 0 {
@@ -641,6 +641,16 @@ pub unsafe extern "C" fn rless_pcancel_read(stream: *mut libc::FILE) -> libc::c_
         return -1;
     }
     0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn rless_pcancel_read(stream: *mut libc::FILE) -> libc::c_int {
+    cancel_helper(stream, true)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn rless_pcancel_write(stream: *mut libc::FILE) -> libc::c_int {
+    cancel_helper(stream, false)
 }
 
 #[no_mangle]

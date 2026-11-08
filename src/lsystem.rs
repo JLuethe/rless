@@ -27,6 +27,7 @@ extern "C" {
     fn putc(__c: ::core::ffi::c_int, __stream: *mut FILE) -> ::core::ffi::c_int;
     #[link_name = "rless_pclose_write"]
     fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_pcancel_write(__stream: *mut FILE) -> ::core::ffi::c_int;
     #[link_name = "rless_popen_write"]
     fn popen(
         __command: *const ::core::ffi::c_char,
@@ -723,7 +724,7 @@ unsafe extern "C" fn pipe_data(
         -1
     };
     if pipe_flags < 0 || libc::fcntl(pipe_fd, libc::F_SETFL, pipe_flags | libc::O_NONBLOCK) != 0 {
-        pclose(f);
+        rless_pcancel_write(f);
         record_pipe_io_error();
         error(
             lmsg(lessmsg_id::LM_Cannot_create_pipe),
@@ -745,7 +746,7 @@ unsafe extern "C" fn pipe_data(
     ignored_pipe.sa_sigaction = libc::SIG_IGN;
     libc::sigemptyset(&mut ignored_pipe.sa_mask);
     if libc::sigaction(libc::SIGPIPE, &ignored_pipe, &mut previous_pipe) != 0 {
-        pclose(f);
+        rless_pcancel_write(f);
         record_pipe_io_error();
         raw_mode(lbool::LTRUE);
         term_init();
