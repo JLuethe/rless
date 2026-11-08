@@ -116,6 +116,11 @@ int dup3(int source, int target, int flags)
     if (!real_call) _exit(125);
     int result = real_call(source, target, flags);
     if (result >= 0 && target >= 0 && target < 1024) {
+        /* The path-backed input worker moves its opened file to fd 5 before
+         * the binary probe. Keep the native read fault attached to that same
+         * file description after dup3 closes the old target. */
+        input_fds[target] = source == STDIN_FILENO ||
+            (source >= 0 && source < 1024 && input_fds[source]);
         int output = source == STDOUT_FILENO ||
             (source >= 0 && source < 1024 && output_fds[source]);
         if (!output && getpid() != initial_pid) {
