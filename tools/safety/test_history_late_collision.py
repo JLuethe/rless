@@ -27,6 +27,7 @@ def main():
     parser.add_argument("--binary", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expect-vulnerable", action="store_true")
+    parser.add_argument("--require-worker-exit", action="store_true")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="rless-history-late-") as directory:
@@ -73,6 +74,14 @@ def main():
                 pager.wait(timeout=4)
             except subprocess.TimeoutExpired:
                 pass
+            # The shim holds a worker inside openat after reporting EEXIST.
+            # Record its lifetime separately from the pathname-ownership check.
+            time.sleep(0.2)
+            try:
+                os.killpg(pager.pid, 0)
+                worker_group_gone = False
+            except ProcessLookupError:
+                worker_group_gone = True
             names = sorted(root.glob(".historyX.*"))
             markers = marker.read_text().splitlines() if marker.exists() else []
             report = {
@@ -84,9 +93,11 @@ def main():
                 "markers": markers,
                 "status": pager.poll(),
                 "terminal_restored": termios.tcgetattr(master) == original,
+                "worker_group_gone": worker_group_gone,
                 "remaining_temp_names": [p.name for p in names],
                 "remaining_contents": [p.read_bytes().decode("ascii", "replace") for p in names],
                 "expect_vulnerable": args.expect_vulnerable,
+                "require_worker_exit": args.require_worker_exit,
             }
             expected = (ready and "fallback" in markers and "late-created" in markers
                         and "open-collision" in markers and report["status"] == 15
@@ -95,14 +106,18 @@ def main():
                 expected &= names == []
             else:
                 expected &= (len(names) == 1 and report["remaining_contents"] == ["unrelated\n"])
+            if args.require_worker_exit:
+                expected &= worker_group_gone
             report["expected_observed"] = expected
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(json.dumps(report, indent=2) + "\n")
             print(json.dumps(report))
             return 0 if expected else 1
         finally:
-            if pager.poll() is None:
+            try:
                 os.killpg(pager.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
             pager.wait(timeout=2)
             os.close(master)
 
