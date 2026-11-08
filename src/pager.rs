@@ -993,6 +993,7 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
             || crate::ch::logfile_failed()
             || crate::ch::buffer_allocation_failed()
             || crate::ch::input_read_failed()
+            || crate::filename::helper_io_failed()
             || crate::lsystem::pipe_io_failed()
             || crate::cmdbuf::history_persistence_failed()
             || crate::screen::terminal_failed())

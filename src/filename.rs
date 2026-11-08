@@ -3,6 +3,25 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static HELPER_IO_FAILED: AtomicBool = AtomicBool::new(false);
+
+pub fn helper_io_failed() -> bool {
+    HELPER_IO_FAILED.load(Ordering::Relaxed)
+}
+
+fn record_helper_io_failure() {
+    if !HELPER_IO_FAILED.swap(true, Ordering::Relaxed) {
+        crate::output::io_error_diagnostic(b"rless: input preprocessor I/O error\n");
+    }
+}
+
+unsafe fn check_helper_close(status: i32) {
+    if status == -1 && !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+        record_helper_io_failure();
+    }
+}
 extern "C" {
     fn sprintf(
         __s: *mut ::core::ffi::c_char,
@@ -990,6 +1009,7 @@ pub unsafe extern "C" fn readfd(mut fd: *mut FILE) -> *mut ::core::ffi::c_char {
     xbuf_init(&raw mut xbuf);
     let input = rless_helper_fd(fd);
     if input < 0 {
+        record_helper_io_failure();
         xbuf_deinit(&raw mut xbuf);
         return ::core::ptr::null_mut();
     }
@@ -1001,6 +1021,9 @@ pub unsafe extern "C" fn readfd(mut fd: *mut FILE) -> *mut ::core::ffi::c_char {
             continue;
         }
         if read < 0 {
+            if read == -1 {
+                record_helper_io_failure();
+            }
             xbuf_deinit(&raw mut xbuf);
             return ::core::ptr::null_mut();
         }
@@ -1124,7 +1147,7 @@ pub unsafe extern "C" fn lglob(
         return filename;
     }
     gfilename = readfd(fd);
-    rless_pclose_read(fd);
+    check_helper_close(rless_pclose_read(fd));
     if gfilename.is_null() {
         return filename;
     }
@@ -1248,6 +1271,10 @@ pub unsafe extern "C" fn open_altfile(
         };
         if first_byte != 1 as ssize_t {
             let mut status: ::core::ffi::c_int = rless_pclose_read(fd);
+            if first_byte == -1 {
+                record_helper_io_failure();
+            }
+            check_helper_close(status);
             if returnfd > 1 as ::core::ffi::c_int && status == 0 as ::core::ffi::c_int {
                 *pfd = ::core::ptr::null_mut::<FILE>();
                 *pf = -1 as ::core::ffi::c_int;
@@ -1263,7 +1290,7 @@ pub unsafe extern "C" fn open_altfile(
         return save(b"-\0".as_ptr() as *const ::core::ffi::c_char);
     }
     cmd = readfd(fd);
-    rless_pclose_read(fd);
+    check_helper_close(rless_pclose_read(fd));
     if cmd.is_null() {
         return ::core::ptr::null_mut();
     }
@@ -1320,7 +1347,7 @@ pub unsafe extern "C" fn close_altfile(
     fd = shellcmd(cmd);
     free(cmd as *mut ::core::ffi::c_void);
     if !fd.is_null() {
-        rless_pclose_read(fd);
+        check_helper_close(rless_pclose_read(fd));
     }
 }
 #[no_mangle]
