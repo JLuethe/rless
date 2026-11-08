@@ -512,7 +512,17 @@ unsafe fn send(worker: &mut Worker, request: Request) -> Result<(), i32> {
         } else {
             scratch.as_mut_ptr()
         };
-        let reply = receive(worker.socket.as_raw_fd(), worker.pending, output, capacity)?;
+        let reply = match receive(worker.socket.as_raw_fd(), worker.pending, output, capacity) {
+            Ok(reply) => reply,
+            Err(libc::EINTR) if pending.command == READ && worker.regular => {
+                // A stat or seek may be the first request after a terminal
+                // key was noticed during a blocked read. Retire the pending
+                // worker before the next operation tries to drain it again.
+                worker.restart_read = true;
+                return Err(libc::EINTR);
+            }
+            Err(error) => return Err(error),
+        };
         worker.pending = None;
         if reply.error != 0 {
             return Err(reply.error);
