@@ -245,6 +245,16 @@ def require_observation(actual, expected, trace, site, ordinal=1):
         raise ValueError('wrong status, terminal state, screen, bells or file effects')
 
 
+def resource_members(checkpoint, allow_input_switch=False):
+    """Normalize only the identities that change on a managed worker restart."""
+    descriptors = checkpoint['descriptors']
+    return sorted(
+        '{INPUT}' if allow_input_switch and name in ('{ROOT}/i', '{ROOT}/j')
+        else '{INPUT_SOCKET}' if name.startswith('socket:[')
+        else name for name in descriptors
+    )
+
+
 def resource_identity(checkpoint, allow_input_switch=False):
     """Keep descriptor kinds and multiplicity across managed worker restarts."""
     descriptors = checkpoint['descriptors']
@@ -252,11 +262,7 @@ def resource_identity(checkpoint, allow_input_switch=False):
         raise ValueError('expected one input-worker and one output-worker socket')
     if descriptors.count('anon_inode:[pidfd]') != 2:
         raise ValueError('expected two managed worker pidfds')
-    return sorted(
-        '{INPUT}' if allow_input_switch and name in ('{ROOT}/i', '{ROOT}/j')
-        else '{INPUT_SOCKET}' if name.startswith('socket:[')
-        else name for name in descriptors
-    )
+    return resource_members(checkpoint, allow_input_switch)
 
 
 def input_worker_children(checkpoint):
@@ -763,11 +769,26 @@ class ActualFaultPaths(unittest.TestCase):
                 self.assertEqual(observed['status'], 0)
                 self.assertTrue(observed['termios_restored'])
                 self.assertGreaterEqual(len(observed['resource_checkpoints']), REPETITIONS + 1)
-                for checkpoint in observed['resource_checkpoints']:
-                    self.assertEqual(len(checkpoint['descriptors']), expected_count)
+                checkpoints = observed['resource_checkpoints']
+                stable = resource_identity(checkpoints[0], site == 'close')
+                overlap = sorted([*stable, '{INPUT_SOCKET}', 'anon_inode:[pidfd]'])
+                for index, checkpoint in enumerate(checkpoints):
                     self.assertTrue(input_worker_children(checkpoint))
-                    self.assertEqual(resource_identity(checkpoint, site == 'close'),
-                                     resource_identity(observed['resource_checkpoints'][0], site == 'close'))
+                    members = resource_members(checkpoint, site == 'close')
+                    if members == stable:
+                        self.assertEqual(len(checkpoint['descriptors']), expected_count)
+                        continue
+                    # READY can be rendered while a previous file worker's
+                    # pidfd and socket are being retired. Permit exactly one
+                    # extra pair only between two fully settled checkpoints;
+                    # a persistent or accumulating worker still fails.
+                    self.assertEqual(members, overlap)
+                    self.assertGreater(index, 0)
+                    self.assertLess(index + 1, len(checkpoints))
+                    self.assertEqual(
+                        resource_identity(checkpoints[index - 1], site == 'close'), stable)
+                    self.assertEqual(
+                        resource_identity(checkpoints[index + 1], site == 'close'), stable)
 
     def test_callback_startup_failure_preserves_later_session_lifecycle(self):
         # cost() runs during terminal setup, before the first input barrier.
