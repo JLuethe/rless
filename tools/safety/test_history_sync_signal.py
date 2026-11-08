@@ -33,7 +33,7 @@ def alive(pid: int) -> bool:
 
 
 def observe(binary: Path, library: Path, mode: str, stage: str, delivery: str,
-            signal_group: bool, no_tmpfile: bool) -> dict:
+            signal_group: bool, no_tmpfile: bool, pager_umask: int | None) -> dict:
     with tempfile.TemporaryDirectory(prefix="rless-history-sync-") as directory:
         root = Path(directory)
         source = root / "input"
@@ -56,6 +56,7 @@ def observe(binary: Path, library: Path, mode: str, stage: str, delivery: str,
         pager = subprocess.Popen(
             argv, stdin=slave, stdout=slave, stderr=slave,
             start_new_session=True, close_fds=True, env=env,
+            preexec_fn=(lambda: os.umask(pager_umask)) if pager_umask is not None else None,
         )
         os.close(slave)
         try:
@@ -150,6 +151,8 @@ def main() -> int:
     parser.add_argument("--rounds", type=int, default=1)
     parser.add_argument("--signal-group", action="store_true")
     parser.add_argument("--no-tmpfile", action="store_true")
+    parser.add_argument("--pager-umask", type=lambda value: int(value, 8),
+                        help="optional octal umask for the pager child")
     parser.add_argument("--expect-blocked", action="store_true")
     parser.add_argument("--expect-restored-block", action="store_true")
     args = parser.parse_args()
@@ -170,7 +173,7 @@ def main() -> int:
             check=True, capture_output=True,
         )
         cases = [observe(binary, library, args.mode, args.stage, args.signal,
-                         args.signal_group, args.no_tmpfile)
+                         args.signal_group, args.no_tmpfile, args.pager_umask)
                  for _ in range(args.rounds)]
     def valid(case: dict) -> bool:
         if args.expect_blocked:
@@ -197,6 +200,7 @@ def main() -> int:
     result = {"binary_sha256": sha(binary), "shim_sha256": sha(SHIM),
               "mode": args.mode, "stage": args.stage, "signal": args.signal,
               "signal_group": args.signal_group, "no_tmpfile": args.no_tmpfile,
+              "pager_umask": args.pager_umask,
               "expect_blocked": args.expect_blocked,
               "expect_restored_block": args.expect_restored_block,
               "cases": cases, "passed_count": passed_count, "rounds": args.rounds,

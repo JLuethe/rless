@@ -55,6 +55,10 @@ pub(crate) struct Report {
 struct Temp {
     directory: OwnedFd,
     file: Option<OwnedFd>,
+    // PREPARE-only cancellation may catch the worker after openat installed
+    // its fd but before it could send TEMP. Parent-owned pidfd_getfd copies
+    // let the cleanup child prove inode ownership before unlinking.
+    candidates: Vec<OwnedFd>,
     name: CString,
     destination: CString,
     renamed: bool,
@@ -265,27 +269,63 @@ unsafe fn verify_commit(temp: &Temp) -> Result<bool, libc::c_int> {
 }
 
 unsafe fn cleanup_child(temp: &Temp, pending_pidfd: Option<libc::c_int>) -> ! {
+    // A PREPARE-only name is not an ownership proof. Check duplicated worker
+    // fds while they still pin their inodes; a colliding entry with no matching
+    // fd must be left alone. A worker still inside openat will clean its own
+    // eventual create after the parent closes the protocol socket.
+    let prepared_file = if temp.file.is_none() {
+        let mut named: libc::stat = std::mem::zeroed();
+        if libc::fstatat(
+            temp.directory.as_raw_fd(),
+            temp.name.as_ptr(),
+            &mut named,
+            libc::AT_SYMLINK_NOFOLLOW,
+        ) != 0
+        {
+            libc::_exit(if *libc::__errno_location() == libc::ENOENT {
+                0
+            } else {
+                2
+            });
+        }
+        temp.candidates.iter().find_map(|candidate| {
+            let mut source: libc::stat = std::mem::zeroed();
+            if libc::fstat(candidate.as_raw_fd(), &mut source) == 0
+                && source.st_dev == named.st_dev
+                && source.st_ino == named.st_ino
+                && source.st_mode & libc::S_IFMT == libc::S_IFREG
+                // The worker may be stalled before its fchmod(0600). The
+                // initial open mode is 0600 reduced by the caller's umask.
+                && source.st_mode & 0o7777 & !0o600 == 0
+                && source.st_uid == libc::geteuid()
+                && source.st_nlink == 1
+            {
+                Some(candidate.as_raw_fd())
+            } else {
+                None
+            }
+        })
+    } else {
+        None
+    };
+    let source_fd = temp.file.as_ref().map(AsRawFd::as_raw_fd).or(prepared_file);
+    let Some(source_fd) = source_fd else {
+        libc::_exit(0);
+    };
     // Keep only the verified file and pinned directory. This worker may remain
     // in a kernel filesystem wait after the pager exits.
     let source_dir = libc::fcntl(temp.directory.as_raw_fd(), libc::F_DUPFD_CLOEXEC, 16);
-    let source_file = temp
-        .file
-        .as_ref()
-        .map(|file| libc::fcntl(file.as_raw_fd(), libc::F_DUPFD_CLOEXEC, 16));
+    let source_file = libc::fcntl(source_fd, libc::F_DUPFD_CLOEXEC, 16);
     let source_pending = pending_pidfd.map(|fd| libc::fcntl(fd, libc::F_DUPFD_CLOEXEC, 16));
     if source_dir < 0
-        || source_file.is_some_and(|fd| fd < 0)
+        || source_file < 0
         || source_pending.is_some_and(|fd| fd < 0)
         || libc::dup3(source_dir, 3, libc::O_CLOEXEC) < 0
     {
         libc::_exit(2);
     }
-    if let Some(fd) = source_file {
-        if libc::dup3(fd, 4, libc::O_CLOEXEC) < 0 {
-            libc::_exit(2);
-        }
-    } else {
-        libc::close(4);
+    if libc::dup3(source_file, 4, libc::O_CLOEXEC) < 0 {
+        libc::_exit(2);
     }
     if let Some(fd) = source_pending {
         if libc::dup3(fd, 5, libc::O_CLOEXEC) < 0 {
@@ -300,6 +340,21 @@ unsafe fn cleanup_child(temp: &Temp, pending_pidfd: Option<libc::c_int>) -> ! {
     libc::close(0);
     libc::close(1);
     libc::close(2);
+    if temp.file.is_none() && source_pending.is_some() {
+        // The proof pins the exact inode, so the worker may now be killed even
+        // if a test or hostile helper stalls after openat returned its fd.
+        if libc::syscall(
+            libc::SYS_pidfd_send_signal,
+            5,
+            libc::SIGKILL,
+            std::ptr::null::<libc::siginfo_t>(),
+            0,
+        ) != 0
+            && *libc::__errno_location() != libc::ESRCH
+        {
+            libc::_exit(2);
+        }
+    }
     if source_pending.is_some() {
         // A killed worker can finish a stalled openat *after* an early cleanup
         // check. Wait for its pidfd to become terminal before inspecting the
@@ -325,7 +380,7 @@ unsafe fn cleanup_child(temp: &Temp, pending_pidfd: Option<libc::c_int>) -> ! {
     }
     let mut original: libc::stat = std::mem::zeroed();
     let mut named: libc::stat = std::mem::zeroed();
-    if source_file.is_some() && libc::fstat(4, &mut original) != 0 {
+    if libc::fstat(4, &mut original) != 0 {
         libc::_exit(2);
     }
     if libc::fstatat(3, temp.name.as_ptr(), &mut named, libc::AT_SYMLINK_NOFOLLOW) != 0 {
@@ -335,17 +390,7 @@ unsafe fn cleanup_child(temp: &Temp, pending_pidfd: Option<libc::c_int>) -> ! {
             2
         });
     }
-    let owned = if source_file.is_some() {
-        original.st_dev == named.st_dev && original.st_ino == named.st_ino
-    } else {
-        // PREPARE may precede an openat that was killed before TEMP arrived.
-        // The random name is known, but the inode is not. Never remove a
-        // symlink, hard link, or another user's entry in a sticky directory.
-        named.st_mode & libc::S_IFMT == libc::S_IFREG
-            && named.st_mode & 0o7177 == 0
-            && named.st_uid == libc::geteuid()
-            && named.st_nlink == 1
-    };
+    let owned = original.st_dev == named.st_dev && original.st_ino == named.st_ino;
     if !owned {
         libc::_exit(2);
     }
@@ -460,6 +505,7 @@ impl Worker {
                             self.temp = Some(Temp {
                                 directory,
                                 file: None,
+                                candidates: Vec::new(),
                                 name,
                                 destination,
                                 renamed: false,
@@ -473,6 +519,7 @@ impl Worker {
                             self.temp = Some(Temp {
                                 directory,
                                 file: Some(file),
+                                candidates: Vec::new(),
                                 name,
                                 destination,
                                 renamed: false,
@@ -496,6 +543,38 @@ impl Worker {
         let Some(pidfd) = self.pidfd.take() else {
             return None;
         };
+        if self.temp.as_ref().is_some_and(|temp| temp.file.is_none()) {
+            // PREPARE says only which name the worker might create; it does
+            // not prove ownership. Duplicate every small, currently open
+            // worker fd while this process still has parent ptrace rights.
+            // The cleanup child later compares each against the named inode.
+            let mut candidates = Vec::new();
+            if candidates.try_reserve_exact(16).is_ok() {
+                for target_fd in 0..16 {
+                    let copied =
+                        libc::syscall(libc::SYS_pidfd_getfd, pidfd.as_raw_fd(), target_fd, 0);
+                    if copied >= 0 {
+                        candidates.push(OwnedFd::from_raw_fd(copied as libc::c_int));
+                    } else if matches!(*libc::__errno_location(), libc::EPERM | libc::ENOSYS) {
+                        break;
+                    }
+                }
+            }
+            self.temp.as_mut().unwrap().candidates = candidates;
+            // With no ownership witness, keep the worker alive: after a
+            // delayed open it sees the closed socket and unlinks its own temp.
+            let _ = libc::shutdown(self.socket.as_raw_fd(), libc::SHUT_RDWR);
+            if !exited(pidfd.as_raw_fd(), 100) {
+                let raw = pidfd.as_raw_fd();
+                let mut slot = ABANDONED.lock().unwrap_or_else(|_| libc::_exit(1));
+                if slot.is_some() {
+                    libc::_exit(1);
+                }
+                *slot = Some(pidfd);
+                return Some(raw);
+            }
+            return None;
+        }
         let _ = libc::syscall(
             libc::SYS_pidfd_send_signal,
             pidfd.as_raw_fd(),
@@ -519,6 +598,9 @@ impl Worker {
         let Some(temp) = self.temp.take() else {
             return;
         };
+        if temp.file.is_none() && temp.candidates.is_empty() {
+            return;
+        }
         start_cleanup(temp, pending_pidfd);
     }
 }
@@ -638,7 +720,7 @@ unsafe fn child(
     if flags < 0 || libc::fcntl(3, libc::F_SETFL, flags & !libc::O_NONBLOCK) != 0 {
         libc::_exit(2);
     }
-    let code = crate::cmdbuf::save_cmdhist_worker(3);
+    let code = crate::cmdbuf::save_cmdhist_worker(3, parent_pid);
     let _ = send_packet(3, &Packet::new(DONE, code), None);
     libc::_exit(0)
 }
@@ -873,6 +955,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                 worker.temp = Some(Temp {
                     directory,
                     file: None,
+                    candidates: Vec::new(),
                     name,
                     destination,
                     renamed: false,
@@ -894,6 +977,7 @@ pub(crate) unsafe fn run_save() -> Result<Report, libc::c_int> {
                 worker.temp = Some(Temp {
                     directory,
                     file: Some(file),
+                    candidates: Vec::new(),
                     name,
                     destination,
                     renamed: false,

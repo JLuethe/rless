@@ -2156,7 +2156,15 @@ unsafe fn create_announced_named_history_temp(
     directory: OwnedFd,
     destination: CString,
     socket: libc::c_int,
+    parent_pid: libc::pid_t,
 ) -> Option<HistoryTemp> {
+    // A PREPARE packet cannot prove that a later exclusive open created the
+    // named inode. Keep this worker alive through the open: if the pager
+    // cancels, closing its socket makes the worker remove only an inode it
+    // actually opened. The pager never unlinks a PREPARE-only name.
+    if libc::prctl(libc::PR_SET_PDEATHSIG, 0) != 0 || libc::getppid() != parent_pid {
+        return None;
+    }
     for _ in 0..8 {
         let temporary = random_history_name(destination.as_bytes())?;
         // PREPARE lets the parent remove a file created by an openat that
@@ -2230,6 +2238,13 @@ unsafe fn create_announced_named_history_temp(
             libc::close(temp.fd);
             return None;
         }
+        // Once the parent has the opened inode, restore the death signal so
+        // later writes and rename cannot continue after the pager exits.
+        if libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL) != 0 || libc::getppid() != parent_pid
+        {
+            libc::close(temp.fd);
+            return None;
+        }
         return Some(temp);
     }
     None
@@ -2238,6 +2253,7 @@ unsafe fn create_announced_named_history_temp(
 unsafe fn create_worker_history_temp(
     path: *const libc::c_char,
     socket: libc::c_int,
+    parent_pid: libc::pid_t,
 ) -> Option<(HistoryTemp, bool)> {
     let (directory, destination) = crate::secure_path::open_parent(path).ok()?;
     let temporary = random_history_name(destination.as_bytes())?;
@@ -2251,7 +2267,7 @@ unsafe fn create_worker_history_temp(
         0o600,
     );
     if fd < 0 {
-        return create_announced_named_history_temp(directory, destination, socket)
+        return create_announced_named_history_temp(directory, destination, socket, parent_pid)
             .map(|temp| (temp, true));
     }
     let mut stat: libc::stat = std::mem::zeroed();
@@ -2462,7 +2478,7 @@ pub unsafe extern "C" fn save_cmdhist() {
     }
 }
 
-pub(crate) unsafe fn save_cmdhist_worker(socket: libc::c_int) -> u8 {
+pub(crate) unsafe fn save_cmdhist_worker(socket: libc::c_int, parent_pid: libc::pid_t) -> u8 {
     let mut histname: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut skip_search: ::core::ffi::c_int = 0;
     let mut skip_shell: ::core::ffi::c_int = 0;
@@ -2476,7 +2492,8 @@ pub(crate) unsafe fn save_cmdhist_worker(socket: libc::c_int) -> u8 {
     if histname.is_null() {
         return crate::history_worker::RESULT_SKIPPED;
     }
-    let Some((mut history_temp, already_announced)) = create_worker_history_temp(histname, socket)
+    let Some((mut history_temp, already_announced)) =
+        create_worker_history_temp(histname, socket, parent_pid)
     else {
         free(histname as *mut ::core::ffi::c_void);
         return crate::history_worker::RESULT_FAILED;
