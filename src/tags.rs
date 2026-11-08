@@ -20,6 +20,7 @@ extern "C" {
     ) -> ::core::ffi::c_int;
     #[link_name = "rless_pclose_read"]
     fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_pcancel_read(__stream: *mut FILE) -> ::core::ffi::c_int;
     #[link_name = "rless_popen_read"]
     fn popen(
         __command: *const ::core::ffi::c_char,
@@ -936,6 +937,7 @@ unsafe extern "C" fn findgtag(
     let mut buf: [::core::ffi::c_char; 1024] = [0; 1024];
     let mut fp: *mut FILE = ::core::ptr::null_mut::<FILE>();
     let mut tp: *mut tag = ::core::ptr::null_mut::<tag>();
+    let mut malformed = false;
     if r#type != C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int && tag.is_null() {
         return tag_result::TAG_NOFILE;
     }
@@ -1057,6 +1059,7 @@ unsafe extern "C" fn findgtag(
                 &raw mut line,
             ) != 0
             {
+                malformed = true;
                 break;
             }
             tp = maketagent(
@@ -1078,7 +1081,15 @@ unsafe extern "C" fn findgtag(
                 return tag_result::TAG_NOFILE;
             }
         } else {
-            if pclose(fp) != 0 || read_failed {
+            // The parser has stopped consuming this helper. Waiting for a
+            // malformed or failed provider to exit can block forever even
+            // though its output is no longer useful.
+            let close_status = if malformed || read_failed {
+                rless_pcancel_read(fp)
+            } else {
+                pclose(fp)
+            };
+            if close_status != 0 || read_failed {
                 cleantags();
                 return tag_result::TAG_NOFILE;
             }
