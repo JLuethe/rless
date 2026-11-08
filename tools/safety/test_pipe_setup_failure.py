@@ -56,10 +56,23 @@ def observe(binary: Path, library: Path, failure: str) -> dict:
                 if ready:
                     output.extend(os.read(master, 65536))
             hit = trace.exists() and trace.read_bytes() == b"hit\n"
-            if hit and pager.poll() is None:
-                os.write(master, b"\nq")
+            diagnostic = (b"Cannot create pipe" if failure == "bad_fd"
+                          else b"cannot ignore SIGPIPE for pipe")
+            # The injection marker precedes the error prompt. Sending q at
+            # that marker can be consumed by the prompt rather than by the
+            # resumed command loop, especially in the optimized build.
+            sent_return = False
+            next_quit = 0.0
             deadline = time.monotonic() + 2
             while pager.poll() is None and time.monotonic() < deadline:
+                if hit and diagnostic in output:
+                    if not sent_return:
+                        os.write(master, b"\n")
+                        sent_return = True
+                        next_quit = time.monotonic() + 0.05
+                    elif time.monotonic() >= next_quit:
+                        os.write(master, b"q")
+                        next_quit = time.monotonic() + 0.15
                 ready, _, _ = select.select([master], [], [], 0.05)
                 if ready:
                     try:
@@ -71,8 +84,7 @@ def observe(binary: Path, library: Path, failure: str) -> dict:
                 "status": pager.poll(),
                 "stalled_after_setup_failure": hit and pager.poll() is None,
                 "terminal_restored": termios.tcgetattr(master) == original,
-                "diagnostic": (b"Cannot create pipe" if failure == "bad_fd"
-                               else b"cannot ignore SIGPIPE for pipe") in output,
+                "diagnostic": diagnostic in output,
                 "output_tail": bytes(output[-400:]).decode("latin-1"),
             }
         finally:
