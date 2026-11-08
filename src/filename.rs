@@ -893,6 +893,14 @@ pub unsafe extern "C" fn bin_file(mut f: ::core::ffi::c_int, mut n: *mut ssize_t
     let mut edata: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let umax: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
     if seekable(f).0 == 0 {
+        let failure = *libc::__errno_location();
+        if !matches!(
+            failure,
+            libc::ESPIPE | libc::EINVAL | libc::EINTR | libc::EAGAIN
+        ) {
+            crate::ch::mark_input_probe_failed();
+            crate::output::io_error_diagnostic(b"rless: seek error\n");
+        }
         return lbool::LFALSE;
     }
     if crate::input_worker::seek_or_native(
@@ -901,6 +909,10 @@ pub unsafe extern "C" fn bin_file(mut f: ::core::ffi::c_int, mut n: *mut ssize_t
         0 as ::core::ffi::c_int,
     ) == -1 as ::core::ffi::c_int as off_t
     {
+        if !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+            crate::ch::mark_input_probe_failed();
+            crate::output::io_error_diagnostic(b"rless: seek error\n");
+        }
         return lbool::LFALSE;
     }
     // This probe happens before ch_init and can stall after a regular file

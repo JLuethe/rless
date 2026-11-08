@@ -667,6 +667,9 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                     if crate::input_worker::seek_or_native((*thisfile).file, pos, 0)
                         == -1 as ::core::ffi::c_int as off_t
                     {
+                        if !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+                            mark_input_probe_failed();
+                        }
                         error(
                             lmsg(lessmsg_id::LM_seek_error),
                             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
@@ -1142,6 +1145,9 @@ pub unsafe extern "C" fn ch_flush() {
         0 as ::core::ffi::c_int,
     ) == -1 as ::core::ffi::c_int as off_t
     {
+        if !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+            mark_input_probe_failed();
+        }
         error(
             lmsg(lessmsg_id::LM_seek_error_to_0),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
