@@ -219,18 +219,37 @@ class RetainedFaultOracleControls(unittest.TestCase):
             self.validate(report, [selector])
 
     def test_resource_conservation_requires_live_comparable_checkpoints(self):
-        checkpoints = [dict(descriptors=['/dev/pts/fixture', '/dev/pts/fixture', '/input/i'], children=[])
+        workers = ['101', '102']  # the live input and output workers
+        worker_fds = ['socket:[11]', 'socket:[12]', 'anon_inode:[pidfd]', 'anon_inode:[pidfd]']
+        checkpoints = [dict(descriptors=['/dev/pts/fixture', '/dev/pts/fixture', '/input/i', *worker_fds],
+                            children=list(workers))
                        for _ in range(3)]
         observation = dict(kind='pty', status=0, termios_restored=True, trace_hex='', resources=checkpoints)
         report, selector = self.retained_control(
             'test_repeated_file_and_child_failures_conserve_live_process_resources', observation)
         self.assertEqual(self.validate(report, [selector]), {selector: []})
-        invalid = [None, [], checkpoints[:1],
-                   [checkpoints[0], dict(descriptors=[], children=[])],
-                   [checkpoints[0], dict(descriptors=[42, '/input/i', '/dev/pts/fixture'], children=[])],
-                   [checkpoints[0], dict(descriptors=['/input/i'], children=[])],
-                   [checkpoints[0], dict(descriptors=checkpoints[0]['descriptors'], children=['12345'])],
-                   [checkpoints[0], dict(descriptors=checkpoints[0]['descriptors'])]]
+        descriptors = checkpoints[0]['descriptors']
+        # The validator requires 2 * repetitions + 1 checkpoints. Each negative keeps
+        # that many, so it reaches the check it targets rather than the count check.
+        def last(**changed):
+            return [*checkpoints[:2], dict(dict(descriptors=descriptors, children=list(workers)), **changed)]
+        def every(**changed):
+            return [dict(dict(descriptors=descriptors, children=list(workers)), **changed) for _ in checkpoints]
+        one_socket = [*descriptors[:3], 'socket:[11]', '/input/x', *worker_fds[2:]]
+        one_pidfd = [*descriptors[:3], *worker_fds[:3], '/input/x']
+        invalid = [None, [], checkpoints[:1], checkpoints[:2],
+                   last(descriptors=[]),
+                   last(descriptors=[42, *descriptors[1:]]),
+                   last(descriptors=descriptors[1:]),
+                   last(descriptors=['/dev/pts/fixture', '/dev/pts/fixture', '/other', *worker_fds]),
+                   every(descriptors=one_socket),
+                   every(descriptors=one_pidfd),
+                   last(children=workers + ['12345']),
+                   last(children=['101']),
+                   last(children=['101', '101']),
+                   last(children=['101', 'worker']),
+                   last(children=[]),
+                   [*checkpoints[:2], dict(descriptors=descriptors)]]
         for resources in invalid:
             changed = copy.deepcopy(report)
             changed['records'][0]['observations'][0]['resources'] = resources
@@ -242,11 +261,14 @@ class RetainedFaultOracleControls(unittest.TestCase):
 
     def test_failed_extra_observation_cannot_hide_behind_a_good_checkpoint(self):
         good = dict(kind='pty', status=0, termios_restored=True, trace_hex='',
-                    resources=[dict(descriptors=['/input/i'], children=[]) for _ in range(3)])
+                    resources=[dict(descriptors=['/input/i', 'socket:[11]', 'socket:[12]',
+                                                 'anon_inode:[pidfd]', 'anon_inode:[pidfd]'],
+                                    children=['101', '102']) for _ in range(3)])
         report, selector = self.retained_control(
             'test_repeated_file_and_child_failures_conserve_live_process_resources', good)
+        self.assertEqual(self.validate(report, [selector]), {selector: []})
         bad = copy.deepcopy(good)
-        bad['resources'][-1]['children'] = ['12345']
+        bad['resources'][-1]['children'] = ['101', '102', '12345']
         report['records'][0]['observations'][1] = bad
         with self.assertRaises(ValueError):
             self.validate(report, [selector])
