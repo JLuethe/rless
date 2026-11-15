@@ -30,7 +30,8 @@ int close(int fd)
                 atomic_exchange(&fired, 1) == 0) {
                 int marker = open(hit, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
                 if (marker >= 0) {
-                    (void)write(marker, "hit\n", 4);
+                    ssize_t written = write(marker, "hit\n", 4);
+                    (void)written;
                     (void)original(marker);
                 }
                 (void)original(fd);
@@ -57,7 +58,8 @@ ssize_t read(int fd, void *buffer, size_t size)
             atomic_exchange(&fired, 1) == 0) {
             int marker = open(hit, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
             if (marker >= 0) {
-                (void)write(marker, "hit\n", 4);
+                ssize_t written = write(marker, "hit\n", 4);
+                (void)written;
                 (void)close(marker);
             }
             errno = EIO;
