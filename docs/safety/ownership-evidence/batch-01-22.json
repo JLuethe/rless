@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:32d990e92d0b2864925d8413",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/help.rs"
+    ],
+    "symbol": "helpdata",
+    "context": "",
+    "declared_type": "[:: core :: ffi :: c_char ; 17587]",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "helpdata directly owns a statically typed 17587-byte array including its final NUL; no allocation creates its backing store.",
+      "invariant": "Help backing storage is a fixed static byte array.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17589,
+          "end_line": 17600,
+          "excerpt_sha256": "5d24005208381bd1eff9a716e629432398985f8d3e1d35e6197a390744a778b3"
+        }
+      ],
+      "limitations": [
+        "helpdata owns the image literal, not translated help_data replacements."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "lmsg.rs:2591 borrows helpdata's address as help_data only with owned_help false; ch.rs:659 reads the selected help owner through that alias.",
+      "invariant": "The static backing array is borrowed, never transferred.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2592,
+          "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 653,
+          "end_line": 661,
+          "excerpt_sha256": "5ddc7a4a8ab22fb170a71950db22e2b55ad0459b1a97d5e569d2c9d3bb318441"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2591,
+          "end_line": 2591,
+          "excerpt_sha256": "42aa254c7937734afe6703df8c472ef85ed410bfb43285a14ac6a4202f37c9e4"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 659,
+          "end_line": 659,
+          "excerpt_sha256": "3316bd79733b437a655440fa84807a25e4739eb695f71b8b76676b12dacdc3d2"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews.",
+        "Retained help input must borrow whichever help_data owner is currently selected."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The helpdata array stores text only; its neighboring initializer callback sets size_helpdata and does not call through help bytes.",
+      "invariant": "Help byte content is never a function pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": [
+        "The size initializer does not mutate literal help bytes."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Selecting translated help changes help_data rather than helpdata; the default backing array remains at its image address.",
+      "invariant": "Help replacement does not invalidate the default array.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2554,
+          "end_line": 2561,
+          "excerpt_sha256": "edc414461af9bdf0009705cdb0e45860f4da40e7fbdb6210aff04a6a3122f8fd"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The literal initializes every byte before startup; the size initializer publishes 17586 payload bytes excluding helpdata's final NUL.",
+      "invariant": "Reported default length excludes exactly the terminator.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17589,
+          "end_line": 17600,
+          "excerpt_sha256": "5d24005208381bd1eff9a716e629432398985f8d3e1d35e6197a390744a778b3"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "lmsg distinguishes owned allocated help from this default; free(help_data) is guarded by owned_help before resetting to helpdata.",
+      "invariant": "Default help image storage must never be heap-freed.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2592,
+          "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
+        }
+      ],
+      "limitations": [
+        "Only owned_help replacements may be freed; the literal must survive unchanged."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "The literal initializer cannot allocate or fail; failed translated-message loading can retain/reset this static fallback without allocating helpdata.",
+      "invariant": "Default-help fallback needs no allocation rollback.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17600,
+          "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2604,
+          "excerpt_sha256": "54da7ee962440ab1785745fd8ca3afc880a1b5074db5170715f2ca21c122f8b1"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "No maintained code writes the helpdata byte array after initialization; signal consumers can only observe this stable image through aliases.",
+      "invariant": "This review assumes the maintained read-only use pattern.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17605,
+          "excerpt_sha256": "4a8c3983c776acff3e6bc5b74143e070b5f1e3df4afcb1081a142946b42b0eb4"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {
+    "src/lmsg.rs": {
+      "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+      "relationship": "Message installation at src/lmsg.rs:2554-2561 may free owned_help and replace help_data; initialization at src/lmsg.rs:2587-2592 restores the helpdata image alias. The literal stays separate from owned translations."
+    },
+    "src/ch.rs": {
+      "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+      "relationship": "The help-input branch at src/ch.rs:653-661 returns bytes from selected help_data. It borrows helpdata only while the message subsystem still selects the default image."
+    }
+  },
+  "finding_context": {}
+}

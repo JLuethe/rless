@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:5800902cd412bafa331c8c66",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "num_metachars",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The num_metachars private c_int owns the number of initialized metacharacter bytes, zero initially and incremented after capacity selection.",
+      "invariant": "The count describes initialized payload bytes only.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 95,
+          "end_line": 97,
+          "excerpt_sha256": "326c2cc71e3c11ded3db965cf7c798649bad822e00037c79d3c7d2edb30f0413"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 230,
+          "excerpt_sha256": "0cabf637159adb56e68b176b66cff2d9d9ed1d6e96b32a43d31111f660a87db6"
+        }
+      ],
+      "limitations": [
+        "num_metachars counts payload bytes rather than owning their allocation."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "add_metachar copies the old value into an index; the num_metachars count itself escapes only by value and retains no argument pointer.",
+      "invariant": "Count metadata does not own the selected characters.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 227,
+          "end_line": 233,
+          "excerpt_sha256": "2d4c28c27a3f1750b17ed6fecf2f7373348ed4fb5e9b91536c2db475e88e9b0c"
+        }
+      ],
+      "limitations": [
+        "A count snapshot is meaningful only with its matching metachars pointer."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The num_metachars scalar selects data indices and never names an indirect call; strchr reads the resulting NUL string through metachars.",
+      "invariant": "Payload length is not callback state.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 232,
+          "end_line": 233,
+          "excerpt_sha256": "b5a346286dcc5da7350fdf9549fef5096e44349c06bcdb29529968f8e3bbc720"
+        }
+      ],
+      "limitations": [
+        "The count supplies loop bounds but stores no callback target."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The num_metachars count survives pointer replacement because strcpy preserves existing bytes, but it must still be bounded by the newly allocated extent.",
+      "invariant": "Replacement must preserve count-to-buffer coherence.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 221,
+          "end_line": 230,
+          "excerpt_sha256": "1a67f52199b98e4277e2ffa5320a2200a642009b7fc25c7bddf130693f9200ae"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "num_metachars+1 and the increment have no explicit overflow checks; byte and NUL writes follow those arithmetic results.",
+      "invariant": "Index arithmetic needs a checked capacity relationship.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 230,
+          "excerpt_sha256": "0cabf637159adb56e68b176b66cff2d9d9ed1d6e96b32a43d31111f660a87db6"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "No free applies to the num_metachars count; retiring a string allocation must retire its logical count consistently, although the one-shot helper never resets this owner.",
+      "invariant": "Scalar cleanup cannot release the buffer itself.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 95,
+          "end_line": 97,
+          "excerpt_sha256": "326c2cc71e3c11ded3db965cf7c798649bad822e00037c79d3c7d2edb30f0413"
+        }
+      ],
+      "limitations": [
+        "Releasing metachars does not make a retained num_metachars value safe to use."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "malloc failure exits before num_metachars increments; arithmetic failure has no typed count/capacity rollback contract.",
+      "invariant": "Failed capacity growth must not publish a new count.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 230,
+          "excerpt_sha256": "0cabf637159adb56e68b176b66cff2d9d9ed1d6e96b32a43d31111f660a87db6"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "num_metachars changes during one-shot parsing, but its type does not encode count-to-buffer validity for reuse or reentry.",
+      "invariant": "Current sequencing is a caller contract, not a safe type.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 235,
+          "end_line": 243,
+          "excerpt_sha256": "93aa2721149c87396d30da30908e427c55b6b10a5ac1b0c68a516a760025d851"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 230,
+          "excerpt_sha256": "0cabf637159adb56e68b176b66cff2d9d9ed1d6e96b32a43d31111f660a87db6"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

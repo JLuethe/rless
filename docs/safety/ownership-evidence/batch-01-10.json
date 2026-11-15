@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:dad75ea4af15c5514174b724",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/process.rs"
+    ],
+    "symbol": "INHERITED_SIGPIPE",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The INHERITED_SIGPIPE AtomicUsize is initialized with libc::SIG_DFL and owns the integer representation of the pre-Rust SIGPIPE disposition.",
+      "invariant": "The saved value is initialized before the constructor.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 4,
+          "end_line": 10,
+          "excerpt_sha256": "0c92c0c5fae1a2e65f8a45291b8717ec04c580a82263770d73ed803744a5b2ff"
+        }
+      ],
+      "limitations": [
+        "INHERITED_SIGPIPE owns an atomic disposition value, not executable code."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "remember_sigpipe copies sa_sigaction into INHERITED_SIGPIPE; the saved value does not borrow the stack query structure.",
+      "invariant": "Saved signal state does not alias stack metadata.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 6,
+          "end_line": 11,
+          "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
+        }
+      ],
+      "limitations": [
+        "The copied sa_sigaction integer outlives the stack query struct."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "init passes the INHERITED_SIGPIPE saved value to libc::signal, not to a Rust function call; exec inheritance constrains it to DFL or IGN.",
+      "invariant": "The inherited value is restored through the C API.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 19,
+          "end_line": 23,
+          "excerpt_sha256": "ac60ae8824aaf04c220b2b5966860345db562fc1e13167d64315f13b22cbb175"
+        }
+      ],
+      "limitations": [
+        "Supported Linux x86_64 exec startup only; this does not approve runtime.rs signal-sentinel conversions or the remaining signal handler owners.",
+        "Restoration assumes exec inherited DFL or IGN in the supported startup model."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Rust startup may change the process disposition but cannot relocate or invalidate the INHERITED_SIGPIPE static scalar.",
+      "invariant": "Runtime signal setup cannot invalidate saved storage.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 4,
+          "end_line": 21,
+          "excerpt_sha256": "1bc6f41935b78a0db6ee0c85e0a50a004f005dbc8f22aebbb7463d8cc1b1e69e"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The constructor stores INHERITED_SIGPIPE before main; init reads it after constructor completion under single-threaded startup ordering.",
+      "invariant": "Publication relies on executable startup sequencing.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 6,
+          "end_line": 21,
+          "excerpt_sha256": "b50c1d1ab377265c103aa55be4976fc585c0272467815eed3c6020fddcfa1947"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "This is disposition metadata, not a kernel FD or allocated handler owner; no explicit destructor is paired with INHERITED_SIGPIPE.",
+      "invariant": "Signal metadata cannot be freed as a pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 4,
+          "end_line": 10,
+          "excerpt_sha256": "0c92c0c5fae1a2e65f8a45291b8717ec04c580a82263770d73ed803744a5b2ff"
+        }
+      ],
+      "limitations": [
+        "The atomic has no kernel-resource close or allocator free counterpart."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "A failed query leaves INHERITED_SIGPIPE at its initialized SIG_DFL; ignored restoration errors do not create a memory owner.",
+      "invariant": "Query errors cannot expose an uninitialized scalar.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 6,
+          "end_line": 11,
+          "excerpt_sha256": "c0836c520dec3d00bac5095855af8ba3ac124d7712c4a1c4a4d1b0a2a60f7f35"
+        },
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 19,
+          "end_line": 23,
+          "excerpt_sha256": "ac60ae8824aaf04c220b2b5966860345db562fc1e13167d64315f13b22cbb175"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The INHERITED_SIGPIPE saved sentinel is not mutated in a handler; only the startup constructor writes it and init restores the process-wide disposition.",
+      "invariant": "Current application handlers do not write saved state.",
+      "source_refs": [
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 6,
+          "end_line": 23,
+          "excerpt_sha256": "393cfbd06afd894938a17f2c8ff614c0e77d4f19c61b6fa57eb72b4219232177"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

@@ -4,6 +4,19 @@
 
 use ::c2rust_bitfields;
 use ::libc;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static PIPE_IO_FAILED: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn pipe_io_failed() -> bool {
+    PIPE_IO_FAILED.load(Ordering::Relaxed)
+}
+
+fn record_pipe_io_error() {
+    if !PIPE_IO_FAILED.swap(true, Ordering::Relaxed) {
+        crate::output::io_error_diagnostic(b"rless: pipe I/O error\n");
+    }
+}
 extern "C" {
     fn snprintf(
         __s: *mut ::core::ffi::c_char,
@@ -12,15 +25,16 @@ extern "C" {
         ...
     ) -> ::core::ffi::c_int;
     fn putc(__c: ::core::ffi::c_int, __stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_pclose_write"]
     fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_pcancel_write(__stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_popen_write"]
     fn popen(
         __command: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
     ) -> *mut FILE;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn dup(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn free(__ptr: *mut ::core::ffi::c_void);
-    fn system(__command: *const ::core::ffi::c_char) -> ::core::ffi::c_int;
     fn strlen(__s: *const ::core::ffi::c_char) -> size_t;
     fn save(s: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn ecalloc(count: size_t, size: size_t) -> *mut ::core::ffi::c_void;
@@ -45,9 +59,7 @@ extern "C" {
     fn error(fmt: *const ::core::ffi::c_char, parg: *const PARG);
     fn position(sindex: ::core::ffi::c_int) -> POSITION;
     fn lwinch(r#type: ::core::ffi::c_int);
-    fn init_signals(on: lbool);
-    fn open_tty() -> ::core::ffi::c_int;
-    fn signal(__sig: ::core::ffi::c_int, __handler: __sighandler_t) -> __sighandler_t;
+    fn init_signals(on: lbool) -> ::core::ffi::c_int;
     static mut sigs: ::core::ffi::c_int;
 }
 pub type __uint64_t = u64;
@@ -459,7 +471,6 @@ pub union parg {
     pub p_char: ::core::ffi::c_char,
 }
 pub type PARG = parg;
-pub type __sighandler_t = Option<unsafe extern "C" fn(::core::ffi::c_int) -> ()>;
 unsafe extern "C" fn print_done_msg(mut donemsg: *const ::core::ffi::c_char) {
     if donemsg.is_null() {
         return;
@@ -471,12 +482,51 @@ unsafe extern "C" fn print_done_msg(mut donemsg: *const ::core::ffi::c_char) {
     putchr('\n' as ::core::ffi::c_int);
     flush();
 }
+// An interrupted dup2 has not established which descriptor is in fd 0.
+// Retry before the pager uses stdin again.
+unsafe fn replace_stdin(from: ::core::ffi::c_int) -> bool {
+    loop {
+        if ::libc::dup2(from, 0) == 0 {
+            return true;
+        }
+        if *::libc::__errno_location() != ::libc::EINTR {
+            return false;
+        }
+    }
+}
+
+unsafe fn handoff_error(message: &'static [u8]) {
+    // This can run while the pager terminal is deinitialized. Keep the
+    // diagnostic independent of pager output and allocation.
+    crate::output::io_error_diagnostic(message);
+}
+
+unsafe fn resume_after_handoff(save_ifile: *mut ::core::ffi::c_void) {
+    if init_signals(lbool::LTRUE) != 0 {
+        handoff_error(b"rless: cannot restore signal handlers after shell\n");
+        ::libc::_exit(1);
+    }
+    raw_mode(lbool::LTRUE);
+    term_init();
+    screen_trashed();
+    reedit_ifile(save_ifile);
+    sigs |= (1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int;
+}
 #[no_mangle]
 pub unsafe extern "C" fn lsystem(
     mut cmd: *const ::core::ffi::c_char,
     mut donemsg: *const ::core::ffi::c_char,
 ) {
-    let mut inp: ::core::ffi::c_int = 0;
+    let inp: ::core::ffi::c_int = loop {
+        let fd = ::libc::fcntl(0, ::libc::F_DUPFD_CLOEXEC, 3);
+        if fd >= 0 || *::libc::__errno_location() != ::libc::EINTR {
+            break fd;
+        }
+    };
+    if inp < 0 {
+        handoff_error(b"rless: cannot preserve standard input for shell\n");
+        return;
+    }
     let mut shell: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut p: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut save_ifile: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
@@ -493,11 +543,32 @@ pub unsafe extern "C" fn lsystem(
     term_deinit();
     flush();
     raw_mode(lbool::LFALSE);
-    init_signals(lbool::LFALSE);
-    inp = dup(0 as ::core::ffi::c_int);
-    close(0 as ::core::ffi::c_int);
-    if open_tty() < 0 as ::core::ffi::c_int {
-        dup(inp);
+    if init_signals(lbool::LFALSE) != 0 {
+        close(inp);
+        resume_after_handoff(save_ifile);
+        handoff_error(b"rless: cannot prepare signal handlers for shell\n");
+        return;
+    }
+    let tty = crate::ttyin::open_tty_with_ownership();
+    let tty_fd = tty.fd;
+    if tty_fd < 0 || !replace_stdin(tty_fd) {
+        // Restore from the backup even if dup2 reported failure: an EINTR
+        // retry may have left the result of the first attempt ambiguous.
+        if tty.owned {
+            close(tty_fd);
+        }
+        if !replace_stdin(inp) {
+            handoff_error(b"rless: cannot restore standard input after shell\n");
+            ::libc::_exit(1);
+        }
+        close(inp);
+        resume_after_handoff(save_ifile);
+        handoff_error(b"rless: cannot set standard input for shell\n");
+        return;
+    }
+    // An opened tty is owned even if open reused a vacant standard slot.
+    if tty.owned {
+        close(tty_fd);
     }
     p = ::core::ptr::null_mut::<::core::ffi::c_char>();
     shell = lgetenv(b"SHELL\0".as_ptr() as *const ::core::ffi::c_char);
@@ -541,14 +612,22 @@ pub unsafe extern "C" fn lsystem(
     let injected_failure = crate::fault::hit(crate::fault::Site::Handoff);
     #[cfg(not(feature = "safety-injection"))]
     let injected_failure = false;
-    if !injected_failure {
-        system(p);
+    if injected_failure || crate::shell_process::run(p).is_err() {
+        handoff_error(b"rless: cannot run shell command\n");
     }
     free(p as *mut ::core::ffi::c_void);
-    close(0 as ::core::ffi::c_int);
-    dup(inp);
+    if !replace_stdin(inp) {
+        // Do not resume a pager whose stdin still names the shell terminal.
+        // Terminal raw mode is already off; quit() would run pager cleanup
+        // against the wrong input descriptor.
+        handoff_error(b"rless: cannot restore standard input after shell\n");
+        ::libc::_exit(1);
+    }
     close(inp);
-    init_signals(lbool::LTRUE);
+    if init_signals(lbool::LTRUE) != 0 {
+        handoff_error(b"rless: cannot restore signal handlers after shell\n");
+        ::libc::_exit(1);
+    }
     raw_mode(lbool::LTRUE);
     print_done_msg(donemsg);
     term_init();
@@ -556,6 +635,65 @@ pub unsafe extern "C" fn lsystem(
     reedit_ifile(save_ifile);
     sigs |= (1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int;
 }
+
+struct PipeOutput {
+    fd: libc::c_int,
+    bytes: [u8; 8192],
+    used: usize,
+}
+
+impl PipeOutput {
+    unsafe fn push(&mut self, byte: libc::c_int) -> bool {
+        self.bytes[self.used] = byte as u8;
+        self.used += 1;
+        self.used < self.bytes.len() || self.flush()
+    }
+
+    unsafe fn flush(&mut self) -> bool {
+        let _waiting = crate::runtime::IoWait::new();
+        let mut offset = 0;
+        while offset < self.used {
+            if crate::runtime::IO_INTERRUPTED.load(std::sync::atomic::Ordering::SeqCst)
+                || crate::signal::has_pending_notifications()
+                || sigs != 0
+            {
+                *libc::__errno_location() = libc::EINTR;
+                return false;
+            }
+            let count = libc::write(
+                self.fd,
+                self.bytes.as_ptr().add(offset).cast(),
+                self.used - offset,
+            );
+            if count > 0 {
+                offset += count as usize;
+                continue;
+            }
+            if count == 0 {
+                *libc::__errno_location() = libc::EIO;
+                return false;
+            }
+            let failure = *libc::__errno_location();
+            if failure == libc::EINTR {
+                continue;
+            }
+            if failure != libc::EAGAIN && failure != libc::EWOULDBLOCK {
+                return false;
+            }
+            let mut descriptor = libc::pollfd {
+                fd: self.fd,
+                events: libc::POLLOUT,
+                revents: 0,
+            };
+            if crate::runtime::poll_interruptible(&mut descriptor, 1, -1) < 0 {
+                return false;
+            }
+        }
+        self.used = 0;
+        true
+    }
+}
+
 unsafe extern "C" fn pipe_data(
     mut cmd: *const ::core::ffi::c_char,
     mut spos: POSITION,
@@ -579,6 +717,21 @@ unsafe extern "C" fn pipe_data(
         );
         return -1 as ::core::ffi::c_int;
     }
+    let pipe_fd = libc::fileno(f.cast());
+    let pipe_flags = if pipe_fd >= 0 {
+        libc::fcntl(pipe_fd, libc::F_GETFL)
+    } else {
+        -1
+    };
+    if pipe_flags < 0 || libc::fcntl(pipe_fd, libc::F_SETFL, pipe_flags | libc::O_NONBLOCK) != 0 {
+        rless_pcancel_write(f);
+        record_pipe_io_error();
+        error(
+            lmsg(lessmsg_id::LM_Cannot_create_pipe),
+            ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
+        );
+        return -1;
+    }
     clear_bot();
     putstr(b"!\0".as_ptr() as *const ::core::ffi::c_char);
     putstr(cmd);
@@ -586,13 +739,27 @@ unsafe extern "C" fn pipe_data(
     term_deinit();
     flush();
     raw_mode(lbool::LFALSE);
-    init_signals(lbool::LFALSE);
-    signal(
-        13 as ::core::ffi::c_int,
-        ::core::mem::transmute::<::libc::intptr_t, __sighandler_t>(
-            1 as ::core::ffi::c_int as ::libc::intptr_t,
-        ),
-    );
+    // The helper has already forked. Keep pager handlers installed while the
+    // parent writes, including when SIGTERM was inherited as ignored.
+    let mut ignored_pipe: libc::sigaction = std::mem::zeroed();
+    let mut previous_pipe: libc::sigaction = std::mem::zeroed();
+    ignored_pipe.sa_sigaction = libc::SIG_IGN;
+    libc::sigemptyset(&mut ignored_pipe.sa_mask);
+    if libc::sigaction(libc::SIGPIPE, &ignored_pipe, &mut previous_pipe) != 0 {
+        rless_pcancel_write(f);
+        record_pipe_io_error();
+        raw_mode(lbool::LTRUE);
+        term_init();
+        screen_trashed();
+        handoff_error(b"rless: cannot ignore SIGPIPE for pipe\n");
+        return -1;
+    }
+    let mut output = PipeOutput {
+        fd: pipe_fd,
+        bytes: [0; 8192],
+        used: 0,
+    };
+    let mut write_failed = false;
     c = -1 as ::core::ffi::c_int;
     while epos == -1 as ::core::ffi::c_int as POSITION || {
         let c2rust_fresh0 = spos;
@@ -603,27 +770,53 @@ unsafe extern "C" fn pipe_data(
         if c == -1 as ::core::ffi::c_int {
             break;
         }
-        if putc(c, f) == -1 as ::core::ffi::c_int {
+        if !output.push(c) {
+            write_failed = true;
             break;
         }
     }
-    while c != '\n' as ::core::ffi::c_int && c != -1 as ::core::ffi::c_int {
+    while !write_failed && c != '\n' as ::core::ffi::c_int && c != -1 as ::core::ffi::c_int {
         c = ch_forw_get();
         if c == -1 as ::core::ffi::c_int {
             break;
         }
-        if putc(c, f) == -1 as ::core::ffi::c_int {
+        if !output.push(c) {
+            write_failed = true;
             break;
         }
     }
-    pclose(f);
-    signal(13 as ::core::ffi::c_int, None);
-    init_signals(lbool::LTRUE);
+    let flushed = !write_failed && output.flush();
+    let write_error = if flushed {
+        0
+    } else {
+        *libc::__errno_location()
+    };
+    let close_result = pclose(f);
+    let close_error = if close_result < 0 {
+        *libc::__errno_location()
+    } else {
+        0
+    };
+    if libc::sigaction(libc::SIGPIPE, &previous_pipe, std::ptr::null_mut()) != 0 {
+        handoff_error(b"rless: cannot restore SIGPIPE after pipe\n");
+        ::libc::_exit(1);
+    }
+    if (write_error != 0 && write_error != libc::EINTR)
+        || (close_error != 0 && close_error != libc::EINTR)
+    {
+        record_pipe_io_error();
+    }
+    let pending_signal = crate::signal::has_pending_notifications() || sigs != 0;
     raw_mode(lbool::LTRUE);
-    print_done_msg(donemsg);
+    if !pending_signal {
+        print_done_msg(donemsg);
+    }
     term_init();
     screen_trashed();
     lwinch(0 as ::core::ffi::c_int);
+    if pending_signal || crate::signal::has_pending_notifications() {
+        crate::signal::psignals();
+    }
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]

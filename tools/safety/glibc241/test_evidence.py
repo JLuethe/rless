@@ -8,13 +8,25 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from glibc241.evidence import checked, fault_records, validate_external_report, work_path
+from glibc241.evidence import (REGEX_PROBE_EXTENSION, abi_probe_matches, checked,
+                              fault_records, validate_external_report, work_path)
 from common import ROOT, sha
 from release import reference_policy, validate_reference_hashes
 from native_alloc import ElfTargets
 
 
 class EvidenceControls(unittest.TestCase):
+    def test_extended_regex_abi_probe_must_match_every_locked_and_new_field(self):
+        locked = {"glibc_headers": "2.41", "regex_bytes": 64}
+        observed = {**locked, **REGEX_PROBE_EXTENSION}
+        self.assertTrue(abi_probe_matches(observed, locked))
+        for key in observed:
+            with self.subTest(key=key):
+                changed = dict(observed, **{key: -1})
+                self.assertFalse(abi_probe_matches(changed, locked))
+        self.assertFalse(abi_probe_matches({**observed, "extra": 1}, locked))
+        self.assertFalse(abi_probe_matches(observed, {**locked, "regs_fixed": -1}))
+
     def test_reference_qualification_rejects_self_consistent_alternate_bundle(self):
         hashes = reference_policy(ROOT)['files_sha256']
         validate_reference_hashes(hashes, ROOT)

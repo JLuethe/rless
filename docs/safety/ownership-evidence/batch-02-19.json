@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:d8def47d2ed5784f9ae2d78a",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/position.rs"
+    ],
+    "symbol": "table_rows",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "This table_rows c_int owns the last initialized geometry, distinct from capacity; pos_init starts at zero and updates it after clearing changed rows.",
+      "invariant": "Logical row count tracks initialized table content.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 53,
+          "excerpt_sha256": "d82407230701dd38697fcfd93dc629863b590ff43d34b17f23ed6496dfa4bc7a"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": [
+        "table_rows records initialized geometry rather than owning rows separately."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "Readers copy min(sc_height,table_rows) before scanning; no array reference is returned by the row-count value.",
+      "invariant": "Logical rows limit a scan but do not own its bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 118,
+          "end_line": 137,
+          "excerpt_sha256": "fabe6948ff001c777276f3b7aa35a965e002b81edabe4a1f246e29f85cb30274"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        }
+      ],
+      "limitations": [
+        "The old row count can admit reads after the table allocation has been freed."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "No callback target lives in this table_rows field; get_scrpos consumes it during ordinary navigation and fatal cleanup through direct calls.",
+      "invariant": "Row metadata can be read during cleanup reentry.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 230,
+          "end_line": 244,
+          "excerpt_sha256": "b22a7002567eebd58b4d7a0ebd0a6d934f801d171fc29d2be4cdd8d92eb455cd"
+        }
+      ],
+      "limitations": [
+        "Cleanup reaches get_scrpos before successful replacement updates table_rows."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Resize reuse invalidates removed/newly exposed rows before changing the table_rows count; old rows may nevertheless describe a freed array during allocation growth.",
+      "invariant": "Initialized-row history cannot validate retired storage.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "table_rows changes immediately in the within-capacity branch, but the growth branch assigns it only after ecalloc returns. Failed growth therefore retains the old initialized-row count while table already points to freed storage; the geometry scalar outlives its backing array (M0-MEM-004).",
+      "invariant": "Row publication must remain coherent with its backing owner.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 173,
+          "end_line": 195,
+          "excerpt_sha256": "c7894f940e8de7742b2e8f3bad707471bf3badaecbfb7166b8e135b2a68294cf"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The table_rows scalar has no destructor/free pair; clearing rows logically retires positions without releasing array capacity.",
+      "invariant": "Invalidating rows is distinct from freeing the allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 173,
+          "end_line": 180,
+          "excerpt_sha256": "a537f7ea52dc474db211671692ac7307a79a3b7a443781daa994c34d52f541a4"
+        }
+      ],
+      "limitations": [
+        "Retiring geometry does not itself free or null the table pointer."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "table_rows participates directly in the cleanup read guard: get_scrpos uses min(sc_height,table_rows). The ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file path can reach that guard before table_rows is updated. With a current tty file and at least two old rows, the count admits reads through freed table (M0-MEM-004).",
+      "invariant": "Row bounds do not resolve the growth cleanup hazard.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 860,
+          "end_line": 887,
+          "excerpt_sha256": "477e15342e8cb8885a78cc46eaf268356aff029fc5cf1e053bb03c0836e62330"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 969,
+          "excerpt_sha256": "54bd56b0d427e831ff86929d935fd0a3e0251c6d7e7fe24e1dccc7166ecc787a"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1078,
+          "end_line": 1083,
+          "excerpt_sha256": "2b997a8f7c13dcf535481729891283def45315511bd82bcdd437d26d7046b153"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 907,
+          "excerpt_sha256": "5f8591bb715bbac9cbf69a6dd7180f660031e7eab030c6608391e419d875e7c3"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 274,
+          "end_line": 282,
+          "excerpt_sha256": "90616eacd2eef93332912f5737ec1c16dec941bf63b4ce413845ba5d7a763788"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 293,
+          "end_line": 295,
+          "excerpt_sha256": "6a5ca53b6e43cf1bc88d129a7fa1d5b4dc3f996177a65c075c057c55dbe64e51"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "As a mutable global, table_rows's relation to sc_height/table relies on excluded reentry; ordinary resize tests do not establish a handler-safe transaction.",
+      "invariant": "Existing M0-MEM-003 and IND-POS-F4 remain open.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "ecalloc failure at src/pager.rs:860-887 enters quit/edit(NULL) at src/pager.rs:948-969 before table_rows can be updated for the new screen height."
+    },
+    "src/edit.rs": {
+      "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+      "relationship": "close_file invokes get_scrpos at src/edit.rs:899-907 via src/edit.rs:924-927 and src/edit.rs:1078-1083; the position reader uses old table_rows to admit rows during failed-growth cleanup."
+    }
+  },
+  "finding_context": {}
+}

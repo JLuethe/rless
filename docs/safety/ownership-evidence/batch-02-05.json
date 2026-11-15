@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/safe_core/reserve.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/safe_core/reserve.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/safe_core/reserve.rs borrows a vector and reserve gate. Reserve borrows a caller-owned Vec and Gate; ReserveFault owns fail_at, attempts and hits as checked scalar bookkeeping.",
+      "invariant": "Allocation ownership remains with the supplied Vec.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 27,
+          "end_line": 39,
+          "excerpt_sha256": "d951312f72be01e51b27269437d9b60816a36c37b807a7782b93aa279c1fb4a2"
+        },
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 44,
+          "end_line": 62,
+          "excerpt_sha256": "e782bcf3aabf0e19468e0f9ffabba63c92e93c8311b0ffdb8379dc71217cf630"
+        }
+      ],
+      "limitations": [
+        "These gates belong to the isolated component test crate, not the production safety-injection hook or the global allocator.",
+        "reserve borrows the vector; it never becomes the element owner."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/safe_core/reserve.rs keeps element aliases outside the reserve gate. Both mutable borrows are scoped to the call; checked_len receives only lengths and the gate receives no reference to elements.",
+      "invariant": "Gate execution cannot retain the vector element borrow.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 27,
+          "end_line": 39,
+          "excerpt_sha256": "d951312f72be01e51b27269437d9b60816a36c37b807a7782b93aa279c1fb4a2"
+        }
+      ],
+      "limitations": [
+        "The Gate receives bookkeeping access, not mutable element slices."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/safe_core/reserve.rs invokes Gate synchronously before allocation. Gate dispatch uses &mut impl Gate and completes before try_reserve; the private Unfaulted and test ReserveFault implementations retain no callback.",
+      "invariant": "Reserve notification is synchronous and non-retaining.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 3,
+          "end_line": 11,
+          "excerpt_sha256": "6540f93d013643a59b956347afedc49b44c50c6971fc3c8e4c8aacadb0049f8d"
+        },
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 27,
+          "end_line": 39,
+          "excerpt_sha256": "d951312f72be01e51b27269437d9b60816a36c37b807a7782b93aa279c1fb4a2"
+        }
+      ],
+      "limitations": [
+        "Other Gate implementations must satisfy their own synchronous-call contract."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/safe_core/reserve.rs can relocate exclusively borrowed vector storage. Successful Vec growth can relocate storage, but exclusive borrowing prevents callers from retaining safe element references across reserve.",
+      "invariant": "Reallocation occurs under an exclusive vector borrow.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 27,
+          "end_line": 39,
+          "excerpt_sha256": "d951312f72be01e51b27269437d9b60816a36c37b807a7782b93aa279c1fb4a2"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "src/safe_core/reserve.rs checks lengths before allocator entry. Checked_len checks element addition, byte multiplication and isize bound before gate or allocator; capacity-satisfied requests skip both.",
+      "invariant": "No allocator sees an unchecked byte-length request.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 14,
+          "end_line": 39,
+          "excerpt_sha256": "8b5113fe18ce4f212dc7f851c9812899e4f7d85b712b49a5a061a5e4818920be"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "src/safe_core/reserve.rs preserves vector ownership on reserve failure. A successful reserve updates capacity of the same Vec owner; allocation failure leaves its prior storage owned and valid.",
+      "invariant": "Reserve never transfers the vector allocation to Gate.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 27,
+          "end_line": 39,
+          "excerpt_sha256": "d951312f72be01e51b27269437d9b60816a36c37b807a7782b93aa279c1fb4a2"
+        }
+      ],
+      "limitations": [
+        "A successful capacity change is not a release of the Vec owner."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/safe_core/reserve.rs maps allocation and ordinal errors explicitly. Try_reserve failures map to AllocationFailed; attempts uses checked_add and a one-time selected ordinal cannot wrap into a repeated hit.",
+      "invariant": "Failure accounting cannot repeat an old ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 14,
+          "end_line": 39,
+          "excerpt_sha256": "8b5113fe18ce4f212dc7f851c9812899e4f7d85b712b49a5a061a5e4818920be"
+        },
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 73,
+          "end_line": 85,
+          "excerpt_sha256": "66066bd279d902ca2bd135ae519c75151fa44ee17fb3a869f627511752a9543e"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "src/safe_core/reserve.rs allocates only during ordinary component execution. No process-global state or signal callback exists; Vec reserve may allocate and therefore belongs to ordinary component execution.",
+      "invariant": "Reserve is not an asynchronous signal operation.",
+      "source_refs": [
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 3,
+          "end_line": 11,
+          "excerpt_sha256": "6540f93d013643a59b956347afedc49b44c50c6971fc3c8e4c8aacadb0049f8d"
+        },
+        {
+          "target": "source:src/safe_core/reserve.rs",
+          "sha256": "b645a367aadb0ca74105c904efa35bd8c918b33e2ffdbc23f6e76e25e64e9d7b",
+          "start_line": 27,
+          "end_line": 39,
+          "excerpt_sha256": "d951312f72be01e51b27269437d9b60816a36c37b807a7782b93aa279c1fb4a2"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

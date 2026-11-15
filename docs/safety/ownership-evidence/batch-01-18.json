@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:28f06481e852b3bdc84c3162",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "meta_escape",
+    "context": "",
+    "declared_type": "* mut :: core :: ffi :: c_char",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The meta_escape pointer initially borrows the static backslash string; -e chooses a static empty string or argument tail, and -f selects meta_escape_buf.",
+      "invariant": "Escape storage is borrowed from one of three live owners.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 92,
+          "end_line": 94,
+          "excerpt_sha256": "769ee2f1b94a33fcc2e155b42d7683d0ab72d97ce9c75d882fdef9b1800bddb6"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        }
+      ],
+      "limitations": [
+        "meta_escape may borrow a literal, argument tail or meta_escape_buf."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "meta_escape borrows a static literal, the two-byte static array or an argv tail owned by args_strings throughout main_0.",
+      "invariant": "Escape borrows remain inside the argument owner lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
+          "end_line": 426,
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries.",
+        "Its raw C pointer must not outlive the selected backing owner."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "strlen and printf read meta_escape synchronously as string data; the pointer is never registered as executable code.",
+      "invariant": "Escape strings cannot act as callback addresses.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 381,
+          "end_line": 396,
+          "excerpt_sha256": "8d65df6b9a3c1245986ba0550b829402336a81aa67e6e0c85ec13f1443480e13"
+        }
+      ],
+      "limitations": [
+        "Direct printf/string reads assume a stable NUL-terminated backing region."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Later options may replace the meta_escape pointer before output; no code retains an earlier escape alias and the backing argv Vecs are not resized in main_0.",
+      "invariant": "Pointer replacement occurs before escape readers run.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "meta_escape is assigned either a borrowed option tail or the address of meta_escape_buf after its two bytes are written. The pointer has no separate length field to commit, and its C-string lifetime depends on retaining the selected argument or static buffer until helper exit.",
+      "invariant": "The escape pointer always selects a terminated string.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The meta_escape pointer is non-owning and never freed; args_strings owns argv storage while literals and meta_escape_buf have image lifetime.",
+      "invariant": "Escape pointers must not be passed to free.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 92,
+          "end_line": 94,
+          "excerpt_sha256": "769ee2f1b94a33fcc2e155b42d7683d0ab72d97ce9c75d882fdef9b1800bddb6"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
+          "end_line": 426,
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
+        }
+      ],
+      "limitations": [
+        "meta_escape must not be freed when it points into argv or static bytes."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "A missing -f number exits before output, so partially changed option state is not consumed; other parse errors do not transfer meta_escape's owner.",
+      "invariant": "Option failure cannot publish a dangling escape borrow.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 132,
+          "end_line": 135,
+          "excerpt_sha256": "ab1d81051ffb5edddc6366c5ffc16af0a75988e9000c149ef0aac614dd792c19"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The single helper invocation has no signal handler that changes meta_escape; SIGPIPE may terminate output without replacing its owner.",
+      "invariant": "Escape configuration is stable during output.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 276,
+          "end_line": 302,
+          "excerpt_sha256": "79d58958e7b5e04724df995b1d88a95f47df4f2cbd9f9bb4277cd335f5f5c65d"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 411,
+          "end_line": 426,
+          "excerpt_sha256": "4d17d4eb07192f1b933bbadc00c74f65a6175c664ab0f902ee3e2df3a9720c65"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

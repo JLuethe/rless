@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-03",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/command.rs",
+      "src/signal.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-03 allocates one ungot node per queued character; the global head owns the chain, and backward insertion initializes a new node before linking it at the tail.",
+      "invariant": "Every published queue node has one chain owner.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1576,
+          "end_line": 1588,
+          "excerpt_sha256": "97643d3c006f6c4d2c9628d7884be205a9a31c070bdbd4b6347e6b8e835a17f1"
+        }
+      ],
+      "limitations": [
+        "No ownership is acquired over the source command string."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-03 tail insertion traverses pu through live nodes while queue consumption reads the same head and successor links. SIGUSR1 can enter the producer independently of that traversal.",
+      "invariant": "A traversal alias must remain valid until link publication.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1589,
+          "end_line": 1596,
+          "excerpt_sha256": "3015c3a962ca43ab8786edc50c5be2116544a2745fc681bcf1bb65587efa673e"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1481,
+          "end_line": 1488,
+          "excerpt_sha256": "414d50fa50e3dee890ce390b8682545d8186a5cef7193b87953c961597a07168"
+        }
+      ],
+      "limitations": [
+        "There is no generation or borrow guard on pu."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-03 has an actual asynchronous producer: sigusr1 calls sigusr, which performs lgetenv and ungetsc; ungetsc loops into ungetcc_back and allocates queue nodes.",
+      "invariant": "Handler work must not enter the allocating queue producer.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "This is the source route recorded by M0-SIG-002, not a new probe."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-03 consuming a node saves its byte/end marker, advances ungot and frees the old node. A concurrent producer or reader cannot retain that removed node address.",
+      "invariant": "Node aliases expire immediately when get_ungot frees it.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1481,
+          "end_line": 1489,
+          "excerpt_sha256": "277c383085f7c97b32584c15e08dc78077725f372d2224a045982a63793fdb8a"
+        }
+      ],
+      "limitations": [
+        "The returned character is a copy, not a retained node borrow."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-03 head insertion publishes one initialized node, while tail insertion finds a mutable link through the current chain. Neither update is protected against handler reentry.",
+      "invariant": "Queue publication must be serialized with consumption.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1576,
+          "end_line": 1596,
+          "excerpt_sha256": "5dbd5554ee8e89eb885a89e46ef3f7bae2a8546c2be489a0fd8d6ee24b8dcbd7"
+        }
+      ],
+      "limitations": [
+        "Allocation-before-link is not a whole-queue exclusion protocol."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-03 releases one ecalloc node with free in get_ungot after detaching its successor; ungetsc copies input bytes rather than taking the caller string allocation.",
+      "invariant": "Producer and consumer agree on node allocation/free pairing.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1481,
+          "end_line": 1489,
+          "excerpt_sha256": "277c383085f7c97b32584c15e08dc78077725f372d2224a045982a63793fdb8a"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "This release path does not prove pending nodes are drained at exit."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-03 has no local allocation-error Result or rollback of a partially queued string: ungetsc can publish earlier characters before a later node allocation fails.",
+      "invariant": "Failure must distinguish already queued characters from remaining input.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1582,
+          "end_line": 1596,
+          "excerpt_sha256": "53af0c34fe842fe50dd3aa0336592649dc36a62c5cd05f182b0f726361fff01f"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1607,
+          "end_line": 1613,
+          "excerpt_sha256": "3a40087200f7fc3ae1b48ea20eb76c8ed2f7ecd9edb7297039e5602eb2dff101"
+        }
+      ],
+      "limitations": [
+        "No all-or-nothing command-string enqueue guarantee is inferred."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-03 retains the open M0-SIG-002 route because sigusr performs lookup, queue mutation and intio inside the handler. Setting notification state afterward does not defer earlier allocation.",
+      "invariant": "Asynchronous entry must hand off intent before queue mutation.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        }
+      ],
+      "limitations": [
+        "No signal-source change or finding closure is part of this review."
+      ]
+    }
+  }
+}

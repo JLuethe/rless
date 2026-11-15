@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:9afcbf4c01306a8a95a252cc",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "pasting",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The pasting exported lbool records bracketed-paste suppression state; cmd_edit sets it for a paste-start action when no_paste is enabled.",
+      "invariant": "Paste suppression owns no clipboard or command bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 589,
+          "excerpt_sha256": "5b6fbd8e2ea3739329f94e8c9e7126880b73f32bbdd88ca1d9fe0158d15787e2"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1237,
+          "end_line": 1256,
+          "excerpt_sha256": "414fb2a9fb9f9f74a966896298ae53454e08aab35c5d87a00e4bd6ef79cdd52e"
+        }
+      ],
+      "limitations": [
+        "pasting owns a mode integer rather than paste text."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "command.rs:1239 reads pasting and command.rs:1744 clears it for a new command; its Boolean value carries no input-source identity.",
+      "invariant": "Paste state is not an owning token for a byte stream.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1233,
+          "end_line": 1246,
+          "excerpt_sha256": "77ce180a6afd7efe7b5b98a19eb8a4e10f65dca3f02cd9e2b5781953bdb263de"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1738,
+          "end_line": 1748,
+          "excerpt_sha256": "748fbc217118a657478253ed963472157a1a88cd606157e74b45bcd6cafe7661"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1239,
+          "end_line": 1239,
+          "excerpt_sha256": "128131dae0cf2eb61bb8d12f3053e7421e771620827cf9cb7068802296d929e6"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1744,
+          "end_line": 1744,
+          "excerpt_sha256": "3a658b8facc318700672f62144cfb5bf2e0addd04ecccd55b5b62ea1c7e5d90a"
+        }
+      ],
+      "limitations": [
+        "Paste mode must remain coherent with cmdbuf and its cursor."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "A paste-end action calls stop_ignoring_input directly; the pasting mode stores neither that function address nor a retained callback context.",
+      "invariant": "Paste termination dispatch has a fixed direct target.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1237,
+          "end_line": 1256,
+          "excerpt_sha256": "414fb2a9fb9f9f74a966896298ae53454e08aab35c5d87a00e4bd6ef79cdd52e"
+        }
+      ],
+      "limitations": [
+        "Command parsing changes the mode directly and may call editor operations."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The command loop resets pasting separately from command text and other mode flags; stale mode state must not be reused for a different command input.",
+      "invariant": "New-command setup must retire prior paste interpretation.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1738,
+          "end_line": 1748,
+          "excerpt_sha256": "748fbc217118a657478253ed963472157a1a88cd606157e74b45bcd6cafe7661"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The pasting mode change and any discarded input occur in different functions; no owned event binds the bracket marker, command buffer and suppression decision.",
+      "invariant": "Paste state is not an atomic editor-state transition.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1237,
+          "end_line": 1256,
+          "excerpt_sha256": "414fb2a9fb9f9f74a966896298ae53454e08aab35c5d87a00e4bd6ef79cdd52e"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "Clearing the pasting flag releases no source FD, clipboard storage or command buffer; those have separate owners and lifetimes.",
+      "invariant": "Ending paste suppression does not release input ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        }
+      ],
+      "limitations": [
+        "Ending a paste changes policy without releasing command-buffer storage."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "A Boolean cannot report truncated input, absent end markers or underlying read errors; pasting must not be treated as an I/O completion receipt.",
+      "invariant": "Paste mode conveys policy rather than read success.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1237,
+          "end_line": 1256,
+          "excerpt_sha256": "414fb2a9fb9f9f74a966896298ae53454e08aab35c5d87a00e4bd6ef79cdd52e"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1233,
+          "end_line": 1246,
+          "excerpt_sha256": "77ce180a6afd7efe7b5b98a19eb8a4e10f65dca3f02cd9e2b5781953bdb263de"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "pasting crosses command/editor boundaries without an input-generation identity or exclusive owner, so a new command must explicitly retire prior suppression state.",
+      "invariant": "Suppression-state coupling remains a raw-core constraint.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "Paste recognition reads pasting at src/command.rs:1233-1246, and stop_ignoring_input clears it at src/command.rs:1738-1748; command parsing therefore shares the cmdbuf paste-mode scalar."
+    },
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "src/signal.rs:83-85 shows termination entering quit, without reading or changing pasting. Any route from that cleanup into paste-mode editing is untraced and is only a precondition concern here."
+    }
+  },
+  "finding_context": {}
+}

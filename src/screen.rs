@@ -2,6 +2,14 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static TERMINAL_FAILED: AtomicBool = AtomicBool::new(false);
+
+pub fn terminal_failed() -> bool {
+    TERMINAL_FAILED.load(Ordering::Relaxed)
+}
+
 extern "C" {
     fn sprintf(
         __s: *mut ::core::ffi::c_char,
@@ -312,6 +320,9 @@ pub unsafe extern "C" fn raw_mode(mut on: lbool) {
             erase_char = '\u{8}' as ::core::ffi::c_int;
             kill_char = 'U' as ::core::ffi::c_int & 0o37 as ::core::ffi::c_int;
             werase_char = 'W' as ::core::ffi::c_int & 0o37 as ::core::ffi::c_int;
+            // No usable snapshot exists. In particular, never apply the
+            // zero-initialized termios value (including B0) to this terminal.
+            return;
         } else {
             if saved_term.0 == 0 {
                 save_term = s;
@@ -349,7 +360,9 @@ pub unsafe extern "C" fn raw_mode(mut on: lbool) {
         }
         if *libc::__errno_location() != libc::EINTR {
             // Preserve the actual mode state; a failed restore is not a commit.
-            // Reporting permanent terminal errors remains a tracked legacy gap.
+            if on.0 == 0 && saved_term.0 != 0 && !TERMINAL_FAILED.swap(true, Ordering::Relaxed) {
+                crate::output::io_error_diagnostic(b"rless: terminal mode change failed\n");
+            }
             return;
         }
     }
@@ -538,6 +551,9 @@ pub unsafe extern "C" fn scrsize() {
     if sc_height <= 0 as ::core::ffi::c_int {
         sc_height = 24 as ::core::ffi::c_int;
     }
+    // One logical content row plus the prompt/position sentinel is the minimum
+    // supported geometry, including LESS_LINES=1 and one-row terminal resizes.
+    sc_height = sc_height.max(2);
     if sys_width > 0 as ::core::ffi::c_int {
         sc_width = sys_width;
     } else {
@@ -580,7 +596,8 @@ pub unsafe extern "C" fn screen_size_changed() {
     if shell_lines >= sc_height {
         shell_lines = sc_height - 1 as ::core::ffi::c_int;
     }
-    wscroll = (sc_height + 1 as ::core::ffi::c_int) / 2 as ::core::ffi::c_int;
+    shell_lines = shell_lines.max(1);
+    wscroll = sc_height / 2 + sc_height % 2;
     calc_jump_sline();
     calc_shift_count();
     calc_match_shift();

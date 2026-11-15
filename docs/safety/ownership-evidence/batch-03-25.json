@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:5b27208908809bd7082ce8d4",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "insert_mode",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The insert_mode private lbool owns insert-versus-overwrite policy, initially insert; an editor action toggles it and cmd_istr temporarily forces insertion.",
+      "invariant": "Editing policy is separate from owned command bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 598,
+          "end_line": 598,
+          "excerpt_sha256": "dee9c6a9629ed88a73e85012ee02b61f424f3beeb1b647fd36d5e9997b6f89f4"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1312,
+          "end_line": 1321,
+          "excerpt_sha256": "d23268da90c7cdc0fc63db8d6172b3f7d170573ec6ebea9d66c4c0fdcaf62bb5"
+        }
+      ],
+      "limitations": [
+        "insert_mode is editing policy, not ownership of inserted bytes."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "cmd_istr saves a copied Boolean while borrowing source text; no pointer into that source is stored in the insert_mode policy field.",
+      "invariant": "Saved mode state cannot keep source text live.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1376,
+          "end_line": 1392,
+          "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
+        }
+      ],
+      "limitations": [
+        "Temporary overrides must not be observed by another editor operation."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "cmd_ichar may directly delete a character before insertion in overwrite mode; the insert_mode flag contains no dynamic edit callback or closure.",
+      "invariant": "Overwrite behavior is a direct policy branch.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1038,
+          "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
+        }
+      ],
+      "limitations": [
+        "The cited termination handler does not by itself prove an insert_mode reentry route."
+      ]
+    },
+    "invalidation": {
+      "analysis": "cmd_istr restores insert_mode on normal return, but no RAII guard restores its temporary override on every nonlocal/fatal path.",
+      "invariant": "Temporary mode lifetime depends on normal function return.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1376,
+          "end_line": 1392,
+          "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
+        }
+      ],
+      "limitations": [
+        "The scoped concern is another editor observing a temporary insert_mode override; no exclusive owner currently excludes that reentry."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "insert_mode selects deletion before overwrite insertion; that choice does not preserve self-aliasing source bytes or make replacement failure-atomic.",
+      "invariant": "Mode choice does not commit a complete byte replacement.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1038,
+          "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The insert_mode bit has no allocator release pair; restoring its old value neither restores deleted text nor retires any completion/history allocation.",
+      "invariant": "Policy rollback is distinct from storage rollback.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 598,
+          "end_line": 598,
+          "excerpt_sha256": "dee9c6a9629ed88a73e85012ee02b61f424f3beeb1b647fd36d5e9997b6f89f4"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1376,
+          "end_line": 1392,
+          "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
+        }
+      ],
+      "limitations": [
+        "Restoring insert_mode does not restore a moved or invalidated command cursor."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "cmd_istr restores the insert_mode saved mode after an action error breaks its loop; fatal/reentrant paths still lack an exclusive editor transaction.",
+      "invariant": "Ordinary action errors and fatal cleanup have different paths.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1376,
+          "end_line": 1392,
+          "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "insert_mode is temporarily overridden by ordinary editor operations. A second editor observing the override would use the wrong policy, but the terminate -> quit citation does not establish that such an operation is reachable from a handler. No concrete asynchronous insert_mode mutation is claimed; exclusive editor entry remains a required precondition.",
+      "invariant": "Insert-mode review does not approve asynchronous editing.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 598,
+          "end_line": 599,
+          "excerpt_sha256": "644a8138d7f03b04f638f0aa1b8538db736178c697651ec2a3dfafa1fb010024"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "src/signal.rs:83-85 reaches quit but does not invoke an editor or alter insert_mode. Observing a temporary insert override from a handler is a conditional editor-entry concern, not an established path."
+    }
+  },
+  "finding_context": {}
+}

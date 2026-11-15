@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:79b3134255a294064e216636",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "literal",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The literal private lbool owns the one-shot request to insert the next character literally; cmd_reset clears it and editor action 19 sets it.",
+      "invariant": "Literal mode is one pending input interpretation decision.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 595,
+          "end_line": 595,
+          "excerpt_sha256": "ef2f48cf8ee90fe9f7bcf22a75f00dd574575d4b1ecb1962d47edc68556de119"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1354,
+          "end_line": 1361,
+          "excerpt_sha256": "e5fb252c7ef88d919af98d53ad4fdefecb13fd2a850221a2f052fc113e04ba58"
+        }
+      ],
+      "limitations": [
+        "literal owns a next-character interpretation flag."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "literal retains no character pointer; cmd_char2 consumes completed bytes from the separate multibyte staging buffer before insertion.",
+      "invariant": "Mode state does not own staged character bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "The flag must describe the same command sequence as cp and cmdbuf."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "When true, cmd_char2 skips normal edit-command decoding and directly calls cmd_ichar; no function pointer is stored in the literal mode bit.",
+      "invariant": "Literal interpretation selects data flow, not a callback.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": [
+        "Direct key processing stores no callback target in literal."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Reset or consumption clears it, but the literal bit has no generation tying it to a particular command or partially assembled UTF character.",
+      "invariant": "Mode validity depends on the active editing operation.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1618,
+          "end_line": 1643,
+          "excerpt_sha256": "516dafe4719342dd49c086e04710821e21dac5af30aa894161cdfa54215cd41b"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "cmd_char2 clears the flag before cmd_ichar may reject a full buffer, so literal intent can be consumed without a committed text insertion.",
+      "invariant": "Consuming a mode is distinct from committing command bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1622,
+          "end_line": 1633,
+          "excerpt_sha256": "2fc07e69f5d4ad9bda85fa818dc4086bc0a45c475f8cb55c51e41f8a90441300"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The literal Boolean owns no heap or FD; clearing it must not release the multibyte array or command buffer used by the next stage.",
+      "invariant": "Literal-mode retirement releases no byte storage.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 595,
+          "end_line": 595,
+          "excerpt_sha256": "ef2f48cf8ee90fe9f7bcf22a75f00dd574575d4b1ecb1962d47edc68556de119"
+        }
+      ],
+      "limitations": [
+        "Consuming literal mode retires no heap object."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "literal is cleared before cmd_ichar may reject capacity, so a failed byte insertion does not automatically restore the consumed interpretation mode.",
+      "invariant": "A failed insertion does not restore literal intent automatically.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1622,
+          "end_line": 1633,
+          "excerpt_sha256": "2fc07e69f5d4ad9bda85fa818dc4086bc0a45c475f8cb55c51e41f8a90441300"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1020,
+          "excerpt_sha256": "f13d8569ebe0eef4df0dfe5247378fe0f2e358b4a8f5ad40629c03daf7616098"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "As raw shared editor state, the literal bit relies on ordinary command sequencing and does not authorize nested handler-time command editing.",
+      "invariant": "Interpretation state remains under M0-MEM-001.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 595,
+          "end_line": 595,
+          "excerpt_sha256": "ef2f48cf8ee90fe9f7bcf22a75f00dd574575d4b1ecb1962d47edc68556de119"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "The terminate handler at src/signal.rs:83-85 has no literal-mode access. It marks the asynchronous termination boundary; a reentrant change to the next-character flag remains untraced."
+    }
+  },
+  "finding_context": {}
+}

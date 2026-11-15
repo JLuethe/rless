@@ -77,7 +77,7 @@ def main():
         (out/name).write_bytes(value)
     record['environment_manifests']={p.name:sha(p) for p in out.iterdir() if p.is_file()}
     write_json(out/'summary.json',record)
-    command=['podman','run','--rm','--network=none','--read-only','--cap-drop=all',
+    command=['podman','run','--rm','--network=none','--read-only','--cap-drop=all', '--ulimit', 'core=0:0',
         '--userns=keep-id','--user',str(os.getuid())+':'+str(os.getgid()),'--tmpfs','/tmp:rw,nosuid,nodev',
         '-v',str(inputs)+':/input:ro','-v',str(work)+':/work:rw','-v',str(reference)+':/reference:ro',
         '-v',str(args.rust_toolchain.resolve())+':/opt/rust:ro',

@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
 import tarfile
 
@@ -26,6 +27,55 @@ LAYOUT = dict(pointer_bytes=8, off_t_bytes=8, regex_bytes=64, regex_alignment=8,
     regs_flag_byte_offset=56, regs_fixed_mask=4, sigaction_bytes=152, sigset_bytes=128,
     termios_bytes=60, stat_bytes=144, sigint=2, sigwinch=28, sigpipe=13)
 TOOLS = {'rustc', 'cargo', 'cc', 'linker', 'glibc', 'ldd', 'terminfo', 'readelf', 'python'}
+TERM_SYMBOLS = {'setupterm', 'tigetflag', 'tigetnum', 'tigetstr', 'tparm', 'tputs',
+                'tgetent', 'tgetflag', 'tgetnum', 'tgetstr', 'tgoto', 'PC', 'UP', 'BC', 'ospeed'}
+
+
+def dynamic_symbols(binary, readelf):
+    """Read ELF metadata with the retained reader, without loading the object."""
+    result = subprocess.run([str(readelf), '--dyn-syms', '--wide', str(binary)],
+                            capture_output=True, text=True, timeout=30,
+                            env={'LC_ALL': 'C'})
+    require(result.returncode == 0 and not result.stderr, 'cannot read host dynamic symbols')
+    imported, exported = set(), set()
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) < 8 or not re.fullmatch(r'\d+:', fields[0]):
+            continue
+        _, _, _, kind, binding, visibility, section, name = fields[:8]
+        if kind not in ('FUNC', 'OBJECT', 'NOTYPE') or binding not in ('GLOBAL', 'WEAK'):
+            continue
+        if section == 'UND':
+            imported.add(name)
+        elif visibility in ('DEFAULT', 'PROTECTED'):
+            exported.add(name.replace('@@', '@'))
+            # An unversioned import resolves only to an unversioned or default export.
+            if '@@' in name:
+                exported.add(name.split('@@')[0])
+    require(imported or exported, 'host dynamic symbol table missing')
+    return imported, exported
+
+
+def validate_terminfo_provider(binary, objects, readelf):
+    """Require the actual loaded DSO to define this binary's terminfo imports.
+
+    Some distributions bundle libtinfo into ncursesw. A matching filename alone
+    is insufficient: both the imported symbol and its requested version must
+    exist in one of the already hash-checked, actually loaded terminal DSOs.
+    """
+    imported, _ = dynamic_symbols(binary, readelf)
+    needed = {name for name in imported if name.split('@')[0] in TERM_SYMBOLS}
+    bases = {name.split('@')[0] for name in needed}
+    require('tputs' in bases and bool({'setupterm', 'tgetent'} & bases),
+            'host terminal imports missing')
+    for requested, value in objects.items():
+        if not re.fullmatch(r'lib(?:tinfo|ncursesw|ncurses)\.so\.\d+(?:\.\d+)*', Path(requested).name):
+            continue
+        provider = checked(value)
+        _, exported = dynamic_symbols(provider, readelf)
+        if needed <= exported:
+            return dict(path=str(provider), sha256=value['sha256'], symbols=sorted(needed))
+    raise ValueError('loaded host terminal provider lacks required symbol definitions/versions')
 
 
 def require(value, message):
@@ -307,9 +357,10 @@ def validate_external_report(path, root=ROOT):
         text = checked(commands['ldd-'+name]['log']).read_text()
         requested = set(re.findall(r'(/[^\s()]+)',text))
         require(text == item['ldd'] and requested == set(item['objects']) == set(item['libraries_sha256']) and
-                any('/libc.so.' in value for value in requested) and any('/libtinfo.so.' in value for value in requested), 'host loaded object set incomplete')
+                any('/libc.so.' in value for value in requested), 'host loaded object set incomplete')
         for target, value in item['objects'].items():
             require(checked(value) == Path(target).resolve() and item['libraries_sha256'][target] == value['sha256'], 'host loaded native object changed')
+        validate_terminfo_provider(binary, item['objects'], Path(record['tools']['readelf']['path']))
     terminal_log=checked(commands['terminfo']['log'])
     terminal_text=terminal_log.read_text()
     require(sha(terminal_log) == record['terminfo_xterm256_sha256'] and all(value in terminal_text for value in

@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:1898203e584c5e9485c9da80",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "size_metachars",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The size_metachars private c_int owns malloc capacity metadata, initially zero, then sixteen or twice the previous capacity during add_metachar growth.",
+      "invariant": "Capacity counts bytes including space for the terminator.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 95,
+          "end_line": 97,
+          "excerpt_sha256": "326c2cc71e3c11ded3db965cf7c798649bad822e00037c79d3c7d2edb30f0413"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 220,
+          "excerpt_sha256": "c01fb5f691ebe0ab11ac4aab6f2454656b5d0f2d3af045a1690ea4a9b175d09f"
+        }
+      ],
+      "limitations": [
+        "size_metachars is signed capacity metadata, not allocated storage."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "The size_metachars integer is copied into malloc size_t and compared with num_metachars; no address to it escapes, but it describes a separate raw allocation.",
+      "invariant": "Numeric capacity does not extend allocation lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 214,
+          "excerpt_sha256": "22545bb7da53a619f2a846060f2ece8668a811d409a3a1988dbc5519894f4d74"
+        }
+      ],
+      "limitations": [
+        "Capacity publication alone does not validate a metachars alias."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The size_metachars field is passed as an allocation size, not a callable address; malloc/strcpy/free execute as direct native operations.",
+      "invariant": "Capacity metadata cannot retain a function target.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 214,
+          "end_line": 225,
+          "excerpt_sha256": "7abd13d1187fb8bd8f2d2e795250e059732b34d956eab92908debfdac48360a3"
+        }
+      ],
+      "limitations": [
+        "add_metachar reaches malloc directly, without a staging callback."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Changing capacity should track the new allocation, but size_metachars is assigned before malloc while metachars still owns the previous buffer.",
+      "invariant": "Capacity publication precedes replacement ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 225,
+          "excerpt_sha256": "1713d5649ca2a09550354d4c1ec5341d7c88ee15e90fa7b134f92cd849f02022"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The signed doubling expression and size_t cast are unchecked; there is no staged validated capacity value committed with the size_metachars pointer.",
+      "invariant": "A new capacity needs checked arithmetic before publication.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 214,
+          "excerpt_sha256": "22545bb7da53a619f2a846060f2ece8668a811d409a3a1988dbc5519894f4d74"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "size_metachars itself needs no release; replacing metachars frees the prior allocation only after a successful copy.",
+      "invariant": "Releasing old bytes is distinct from updating size metadata.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 221,
+          "end_line": 225,
+          "excerpt_sha256": "4a1072eefe94a8e436290e079b03ebbcc25aaa7fb49d66fccbae5329b951abf8"
+        }
+      ],
+      "limitations": [
+        "The capacity scalar has no independent allocator counterpart."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "malloc failure terminates without rolling size_metachars back, so the old capacity is not preserved as a retryable owner state.",
+      "invariant": "Failure handling is fatal rather than transactional.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 214,
+          "end_line": 220,
+          "excerpt_sha256": "c71b4b7390925404400a6a667acd974bcb3eb6f506ff0d83104eb6c7fcab8754"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "size_metachars is published before replacement allocation under startup sequencing, with no protocol permitting a reentrant reader.",
+      "invariant": "Raw-capacity ownership remains under M0-MEM-001.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 206,
+          "end_line": 230,
+          "excerpt_sha256": "0cabf637159adb56e68b176b66cff2d9d9ed1d6e96b32a43d31111f660a87db6"
+        }
+      ],
+      "limitations": [
+        "Current helper buffers remain raw C-shaped owners; unchecked growth/numeric arithmetic is recorded under M0-MEM-001, without claiming a demonstrated runtime failure."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

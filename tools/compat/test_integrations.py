@@ -106,7 +106,8 @@ def main():
                         {'replace_file': {'path': 'data', 'text': 'TRUNCATED-ONE\nTRUNCATED-TWO\n'}},
                         {'send': '\x03', 'await': ['@@READY@@', '(press RETURN)']},
                         {'send': '\nR', 'await': ['Cannot seek to that file position'], 'snapshot': True},
-                        {'send': '\ng', 'await': ['@@READY@@'], 'snapshot': True},
+                        {'send': '\ng', 'await': ['@@READY@@'], 'require_terminal_input': True,
+                         'snapshot': True},
                         {'send': 'q'}])
     observations = [run_case(binary, case) for binary in binaries]
     assert observations[0] == observations[1], ('truncate-recovery', observations)

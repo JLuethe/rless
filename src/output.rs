@@ -2,8 +2,10 @@
 // Distributed under GPL-3.0-or-later OR the Less License; see LICENSE-LESS.
 // See docs/implementation.md for provenance and porting changes.
 
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
+
 extern "C" {
-    fn write(__fd: ::core::ffi::c_int, __buf: *const ::core::ffi::c_void, __n: size_t) -> ssize_t;
     fn strcpy(
         __dest: *mut ::core::ffi::c_char,
         __src: *const ::core::ffi::c_char,
@@ -485,16 +487,165 @@ pub unsafe extern "C" fn put_line(mut forw_scroll: lbool) {
 static mut obuf: [::core::ffi::c_char; 1024] = [0; 1024];
 static mut ob: *mut ::core::ffi::c_char = unsafe { &raw const obuf as *mut ::core::ffi::c_char };
 static mut outfd: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
+// Sticky process failure is separate from screen recovery: terminal teardown
+// must still attempt its output even after a previous write failed.
+static OUTPUT_FAILED: AtomicBool = AtomicBool::new(false);
+
+struct PreparedOutput {
+    source: libc::c_int,
+    target: crate::output_worker::Prepared,
+}
+
+// set_output is the only pager-side transition of the output descriptor. A
+// writer session can serve every buffered flush until that transition;
+// starting a child for every flush would delay interactive screens.
+static PREPARED_OUTPUT: Mutex<Option<PreparedOutput>> = Mutex::new(None);
+
+pub(crate) fn finish_output() {
+    if let Ok(mut prepared) = PREPARED_OUTPUT.lock() {
+        *prepared = None;
+    }
+}
+
+pub fn output_failed() -> bool {
+    OUTPUT_FAILED.load(Ordering::Relaxed)
+}
+
+// Do not enter error()/putstr()/flush() here: their output may be the failing
+// stream. This allocation-free, best-effort stderr path cannot recurse.
+pub fn io_error_diagnostic(message: &[u8]) {
+    unsafe {
+        let saved_errno = *libc::__errno_location();
+        let mut prepared = match crate::output_worker::prepare_diagnostic(2) {
+            Ok(value) => value,
+            Err(_) => {
+                *libc::__errno_location() = saved_errno;
+                return;
+            }
+        };
+        if let crate::output_worker::Prepared::Writer(worker) = &mut prepared {
+            let _ = worker.write_diagnostic(message);
+            *libc::__errno_location() = saved_errno;
+            return;
+        }
+        let mut remaining = message;
+        while !remaining.is_empty() {
+            let result = libc::send(
+                2,
+                remaining.as_ptr().cast(),
+                remaining.len(),
+                libc::MSG_DONTWAIT | libc::MSG_NOSIGNAL,
+            );
+            if result > 0 {
+                remaining = &remaining[result as usize..];
+            } else {
+                // Diagnostics never wait for a full terminal, pipe or socket.
+                break;
+            }
+        }
+        *libc::__errno_location() = saved_errno;
+    }
+}
+
+unsafe fn record_output_failure() {
+    if !OUTPUT_FAILED.swap(true, Ordering::Relaxed) {
+        io_error_diagnostic(b"rless: write error\n");
+    }
+    screen_trashed();
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn flush() {
+    flush_buffer();
+}
+
+unsafe fn flush_buffer() -> bool {
     let mut n: size_t = 0;
     n = ob.offset_from(&raw mut obuf as *mut ::core::ffi::c_char) as size_t;
     if n == 0 as size_t {
-        return;
+        return true;
     }
     ob = &raw mut obuf as *mut ::core::ffi::c_char;
+    let mut prepared = match PREPARED_OUTPUT.lock() {
+        Ok(guard) => guard,
+        Err(_) => {
+            *libc::__errno_location() = libc::EOWNERDEAD;
+            record_output_failure();
+            return false;
+        }
+    };
+    if prepared
+        .as_ref()
+        .is_none_or(|target| target.source != outfd)
+    {
+        let target = match crate::output_worker::prepare(outfd) {
+            Ok(value) => value,
+            Err(error) => {
+                *libc::__errno_location() = error;
+                record_output_failure();
+                return false;
+            }
+        };
+        *prepared = Some(PreparedOutput {
+            source: outfd,
+            target,
+        });
+    }
+    if let crate::output_worker::Prepared::Writer(worker) = &mut prepared.as_mut().unwrap().target {
+        let bytes = std::slice::from_raw_parts((&raw const obuf).cast::<u8>(), n);
+        let mut written = 0;
+        while written < n {
+            #[cfg(feature = "safety-injection")]
+            let injected_failure = crate::fault::hit(crate::fault::Site::Write);
+            #[cfg(not(feature = "safety-injection"))]
+            let injected_failure = false;
+            #[cfg(feature = "safety-injection")]
+            let write_len = if crate::fault::hit(crate::fault::Site::WriteShort) {
+                ((n - written) / 2).max(1)
+            } else {
+                n - written
+            };
+            #[cfg(not(feature = "safety-injection"))]
+            let write_len = n - written;
+            let outcome = if injected_failure {
+                Err(*libc::__errno_location())
+            } else {
+                worker.write(&bytes[written..written + write_len])
+            };
+            if outcome.is_ok() {
+                written += write_len;
+                continue;
+            }
+            let error = outcome.unwrap_err();
+            *prepared = None;
+            *libc::__errno_location() = error;
+            if error == libc::EPIPE {
+                libc::raise(libc::SIGPIPE);
+            }
+            if error == libc::EINTR && crate::pager::is_tty.0 != 0 {
+                screen_trashed();
+            } else {
+                record_output_failure();
+            }
+            return false;
+        }
+        return true;
+    }
+    // Socket output uses per-call nonblocking sends and the inherited SIGPIPE
+    // disposition. Other output classes are acknowledged by the writer child.
+    let _waiting = crate::runtime::IoWait::new();
     let mut written = 0;
     while written < n {
+        if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+            || crate::signal::has_pending_notifications()
+        {
+            if crate::pager::is_tty.0 == 0 {
+                record_output_failure();
+            } else {
+                screen_trashed();
+            }
+            return false;
+        }
         #[cfg(feature = "safety-injection")]
         let injected_failure = crate::fault::hit(crate::fault::Site::Write);
         #[cfg(not(feature = "safety-injection"))]
@@ -510,27 +661,77 @@ pub unsafe extern "C" fn flush() {
         let result = if injected_failure {
             -1
         } else {
-            write(
+            libc::send(
                 outfd,
                 (&raw const obuf).cast::<u8>().add(written).cast(),
                 write_len,
+                libc::MSG_DONTWAIT,
             )
         };
         if result > 0 {
             written += result as usize;
         } else if result < 0 && *libc::__errno_location() == libc::EINTR {
+            if crate::runtime::IO_INTERRUPTED.load(Ordering::SeqCst)
+                || crate::signal::has_pending_notifications()
+            {
+                if crate::pager::is_tty.0 == 0 {
+                    record_output_failure();
+                } else {
+                    screen_trashed();
+                }
+                return false;
+            }
             continue;
+        } else if result < 0
+            && (*libc::__errno_location() == libc::EAGAIN
+                || *libc::__errno_location() == libc::EWOULDBLOCK)
+        {
+            let mut descriptor = libc::pollfd {
+                fd: outfd,
+                events: libc::POLLOUT,
+                revents: 0,
+            };
+            let timeout = if crate::pager::quitting.0 != 0 {
+                100
+            } else {
+                -1
+            };
+            let ready = crate::runtime::poll_interruptible(&mut descriptor, 1, timeout);
+            if ready == 0 {
+                // Exit-time terminal escapes cannot be delivered while the
+                // consumer refuses to read. Continue with termios cleanup.
+                if crate::pager::is_tty.0 == 0 {
+                    record_output_failure();
+                } else {
+                    screen_trashed();
+                }
+                return false;
+            }
+            if ready < 0 {
+                if *libc::__errno_location() == libc::EINTR {
+                    if crate::pager::is_tty.0 == 0 {
+                        record_output_failure();
+                    } else {
+                        screen_trashed();
+                    }
+                    return false;
+                }
+                record_output_failure();
+                return false;
+            }
         } else {
-            // A permanent error still needs the legacy screen recovery path.
-            // Short successful writes must not discard the unconsumed suffix.
-            screen_trashed();
-            break;
+            record_output_failure();
+            return false;
         }
     }
+    true
 }
 #[no_mangle]
 pub unsafe extern "C" fn set_output(mut fd: ::core::ffi::c_int, mut no_term_init: lbool) {
     flush();
+    if let Ok(mut prepared) = PREPARED_OUTPUT.lock() {
+        *prepared = None;
+    }
     outfd = fd;
     if no_term_init.0 != 0 {
         term_init_ever = lbool::LTRUE;
@@ -556,7 +757,9 @@ pub unsafe extern "C" fn putchr(mut ch: ::core::ffi::c_int) -> ::core::ffi::c_in
             ::core::mem::size_of::<[::core::ffi::c_char; 1024]>().wrapping_sub(1usize) as isize,
         )
     {
-        flush();
+        if !flush_buffer() {
+            return -1;
+        }
     }
     let c2rust_fresh0 = ob;
     ob = ob.offset(1);
@@ -1039,6 +1242,12 @@ pub unsafe extern "C" fn query(
     }
     less_printf(fmt, parg);
     c = getchr();
+    if c == -2 {
+        // A startup query may run before terminal initialization. Its
+        // noninteractive newline drain must not turn an interrupted read
+        // into an endless sequence of interrupted reads.
+        return c;
+    }
     if interactive().0 != 0 {
         lower_left();
         flush();
@@ -1049,6 +1258,9 @@ pub unsafe extern "C" fn query(
         let mut eol: ::core::ffi::c_int = c;
         while eol != '\n' as ::core::ffi::c_int && eol != '\r' as ::core::ffi::c_int {
             eol = getchr();
+            if eol == -2 {
+                return eol;
+            }
         }
     }
     if c == 'Q' as ::core::ffi::c_int {

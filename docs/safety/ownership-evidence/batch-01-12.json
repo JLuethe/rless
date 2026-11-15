@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:db5d112206b265d4e80dc979",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/runtime.rs"
+    ],
+    "symbol": "IO_INTERRUPTED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The IO_INTERRUPTED AtomicBool owns a pending-interrupt bit initially false; it carries no input buffer, descriptor or event allocation.",
+      "invariant": "Interrupt state is a Boolean rather than a pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 4,
+          "end_line": 5,
+          "excerpt_sha256": "99128ef91c8bb718d66d44e5eeab1489dac87f1f16b059040dc7de02b0f424d8"
+        }
+      ],
+      "limitations": [
+        "IO_INTERRUPTED owns notification state rather than the interrupted read buffer."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "os.rs:292-294 stores through IO_INTERRUPTED's crate-visible atomic interface; take_interrupt and read_interruptible read or swap values, not references.",
+      "invariant": "Shared users communicate only through atomic values.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 4,
+          "end_line": 5,
+          "excerpt_sha256": "99128ef91c8bb718d66d44e5eeab1489dac87f1f16b059040dc7de02b0f424d8"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 43,
+          "end_line": 45,
+          "excerpt_sha256": "98bbd18d5266e1e94a46427fafe3d7e97f5d54c4c41fffeb7b29246380bd0888"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 290,
+          "end_line": 295,
+          "excerpt_sha256": "38e69c1e295d5862f2031d918eccf1a007b8818ae384bea8bad9fb9431c4407f"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 292,
+          "end_line": 294,
+          "excerpt_sha256": "71b1f91a463189149ed62667eabe54ade2a094f44504805f1503271b43ab2345"
+        }
+      ],
+      "limitations": [
+        "Atomic access cannot prolong the lifetime of the caller buffer."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The IO_INTERRUPTED flag is consumed by direct functions; signal registration in rless_signal is separate and is not a callback contained by this field.",
+      "invariant": "The interrupt bit contains no signal handler address.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 26,
+          "end_line": 45,
+          "excerpt_sha256": "8a23deca9aa5f106109f64689d73096c29b54d81a53d415a02cd419a4e680f13"
+        }
+      ],
+      "limitations": [
+        "Notification does not resolve rless_signal error-sentinel representation."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The final IoWait drop clears the IO_INTERRUPTED bit; inner wait completion leaves an outer operation interruptible rather than retiring its state.",
+      "invariant": "Nested waits retain the outer pending-interrupt state.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 16,
+          "end_line": 24,
+          "excerpt_sha256": "6f902a2b0700b286c9e45152b97528e10614fede5c0ce37375a614e1e46ee214"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "SeqCst operations connect stores, take_interrupt swap and the IO_INTERRUPTED flag check while handled signals are masked before ppoll.",
+      "invariant": "Flag observation uses an explicit atomic ordering.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 43,
+          "end_line": 45,
+          "excerpt_sha256": "98bbd18d5266e1e94a46427fafe3d7e97f5d54c4c41fffeb7b29246380bd0888"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 81,
+          "end_line": 109,
+          "excerpt_sha256": "d813577c463b1dfbb663e8f6a5e64a6d0b59b90db3afbf263a7a8fa56cfbe121"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "No heap storage is owned; clearing the IO_INTERRUPTED bit releases a notification logically, while IoWait owns only its matching counter decrement.",
+      "invariant": "Consuming notification does not free input storage.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 4,
+          "end_line": 24,
+          "excerpt_sha256": "985ca22e37c6166aa96b0b44131bf5e853646de544192b9eb8e4c444cbf1370b"
+        }
+      ],
+      "limitations": [
+        "Clearing the flag does not close the read descriptor."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "read_interruptible returns EINTR when the IO_INTERRUPTED bit is set and its RestoreMask guard restores the old mask while preserving errno.",
+      "invariant": "Interrupted return restores the saved mask ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 81,
+          "end_line": 109,
+          "excerpt_sha256": "d813577c463b1dfbb663e8f6a5e64a6d0b59b90db3afbf263a7a8fa56cfbe121"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "intio stores IO_INTERRUPTED atomically; notification does not jump across or abandon the interrupted buffer-owning Rust frames.",
+      "invariant": "Notification does not unwind or abandon Rust frames.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 4,
+          "end_line": 5,
+          "excerpt_sha256": "99128ef91c8bb718d66d44e5eeab1489dac87f1f16b059040dc7de02b0f424d8"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 43,
+          "end_line": 45,
+          "excerpt_sha256": "98bbd18d5266e1e94a46427fafe3d7e97f5d54c4c41fffeb7b29246380bd0888"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 290,
+          "end_line": 295,
+          "excerpt_sha256": "38e69c1e295d5862f2031d918eccf1a007b8818ae384bea8bad9fb9431c4407f"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/os.rs": {
+      "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+      "relationship": "intio at src/os.rs:290-295 sets IO_INTERRUPTED when IO_WAITING is nonzero, establishing the atomic notification producer outside runtime.rs."
+    }
+  },
+  "finding_context": {
+    "M0-SIG-004": "IO_INTERRUPTED transfers a notification bit between intio and the wait loop. M0-SIG-004 remains about rless_signal representing error/default sentinel integers as Rust function pointers; the atomic bit contains no callable representation to resolve that defect."
+  }
+}

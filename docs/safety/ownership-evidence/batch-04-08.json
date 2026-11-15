@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-10",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/os.rs",
+      "src/process.rs",
+      "src/lsystem.rs",
+      "src/filename.rs",
+      "src/edit.rs",
+      "src/tags.rs",
+      "src/pager.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-10 separates borrowed process input from owned stdin backups, opened tty descriptors, popen streams, alternate-file names and allocated tag records. Shell handoff acquires a CLOEXEC backup before teardown.",
+      "invariant": "Each FD, FILE pointer and saved string needs its own owner identity.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 500,
+          "end_line": 513,
+          "excerpt_sha256": "7fcbcfb01fa5b53e2b5239dc6e522b4063882e23c39990d17c3c7639a38d90ef"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 1190,
+          "end_line": 1213,
+          "excerpt_sha256": "9e94ac2bdfb0b0488b2f58cb13d3c84765e0f4ce3ef8f9cb08e34c5e85755be1"
+        },
+        {
+          "target": "source:src/tags.rs",
+          "sha256": "a17f88e04d201fd560d7a8365fbd34fe3e19c8b3a7b12f90788e1375a91b2c64",
+          "start_line": 584,
+          "end_line": 608,
+          "excerpt_sha256": "3949a3c10c22ff2e8ea5b6a2516366441a2da617a7d6b7642284b08628766162"
+        }
+      ],
+      "limitations": [
+        "A standard numeric slot does not determine whether a descriptor was opened or borrowed."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-10 save_curr_ifile increments a hold count and reedit releases that hold before trying saved/neighbor handles. Resource switching retains raw names and IFILE addresses across multiple owner operations.",
+      "invariant": "Held handles require coherent list and disposal behavior.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1314,
+          "end_line": 1346,
+          "excerpt_sha256": "6836db2f16675973778e6047a49ba17a621e7f7d9c1164235405bd6498de5eec"
+        }
+      ],
+      "limitations": [
+        "The hold counter is not a Rust reference or generation check."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-10 dispatches to system/popen and direct file/edit calls; no child owns the caller command allocation after the synchronous system return. Pipe streams have their own pclose lifecycle.",
+      "invariant": "Native process calls must not inherit application owner pointers as live callbacks.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 590,
+          "end_line": 605,
+          "excerpt_sha256": "10db109f3547cbf130c263dfab63188c496a4f6a20c8ce60725e981e6827a30d"
+        },
+        {
+          "target": "source:src/filename.rs",
+          "sha256": "77ac3fd955c8b67823093f3d3af8411b21611c5eac7fce22ee3c29f4658a91c5",
+          "start_line": 972,
+          "end_line": 1012,
+          "excerpt_sha256": "904ad3c77659e4fcb48951490cc063b06ec81ffb53ad692a1fc63242fd3317ad"
+        }
+      ],
+      "limitations": [
+        "Child execution success is separate from parent resource cleanup success."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-10 close_file saves position, closes ch state and alternate pipes, clears alternate filename and then clears curr_ifile. Those operations invalidate different aliases at different points.",
+      "invariant": "A file switch must retire aliases before another owner uses them.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 921,
+          "excerpt_sha256": "31c55c46cded87c782420977a2db6b37dc80297741a6a0f86c1ad307b06a3b90"
+        }
+      ],
+      "limitations": [
+        "The sequence still relies on raw cross-module coordination."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-10 now checks backup acquisition and uses EINTR-aware dup2 for stdin swaps; restoration failure exits cooked rather than resuming the wrong input. M0-IO-003 and IND-FD-F3 stay open for maintained disposition.",
+      "invariant": "Do not dismantle stdin until its independent backup exists.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 474,
+          "end_line": 482,
+          "excerpt_sha256": "318818461253691c599571f6b3872ba6667fbda3a827ace8166abcfcbea8dfda"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 500,
+          "end_line": 513,
+          "excerpt_sha256": "7fcbcfb01fa5b53e2b5239dc6e522b4063882e23c39990d17c3c7639a38d90ef"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 531,
+          "end_line": 550,
+          "excerpt_sha256": "a27879bcb06ea5061c642516def0dcae30823426bebb2c2ec75d43501cd3564d"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 597,
+          "end_line": 605,
+          "excerpt_sha256": "9e3763bf510c7c836aef90c3133649c18f795f36eb0d1c519e8c2947318293be"
+        }
+      ],
+      "limitations": [
+        "This records repaired source behavior without rerunning descriptor campaigns."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-10 releases shell command storage and backup FD after use, pairs pipe streams with pclose, and frees tag names/patterns before their nodes. These are distinct release operations, not one global destructor.",
+      "invariant": "Release counterparts must follow the resource acquired by each branch.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 594,
+          "end_line": 605,
+          "excerpt_sha256": "0cb3709ec340a4ba75d378f859417d94326e8a27a9d8ce8753a3dcfdaf14ee0e"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 816,
+          "end_line": 835,
+          "excerpt_sha256": "1fbb2110504783d078c9c6fcb8f2ad04629b23bcdeac2127cd4e72908eea8d28"
+        },
+        {
+          "target": "source:src/tags.rs",
+          "sha256": "a17f88e04d201fd560d7a8365fbd34fe3e19c8b3a7b12f90788e1375a91b2c64",
+          "start_line": 567,
+          "end_line": 582,
+          "excerpt_sha256": "d793a285686bc30cfdfb8021ffc238c34d47e29f17c211910fda7d59b507f852"
+        }
+      ],
+      "limitations": [
+        "Process-exit reclamation is not evidence that every local release ran."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-10 pre-handoff backup failure returns before teardown; later stdin restoration failure emits a nonallocating diagnostic and _exit(1). General quit still performs broad mutable cleanup, including edit and history save.",
+      "invariant": "Error recovery must preserve the primary input resource or stop safely.",
+      "source_refs": [
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 504,
+          "end_line": 513,
+          "excerpt_sha256": "e1cc8f0f49735256786e1ac6a3a99bd2d582c244eeed38b968d809d5ca018391"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 533,
+          "end_line": 546,
+          "excerpt_sha256": "9398d351deacae5d6443423fbd2dd42211f09788838b6c713b2be97754a1e117"
+        },
+        {
+          "target": "source:src/lsystem.rs",
+          "sha256": "f747b566fe1a99e935d5bc203ec2f40cc42153ad92635903544bb3035af1e863",
+          "start_line": 597,
+          "end_line": 605,
+          "excerpt_sha256": "9e3763bf510c7c836aef90c3133649c18f795f36eb0d1c519e8c2947318293be"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 981,
+          "excerpt_sha256": "ba5b765063e334c3e0cc458bd281765707f3305166da86f367dab51e2faa6f08"
+        }
+      ],
+      "limitations": [
+        "No complete cleanup ordering proof is claimed for fatal application allocation."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-10 terminate directly invokes quit, whereas process initialization restores inherited SIGPIPE and iread polls interrupt state through a guard. These mechanisms do not defer all owner cleanup to the main loop.",
+      "invariant": "Notification protocols cannot authorize asynchronous resource destruction.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        },
+        {
+          "target": "source:src/process.rs",
+          "sha256": "1f2d5e0b0fe22a8b195f24abdf5a416c700693e226b0d22d75472d0774b9b64c",
+          "start_line": 19,
+          "end_line": 23,
+          "excerpt_sha256": "ac60ae8824aaf04c220b2b5966860345db562fc1e13167d64315f13b22cbb175"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 229,
+          "end_line": 236,
+          "excerpt_sha256": "43df32adc233b7b48510b70d621e2e3ec54787068b87cf0b64223fee1d2d2bb0"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 967,
+          "end_line": 970,
+          "excerpt_sha256": "2a78429734be51bf32abdc07c2aa2234a35d9c827e8170b6833ad67646470f26"
+        }
+      ],
+      "limitations": [
+        "The source route remains recorded under M0-SIG-003."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "terminate at src/signal.rs:83-85 calls quit; OWN-10 includes the pager/edit/process resources that this asynchronous cleanup can reach."
+    }
+  }
+}

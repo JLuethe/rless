@@ -11,7 +11,7 @@ extern "C" {
     fn ttyname(__fd: ::core::ffi::c_int) -> *mut ::core::ffi::c_char;
     fn quit(status: ::core::ffi::c_int);
     fn iread(fd: ::core::ffi::c_int, buf: *mut ::core::ffi::c_uchar, len: size_t) -> ssize_t;
-    fn set_mstimer(ms: ::core::ffi::c_ulong);
+    fn set_mstimer(ms: ::core::ffi::c_ulong) -> ::core::ffi::c_int;
     fn flush();
     static mut sigs: ::core::ffi::c_int;
 }
@@ -22,8 +22,12 @@ pub static mut tty: ::core::ffi::c_int = 0;
 unsafe extern "C" fn open_tty_device(mut dev: *const ::core::ffi::c_char) -> ::core::ffi::c_int {
     return open(dev, 0 as ::core::ffi::c_int);
 }
-#[no_mangle]
-pub unsafe extern "C" fn open_tty() -> ::core::ffi::c_int {
+pub(crate) struct TtyDescriptor {
+    pub fd: ::core::ffi::c_int,
+    pub owned: bool,
+}
+
+pub(crate) unsafe fn open_tty_with_ownership() -> TtyDescriptor {
     let mut fd: ::core::ffi::c_int = -1 as ::core::ffi::c_int;
     if fd < 0 as ::core::ffi::c_int {
         fd = open_tty_device(b"/dev/tty\0".as_ptr() as *const ::core::ffi::c_char);
@@ -34,10 +38,18 @@ pub unsafe extern "C" fn open_tty() -> ::core::ffi::c_int {
             fd = open_tty_device(dev);
         }
     }
-    if fd < 0 as ::core::ffi::c_int {
-        fd = 2 as ::core::ffi::c_int;
+    if fd < 0 {
+        TtyDescriptor {
+            fd: 2,
+            owned: false,
+        }
+    } else {
+        TtyDescriptor { fd, owned: true }
     }
-    return fd;
+}
+#[no_mangle]
+pub unsafe extern "C" fn open_tty() -> ::core::ffi::c_int {
+    open_tty_with_ownership().fd
 }
 #[no_mangle]
 pub unsafe extern "C" fn open_getchr() {
@@ -60,18 +72,27 @@ pub unsafe extern "C" fn getchr_timeout(
         flush();
         let mut uc: ::core::ffi::c_uchar = 0;
         if timeout_ms > 0 as ::core::ffi::c_ulong {
-            set_mstimer(timeout_ms);
+            if set_mstimer(timeout_ms) < 0 {
+                quit(1);
+                libc::_exit(1);
+            }
         }
         result = iread(
             tty,
             &raw mut uc,
             ::core::mem::size_of::<::core::ffi::c_char>(),
         );
-        if timeout_ms > 0 as ::core::ffi::c_ulong {
-            set_mstimer(0 as ::core::ffi::c_ulong);
-        }
-        if sigs & (1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int != 0 {
-            sigs &= !((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int);
+        let timed_out = if timeout_ms > 0 as ::core::ffi::c_ulong {
+            let stopped = set_mstimer(0);
+            if stopped < 0 {
+                quit(1);
+                libc::_exit(1);
+            }
+            stopped != 0
+        } else {
+            false
+        };
+        if timed_out {
             return -4 as ::core::ffi::c_int;
         }
         c = uc as ::core::ffi::c_char;

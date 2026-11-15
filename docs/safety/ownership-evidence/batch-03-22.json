@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:b7ab2d40b1a0b0453fc65878",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "prompt_col",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The prompt_col c_int owns the display width of the prompt prefix; clear_cmd zeroes it and cmd_putstr adds measured character widths while emitting prompt text.",
+      "invariant": "Prompt width is metadata, not an owned prompt buffer.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 699,
+          "excerpt_sha256": "17cfdc7464e55afc45aba14dd9e674a2e3ebae600d50a4d0db1adb7a3889dd07"
+        }
+      ],
+      "limitations": [
+        "prompt_col records the prompt boundary without owning prompt text."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "Cursor/home/scroll routines use prompt_col as the left editing boundary; no borrow of the actual prompt bytes is retained in this number.",
+      "invariant": "A copied width cannot extend prompt-text lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 786,
+          "end_line": 802,
+          "excerpt_sha256": "ca830175335c80c3b9644dd35463a35e570ccd84e13bd792e76ec39abe888b95"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 848,
+          "end_line": 906,
+          "excerpt_sha256": "39c0a9266aad4fee60d22b2e3a8d32c8b28655371740a59940a6299d5a1ef047"
+        }
+      ],
+      "limitations": [
+        "A saved cmd_col and cp must use the same prompt layout."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "cmd_putstr invokes putchr while measuring prompt_col; the width value does not own or store the terminal provider callback.",
+      "invariant": "Width metadata and native output callbacks are separate.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 674,
+          "end_line": 699,
+          "excerpt_sha256": "f782359491f0a6caaba69a18937890aabfb2b5834ed9caec0308f8f6956019f0"
+        }
+      ],
+      "limitations": [
+        "terminate reaches quit, but reentrant editor mutation remains untraced."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Redrawing a prompt replaces prompt_col\u2019s boundary while a saved cmd_col/cp may still describe the previous prompt layout.",
+      "invariant": "Prompt replacement invalidates old column relationships.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 667,
+          "end_line": 699,
+          "excerpt_sha256": "803c9f9dab0f76988c81b3c161ac6e5f246646b828689d5f424c4b4e219f76ef"
+        }
+      ],
+      "limitations": [
+        "The specific condition is prompt_col changing while a saved cmd_col/cp pair still describes the old layout; bounds rely on coherence."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "cmd_putstr increments cmd_col and prompt_col after output, and clear_cmd assigns them separately; no failure-atomic display-state object commits them together.",
+      "invariant": "Prompt and cursor widths must be updated coherently.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 667,
+          "end_line": 699,
+          "excerpt_sha256": "803c9f9dab0f76988c81b3c161ac6e5f246646b828689d5f424c4b4e219f76ef"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The prompt_col scalar is never freed and does not own the prompt string returned by other modules; ending prompt display releases no text through this field.",
+      "invariant": "Width retirement cannot free a prompt-data owner.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        }
+      ],
+      "limitations": [
+        "Changing the prompt column does not release either prompt or command storage."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "Failed output or unsuitable terminal geometry does not roll back width accumulation here; callers must not infer a rendered prefix solely from prompt_col.",
+      "invariant": "Recorded width is not proof of successful rendering.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 804,
+          "end_line": 842,
+          "excerpt_sha256": "cb406ba10b02144fc3e58b3edf3c042992d7c2112856ff09d3c8b31e5c75ed4a"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 907,
+          "end_line": 973,
+          "excerpt_sha256": "9aee9641faeb61e192fda0b85b8200821a0ce8f7baa70d4671c4db7fc2570780"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "prompt_col is raw shared prompt-layout state, and changing it while cmd_col/cp describe an earlier layout would violate editor coherence. terminate calls quit, but this record has not traced cleanup back into a prompt_col mutation. Handler-driven editor reentry is an unverified precondition, not an established source path.",
+      "invariant": "Prompt-boundary mutation remains controlled-loop work.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 599,
+          "excerpt_sha256": "5322a7afb2c77da0c84860179b3a0721547f0788a405a18629da59528bdfe9ff"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "The quit entry at src/signal.rs:83-85 contains no prompt_col mutation. This source establishes termination only; reaching another prompt-layout update from cleanup remains an unverified precondition."
+    }
+  },
+  "finding_context": {}
+}

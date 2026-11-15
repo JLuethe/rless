@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/position.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/position.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/position.rs owns a position array with separate geometry scalars. Table owns an ecalloc POSITION array, table_size records capacity and table_rows the initialized geometry; pos_shift temporarily owns a converted line buffer.",
+      "invariant": "Capacity and initialized row bounds describe different extents.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 53,
+          "excerpt_sha256": "d82407230701dd38697fcfd93dc629863b590ff43d34b17f23ed6496dfa4bc7a"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": [
+        "table_size and table_rows describe storage but do not own separate arrays."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/position.rs exports coordinates while retaining raw global cursors. Most access is through raw global table cursors; get_scrpos returns copied coordinates, while callers can enter cleanup using the same globals during allocation failure.",
+      "invariant": "Copies of positions do not make the backing table live.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 118,
+          "end_line": 137,
+          "excerpt_sha256": "fabe6948ff001c777276f3b7aa35a965e002b81edabe4a1f246e29f85cb30274"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 230,
+          "end_line": 291,
+          "excerpt_sha256": "a801de8ac110573d5c436ec4574f88ba770ae17000006489d3f7c20d5972e957"
+        }
+      ],
+      "limitations": [
+        "Copied coordinates do not make raw table cursors safe during replacement."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/position.rs can reenter readers through fatal allocation cleanup. There are direct input/conversion/display calls and no stored callback; ecalloc may call out_of_memory then quit, indirectly reentering position readers.",
+      "invariant": "Allocation is a possible cleanup reentry point.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 314,
+          "end_line": 334,
+          "excerpt_sha256": "46b68f441753bfb4a79d372049920c5128e17e036b8524378d7dd62a2354db1b"
+        }
+      ],
+      "limitations": [
+        "Fatal ecalloc can reach position readers through quit and close_file."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/position.rs frees the published table during growth. Shrink/regrow explicitly invalidates changed rows and query bounds use min(sc_height,table_rows); growth still frees table before replacing its published pointer.",
+      "invariant": "Geometry checks cannot validate a freed table pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "src/position.rs publishes three separate pieces of state: table, table_size and table_rows. pos_init frees the array before evaluating the replacement ecalloc, then assigns the new pointer and both scalars only on return. The entire old pointer/geometry combination remains globally visible during fatal cleanup, without a staged owner commit (M0-MEM-004).",
+      "invariant": "Replacement is not a failure-preserving owner transaction.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "src/position.rs pairs old array release with growth allocation. Growth pairs old allocation with free and pos_shift frees cline; table remains process-owned at exit, but the old global address is stale during replacement.",
+      "invariant": "A freed allocation must not remain a readable global owner.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 314,
+          "end_line": 334,
+          "excerpt_sha256": "46b68f441753bfb4a79d372049920c5128e17e036b8524378d7dd62a2354db1b"
+        }
+      ],
+      "limitations": [
+        "Freeing the old array is not a transactional table replacement."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/position.rs exposes the cross-owner failure path: ecalloc -> out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file -> get_scrpos. A current tty file and at least two available rows permit the stale table read; table_size is no liveness guard, while table_rows directly supplies the row bound. This module-level mechanism is source-inspected only (M0-MEM-004).",
+      "invariant": "Fatal growth cleanup can revisit the old table alias.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 860,
+          "end_line": 887,
+          "excerpt_sha256": "477e15342e8cb8885a78cc46eaf268356aff029fc5cf1e053bb03c0836e62330"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 969,
+          "excerpt_sha256": "54bd56b0d427e831ff86929d935fd0a3e0251c6d7e7fe24e1dccc7166ecc787a"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1078,
+          "end_line": 1083,
+          "excerpt_sha256": "2b997a8f7c13dcf535481729891283def45315511bd82bcdd437d26d7046b153"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 907,
+          "excerpt_sha256": "5f8591bb715bbac9cbf69a6dd7180f660031e7eab030c6608391e419d875e7c3"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 274,
+          "end_line": 282,
+          "excerpt_sha256": "90616eacd2eef93332912f5737ec1c16dec941bf63b4ce413845ba5d7a763788"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 293,
+          "end_line": 295,
+          "excerpt_sha256": "6a5ca53b6e43cf1bc88d129a7fa1d5b4dc3f996177a65c075c057c55dbe64e51"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "src/position.rs does not exclude termination during replacement. Direct handler termination can also enter cleanup; bounds tests cover ordinary small/shrink/growth geometry but do not approve reentry during failed replacement.",
+      "invariant": "Existing position and raw-owner findings remain recorded.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "ecalloc/out_of_memory at src/pager.rs:860-887 enter quit; quit at src/pager.rs:948-969 calls edit(NULL). Failed position-array growth can therefore leave the old globals visible to file-close cleanup."
+    },
+    "src/edit.rs": {
+      "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+      "relationship": "close_file calls get_scrpos at src/edit.rs:899-907; edit(NULL) dispatches through edit_ifile(NULL) at src/edit.rs:924-927 and src/edit.rs:1078-1083. This is the traced cleanup reader of position.rs table geometry."
+    },
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "terminate calls quit at src/signal.rs:83-85; quit can enter the file-close position-reader route, so asynchronous termination is relevant to the unguarded position globals."
+    }
+  },
+  "finding_context": {}
+}

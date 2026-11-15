@@ -84,7 +84,7 @@ extern "C" {
     fn error(fmt: *const ::core::ffi::c_char, parg: *const PARG);
     fn init_prompt();
     fn init_search();
-    fn init_signals(on: lbool);
+    fn init_signals(on: lbool) -> ::core::ffi::c_int;
     fn findtag(tag: *const ::core::ffi::c_char);
     fn tagsearch() -> POSITION;
     fn edit_tagfile() -> ::core::ffi::c_int;
@@ -732,6 +732,12 @@ unsafe fn main_0(
     if isnullenv(editproto).0 != 0 {
         editproto = b"%E ?lm+%lm. %g\0".as_ptr() as *const ::core::ffi::c_char;
     }
+    // File-list construction resolves attacker-controlled paths. Install the
+    // notification handlers before a filesystem can stall that work.
+    if init_signals(lbool::LTRUE) != 0 {
+        crate::output::io_error_diagnostic(b"rless: cannot install signal handlers\n");
+        quit(1);
+    }
     ifile = ::core::ptr::null_mut::<::core::ffi::c_void>();
     if dohelp.0 != 0 {
         ifile = get_ifile(
@@ -755,13 +761,24 @@ unsafe fn main_0(
             quit(1 as ::core::ffi::c_int);
         }
         set_output(1 as ::core::ffi::c_int, lbool::LTRUE);
+        let mut copy_status = 0;
         loop {
             cat_file();
+            // Keep a sticky copy result but consume each file's read-error flag
+            // once. Noninteractive edit_next does not clear that flag.
+            if crate::ch::read_error.0 != 0 {
+                copy_status = 1;
+                crate::output::io_error_diagnostic(b"rless: read error\n");
+                crate::ch::read_error = crate::ch::lbool::LFALSE;
+            }
+            if crate::output::output_failed() {
+                break;
+            }
             if edit_next(1 as ::core::ffi::c_int) != 0 as ::core::ffi::c_int {
                 break;
             }
         }
-        quit(0 as ::core::ffi::c_int);
+        quit(copy_status);
     }
     if missing_cap.0 != 0 && know_dumb == 0 {
         error(
@@ -770,7 +787,6 @@ unsafe fn main_0(
         );
     }
     open_getchr();
-    init_signals(lbool::LTRUE);
     less_start_time = get_time();
     if !tagoption.is_null()
         || strcmp(tags, b"-\0".as_ptr() as *const ::core::ffi::c_char) == 0 as ::core::ffi::c_int
@@ -834,7 +850,10 @@ pub unsafe extern "C" fn saven(
         n.wrapping_add(1 as size_t),
         ::core::mem::size_of::<::core::ffi::c_char>(),
     ) as *mut ::core::ffi::c_char;
-    strncpy(p, s, n);
+    // Empty xbuffers may lend a null data pointer; do not pass it to C.
+    if n != 0 {
+        strncpy(p, s, n);
+    }
     *p.offset(n as isize) = '\0' as ::core::ffi::c_char;
     return p;
 }
@@ -950,10 +969,37 @@ pub unsafe extern "C" fn quit(mut status: ::core::ffi::c_int) {
         repaint();
         flush();
     }
+    // The remaining file and history cleanup may block in a hostile native
+    // filesystem. Restore termios before entering either operation.
+    raw_mode(lbool::LFALSE);
+    crate::output::finish_output();
+    if status == 15 || status == 2 {
+        crate::ch::abort_logfile();
+    }
     edit(::core::ptr::null_mut::<::core::ffi::c_void>() as *mut ::core::ffi::c_char);
     save_cmdhist();
-    raw_mode(lbool::LFALSE);
     close_getchr();
+    crate::output::finish_output();
+    crate::diagnostic_broker::finish();
+    // A termination delivered during any exit path, including a failing
+    // history diagnostic, still determines the final signal status.
+    if let Some(pending) = crate::signal::pending_quit_status() {
+        status = pending;
+    }
+    // Include failures from the final flush/terminal teardown, without hiding
+    // a more specific primary error (for example SIGTERM's status 15).
+    if status == 0
+        && (crate::output::output_failed()
+            || crate::ch::logfile_failed()
+            || crate::ch::buffer_allocation_failed()
+            || crate::ch::input_read_failed()
+            || crate::filename::helper_io_failed()
+            || crate::lsystem::pipe_io_failed()
+            || crate::cmdbuf::history_persistence_failed()
+            || crate::screen::terminal_failed())
+    {
+        status = 1;
+    }
     exit(status);
 }
 #[no_mangle]
@@ -963,9 +1009,17 @@ pub unsafe extern "C" fn secure_allow(mut features: ::core::ffi::c_uint) -> lboo
     );
 }
 pub fn main() {
+    if unsafe { crate::signal::init_early_signals() }.is_err() {
+        ::std::process::exit(1);
+    }
+    if crate::diagnostic_broker::prepare().is_err() {
+        unsafe { crate::signal::restore_early_signals() };
+        ::std::process::exit(1);
+    }
     #[cfg(feature = "safety-injection")]
     if let Err(error) = crate::fault::initialize() {
         eprintln!("rless safety injection: {error}");
+        unsafe { crate::signal::restore_early_signals() };
         ::std::process::exit(2);
     }
     let mut args_strings: Vec<Vec<u8>> = ::std::env::args_os()
@@ -981,9 +1035,12 @@ pub fn main() {
         .chain(::core::iter::once(::core::ptr::null_mut()))
         .collect();
     unsafe {
-        ::std::process::exit(main_0(
+        let status = main_0(
             (args_ptrs.len() - 1) as ::core::ffi::c_int,
             args_ptrs.as_mut_ptr() as *mut *const ::core::ffi::c_char,
-        ) as i32)
+        ) as i32;
+        crate::output::finish_output();
+        crate::diagnostic_broker::finish();
+        ::std::process::exit(status)
     }
 }

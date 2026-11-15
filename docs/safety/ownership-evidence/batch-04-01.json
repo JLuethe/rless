@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-02",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/xbuf.rs",
+      "src/cmdbuf.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-02 separates caller-owned xbuffer descriptors from their ecalloc data; cmdbuf itself is a fixed 2048-byte image array, with separate heap completion/history objects.",
+      "invariant": "A descriptor copy must not duplicate allocation ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 29,
+          "end_line": 34,
+          "excerpt_sha256": "ea8ccda7dff65c71781d93614bffa734226b3a360e30b429860d19bb484c6d81"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 590,
+          "end_line": 604,
+          "excerpt_sha256": "85f13e27c18331491b4d347b60d5d1758e11fb639ed99165666183f790966ba4"
+        }
+      ],
+      "limitations": [
+        "Static command bytes are not an expandable heap buffer."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-02 exports xbuffer data addresses and accepts a raw add_data source across repeated growth calls. An overlapping source can become stale after old data is freed.",
+      "invariant": "A source borrow must survive every destination growth.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 86,
+          "end_line": 98,
+          "excerpt_sha256": "bacd6b5ac25aa1a3043de151d620b440c28935f608b5fd3ee18bea1286af5d83"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 113,
+          "end_line": 115,
+          "excerpt_sha256": "46130b423af03343fe2535402e6732e661a7fe2e83aa336822272a7b312e18e6"
+        }
+      ],
+      "limitations": [
+        "No safe slice contract prevents overlapping source and destination."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-02 uses direct ecalloc/memcpy/free calls for growth; command insertion directly invokes repaint and cursor movement after editing, without a retained buffer callback.",
+      "invariant": "Callee entry must not replace an actively borrowed owner.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 65,
+          "end_line": 75,
+          "excerpt_sha256": "b932fba64dd9fad151a5e75b6cffc285c5b3f67dcf40347191ce7f91d75e4d83"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1028,
+          "end_line": 1038,
+          "excerpt_sha256": "f884135e98153b041a8a964b621d379fb89b407a985bb2c94cd9d0cd5fded49a"
+        }
+      ],
+      "limitations": [
+        "Direct dispatch does not provide an exclusive editing token."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-02 growth retires the old xbuffer address, while cmd_reset only rewrites static command bytes and cursor state. These are different kinds of alias invalidation.",
+      "invariant": "Address lifetime and text validity require separate reasoning.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 67,
+          "end_line": 79,
+          "excerpt_sha256": "f907c663265dfece06220ab16a07803eb1b600c98ca5d37e3a5abd70d535b3f0"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
+        }
+      ],
+      "limitations": [
+        "A stable cmdbuf address does not preserve earlier text."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-02 changes size before overflow checking and replacement allocation; xbuf_set resets destination length before copying. These updates are not a failure-preserving staged byte transaction.",
+      "invariant": "Capacity metadata must agree with the live allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 54,
+          "end_line": 66,
+          "excerpt_sha256": "c3ca86b5dc7f94872286d411687cc91e1b11a1f570aff0421e54532b9f39a58c"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 108,
+          "end_line": 111,
+          "excerpt_sha256": "ce24ba3ade33df29bdc59fbdc564a56ac75157fdd7bbde1e1d16b680f7296443"
+        }
+      ],
+      "limitations": [
+        "No new runtime failure is claimed from this ordering alone."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-02 pairs data allocation with xbuf_deinit free/reset and frees old data during growth. The static cmdbuf array has no allocator release; completion strings have separate owners.",
+      "invariant": "Only heap xbuffer data may take the free counterpart.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 36,
+          "end_line": 41,
+          "excerpt_sha256": "55d63050f08639dfd824f025d6d9d5a30f02e75781a36f13ab34a297935e4870"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1394,
+          "end_line": 1404,
+          "excerpt_sha256": "272ccd370715a8c921e8171c00d61a0f3d32232871136106d16a334091012581"
+        }
+      ],
+      "limitations": [
+        "A copied descriptor cannot independently deinitialize shared data."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-02 reserve hooks and overflow branches call fatal allocation handling rather than return a rollback object; command insertion instead rejects a full static array before shifting bytes.",
+      "invariant": "Failure recovery must identify which updates already occurred.",
+      "source_refs": [
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 47,
+          "end_line": 64,
+          "excerpt_sha256": "5e0d080ea208f6b481551ded63058f237d5fae44020b255a6fb0e8075712d890"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1018,
+          "excerpt_sha256": "63ac0c9c59585d82f78fae473ee0a8bd04fbc61f3d12bf1daa0433e67b19dd08"
+        }
+      ],
+      "limitations": [
+        "The bounded editor rejection does not approve xbuffer growth cleanup."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-02 temporary insert_mode changes and raw data growth have no encoded exclusive-owner handoff. M0-MEM-001 remains open; these sources do not establish a handler-to-editor mutation route.",
+      "invariant": "Borrowed bytes require ordinary serialized owner access.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1376,
+          "end_line": 1392,
+          "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
+        },
+        {
+          "target": "source:src/xbuf.rs",
+          "sha256": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+          "start_line": 47,
+          "end_line": 79,
+          "excerpt_sha256": "db36fe34f71b0ee389cc8c26904cc1e15c954dfef30084f50d900a67d94d1f03"
+        }
+      ],
+      "limitations": [
+        "Asynchronous editing is a precondition concern, not a reproduced event."
+      ]
+    }
+  }
+}

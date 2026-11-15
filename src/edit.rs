@@ -3,8 +3,9 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::os::fd::AsRawFd;
 extern "C" {
-    fn pclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn rless_pclose_read(__stream: *mut FILE) -> ::core::ffi::c_int;
     fn open(
         __file: *const ::core::ffi::c_char,
         __oflag: ::core::ffi::c_int,
@@ -13,7 +14,6 @@ extern "C" {
     fn creat(__file: *const ::core::ffi::c_char, __mode: mode_t) -> ::core::ffi::c_int;
     fn lseek(__fd: ::core::ffi::c_int, __offset: __off_t, __whence: ::core::ffi::c_int) -> __off_t;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn isatty(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn strcmp(
         __s1: *const ::core::ffi::c_char,
@@ -97,7 +97,6 @@ extern "C" {
     fn undo_osc8() -> lbool;
     fn clr_hilite();
     fn set_header(pos: POSITION);
-    fn stat(__file: *const ::core::ffi::c_char, __buf: *mut stat) -> ::core::ffi::c_int;
     static mut new_file: lbool;
     static mut every_first_cmd: *mut ::core::ffi::c_char;
     static mut force_open: ::core::ffi::c_int;
@@ -557,6 +556,12 @@ impl lessmsg_id {
 }
 pub type less_off_t = off_t;
 pub type less_stat_t = stat;
+const _: () = {
+    assert!(std::mem::size_of::<less_stat_t>() == std::mem::size_of::<libc::stat>());
+    assert!(std::mem::align_of::<less_stat_t>() == std::mem::align_of::<libc::stat>());
+    assert!(std::mem::offset_of!(less_stat_t, st_ino) == std::mem::offset_of!(libc::stat, st_ino));
+    assert!(std::mem::offset_of!(less_stat_t, st_dev) == std::mem::offset_of!(libc::stat, st_dev));
+};
 pub type POSITION = less_off_t;
 pub type LINENUM = off_t;
 #[derive(Copy, Clone)]
@@ -823,7 +828,8 @@ pub unsafe extern "C" fn close_pipe(mut pipefd: *mut FILE) {
     if pipefd.is_null() {
         return;
     }
-    status = pclose(pipefd);
+    status = rless_pclose_read(pipefd);
+    crate::filename::check_helper_close(status);
     if status == -1 as ::core::ffi::c_int {
         p = errno_message(b"pclose\0".as_ptr() as *const ::core::ffi::c_char);
         parg.p_string = p;
@@ -949,6 +955,7 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
     let mut f: ::core::ffi::c_int = 0;
     let mut answer: ::core::ffi::c_int = 0;
     let mut chflags: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
+    let mut tty_checked_before_probe = false;
     let mut filename: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut open_filename: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     let mut alt_filename: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -1045,6 +1052,17 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                         return edit_error(filename, alt_filename, altpipe, ifile);
                     } else {
                         chflags |= 0o1 as ::core::ffi::c_int;
+                        // A read probe may leave an outstanding request in a
+                        // hostile filesystem. Check the opened descriptor for
+                        // a tty before starting that cancellable read; an
+                        // isatty ioctl afterward could wait behind it.
+                        if force_open == 0 && crate::input_worker::isatty_or_native(f) != 0 {
+                            crate::input_worker::close_or_native(f);
+                            parg.p_string = filename;
+                            error(lmsg(lessmsg_id::LM_X_is_a_terminal), &raw mut parg);
+                            return edit_error(filename, alt_filename, altpipe, ifile);
+                        }
+                        tty_checked_before_probe = true;
                         if bin_file(f, &raw mut nread).0 != 0
                             && is_tty.0 != 0
                             && force_open == 0
@@ -1059,7 +1077,7 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                             if answer != 'y' as ::core::ffi::c_int
                                 && answer != 'Y' as ::core::ffi::c_int
                             {
-                                close(f);
+                                crate::input_worker::close_or_native(f);
                                 return edit_error(filename, alt_filename, altpipe, ifile);
                             }
                         }
@@ -1067,11 +1085,21 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                 }
             }
         }
-        if force_open == 0 && f >= 0 as ::core::ffi::c_int && isatty(f) != 0 {
+        if !tty_checked_before_probe
+            && force_open == 0
+            && f >= 0 as ::core::ffi::c_int
+            && crate::input_worker::isatty_or_native(f) != 0
+        {
             let mut parg_0: PARG = parg {
                 p_string: ::core::ptr::null::<::core::ffi::c_char>(),
             };
             parg_0.p_string = filename;
+            // A pathname can change after bad_file's stat. If the pinned open
+            // resolves to a terminal, release that newly owned descriptor;
+            // CH_KEEPOPEN still borrows fd 0 and must remain untouched.
+            if chflags & 0o1 != 0 {
+                crate::input_worker::close_or_native(f);
+            }
             error(lmsg(lessmsg_id::LM_X_is_a_terminal), &raw mut parg_0);
             return edit_error(filename, alt_filename, altpipe, ifile);
         }
@@ -1134,7 +1162,8 @@ pub unsafe extern "C" fn edit_ifile(mut ifile: *mut ::core::ffi::c_void) -> ::co
                 },
                 __glibc_reserved: [0; 3],
             };
-            let mut r: ::core::ffi::c_int = stat(open_filename, &raw mut statbuf);
+            let mut r: ::core::ffi::c_int =
+                crate::input_worker::stat_or_native(f, (&raw mut statbuf).cast());
             if r == 0 as ::core::ffi::c_int {
                 curr_ino = statbuf.st_ino as ino_t;
                 curr_dev = statbuf.st_dev as dev_t;
@@ -1353,7 +1382,7 @@ pub unsafe extern "C" fn reopen_curr_ifile() {
 }
 #[no_mangle]
 pub unsafe extern "C" fn edit_stdin() -> ::core::ffi::c_int {
-    if isatty(fd0) != 0 {
+    if crate::input_worker::isatty_or_native(fd0) != 0 {
         error(
             lmsg(lessmsg_id::LM_Missing_filename),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
@@ -1365,7 +1394,7 @@ pub unsafe extern "C" fn edit_stdin() -> ::core::ffi::c_int {
 #[no_mangle]
 pub unsafe extern "C" fn cat_file() {
     let mut c: ::core::ffi::c_int = 0;
-    loop {
+    while !crate::output::output_failed() {
         c = ch_forw_get();
         if c == -1 as ::core::ffi::c_int {
             break;
@@ -1374,9 +1403,133 @@ pub unsafe extern "C" fn cat_file() {
     }
     flush();
 }
+
+// Hold the verified object through the overwrite/append decision. Opening a
+// pathname again after a prompt lets another process replace its final link.
+pub(crate) unsafe fn open_verified_logfile(
+    filename: *const libc::c_char,
+) -> Result<(libc::c_int, bool), ()> {
+    let (directory, basename) = crate::secure_path::open_parent(filename).map_err(|error| {
+        *libc::__errno_location() = error;
+    })?;
+    let mut fd = -1;
+    let mut existed = false;
+    for _ in 0..4 {
+        fd = libc::openat(
+            directory.as_raw_fd(),
+            basename.as_ptr(),
+            libc::O_WRONLY | libc::O_CLOEXEC | libc::O_NOFOLLOW | libc::O_NONBLOCK,
+        );
+        if fd >= 0 {
+            existed = true;
+            break;
+        }
+        if *libc::__errno_location() != libc::ENOENT {
+            return Err(());
+        }
+        fd = libc::openat(
+            directory.as_raw_fd(),
+            basename.as_ptr(),
+            libc::O_WRONLY | libc::O_CREAT | libc::O_EXCL | libc::O_CLOEXEC | libc::O_NOFOLLOW,
+            0o600,
+        );
+        if fd >= 0 {
+            break;
+        }
+        if *libc::__errno_location() != libc::EEXIST {
+            return Err(());
+        }
+    }
+    if fd < 0 {
+        *libc::__errno_location() = libc::EAGAIN;
+        return Err(());
+    }
+    let mut stat: libc::stat = std::mem::zeroed();
+    let stat_failed = libc::fstat(fd, &mut stat) != 0;
+    if stat_failed
+        || stat.st_mode & libc::S_IFMT != libc::S_IFREG
+        || stat.st_nlink != 1
+        || stat.st_uid != libc::geteuid()
+    {
+        let error = if stat_failed {
+            *libc::__errno_location()
+        } else {
+            libc::EPERM
+        };
+        libc::close(fd);
+        *libc::__errno_location() = error;
+        return Err(());
+    }
+    let flags = libc::fcntl(fd, libc::F_GETFL);
+    if flags < 0 || libc::fcntl(fd, libc::F_SETFL, flags & !libc::O_NONBLOCK) < 0 {
+        let error = *libc::__errno_location();
+        libc::close(fd);
+        *libc::__errno_location() = error;
+        return Err(());
+    }
+    Ok((fd, existed))
+}
+
+#[cfg(test)]
+mod logfile_tests {
+    use super::open_verified_logfile;
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::fs::{symlink, PermissionsExt};
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+
+    #[test]
+    fn logfile_open_rejects_links_and_keeps_the_verified_object() {
+        let directory = std::env::temp_dir().join(format!(
+            "rless-log-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        let target = directory.join("target");
+        std::fs::write(&target, b"unchanged").unwrap();
+        let alias = directory.join("alias");
+        symlink(&target, &alias).unwrap();
+        let hard = directory.join("hard");
+        std::fs::hard_link(&target, &hard).unwrap();
+        for path in [&alias, &hard] {
+            let name = CString::new(path.as_os_str().as_bytes()).unwrap();
+            assert!(unsafe { open_verified_logfile(name.as_ptr()) }.is_err());
+        }
+        std::fs::remove_file(&hard).unwrap();
+        assert_eq!(std::fs::read(&target).unwrap(), b"unchanged");
+
+        let log = directory.join("log");
+        let name = CString::new(log.as_os_str().as_bytes()).unwrap();
+        let (fd, existed) = unsafe { open_verified_logfile(name.as_ptr()) }.unwrap();
+        assert!(!existed);
+        assert_eq!(
+            std::fs::metadata(&log).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+        assert_ne!(
+            unsafe { libc::fcntl(fd, libc::F_GETFD) } & libc::FD_CLOEXEC,
+            0
+        );
+        assert_eq!(unsafe { libc::close(fd) }, 0);
+
+        let (fd, existed) = unsafe { open_verified_logfile(name.as_ptr()) }.unwrap();
+        assert!(existed);
+        let displaced = directory.join("displaced");
+        std::fs::rename(&log, &displaced).unwrap();
+        std::fs::write(&log, b"replacement").unwrap();
+        assert_eq!(unsafe { libc::write(fd, b"old".as_ptr().cast(), 3) }, 3);
+        assert_eq!(unsafe { libc::close(fd) }, 0);
+        assert_eq!(std::fs::read(&displaced).unwrap(), b"old");
+        assert_eq!(std::fs::read(&log).unwrap(), b"replacement");
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
-    let mut exists: ::core::ffi::c_int = 0;
     let mut answer: ::core::ffi::c_int = 0;
     let mut parg: PARG = parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -1384,40 +1537,54 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
     if ch_getflags() & 0o1 as ::core::ffi::c_int != 0 {
         return;
     }
-    exists = open(filename, 0 as ::core::ffi::c_int);
-    if exists >= 0 as ::core::ffi::c_int {
-        close(exists);
+    let existed = match crate::log_process::open(filename) {
+        Ok(existed) => existed,
+        Err(_) => {
+            crate::ch::mark_logfile_failed();
+            if !crate::signal::has_pending_notifications() {
+                parg.p_string = filename;
+                error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+            }
+            return;
+        }
+    };
+    if sigs != 0 || crate::signal::has_pending_notifications() {
+        crate::log_process::cancel();
+        return;
     }
-    exists = (exists >= 0 as ::core::ffi::c_int) as ::core::ffi::c_int;
-    if exists == 0 || force_logfile != 0 {
+    if !existed || force_logfile != 0 {
         answer = 'O' as ::core::ffi::c_int;
     } else {
         parg.p_string = filename;
         answer = query(lmsg(lessmsg_id::LM_X_exists), &raw mut parg);
     }
     loop {
+        // query() returns the interrupted-read sentinel while a signal is
+        // pending. Re-prompting here would keep consuming that sentinel and
+        // prevent the main loop from dispatching SIGTERM or SIGWINCH.
+        if answer == -2 || sigs != 0 || crate::signal::has_pending_notifications() {
+            crate::log_process::cancel();
+            return;
+        }
         match answer {
             79 | 111 => {
-                logfile = creat(filename, 0o644 as mode_t);
-                break;
-            }
-            65 | 97 => {
-                logfile = open(
-                    filename,
-                    0o2000 as ::core::ffi::c_int | 0o1 as ::core::ffi::c_int,
-                );
-                if lseek(
-                    logfile,
-                    0 as ::core::ffi::c_int as __off_t,
-                    2 as ::core::ffi::c_int,
-                ) == -1 as ::core::ffi::c_int as off_t
-                {
-                    close(logfile);
-                    logfile = -1 as ::core::ffi::c_int;
+                if crate::log_process::configure(true).is_ok() {
+                    // Legacy global is an active-log sentinel. The actual
+                    // filesystem descriptor lives only in the child.
+                    logfile = 0;
                 }
                 break;
             }
-            68 | 100 => return,
+            65 | 97 => {
+                if crate::log_process::configure(false).is_ok() {
+                    logfile = 0;
+                }
+                break;
+            }
+            68 | 100 => {
+                crate::log_process::cancel();
+                return;
+            }
             _ => {
                 answer = query(
                     lmsg(lessmsg_id::LM_Overwrite),
@@ -1427,8 +1594,12 @@ pub unsafe extern "C" fn use_logfile(mut filename: *const ::core::ffi::c_char) {
         }
     }
     if logfile < 0 as ::core::ffi::c_int {
-        parg.p_string = filename;
-        error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+        crate::ch::mark_logfile_failed();
+        crate::log_process::cancel();
+        if !crate::signal::has_pending_notifications() {
+            parg.p_string = filename;
+            error(lmsg(lessmsg_id::LM_Cannot_write_to_X), &raw mut parg);
+        }
         return;
     }
 }

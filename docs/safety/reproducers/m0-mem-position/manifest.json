@@ -1,0 +1,16 @@
+{
+  "finding_id": "M0-MEM-003",
+  "scope": "Independent pre-fix ASAN startup reproduction; empty/small input, LESS_LINES=1, physical PTY1x80. Partial search/resize probes excluded as incomplete process observations.",
+  "tester": "luna_56_check",
+  "reports": [
+    {
+      "file": "empty-startup.out",
+      "sha256": "94df2331efb61cee096135e3a99758239ce9d4111f61057dc27c3c4a2dbf0a97"
+    },
+    {
+      "file": "small-startup.out",
+      "sha256": "8fc75ab2eff42eff5d245284ae6f8b8624cab598e3c08b7fdad20aad21a4f435"
+    }
+  ],
+  "fix_verified": false
+}

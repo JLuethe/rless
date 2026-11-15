@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:c13207fabc32b5f947566d8e",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/cmdbuf.rs"
+    ],
+    "symbol": "cp",
+    "context": "",
+    "declared_type": "* mut :: core :: ffi :: c_char",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The cp pointer is a non-owning cursor into cmdbuf, initially null and set to the array base by cmd_reset before editing.",
+      "invariant": "Cursor validity depends on the static command owner.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 665,
+          "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
+        }
+      ],
+      "limitations": [
+        "cp is an interior pointer into cmdbuf and never an allocator owner."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "Step/repaint helpers copy cp into raw np/save_cp/old_cp aliases and update through pointer arguments; none retains ownership of command bytes.",
+      "invariant": "Cursor aliases do not keep old command text unchanged.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 804,
+          "end_line": 846,
+          "excerpt_sha256": "95a8b1f16405fffc0539f99ef2801c02301a7e2f2edd7b0d1fb01da6ad1c031c"
+        }
+      ],
+      "limitations": [
+        "The base allocation must survive every cmd_step_left or insert operation."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "Character stepping updates cp-related raw cursor aliases before repaint invokes terminal output using borrowed printable representations.",
+      "invariant": "Formatting calls require the command cursor to remain valid.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 721,
+          "end_line": 785,
+          "excerpt_sha256": "c4cfaceaf38e4bddebdd5f308c2386004ff7714385f2cf97e0cde4f35b20ce59"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 804,
+          "end_line": 842,
+          "excerpt_sha256": "cb406ba10b02144fc3e58b3edf3c042992d7c2112856ff09d3c8b31e5c75ed4a"
+        }
+      ],
+      "limitations": [
+        "Named editor calls can update the cursor but store no callback in cp."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Insertion/erasure and scrolling change which byte a saved address denotes; cmd_reset repositions cp without tracking outstanding borrowed cursor values.",
+      "invariant": "A stable address can still identify changed logical content.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 973,
+          "end_line": 1038,
+          "excerpt_sha256": "6647f16bace80840546541d3d0f2a855f6e70c8883572674dd63dad1e5e686b6"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "cp, byte contents, display column and offset change separately; same-array/NUL assumptions must remain true through the edit.",
+      "invariant": "Cursor publication requires coherent byte and column state.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 907,
+          "end_line": 973,
+          "excerpt_sha256": "9aee9641faeb61e192fda0b85b8200821a0ce8f7baa70d4671c4db7fc2570780"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1038,
+          "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "cp is never freed; moving it does not move or release cmdbuf, and copied cursor values must not be passed to free.",
+      "invariant": "A cursor is always a borrow, never an allocation base owner.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 665,
+          "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
+        }
+      ],
+      "limitations": [
+        "cp must not be passed to free even when it points at the allocation start."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "Start/end checks constrain normal cp movement, but error returns carry no validated cursor generation after replacement or reentry.",
+      "invariant": "Error returns do not certify saved raw cursors.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 907,
+          "end_line": 959,
+          "excerpt_sha256": "a8fdfcf15fd227fa7f0daf009454b43569e406a1844dacb057ded4365d2c81d9"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1020,
+          "excerpt_sha256": "f13d8569ebe0eef4df0dfe5247378fe0f2e358b4a8f5ad40629c03daf7616098"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "No exclusive Rust borrow guards the cp shared pointer across exported editor calls and asynchronous terminal activity.",
+      "invariant": "Cursor lifecycle remains a raw-core alias constraint.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 589,
+          "end_line": 665,
+          "excerpt_sha256": "fe35f17a0f24d4cb3804ad3e69238fc1ec7f2a8777dc4364bcd9113781f26395"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Source-specific review of coupled legacy editor state; M0-MEM-001 remains open and no new runtime defect is asserted from raw-pointer structure alone."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "src/signal.rs:83-85 enters quit without dereferencing cp. The cursor borrow needs ordinary editor exclusion, but no downstream handler-to-editor cursor mutation is established by these lines."
+    }
+  },
+  "finding_context": {}
+}

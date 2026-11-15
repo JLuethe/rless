@@ -18,10 +18,10 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def run(name, command, cwd=SOURCE, env=None):
+def run(name, command, cwd=SOURCE, env=None, timeout=None):
     print(name, flush=True)
     with (REPORT / (name + '.log')).open('wb') as log:
-        result=subprocess.run(command, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT)
+        result=subprocess.run(command, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT,timeout=timeout)
     RECORDS.append(dict(name=name,command=command,original_exit_status=result.returncode,
         expected_exit_status=0,log=str(REPORT/(name+'.log')),log_sha256=sha(REPORT/(name+'.log')),
         build_flags={key:env[key] for key in ('RUSTFLAGS',) if env and key in env}))
@@ -148,6 +148,9 @@ def main():
                 shutil.copyfile(native_path,retained)
             objects[native_path]=dict(path=str(retained),sha256=digest)
         libraries[name]=dict(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),ldd=text,libraries_sha256=hashes)
+    run('supplemental-boundary-controls',['python3','tools/safety/boundary_controls.py',
+        '--profile','native','--output','/work/report/supplemental-boundaries','--reference-runtime'],timeout=2400)
+    boundary_summary=REPORT/'supplemental-boundaries/summary.json'
     if snapshot:
         validate(snapshot,SOURCE)
     evidence_files={str(path):sha(path) for path in REPORT.rglob('*') if path.is_file()}
@@ -159,6 +162,7 @@ def main():
     (REPORT/'result.json').write_text(json.dumps(dict(status='passed',runtime_safety_verified=False,
         procedure='REFERENCE-GLIBC-2.41-NATIVE-v1',records=RECORDS,
         evidence_files=evidence_files,objects=objects,test_binaries=test_binaries,
+        boundary_controls=dict(path=str(boundary_summary),sha256=sha(boundary_summary)),
         allocation_binding=dict(path=str(alloc_binding),sha256=sha(alloc_binding)),native_summary_path=str(summaries[0]),
         source_manifest_sha256=sha('/input/source-manifest.json') if snapshot else None,
         scope='Actual glibc 2.41 native baseline; no full safety campaign claim.',runtime=runtime,

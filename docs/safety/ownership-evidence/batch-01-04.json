@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:84093c43c1d9d19533f8e3f8",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/fault.rs"
+    ],
+    "symbol": "FAIL_SITE",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The FAIL_SITE private AtomicUsize owns a site number, initially disabled at zero, without any pager pointer or allocated payload.",
+      "invariant": "The atomic owns a scalar site identifier only.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 20,
+          "excerpt_sha256": "660031c3fc1f1b6837b076611e84b916fd29c08bd16d7f3e4f176cc808ac33b4"
+        }
+      ],
+      "limitations": [
+        "FAIL_SITE selects a plan site and owns no injected allocation."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "initialize stores a copied Site discriminant and hit reads FAIL_SITE; neither returns a reference or exposes its address to native code.",
+      "invariant": "Site state cannot alias an application allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 146,
+          "end_line": 149,
+          "excerpt_sha256": "d86064981a1688975214e8e8e23b4d6459b4e39433371222bfe28aa70f7af6e3"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
+        }
+      ],
+      "limitations": [
+        "Acquire publication must pair with initialization of ordinal and trace state."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "hit compares FAIL_SITE with the selected Site and directly invokes next_trigger/write_marker; no callback address is stored.",
+      "invariant": "Site selection does not store function addresses.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 204,
+          "excerpt_sha256": "ae16c00a7846337538a3ada1d7c5ff1ab01eb55821e8e434539087d867b42437"
+        }
+      ],
+      "limitations": [
+        "The site tag is not a function pointer supplied by the harness."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The FAIL_SITE object has static lifetime; initialize resets its value without invalidating hit references or moving the atomic.",
+      "invariant": "Reconfiguration changes a value, never its address.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 99,
+          "end_line": 104,
+          "excerpt_sha256": "5cadcc39e008a068bc94966dfec0fc7de46d81ddf1716572697738d109ccec7e"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "initialize validates the plan and descriptor first, then publishes FAIL_SITE with Release; hit loads Acquire before reading related configuration.",
+      "invariant": "Publication of an enabled site follows configuration.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 111,
+          "end_line": 149,
+          "excerpt_sha256": "4c284c66dda08e3e7bd9ef4524942e9d56f5dcde021b622b45179daa7c9b143b"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The FAIL_SITE AtomicUsize requires no free or close; the trace descriptor it selects is owned separately from this numeric field.",
+      "invariant": "Releasing a trace pipe never releases the site object.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 16,
+          "end_line": 20,
+          "excerpt_sha256": "660031c3fc1f1b6837b076611e84b916fd29c08bd16d7f3e4f176cc808ac33b4"
+        }
+      ],
+      "limitations": [
+        "Disabling the tag releases no pager resource."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "A rejected plan or FD check leaves FAIL_SITE disabled; hit ignores other sites without acquiring application storage.",
+      "invariant": "Configuration failure leaves the selected site disabled.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 105,
+          "end_line": 139,
+          "excerpt_sha256": "a7dcf94e1d4e29b0c9d72a2bbdde4c8e5b0a1dcb21de2095091049ad558243be"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "FAIL_SITE uses the supported lock-free atomic width; this local guarantee does not approve allocation reached from legacy handlers.",
+      "invariant": "This scalar is accessed atomically in hook contexts.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 9,
+          "end_line": 20,
+          "excerpt_sha256": "a57affe04b747a49d59235c5be494477eb9d02324d14eff8097bdd3238e8854f"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 204,
+          "excerpt_sha256": "ae16c00a7846337538a3ada1d7c5ff1ab01eb55821e8e434539087d867b42437"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {
+    "M0-SIG-002": "FAIL_SITE publishes the selected hook plan through atomic state. M0-SIG-002 concerns the SIGUSR1 lookup and queue-allocation caller, whose safety is not implied by publishing a site tag; that caller finding remains open."
+  }
+}

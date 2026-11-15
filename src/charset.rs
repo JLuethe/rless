@@ -775,6 +775,140 @@ pub static mut cs_aliases: [cs_alias; 43] = [
 static mut chardef: [::core::ffi::c_char; 256] = [0; 256];
 static mut binfmt: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
 static mut utfbinfmt: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum BinaryFormatArg {
+    None,
+    SignedInt,
+    UnsignedInt,
+    SignedLong,
+    UnsignedLong,
+    SignedLongLong,
+    UnsignedLongLong,
+}
+
+static mut binfmt_arg: BinaryFormatArg = BinaryFormatArg::UnsignedInt;
+static mut utfbinfmt_arg: BinaryFormatArg = BinaryFormatArg::UnsignedLong;
+
+// LESSBINFMT/LESSUTFBINFMT supply a native printf format with one integer
+// argument. Validate its complete conversion before calling libc: rejecting
+// only %n still lets %s dereference the character value as a pointer.
+fn binary_format_arg(bytes: &[u8]) -> Option<BinaryFormatArg> {
+    if bytes.len() > 256 {
+        return None;
+    }
+    let mut index = 0;
+    let mut argument = BinaryFormatArg::None;
+    let mut seen = false;
+    while index < bytes.len() {
+        if bytes[index] != b'%' {
+            index += 1;
+            continue;
+        }
+        index += 1;
+        if bytes.get(index) == Some(&b'%') {
+            index += 1;
+            continue;
+        }
+        if seen {
+            return None;
+        }
+        seen = true;
+        while bytes
+            .get(index)
+            .is_some_and(|byte| b"-+ #0'I".contains(byte))
+        {
+            index += 1;
+        }
+        let mut width = 0u32;
+        while let Some(byte @ b'0'..=b'9') = bytes.get(index) {
+            width = width * 10 + (byte - b'0') as u32;
+            if width > 30 {
+                return None;
+            }
+            index += 1;
+        }
+        if bytes.get(index) == Some(&b'.') {
+            index += 1;
+            let mut precision = 0u32;
+            while let Some(byte @ b'0'..=b'9') = bytes.get(index) {
+                precision = precision * 10 + (byte - b'0') as u32;
+                if precision > 30 {
+                    return None;
+                }
+                index += 1;
+            }
+        }
+        let length = match bytes.get(index) {
+            Some(b'h') => {
+                index += 1;
+                if bytes.get(index) == Some(&b'h') {
+                    index += 1;
+                }
+                0
+            }
+            Some(b'l') => {
+                index += 1;
+                if bytes.get(index) == Some(&b'l') {
+                    index += 1;
+                    2
+                } else {
+                    1
+                }
+            }
+            _ => 0,
+        };
+        argument = match (bytes.get(index), length) {
+            (Some(b'd' | b'i'), 0) | (Some(b'c'), 0) => BinaryFormatArg::SignedInt,
+            (Some(b'u' | b'o' | b'x' | b'X'), 0) => BinaryFormatArg::UnsignedInt,
+            (Some(b'd' | b'i'), 1) => BinaryFormatArg::SignedLong,
+            (Some(b'u' | b'o' | b'x' | b'X'), 1) => BinaryFormatArg::UnsignedLong,
+            (Some(b'd' | b'i'), 2) => BinaryFormatArg::SignedLongLong,
+            (Some(b'u' | b'o' | b'x' | b'X'), 2) => BinaryFormatArg::UnsignedLongLong,
+            _ => return None,
+        };
+        index += 1;
+    }
+    Some(argument)
+}
+
+unsafe fn binary_format_bytes(format: *const ::core::ffi::c_char) -> Option<BinaryFormatArg> {
+    if format.is_null() {
+        return None;
+    }
+    binary_format_arg(std::ffi::CStr::from_ptr(format).to_bytes())
+}
+
+unsafe fn print_binary_format(
+    output: *mut ::core::ffi::c_char,
+    capacity: usize,
+    format: *const ::core::ffi::c_char,
+    value: LWCHAR,
+    argument: BinaryFormatArg,
+) {
+    match argument {
+        BinaryFormatArg::None => {
+            snprintf(output, capacity, format);
+        }
+        BinaryFormatArg::SignedInt => {
+            snprintf(output, capacity, format, value as ::core::ffi::c_int);
+        }
+        BinaryFormatArg::UnsignedInt => {
+            snprintf(output, capacity, format, value as ::core::ffi::c_uint);
+        }
+        BinaryFormatArg::SignedLong => {
+            snprintf(output, capacity, format, value as ::core::ffi::c_long);
+        }
+        BinaryFormatArg::UnsignedLong => {
+            snprintf(output, capacity, format, value as ::core::ffi::c_ulong);
+        }
+        BinaryFormatArg::SignedLongLong => {
+            snprintf(output, capacity, format, value as ::core::ffi::c_longlong);
+        }
+        BinaryFormatArg::UnsignedLongLong => {
+            snprintf(output, capacity, format, value as ::core::ffi::c_ulonglong);
+        }
+    }
+}
 #[no_mangle]
 pub static mut binattr: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int
     | (2 as ::core::ffi::c_int) << 8 as ::core::ffi::c_int;
@@ -1093,19 +1227,19 @@ pub unsafe extern "C" fn setfmt(
 ) {
     if s.is_null() || *s as ::core::ffi::c_int == '\0' as ::core::ffi::c_int {
         s = default_fmt;
-    } else if for_printf.0 != 0
-        && (*s as ::core::ffi::c_int == '*' as ::core::ffi::c_int
-            && (*s.offset(1isize) as ::core::ffi::c_int == '\0' as ::core::ffi::c_int
-                || *s.offset(2isize) as ::core::ffi::c_int == '\0' as ::core::ffi::c_int
-                || !strchr(
-                    s.offset(2 as ::core::ffi::c_int as isize),
-                    'n' as ::core::ffi::c_int,
-                )
-                .is_null())
-            || *s as ::core::ffi::c_int != '*' as ::core::ffi::c_int
-                && !strchr(s, 'n' as ::core::ffi::c_int).is_null())
-    {
-        s = default_fmt;
+    } else if for_printf.0 != 0 {
+        let format = if *s as u8 == b'*' {
+            if *s.offset(1) == 0 || *s.offset(2) == 0 {
+                ::core::ptr::null()
+            } else {
+                s.offset(2)
+            }
+        } else {
+            s
+        };
+        if binary_format_bytes(format).is_none() {
+            s = default_fmt;
+        }
     }
     if *s as ::core::ffi::c_int == '*' as ::core::ffi::c_int
         && *s.offset(1isize) as ::core::ffi::c_int != '\0' as ::core::ffi::c_int
@@ -1188,6 +1322,7 @@ pub unsafe extern "C" fn init_charset() {
         b"*s<%02X>\0".as_ptr() as *const ::core::ffi::c_char,
         lbool::LTRUE,
     );
+    binfmt_arg = binary_format_bytes(binfmt).unwrap_or(BinaryFormatArg::UnsignedInt);
     s = lgetenv(b"LESSUTFBINFMT\0".as_ptr() as *const ::core::ffi::c_char);
     setfmt(
         s,
@@ -1196,6 +1331,7 @@ pub unsafe extern "C" fn init_charset() {
         b"<U+%04lX>\0".as_ptr() as *const ::core::ffi::c_char,
         lbool::LTRUE,
     );
+    utfbinfmt_arg = binary_format_bytes(utfbinfmt).unwrap_or(BinaryFormatArg::UnsignedLong);
 }
 #[no_mangle]
 pub unsafe extern "C" fn binary_char(mut c: LWCHAR) -> lbool {
@@ -1244,11 +1380,12 @@ pub unsafe extern "C" fn prchar(mut c: LWCHAR) -> *const ::core::ffi::c_char {
             (c ^ 0o100 as LWCHAR) as ::core::ffi::c_int,
         );
     } else {
-        snprintf(
+        print_binary_format(
             &raw mut buf as *mut ::core::ffi::c_char,
             ::core::mem::size_of::<[::core::ffi::c_char; 32]>(),
             binfmt,
             c,
+            binfmt_arg,
         );
     }
     return &raw mut buf as *mut ::core::ffi::c_char;
@@ -1270,19 +1407,21 @@ pub unsafe extern "C" fn prutfchar(mut ch: LWCHAR) -> *const ::core::ffi::c_char
                 ch as ::core::ffi::c_char as ::core::ffi::c_int ^ 0o100 as ::core::ffi::c_int,
             );
         } else {
-            snprintf(
+            print_binary_format(
                 &raw mut buf as *mut ::core::ffi::c_char,
                 ::core::mem::size_of::<[::core::ffi::c_char; 32]>(),
                 binfmt,
-                ch as ::core::ffi::c_char as ::core::ffi::c_int,
+                ch as ::core::ffi::c_char as ::core::ffi::c_int as LWCHAR,
+                binfmt_arg,
             );
         }
     } else if is_ubin_char(ch).0 != 0 || is_omit_char(ch).0 != 0 {
-        snprintf(
+        print_binary_format(
             &raw mut buf as *mut ::core::ffi::c_char,
             ::core::mem::size_of::<[::core::ffi::c_char; 32]>(),
             utfbinfmt,
             ch,
+            utfbinfmt_arg,
         );
     } else {
         let mut p: *mut ::core::ffi::c_char = &raw mut buf as *mut ::core::ffi::c_char;
@@ -3888,3 +4027,47 @@ unsafe extern "C" fn c2rust_run_static_initializers() {
 #[cfg_attr(target_os = "windows", link_section = ".CRT$XIB")]
 #[cfg_attr(target_os = "macos", link_section = "__DATA,__mod_init_func")]
 static INIT_ARRAY: [unsafe extern "C" fn(); 1] = [c2rust_run_static_initializers];
+
+#[cfg(test)]
+mod binary_format_tests {
+    use super::{binary_format_arg, BinaryFormatArg};
+
+    #[test]
+    fn accepts_one_typed_integer_or_literal_percent() {
+        assert_eq!(
+            binary_format_arg(b"<%02X>"),
+            Some(BinaryFormatArg::UnsignedInt)
+        );
+        assert_eq!(
+            binary_format_arg(b"<U+%04lX>"),
+            Some(BinaryFormatArg::UnsignedLong)
+        );
+        assert_eq!(
+            binary_format_arg(b"[%#04x]"),
+            Some(BinaryFormatArg::UnsignedInt)
+        );
+        assert_eq!(binary_format_arg(b"%% raw"), Some(BinaryFormatArg::None));
+        assert_eq!(
+            binary_format_arg(b"%% %lld"),
+            Some(BinaryFormatArg::SignedLongLong)
+        );
+    }
+
+    #[test]
+    fn rejects_pointer_reads_writes_and_extra_arguments() {
+        for format in [
+            b"%s".as_slice(),
+            b"%p",
+            b"%n",
+            b"%*X",
+            b"%2$X",
+            b"%X%X",
+            b"%X%",
+            b"%999999999X",
+            b"%.999999999X",
+            b"%ls",
+        ] {
+            assert_eq!(binary_format_arg(format), None, "{:?}", format);
+        }
+    }
+}

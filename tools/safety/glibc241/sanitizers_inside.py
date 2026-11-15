@@ -38,6 +38,7 @@ def main():
     from snapshot import validate
     snapshot = json.loads(Path('/input/source-manifest.json').read_text())
     validate(snapshot, SOURCE, exact=True)
+    shutil.copyfile('/input/source-manifest.json',SOURCE/'.rless-working-tree.json')
     sys.path.insert(0, str(SOURCE / 'tools'))
     from release import capture_reference_bundle
     capture_reference_bundle('/reference/less', SOURCE)
@@ -228,12 +229,21 @@ def main():
                    '--instrumentation-env', config, '--native-io-shim', shims['native-io'],
                    '--reference', '/reference/less', '--native-alloc-binding', alloc_binding,
                    '--oracle-report', REPORT / 'fault-oracles.json']
-        run('fault-path-tests', command, timeout=max(300, options['repetitions'] * 8))
+        # Both exact-source 0bac955 and 4be355c runs reached more than 3,600
+        # of the 4,004 cases before the old 1,500-second deadline. Retain the
+        # full repetition count and a finite bound with room for instrumented
+        # startup and shared-host scheduling.
+        run('fault-path-tests', command, timeout=max(300, options['repetitions'] * 30))
         reports = sorted(unexpected.glob('*'))
         result['unexpected_sanitizer_reports'] = [dict(path=str(path), sha256=sha(path)) for path in reports]
         if reports:
             raise RuntimeError('unexpected sanitizer reports retained; fault lane is failed')
         result['oracle_report_sha256'] = sha(REPORT / 'fault-oracles.json')
+        run('supplemental-boundary-controls',['python3','tools/safety/boundary_controls.py',
+            '--profile','asan','--output','/work/report/supplemental-boundaries','--reference-runtime','--tool-home','/opt/rust'],timeout=2400)
+        boundary_summary=REPORT/'supplemental-boundaries/summary.json'
+        result['boundary_controls']=dict(path=str(boundary_summary),sha256=sha(boundary_summary))
+
         validate(snapshot, SOURCE)
         result.update(status='passed', infrastructure_scope='Declared fault regression and detector controls only',
                       remaining_final_acceptance='Not inferred from this lane; inspect M0 bindings and final matrix.')

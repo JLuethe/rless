@@ -3,10 +3,76 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static LOG_FAILED: AtomicBool = AtomicBool::new(false);
+static BUFFER_ALLOCATION_FAILED: AtomicBool = AtomicBool::new(false);
+static INPUT_READ_FAILED: AtomicBool = AtomicBool::new(false);
+
+pub fn buffer_allocation_failed() -> bool {
+    BUFFER_ALLOCATION_FAILED.load(Ordering::Relaxed)
+}
+
+pub fn input_read_failed() -> bool {
+    INPUT_READ_FAILED.load(Ordering::Relaxed)
+}
+
+// The binary-file probe runs before ch_init, so its permanent read failure
+// must survive a later successful data read and the interactive file reset.
+pub(crate) unsafe fn mark_input_probe_failed() {
+    read_error = lbool::LTRUE;
+    INPUT_READ_FAILED.store(true, Ordering::Relaxed);
+}
+
+pub fn logfile_failed() -> bool {
+    LOG_FAILED.load(Ordering::Relaxed)
+}
+
+pub(crate) fn mark_logfile_failed() {
+    LOG_FAILED.store(true, Ordering::Relaxed);
+}
+
+fn record_log_failure() {
+    if !LOG_FAILED.swap(true, Ordering::Relaxed) {
+        crate::output::io_error_diagnostic(b"rless: log write or close error\n");
+    }
+}
+
+// The caller lends a live input-buffer range. The child owns the verified
+// logfile descriptor; the pager only sends bounded byte packets. On failure,
+// drop the session once so exit cannot drain an endless source into it.
+unsafe fn write_log_buffer(data: *const u8, length: usize) -> bool {
+    let mut written = 0;
+    while written < length {
+        let result = crate::log_process::write(data.add(written), length - written);
+        if result > 0 && result as usize <= length - written {
+            written += result as usize;
+        } else if result < 0 && *libc::__errno_location() == libc::EINTR {
+            if sigs == 0 && !crate::signal::has_pending_notifications() {
+                continue;
+            }
+            // The abandoned helper may still be inside an uninterruptible
+            // filesystem request. Do not start another write on this log.
+            LOG_FAILED.store(true, Ordering::Relaxed);
+            crate::log_process::cancel();
+            logfile = -1;
+            free(namelogfile.cast());
+            namelogfile = std::ptr::null_mut();
+            return false;
+        } else {
+            record_log_failure();
+            crate::log_process::cancel();
+            logfile = -1;
+            free(namelogfile.cast());
+            namelogfile = std::ptr::null_mut();
+            return false;
+        }
+    }
+    true
+}
 extern "C" {
     fn lseek(__fd: ::core::ffi::c_int, __offset: __off_t, __whence: ::core::ffi::c_int) -> __off_t;
     fn close(__fd: ::core::ffi::c_int) -> ::core::ffi::c_int;
-    fn write(__fd: ::core::ffi::c_int, __buf: *const ::core::ffi::c_void, __n: size_t) -> ssize_t;
     fn calloc(__nmemb: size_t, __size: size_t) -> *mut ::core::ffi::c_void;
     fn free(__ptr: *mut ::core::ffi::c_void);
     fn ecalloc(count: size_t, size: size_t) -> *mut ::core::ffi::c_void;
@@ -491,6 +557,7 @@ unsafe extern "C" fn ch_position(mut block: BLOCKNUM, mut offset: size_t) -> POS
     return block * 8192 as POSITION + offset as POSITION;
 }
 unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
+    crate::signal::collect_pending_signals();
     let mut read_again: lbool = lbool::LFALSE;
     let mut len: POSITION = 0;
     let mut pos: POSITION = 0;
@@ -504,7 +571,7 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
     let mut bn: *mut bufnode = ::core::ptr::null_mut::<bufnode>();
     let mut n: ssize_t = 0;
     let mut h: ::core::ffi::c_int = 0;
-    if thisfile.is_null() {
+    if thisfile.is_null() || buffer_allocation_failed() {
         return -1 as ::core::ffi::c_int;
     }
     if (*thisfile).buflist.next != &raw mut (*thisfile).buflist {
@@ -551,6 +618,14 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                     }
                 }
             }
+            // A failed first allocation leaves only the list sentinel. It has
+            // no buffer payload or hash links and must never be cast to buf.
+            if (*thisfile).buflist.prev == &raw mut (*thisfile).buflist {
+                if !BUFFER_ALLOCATION_FAILED.swap(true, Ordering::Relaxed) {
+                    crate::output::io_error_diagnostic(b"rless: cannot allocate input buffer\n");
+                }
+                return -1;
+            }
             bn = (*thisfile).buflist.prev;
             bp = bn as *mut buf;
             (*(*bn).hnext).hprev = (*bn).hprev;
@@ -589,9 +664,12 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                     if (*thisfile).flags & 0o1 as ::core::ffi::c_int == 0 {
                         return '?' as ::core::ffi::c_int;
                     }
-                    if lseek((*thisfile).file, pos, 0 as ::core::ffi::c_int)
+                    if crate::input_worker::seek_or_native((*thisfile).file, pos, 0)
                         == -1 as ::core::ffi::c_int as off_t
                     {
+                        if !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+                            mark_input_probe_failed();
+                        }
                         error(
                             lmsg(lessmsg_id::LM_seek_error),
                             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
@@ -630,6 +708,7 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                 }
                 if n < 0 as ssize_t {
                     read_error = lbool::LTRUE;
+                    INPUT_READ_FAILED.store(true, Ordering::Relaxed);
                     return -1 as ::core::ffi::c_int;
                 }
                 if secure_allow(
@@ -638,11 +717,9 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                 .0 != 0
                 {
                     if logfile >= 0 as ::core::ffi::c_int && n > 0 as ssize_t {
-                        write(
-                            logfile,
+                        write_log_buffer(
                             (&raw mut (*bp).data as *mut ::core::ffi::c_uchar)
-                                .offset((*bp).datasize as isize)
-                                as *const ::core::ffi::c_void,
+                                .offset((*bp).datasize as isize),
                             n as size_t,
                         );
                     }
@@ -675,6 +752,7 @@ unsafe extern "C" fn ch_get() -> ::core::ffi::c_int {
                         }
                         sleep_ms(50 as ::core::ffi::c_int);
                     }
+                    crate::signal::collect_pending_signals();
                     if ignore_eoi.0 != 0
                         && follow_mode == 1 as ::core::ffi::c_int
                         && curr_ifile_changed().0 != 0
@@ -743,7 +821,7 @@ pub unsafe extern "C" fn end_logfile() {
             lmsg(lessmsg_id::LM_Finishing_logfile),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
         );
-        while ch_forw_get() != -1 as ::core::ffi::c_int {
+        while logfile >= 0 && ch_forw_get() != -1 as ::core::ffi::c_int {
             if sigs
                 & ((1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int
                     | (1 as ::core::ffi::c_int) << 1 as ::core::ffi::c_int
@@ -754,12 +832,31 @@ pub unsafe extern "C" fn end_logfile() {
             }
         }
     }
-    close(logfile);
+    if logfile >= 0 {
+        if let Err(error) = crate::log_process::finish() {
+            if error == libc::EINTR && (sigs != 0 || crate::signal::has_pending_notifications()) {
+                LOG_FAILED.store(true, Ordering::Relaxed);
+            } else {
+                record_log_failure();
+            }
+        }
+    }
     logfile = -1 as ::core::ffi::c_int;
     free(namelogfile as *mut ::core::ffi::c_void);
     namelogfile = ::core::ptr::null_mut::<::core::ffi::c_char>();
     putstr(b"\n\0".as_ptr() as *const ::core::ffi::c_char);
     flush();
+}
+
+pub(crate) unsafe fn abort_logfile() {
+    // A signal can arrive while the verified child is waiting at the
+    // overwrite prompt, before the legacy active sentinel is published.
+    crate::log_process::cancel();
+    if logfile >= 0 {
+        logfile = -1;
+        free(namelogfile.cast());
+        namelogfile = std::ptr::null_mut();
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn sync_logfile() {
@@ -783,11 +880,9 @@ pub unsafe extern "C" fn sync_logfile() {
         while bn != (&raw mut (*thisfile).hashtbl as *mut bufnode).offset(h as isize) {
             bp = bn as *mut buf;
             if (*bp).block == block {
-                write(
-                    logfile,
-                    &raw mut (*bp).data as *mut ::core::ffi::c_uchar as *const ::core::ffi::c_void,
-                    (*bp).datasize,
-                );
+                if !write_log_buffer((&raw const (*bp).data).cast(), (*bp).datasize) {
+                    return;
+                }
                 wrote = lbool::LTRUE;
                 break;
             } else {
@@ -1044,12 +1139,15 @@ pub unsafe extern "C" fn ch_flush() {
             filesize((*thisfile).file)
         };
     }
-    if lseek(
+    if crate::input_worker::seek_or_native(
         (*thisfile).file,
         0 as ::core::ffi::c_int as __off_t,
         0 as ::core::ffi::c_int,
     ) == -1 as ::core::ffi::c_int as off_t
     {
+        if !matches!(*libc::__errno_location(), libc::EINTR | libc::EAGAIN) {
+            mark_input_probe_failed();
+        }
         error(
             lmsg(lessmsg_id::LM_seek_error_to_0),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
@@ -1101,7 +1199,7 @@ unsafe extern "C" fn ch_delbufs() {
 #[no_mangle]
 pub unsafe extern "C" fn seekable(mut f: ::core::ffi::c_int) -> lbool {
     return lbool(
-        (lseek(
+        (crate::input_worker::seek_or_native(
             f,
             1 as ::core::ffi::c_int as __off_t,
             0 as ::core::ffi::c_int,
@@ -1173,7 +1271,7 @@ pub unsafe extern "C" fn ch_close() {
         if (*thisfile).file >= 0 as ::core::ffi::c_int
             && (*thisfile).flags & (0o4 as ::core::ffi::c_int | 0o10 as ::core::ffi::c_int) == 0
         {
-            close((*thisfile).file);
+            crate::input_worker::close_or_native((*thisfile).file);
             // Linux may report a close failure after releasing the descriptor.
             // Never skip the actual close or retry a potentially reused FD.
             #[cfg(feature = "safety-injection")]
@@ -1189,6 +1287,31 @@ pub unsafe extern "C" fn ch_close() {
         set_filestate(curr_ifile, ::core::ptr::null_mut::<::core::ffi::c_void>());
     }
 }
+// Navigation may retain a nonseekable input so it can be revisited. Deleting
+// its ifile ends that lifetime even when a different input is now active.
+pub unsafe fn dispose_ifile_state(ifile: *mut ::core::ffi::c_void) {
+    let state = get_filestate(ifile) as *mut filestate;
+    if state.is_null() {
+        return;
+    }
+    set_filestate(ifile, ::core::ptr::null_mut());
+    if thisfile == state {
+        thisfile = ::core::ptr::null_mut();
+    }
+    let sentinel = &raw mut (*state).buflist;
+    let mut node = (*sentinel).next;
+    while node != sentinel {
+        let next = (*node).next;
+        free(node.cast::<buf>().cast());
+        node = next;
+    }
+    // CH_KEEPOPEN lends stdin; CH_POPEN/CH_HELPFILE have separate owners.
+    if (*state).file >= 0 && (*state).flags & (0o2 | 0o4 | 0o10) == 0 {
+        crate::input_worker::close_or_native((*state).file);
+    }
+    free(state.cast());
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn ch_getflags() -> ::core::ffi::c_int {
     if thisfile.is_null() {
@@ -1210,4 +1333,51 @@ pub struct _IO_codecvt {
 #[repr(C)]
 pub struct _IO_marker {
     _private: [u8; 0],
+}
+
+#[cfg(test)]
+mod lifetime_tests {
+    use super::*;
+
+    // The only ch global-state test; other unit tests do not run the pager.
+    #[test]
+    fn deleting_retained_state_detaches_aliases_and_preserves_borrowed_fd() {
+        unsafe {
+            let original = thisfile;
+            let mut fds = [-1; 2];
+            assert_eq!(libc::pipe(fds.as_mut_ptr()), 0);
+            for active in [false, true] {
+                let state = calloc(1, std::mem::size_of::<filestate>()) as *mut filestate;
+                assert!(!state.is_null());
+                (*state).file = fds[0];
+                (*state).flags = 0o2; // CH_KEEPOPEN, as for stdin.
+                (*state).buflist.next = &raw mut (*state).buflist;
+                (*state).buflist.prev = &raw mut (*state).buflist;
+                thisfile = state;
+                init_hashtbl();
+                assert_eq!(ch_addbuf(), 0);
+                assert_eq!(ch_addbuf(), 0);
+                let mut owner: crate::ifile::ifile = std::mem::zeroed();
+                owner.h_filestate = state.cast();
+                // An inactive deletion must leave the active alias alone.
+                thisfile = if active { state } else { original };
+                dispose_ifile_state((&raw mut owner).cast());
+                assert!(owner.h_filestate.is_null());
+                let current = thisfile;
+                assert_eq!(
+                    current,
+                    if active {
+                        std::ptr::null_mut()
+                    } else {
+                        original
+                    }
+                );
+                dispose_ifile_state((&raw mut owner).cast());
+                assert!(libc::fcntl(fds[0], libc::F_GETFD) >= 0);
+            }
+            close(fds[0]);
+            close(fds[1]);
+            thisfile = original;
+        }
+    }
 }

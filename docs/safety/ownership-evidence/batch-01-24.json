@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:e0776a8e6718955d46e0f8f1",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/help.rs"
+    ],
+    "symbol": "INIT_ARRAY",
+    "context": "",
+    "declared_type": "[unsafe extern \"C\" fn () ; 1]",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "INIT_ARRAY owns one typed C-ABI code address retained by used/init_array attributes in the executable image.",
+      "invariant": "The callback table has one fixed C-ABI entry.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17601,
+          "end_line": 17605,
+          "excerpt_sha256": "459531204e7bc51037da4a56430148fab66c7be0720c9b8411c64b4bf32453dd"
+        }
+      ],
+      "limitations": [
+        "INIT_ARRAY owns one image function pointer, not the help array."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "The loader borrows the retained table; INIT_ARRAY's element points to image code with no captured stack or heap context.",
+      "invariant": "Startup callbacks retain no temporary data aliases.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": [
+        "The loader retains the target address for constructor dispatch only."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "INIT_ARRAY names c2rust_run_static_initializers, which computes size_helpdata without allocation or application callbacks.",
+      "invariant": "The initializer target is explicit and nonallocating.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews.",
+        "The constructor target is fixed; arbitrary native callback tables are outside this record."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The function-pointer array is shared and immutable; no runtime replacement or unloading invalidates INIT_ARRAY's target.",
+      "invariant": "Callback address and code lifetime match the image.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17601,
+          "end_line": 17605,
+          "excerpt_sha256": "459531204e7bc51037da4a56430148fab66c7be0720c9b8411c64b4bf32453dd"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "Static initialization fixes the INIT_ARRAY table before loader traversal, and traversal establishes the default help length before main.",
+      "invariant": "Constructor dispatch completes before help use.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "INIT_ARRAY and its callback code share image lifetime; a loader startup table is not an allocator-owned object to free.",
+      "invariant": "Code addresses are not allocator-owned buffers.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17601,
+          "end_line": 17605,
+          "excerpt_sha256": "459531204e7bc51037da4a56430148fab66c7be0720c9b8411c64b4bf32453dd"
+        }
+      ],
+      "limitations": [
+        "Releasing image metadata is process teardown, not a manual free of INIT_ARRAY."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "The INIT_ARRAY target performs constant size computation and one scalar assignment, so no partial resource owner needs rollback.",
+      "invariant": "The constructor needs no error cleanup owner.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17600,
+          "excerpt_sha256": "cb64b79539e800eaf00623936f74fabee8eba6007c326eb7947b6d321dba2a71"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The INIT_ARRAY target runs as a loader constructor and returns before application handler registration; it is not an asynchronous handler.",
+      "invariant": "Constructor execution does not interrupt pager mutation.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

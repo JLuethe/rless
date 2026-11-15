@@ -18,13 +18,15 @@ import pyte
 from run_v2 import Screen
 
 
-def observe(binary):
+def observe(binary, repeat_stop_shim=None):
     with tempfile.TemporaryDirectory(prefix='rless-job-control-') as directory:
         work = Path(directory)
         (work/'data').write_text('line\n'*50)
         master, slave = pty.openpty()
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 24, 80, 0, 0))
         original = termios.tcgetattr(slave)
+        arm = work/'repeat-stop-arm'
+        trace = work/'repeat-stop-hit'
         control_read, control_write = os.pipe()
         report_read, report_write = os.pipe()
         supervisor = os.fork()
@@ -50,9 +52,13 @@ def observe(binary):
                     if slave > 2:
                         os.close(slave)
                     os.chdir(directory)
-                    os.execve(str(binary), [str(binary), '-P@@READY@@', 'data'],
-                              dict(PATH='/usr/bin:/bin', HOME=directory, LC_ALL='C',
-                                   TERM='xterm-256color', LESSHISTFILE='-'))
+                    env = dict(PATH='/usr/bin:/bin', HOME=directory, LC_ALL='C',
+                               TERM='xterm-256color', LESSHISTFILE='-')
+                    if repeat_stop_shim is not None:
+                        env.update(LD_PRELOAD=str(repeat_stop_shim),
+                                   RLESS_REPEAT_STOP_ARM=str(arm),
+                                   RLESS_REPEAT_STOP_TRACE=str(trace))
+                    os.execve(str(binary), [str(binary), '-P@@READY@@', 'data'], env)
                 os.close(gate_read)
                 os.setpgid(child, child)
                 os.tcsetpgrp(slave, child)
@@ -73,6 +79,20 @@ def observe(binary):
                 _, status = os.waitpid(child, os.WCONTINUED)
                 assert os.WIFCONTINUED(status)
                 send({'continued': True})
+                if repeat_stop_shim is not None:
+                    second_stop = False
+                    deadline = time.monotonic()+0.5
+                    while time.monotonic() < deadline:
+                        found, status = os.waitpid(child, os.WNOHANG | os.WUNTRACED)
+                        if found:
+                            assert os.WIFSTOPPED(status), status
+                            second_stop = True
+                            os.kill(child, signal.SIGCONT)
+                            os.waitpid(child, os.WCONTINUED)
+                            break
+                        time.sleep(0.01)
+                    send({'second_stop': second_stop, 'fault_hit': trace.read_bytes() == b'hit\n'
+                          if trace.exists() else False})
                 assert os.read(control_read, 1) == b'e'
                 _, status = os.waitpid(child, 0)
                 send(dict(status=os.waitstatus_to_exitcode(status), restored=termios.tcgetattr(slave) == original))
@@ -123,6 +143,8 @@ def observe(binary):
         try:
             child = report()['child']
             prompt(0)
+            if repeat_stop_shim is not None:
+                arm.write_bytes(b'1')
             os.write(control_write, b's')
             stopped = report()
             while select.select([master], [], [], 0)[0]:
@@ -133,6 +155,7 @@ def observe(binary):
             start = len(transcript)
             os.write(control_write, b'c')
             assert report() == {'continued': True}
+            repeat_result = report() if repeat_stop_shim is not None else None
             prompt(start)
             resumed = screen.state()
             assert 1049 in resumed['private_modes']
@@ -143,8 +166,11 @@ def observe(binary):
             _, status = os.waitpid(supervisor, 0)
             reaped = True
             assert os.waitstatus_to_exitcode(status) == 0
-            return dict(stopped=stopped, stopped_terminal=stopped_screen,
-                        resumed_terminal=resumed, exited=exited)
+            result = dict(stopped=stopped, stopped_terminal=stopped_screen,
+                          resumed_terminal=resumed, exited=exited)
+            if repeat_result is not None:
+                result.update(repeat_result)
+            return result
         finally:
             if not reaped:
                 if child is not None:

@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from release import capture_reference_bundle, reference_policy
 
 from common import Evidence, PINS, ROOT, environment, sha, write_json
-from run import check_tools, nightly_environment
+from safety_runner import check_tools, nightly_environment
 from native_alloc import RUSTFLAGS as ALLOC_RUSTFLAGS
 from test_fault_paths import ActualFaultPaths, contracts, validate_oracle_report
 
@@ -30,6 +30,7 @@ def main():
     if args.output.exists() or args.repetitions < 1:
         parser.error('choose a fresh output directory and positive repetition count')
     evidence = Evidence(args.output)
+    evidence.report['report_kind'] = 'fault-campaign'
     evidence.report['scope'] = 'Partial real cleanup/read/regex/close/allocation regressions; not complete site/variant/profile acceptance or independent review.'
     env = environment()
     abi_profile = args.abi_profile or {'2.44': 'BUILDER-GLIBC-2.44', '2.41': 'REFERENCE-GLIBC-2.41'}.get(platform.libc_ver()[1])
@@ -184,14 +185,32 @@ def main():
     if capture_reference_bundle(reference, ROOT) != bundle:
         raise ValueError('reference bundle changed during fault campaign')
     evidence.report['findings'].extend([
-        dict(id='M0-IO-001', status='open', reason='Injected read EIO loses input without diagnostic and returns zero.'),
-        dict(id='M0-IO-002', status='open', reason='Injected write EIO loses output without diagnostic and returns zero.')])
+        dict(id='M0-IO-001', status='open', reason='Historical silent read EIO; corrected candidate remains pending independent qualification.'),
+        dict(id='M0-IO-002', status='open', reason='Historical silent write EIO; corrected candidate remains pending independent qualification.')])
     reports = [dict(path=str(p), sha256=sha(p)) for p in sorted(diagnostics.iterdir())]
     evidence.report['sanitizer_reports'] = reports
     if reports:
         evidence.report['findings'].append(dict(status='open', reports=reports))
     # This bounded slice does not derive M0 closure. The gate independently
     # requires every site/profile/ABI control and source-bound review. An
+    # Supplemental controls have independently rederived receipts; a green
+    # legacy fault campaign cannot bypass the memory/linked/live-heap checks.
+    from boundary_controls import ref as boundary_ref, validate_external_report as validate_boundary
+    boundary_output = args.output / 'supplemental-boundaries'
+    boundary_command = [sys.executable, ROOT / 'tools/safety/boundary_controls.py',
+        '--profile', args.profile, '--output', boundary_output]
+    if args.tool_home is not None:
+        boundary_command += ['--tool-home', args.tool_home]
+    boundary_record = evidence.run('supplemental-boundary-controls', boundary_command,
+        env=environment(), profile=profile, timeout=1800)
+    if boundary_record['status'] != 'passed':
+        evidence.finish()
+        return 1
+    boundary_summary = boundary_output / 'summary.json'
+    validate_boundary(boundary_summary,tool_home=args.tool_home)
+    boundary_record['boundary_controls_report'] = boundary_ref(boundary_summary)
+    boundary_record['artifact_hashes'][str(boundary_summary)] = sha(boundary_summary)
+    evidence.save()
     # unconditional synthetic "unsupported" command is not executed evidence.
     evidence.report['remaining_scope'] = {
         'status': 'not-assessed-by-this-runner',

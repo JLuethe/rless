@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/evar.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/evar.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/evar.rs allocates replace list nodes that borrow token slices from writable buf, and copies each looked-up environment value into a temporary saved string before output xbuffer growth.",
+      "invariant": "Replacement nodes own only themselves, not their token slices.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 62,
+          "end_line": 69,
+          "excerpt_sha256": "bbb660a41b58a219e026c673c86bddf506b26f8e91b4831fd0d161124adefb6e"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 107,
+          "end_line": 115,
+          "excerpt_sha256": "0d4a93499b8e834e644cf2540e9568dfa407c54d502bf00a254248637882bfb7"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 229,
+          "end_line": 239,
+          "excerpt_sha256": "ca00734b63e64766e53412713a3f2f1022eacb4e462f836389af5647adb6bc8a"
+        }
+      ],
+      "limitations": [
+        "Input buf and output xbuffer remain caller-owned throughout expansion."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/evar.rs r_fm/r_to point into buf after delimiter bytes are replaced by NUL; find_replace returns those same interior slices. evar2 is a separate copy so appending output cannot invalidate lookup bytes.",
+      "invariant": "Borrowed replacement slices require the original mutable buffer to remain live.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 90,
+          "end_line": 111,
+          "excerpt_sha256": "68303ab270e9536fa5de865e9fb913bdd86f2fcd4c90b113f2e0266c93762309"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 144,
+          "end_line": 157,
+          "excerpt_sha256": "483986a7e838e7e0d31a349b6e1aa21890b8180661508134623a458c87d6462d"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 233,
+          "end_line": 239,
+          "excerpt_sha256": "9e996cf275a421927ab20fc90f0bf4614ff88d91095c0bdec8b66b24c18a2d85"
+        }
+      ],
+      "limitations": [
+        "Raw len does not encode a slice borrow or disjointness from output storage."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/evar.rs calls lgetenv_ext, save and xbuf_add_char directly; it stores no function pointer in replace. Calls into lookup/reserve still cross mutable configuration and byte-buffer owner domains.",
+      "invariant": "Direct callees must preserve active input and replacement borrows.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 5,
+          "end_line": 14,
+          "excerpt_sha256": "13ebb46a84d92e0cf04e80116981a60573f27e4b8b269171698811e24b2e46b6"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 167,
+          "end_line": 191,
+          "excerpt_sha256": "894965ed10f58c9b6b329b4010ec1786a96ba6ce9341f70ba31052076012a29f"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 233,
+          "end_line": 239,
+          "excerpt_sha256": "9e996cf275a421927ab20fc90f0bf4614ff88d91095c0bdec8b66b24c18a2d85"
+        }
+      ],
+      "limitations": [
+        "No callback target is retained to extend temporary lookup storage lifetime."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/evar.rs rewrites delimiter bytes in the caller buffer while constructing tokens, and output appends can relocate the destination xbuffer. The saved lookup copy isolates one alias class but not arbitrary overlapping input/output.",
+      "invariant": "Caller input must not alias a destination invalidated by growth.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 90,
+          "end_line": 111,
+          "excerpt_sha256": "68303ab270e9536fa5de865e9fb913bdd86f2fcd4c90b113f2e0266c93762309"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 229,
+          "end_line": 243,
+          "excerpt_sha256": "49040d6cc60963f319de383750770591956d2c07b695a2992fd23448ca7380db"
+        }
+      ],
+      "limitations": [
+        "M0-MEM-001 remains the scoped raw-owner contract, not a demonstrated overlap failure."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/evar.rs appends replacement bytes incrementally and mutates input delimiters before returning. There is no staged whole-expansion owner that can restore original input/output after later failure.",
+      "invariant": "Expansion is an incremental mutation contract rather than an atomic replacement.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 159,
+          "end_line": 191,
+          "excerpt_sha256": "b56976750e3513515b817a7dc9d1f06996647357d90847d74071535be5722d9a"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 229,
+          "end_line": 243,
+          "excerpt_sha256": "49040d6cc60963f319de383750770591956d2c07b695a2992fd23448ca7380db"
+        }
+      ],
+      "limitations": [
+        "A partially constructed result is not automatically a valid completed variable table."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/evar.rs free_replaces frees list nodes without freeing borrowed r_fm/r_to slices; expand_evars separately frees evar2 after add_evar returns. The caller retains output storage ownership.",
+      "invariant": "Each temporary allocation has one matching normal-return free.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 117,
+          "end_line": 122,
+          "excerpt_sha256": "262682f7ce514fb6c6a87463ae723fec02b7c2907484cb80245abdb55d70afd6"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 237,
+          "end_line": 239,
+          "excerpt_sha256": "6498ebd8158dcefa8346e388a53d82c61bc2ce1e23e2b1bfe72d5d7127666524"
+        }
+      ],
+      "limitations": [
+        "Normal-path pairing does not prove every fatal allocator exit runs these frees."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/evar.rs malformed or unterminated substitutions stop scanning at checked length boundaries; incomplete replacement parsing can retain earlier nodes until add_evar performs normal cleanup. Allocation failures are not local Results.",
+      "invariant": "Error handling must respect already modified input and appended output.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 74,
+          "end_line": 88,
+          "excerpt_sha256": "cedbad824331eb3bc7fbc3f424b782d0be44a89e1bae75b8c31afeea844b3119"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 195,
+          "end_line": 227,
+          "excerpt_sha256": "f5df6a0597fe8097a7692ba663de5677ea27430630307c2a70f11011f5a5d7e9"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 186,
+          "end_line": 192,
+          "excerpt_sha256": "4f23f91da10aa9dc0008891ec00961186217204e2b4a7fb3efff9a37fdd764d1"
+        }
+      ],
+      "limitations": [
+        "This review does not prove arbitrary caller pointers really cover their advertised len."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/evar.rs requires ordinary serialized access to writable buf, output xbuffer and lookup tables; it installs no handler or owner-handoff protocol. The entry remains hazard-recorded under M0-MEM-001.",
+      "invariant": "Shared configuration and buffer owners must remain stable for the call.",
+      "source_refs": [
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 195,
+          "end_line": 199,
+          "excerpt_sha256": "dd4ab2018d7e2f141ee3e8f67bb6f388a461ec10ef57a6f511caa39223d1b977"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 229,
+          "end_line": 243,
+          "excerpt_sha256": "49040d6cc60963f319de383750770591956d2c07b695a2992fd23448ca7380db"
+        }
+      ],
+      "limitations": [
+        "No direct handler-to-expand_evars route is claimed here."
+      ]
+    }
+  }
+}

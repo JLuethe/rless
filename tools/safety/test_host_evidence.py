@@ -8,9 +8,11 @@ import sys
 import tarfile
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from host_evidence import (PROCEDURE, checked, normalize, validate_commands,
-                           validate_external_report, validate_source_archive)
+                           validate_external_report, validate_source_archive,
+                           dynamic_symbols, validate_terminfo_provider)
 from common import sha
 
 
@@ -150,6 +152,53 @@ class HostEvidenceControls(unittest.TestCase):
         self.assertEqual(value['oracle_metadata']['executed_cases'],809)
         self.assertEqual(value['coverage_scope'],'partial')
         self.assertNotIn('runtime_safety_verified',value)
+
+    def test_loaded_terminfo_provider_requires_exact_import_definitions(self):
+        binary = self.root/'pager'
+        provider = self.reference(self.root/'libncursesw.so.6.6')
+        objects = {str(self.root/'libncursesw.so.6'): provider}
+        imports = {'setupterm@TERM_1', 'tputs@TERM_1', 'tigetstr@TERM_1'}
+        exports = set(imports)
+        def symbols(path, reader):
+            return (imports, set()) if path == binary else (set(), exports)
+        with patch('host_evidence.dynamic_symbols', side_effect=symbols):
+            proof = validate_terminfo_provider(binary, objects, '/reader')
+            self.assertEqual(proof['symbols'], sorted(imports))
+            for mutation in ('missing', 'wrong-version', 'wrong-provider-name', 'unloaded', 'no-imports', 'changed-object'):
+                with self.subTest(mutation=mutation):
+                    chosen = objects
+                    exports = set(imports)
+                    if mutation == 'missing':
+                        exports.remove('tputs@TERM_1')
+                    elif mutation == 'wrong-version':
+                        exports = {v.replace('TERM_1', 'TERM_2') for v in exports}
+                    elif mutation == 'wrong-provider-name':
+                        chosen = {str(self.root/'libpretend.so.6'): provider}
+                    elif mutation == 'unloaded':
+                        chosen = {}
+                    elif mutation == 'no-imports':
+                        imports = {'malloc@GLIBC_2.2.5'}
+                    elif mutation == 'changed-object':
+                        imports = {'setupterm@TERM_1', 'tputs@TERM_1', 'tigetstr@TERM_1'}
+                        Path(provider['path']).write_text('different')
+                    with self.assertRaises(ValueError):
+                        validate_terminfo_provider(binary, chosen, '/reader')
+
+    def test_symbol_reader_distinguishes_definitions_and_default_versions(self):
+        from types import SimpleNamespace
+        output = '''Symbol table '.dynsym' contains 6 entries:
+  1: 00000000 0 FUNC GLOBAL DEFAULT UND tputs@TERM_1 (2)
+  2: 00000010 5 FUNC GLOBAL DEFAULT 12 setupterm@@TERM_1
+  3: 00000020 5 FUNC GLOBAL DEFAULT 12 tputs@TERM_0
+  4: 00000030 5 FUNC LOCAL DEFAULT 12 hidden
+  5: 00000040 5 FUNC GLOBAL HIDDEN 12 concealed
+'''
+        with patch('host_evidence.subprocess.run', return_value=SimpleNamespace(
+                returncode=0, stderr='', stdout=output)) as run:
+            imported, exported = dynamic_symbols('/pager', '/reader')
+        self.assertEqual(imported, {'tputs@TERM_1'})
+        self.assertEqual(exported, {'setupterm@TERM_1', 'setupterm', 'tputs@TERM_0'})
+        self.assertEqual(run.call_args.args[0], ['/reader','--dyn-syms','--wide','/pager'])
 
 
 if __name__=='__main__':

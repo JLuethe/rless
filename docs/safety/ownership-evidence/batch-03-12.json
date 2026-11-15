@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-01",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/ch.rs",
+      "src/input.rs",
+      "src/ifile.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-01 attaches each retained filestate to an ifile and owns its cache nodes/ordinary FD separately from borrowed stdin or help data.",
+      "invariant": "File identity anchors retained input lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 495,
+          "end_line": 530,
+          "excerpt_sha256": "0df9e376d4b9739721cdbadf97f84358209b86546585efd9cb76c970bf6ed7d0"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 80,
+          "end_line": 118,
+          "excerpt_sha256": "c47070a9580c5e0b526174a6c5656f5e843a9da2224c695640f6bc608875ff1b"
+        }
+      ],
+      "limitations": [
+        "The ifile, filestate, descriptor and cache nodes are distinct OWN-01 owners."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-01 retains curr/old-ifile, active thisfile, LRU/hash and rendering aliases; a raw hold count is not a generation-checked handle.",
+      "invariant": "Raw retained aliases cannot be justified by a count alone.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 534,
+          "end_line": 565,
+          "excerpt_sha256": "9479721b22fdcb93198fe6a32104c876221c3af532d81c60671daab822d337a8"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 255,
+          "end_line": 282,
+          "excerpt_sha256": "e9a63b40ec852386d2725a74f754e9c98b54514cbab526de956a612e3dd2cd1c"
+        }
+      ],
+      "limitations": [
+        "An IFILE handle is not an owning reference that prevents del_ifile."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-01 calls mark, input-disposal and render/filter operations directly while other stages may retain aliases into those owners.",
+      "invariant": "Cross-module calls require explicit alias retirement order.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 145,
+          "end_line": 174,
+          "excerpt_sha256": "ddcdc7df2d5ff911b5c4566897a869215bb237bdc8b7e9d424a9467fa0a7593c"
+        },
+        {
+          "target": "source:src/input.rs",
+          "sha256": "e607e76f8b081e810665042700e952a21b21a808124aa3d1cd88e16944f177ff",
+          "start_line": 150,
+          "end_line": 164,
+          "excerpt_sha256": "ed59162782e7b904e9a19e00fa9b04c6f9fe63e6fb971d1162c3412bbf711f3b"
+        }
+      ],
+      "limitations": [
+        "Direct fatal-cleanup calls can revisit active filestate aliases."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-01 preserves nonseekable state for navigation, while permanent del_ifile first clears external aliases and then disposes the retained state.",
+      "invariant": "A navigation lifetime is longer than the active-file selection.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1267,
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 154,
+          "end_line": 174,
+          "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "OWN-01 publishes initialized list/hash state before attachment, but file-list/index updates and render output positions commit separately.",
+      "invariant": "Publication must keep file and buffer identity coherent.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1170,
+          "end_line": 1205,
+          "excerpt_sha256": "6d1568cf139931002b166f79c142b694b324cf540b45bebc9a11838cbf0f9e89"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 122,
+          "end_line": 153,
+          "excerpt_sha256": "b9c2e6fac8adf569861b68f5b4ae4f11d9d51ce05ab819d1b07569fcc55033c0"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "OWN-01 frees cache nodes/state through disposal, then unlinks and frees ifile names/node; CH_KEEPOPEN stdin is never closed by disposal.",
+      "invariant": "One resource must have one designated close/free owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1267,
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 154,
+          "end_line": 174,
+          "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
+        }
+      ],
+      "limitations": [
+        "Borrowed fd 0 and CH_KEEPOPEN descriptors cannot be closed as ordinary owned files."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-01 cleanup preserves the first-buffer sentinel distinction: failed ch_addbuf leaves no payload node, reports once and returns -1. dispose_ifile_state detaches ifile/thisfile, frees cache nodes, closes only an ordinary owned FD and frees state. del_ifile then unlinks the ifile and frees both names and its node; borrowed stdin is not an owned close target.",
+      "invariant": "Source analysis cannot replace regression-based closure.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 590,
+          "end_line": 610,
+          "excerpt_sha256": "7a1fb0ea9b215d98a24454eacc2859199399ba8e38c1ccad723aed86ce82e2ee"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1267,
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
+        },
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 154,
+          "end_line": 174,
+          "excerpt_sha256": "4773e884eec6b970b61c6250d2bc2051412f559b07b7d968dc397082b0fb4982"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "OWN-01 has no guarded transaction excluding asynchronous quit from active alias/list mutation, so its raw retained-owner hazard remains open.",
+      "invariant": "Owner retirement belongs to controlled command-loop execution.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1267,
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
+        },
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        }
+      ],
+      "limitations": [
+        "Fresh cycle analysis preserves IND-MEM-FIRSTBUF and IND-MEM-STDIN-DELETE as open; no approval is inherited from their historical passing tests."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "terminate at src/signal.rs:83-85 calls quit. OWN-01 traces the resulting edit/close_file/dispose path that can revisit filestate, cache and ifile owners during cleanup."
+    }
+  },
+  "finding_context": {}
+}

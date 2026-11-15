@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:55c415b572a5469891d3e686",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "ch_ungotchar",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_uchar",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "ch_ungotchar owns one copied pushback byte; ch_have_ungotchar separately identifies whether that payload is initialized for use.",
+      "invariant": "Pushback payload is one inline byte, not an allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 528,
+          "end_line": 529,
+          "excerpt_sha256": "d39387f9eef19c33039bc4202327266d2a49b77c670f584501306a897ee26c2d"
+        }
+      ],
+      "limitations": [
+        "ch_ungotchar owns only the saved byte value."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "ch_ungetchar copies its argument and ch_get copies the ch_ungotchar byte into a cache buffer; no pointer to the payload escapes.",
+      "invariant": "Pushback transfers a value rather than a borrowed address.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 650,
+          "end_line": 658,
+          "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The byte must be interpreted with ch_have_ungotchar and the selected input."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "An overrun calls error directly before replacing the ch_ungotchar value; diagnostics may reenter shared screen state but no function pointer is stored in the byte.",
+      "invariant": "Overrun reporting is separate from byte storage.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "ch_ungetchar writes payload directly without a callback object."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Consumption clears the availability flag, and file-state replacement does not by itself encode which input the ch_ungotchar global byte belongs to.",
+      "invariant": "Pushback validity requires the matching active input.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 650,
+          "end_line": 658,
+          "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The concern is applying a pending ch_ungotchar byte to another selected filestate; the payload itself owns no heap memory."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "ch_ungetchar writes ch_ungotchar then sets ch_have_ungotchar; ch_get copies the byte into cache and clears the validity flag, not the payload byte.",
+      "invariant": "Payload and validity must be interpreted as one state.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The ch_ungotchar byte is never freed; consumption retires its logical validity without releasing the destination cache buffer.",
+      "invariant": "Consuming pushback does not release cache ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 528,
+          "end_line": 529,
+          "excerpt_sha256": "d39387f9eef19c33039bc4202327266d2a49b77c670f584501306a897ee26c2d"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 650,
+          "end_line": 658,
+          "excerpt_sha256": "17babc53c180308bf688541d455884e63597fdc5f4a85e4994dcc1cd7bf2ad71"
+        }
+      ],
+      "limitations": [
+        "Consuming validity does not free the integer payload or file cache."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "The overrun path reports and then overwrites the ch_ungotchar payload; no typed error result preserves the previous logical pushback transaction.",
+      "invariant": "Pushback replacement has no failure-preserving result.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "ch_ungotchar and its validity bit can be interpreted during file transitions without an input-generation owner tying them together.",
+      "invariant": "Global payload lifetime is not an input-generation proof.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 530,
+          "excerpt_sha256": "68a778617e4ea627e62ad253ebf7e6c942d58def237643e76c96cd620209310b"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 767,
+          "end_line": 780,
+          "excerpt_sha256": "ed8159b542cf5f588eb3685cf370fc0fb6e568577645a01ebf5c2359a335ba4c"
+        }
+      ],
+      "limitations": [
+        "The one-byte payload is reviewed with its validity/input relationship; no new observed pushback failure is claimed."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/line.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/line.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/line.rs owns parallel heap byte/attribute arrays, retained ANSI xbuffers and optional allocated ANSI parse state. init_line also transfers a temporary xbuffer allocation into osc_ansi_allow.",
+      "invariant": "Each global pointer must identify one backing allocation owner.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 207,
+          "end_line": 238,
+          "excerpt_sha256": "803ed22c0e461e40c43990dec685d7f846193142020c5d8d6aba9766741f5338"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 437,
+          "end_line": 478,
+          "excerpt_sha256": "8c80ae622e03f35fa5f8c78d7c2fe4cba025b7dcdadc8b00e5b56330e690420e"
+        }
+      ],
+      "limitations": [
+        "The static prefix bytes are distinct from allocated rendered arrays."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/line.rs forw_raw_line_len returns linebuf.buf with a length; gline separately indexes byte/attribute arrays. Raw borrowers cannot retain the returned address across a later buffer growth.",
+      "invariant": "A borrowed line expires when its backing allocation or logical content changes.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2194,
+          "end_line": 2201,
+          "excerpt_sha256": "a9f7d59afd41b3bb1a78cc1fa53e12f3c2952957fbd461ce82167d68c1798a77"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2127,
+          "end_line": 2133,
+          "excerpt_sha256": "1b9bfa4040072495ee5874a8bc6e240317211fa22209272d05b78c8eab9d9fc0"
+        }
+      ],
+      "limitations": [
+        "The API supplies no generation token for retained raw pointers."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/line.rs invokes direct allocator, conversion and display helpers; ansi_start returns a newly allocated parser object consumed by ansi_done. No per-line closure owns the global rendering context.",
+      "invariant": "Direct helper calls must preserve active line and parser borrows.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 913,
+          "end_line": 925,
+          "excerpt_sha256": "3cb5ee5fe5ce8abc951d1bb9f0a16b308095fa5957b9da515d571c148733f1bf"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 1124,
+          "end_line": 1126,
+          "excerpt_sha256": "a8fc369fcb841e8e8de061c930d84f6381dc3413a9011f797363ed94deadc4c5"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 480,
+          "end_line": 485,
+          "excerpt_sha256": "78cffbb994099c1072bb51f939d669522b5fca006ed45f88d3372a1499e3fdcb"
+        }
+      ],
+      "limitations": [
+        "This source-level target description does not replace native link verification."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/line.rs expand_linebuf frees both old arrays and republishes the replacements; prewind resets end, prefixes and ANSI scratch without moving every allocation. Saved end/column snapshots do not retain old content.",
+      "invariant": "Byte address lifetime and logical rendering validity must be tracked separately.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 505,
+          "end_line": 509,
+          "excerpt_sha256": "5ab553829f9e407e1d241b58ddbbfbb755e1f2bb83c9466d34c46a80b9cea455"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 547,
+          "end_line": 565,
+          "excerpt_sha256": "3d2f9c887fbd1f67e2a39a2423831a3dbb9726c9e2c887b130cca35cb8f44a52"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 857,
+          "end_line": 865,
+          "excerpt_sha256": "1773805a5e79d02691bbb275c67a7818d9c47a3167fcf4002d81c5ea819d4c35"
+        }
+      ],
+      "limitations": [
+        "savec/loadc is not an ownership or generation mechanism."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/line.rs grows both arrays before replacement and frees partial candidates on allocation failure, but size_linebuf multiplication wraps and publication of buf/attr/size occurs in separate raw writes.",
+      "invariant": "Parallel arrays and capacity must describe one coherent completed render owner.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 480,
+          "end_line": 510,
+          "excerpt_sha256": "df9df52d81815a0ec1c27585b4d2003da5776a9917ff4a88e458954de10957ab"
+        }
+      ],
+      "limitations": [
+        "Successful staging alone does not prove every size calculation representable."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/line.rs frees replaced byte/attribute arrays and pairs ansi_done with the allocation from ansi_start. Retained global ANSI xbuffers and osc_ansi_allow have different process-scoped lifetimes.",
+      "invariant": "A parser-state free must not release global rendering storage.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 505,
+          "end_line": 509,
+          "excerpt_sha256": "5ab553829f9e407e1d241b58ddbbfbb755e1f2bb83c9466d34c46a80b9cea455"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 913,
+          "end_line": 925,
+          "excerpt_sha256": "3cb5ee5fe5ce8abc951d1bb9f0a16b308095fa5957b9da515d571c148733f1bf"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 1124,
+          "end_line": 1126,
+          "excerpt_sha256": "a8fc369fcb841e8e8de061c930d84f6381dc3413a9011f797363ed94deadc4c5"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 462,
+          "end_line": 478,
+          "excerpt_sha256": "22bb334acd68bb61c67662dfc6d4bcc204e7c05b613ced1237ab3c05e0d4c513"
+        }
+      ],
+      "limitations": [
+        "No blanket exit-time destructor balance is claimed for retained global buffers."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/line.rs failed dual-array growth frees whichever candidate succeeded and keeps the old arrays; raw-line reading then stops with a partial bounded line, writes a NUL and publishes the resulting length.",
+      "invariant": "Failure must preserve usable old storage while exposing honest content bounds.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 486,
+          "end_line": 494,
+          "excerpt_sha256": "f4e40b3e40f093ae1920b45c7728335e9ade187e25db868df3521b8426ad3ab1"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2174,
+          "end_line": 2178,
+          "excerpt_sha256": "7327f12229b32e6de50bd468d536d57d44d263f237ca42bd87a81bbb0943e0a1"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2194,
+          "end_line": 2201,
+          "excerpt_sha256": "a9f7d59afd41b3bb1a78cc1fa53e12f3c2952957fbd461ce82167d68c1798a77"
+        }
+      ],
+      "limitations": [
+        "The return position alone is not a full lower-layer error classification."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/line.rs raw reading polls sigs, yet mutable globals and returned line pointers still rely on serialized rendering. M0-MEM-001 stays open; polling is not an owner-retirement protocol.",
+      "invariant": "A suspended render borrower must not observe incompatible global replacement.",
+      "source_refs": [
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 2163,
+          "end_line": 2178,
+          "excerpt_sha256": "656e7c1aade05c9508de529fcb858da7beaf8c18c2056b74996245f71f851031"
+        },
+        {
+          "target": "source:src/line.rs",
+          "sha256": "1889d0253a0d61db2c2ffd9dbbff408efa71a464f96d9fc4548e64a8c91ae392",
+          "start_line": 207,
+          "end_line": 238,
+          "excerpt_sha256": "803ed22c0e461e40c43990dec685d7f846193142020c5d8d6aba9766741f5338"
+        }
+      ],
+      "limitations": [
+        "No direct handler-to-line-buffer reallocation route is claimed here."
+      ]
+    }
+  }
+}

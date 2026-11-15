@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/cmdbuf.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/cmdbuf.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/cmdbuf.rs owns a static 2048-byte command array, separately allocated history nodes/strings and completion text. cp is an interior cursor into the static array, never a heap owner.",
+      "invariant": "Static editing bytes and heap history/completion need separate owner rules.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 590,
+          "end_line": 604,
+          "excerpt_sha256": "85f13e27c18331491b4d347b60d5d1758e11fb639ed99165666183f790966ba4"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1190,
+          "end_line": 1195,
+          "excerpt_sha256": "45078b50235b06fc0a5987d9424f7d3fccc15a59f045d2a8af626dad0017acf7"
+        }
+      ],
+      "limitations": [
+        "The command array cannot be reallocated or passed to free."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/cmdbuf.rs cmd_ichar moves text through raw cp-relative aliases, and history list cursors borrow linked nodes. Deduplication frees matching node/string pairs after unlinking them.",
+      "invariant": "Cursor and list aliases must remain valid through the editing operation.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1022,
+          "end_line": 1038,
+          "excerpt_sha256": "3b220e41ae91be390aeaa8c8389019fb5714857442bf073a70b3c1d07d3bc70f"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1177,
+          "end_line": 1188,
+          "excerpt_sha256": "46b8bf96c80223c398c91b6f3edcdf68cc7b62013a64af0684f27d3dbc3d6a01"
+        }
+      ],
+      "limitations": [
+        "Stable command-array address does not preserve text or history-node lifetime."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/cmdbuf.rs save_cmdhist passes copy_hist and a stack save_ctx to read_cmdhist; copy_hist casts uparam back to that context and writes the selected stream/list synchronously.",
+      "invariant": "The context borrow must end before save_cmdhist returns.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1996,
+          "end_line": 2008,
+          "excerpt_sha256": "4010e9d900bb139d1dbe30801092f6f2b7849ef14991ad3b23cb42dd88c4bd19"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2132,
+          "end_line": 2146,
+          "excerpt_sha256": "1a739f400acadbef8cfbefb0269794408f02dfbf7b874276f965cbe67d6d63d0"
+        }
+      ],
+      "limitations": [
+        "This is a callback scope analysis, not new independent callback execution."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/cmdbuf.rs cmd_reset resets cursor, terminator and editing scalars in place; set_tk_original separately frees and replaces heap completion text. These invalidate text and completion aliases without moving cmdbuf.",
+      "invariant": "A reset text borrow and a freed completion pointer are different invalidations.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 657,
+          "end_line": 665,
+          "excerpt_sha256": "700d4d5d966650974812066b7566c7e0f8e44c666fcac94bcf1305c63b4cc2c7"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1394,
+          "end_line": 1404,
+          "excerpt_sha256": "272ccd370715a8c921e8171c00d61a0f3d32232871136106d16a334091012581"
+        }
+      ],
+      "limitations": [
+        "The reallocation limitation in the prior scalar packet is corrected separately."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/cmdbuf.rs insertion checks capacity before shifting suffix/terminator; history save creates an exclusive temp stream and commits only after stream status, fclose and rename succeed.",
+      "invariant": "Command bounds and history publication have independent commit boundaries.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1008,
+          "end_line": 1038,
+          "excerpt_sha256": "2f3b4c003434887c35db8d52cd2dad8e46be5258d9344d12eb82275c5b16b7d9"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2094,
+          "end_line": 2114,
+          "excerpt_sha256": "005138824c2dfecc5445fdd1f173e8a30bfcee564966abe723bf267242cdb442"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2147,
+          "end_line": 2161,
+          "excerpt_sha256": "2867bf74312d12c39beaac268ccac869d47350c595e6379dff2432f13fe1f0a6"
+        }
+      ],
+      "limitations": [
+        "Current history repairs do not close the still-open M0-HIST-001 record."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/cmdbuf.rs dedup frees owned history strings/nodes; history save closes its stream and frees temp/destination paths. None of those releases applies to the static command array or cp.",
+      "invariant": "Never apply a heap release to cmdbuf or its interior cursor.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1181,
+          "end_line": 1185,
+          "excerpt_sha256": "e5fa9699f97e77dcb69015a274f705b4ea7355896a11b4f879df941a11d038f8"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2147,
+          "end_line": 2161,
+          "excerpt_sha256": "2867bf74312d12c39beaac268ccac869d47350c595e6379dff2432f13fe1f0a6"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 590,
+          "end_line": 594,
+          "excerpt_sha256": "60668f8f06432463b4e3b419dd5415baab0b974b70f8eb95fa66bec811b7049c"
+        }
+      ],
+      "limitations": [
+        "History nodes retained in global lists have a different lifetime from temporary paths."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/cmdbuf.rs failed fdopen closes the acquired FD and unlinks its temp path; failed stream/close/rename restores dirty entries and diagnoses, preserving the prior destination on unsuccessful commit.",
+      "invariant": "An unsuccessful save must preserve dirty-state retry information.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2097,
+          "end_line": 2114,
+          "excerpt_sha256": "d8f9979539880890b75eb4b9677848bff9a264c743c089ed6c9b0e69340e4057"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 2147,
+          "end_line": 2161,
+          "excerpt_sha256": "2867bf74312d12c39beaac268ccac869d47350c595e6379dff2432f13fe1f0a6"
+        }
+      ],
+      "limitations": [
+        "Fatal allocation before these checked branches is not covered by a universal RAII guard."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/cmdbuf.rs temporarily forces insert_mode for cmd_istr and later restores it, while raw globals encode no exclusive editor entry. M0-MEM-001 remains open; no handler-to-editor mutation trace is asserted.",
+      "invariant": "Ordinary editor access must preserve one coherent cursor/mode state.",
+      "source_refs": [
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 1376,
+          "end_line": 1392,
+          "excerpt_sha256": "3321bdaab1e02ddef6dbb66a4dcfbca99b6fc05ec3dd075de957850780f26dd3"
+        },
+        {
+          "target": "source:src/cmdbuf.rs",
+          "sha256": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+          "start_line": 590,
+          "end_line": 603,
+          "excerpt_sha256": "84fcfe9dbdfb7ba4f6512deafe04cf28aa835e422005331e4039628ddc4021aa"
+        }
+      ],
+      "limitations": [
+        "Reentrant editing is an unproved precondition concern, not a demonstrated signal path."
+      ]
+    }
+  }
+}

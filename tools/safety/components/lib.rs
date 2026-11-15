@@ -1,5 +1,5 @@
-//! Compile the actual application module, without the native ELF constructor.
-//! Native signal disposition/constructor behavior has separate process tests.
+//! Compile the production atomic event state without the native ELF constructor.
+//! Signal disposition and wakeup behavior have separate process tests.
 #![allow(dead_code)]
-#[path = "../../../src/runtime.rs"]
-mod runtime;
+#[path = "../../../src/signal_events.rs"]
+mod signal_events;

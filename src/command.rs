@@ -721,7 +721,9 @@ unsafe extern "C" fn mca_search1() {
                 buf = ecalloc(buflen, ::core::mem::size_of::<::core::ffi::c_char>())
                     as *mut ::core::ffi::c_char;
             }
-            snprintf(buf, buflen, lmsg(lessmsg_id::LM_Sub_X), i);
+            if !crate::lmsg::format_decimal_to_c(lmsg(lessmsg_id::LM_Sub_X), i, buf, buflen) {
+                quit(1);
+            }
             cmd_putstr(buf);
         }
         i += 1;
@@ -1140,16 +1142,21 @@ unsafe extern "C" fn mca_search_char(mut c: ::core::ffi::c_char) -> ::core::ffi:
                 buf = ecalloc(buflen, ::core::mem::size_of::<::core::ffi::c_char>())
                     as *mut ::core::ffi::c_char;
             }
-            snprintf(
+            if !crate::lmsg::format_decimal_to_c(
+                lmsg(lessmsg_id::LM_Sub_pattern_1_X),
+                5,
                 buf,
                 buflen,
-                lmsg(lessmsg_id::LM_Sub_pattern_1_X),
-                5 as ::core::ffi::c_int,
-            );
+            ) {
+                quit(1);
+            }
             clear_bot();
             cmd_putstr(buf);
             flush();
-            c = getcc();
+            c = match read_prompt_char() {
+                Some(c) => c,
+                None => return 1,
+            };
             if c as ::core::ffi::c_int >= '1' as ::core::ffi::c_int
                 && c as ::core::ffi::c_int <= '0' as ::core::ffi::c_int + 5 as ::core::ffi::c_int
             {
@@ -1496,9 +1503,21 @@ pub unsafe extern "C" fn getcc_clear() {
 }
 unsafe extern "C" fn getccu(mut timeout_ms: ::core::ffi::c_ulong) -> ::core::ffi::c_int {
     let mut c: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
+    crate::signal::collect_pending_signals();
     while c == 0 as ::core::ffi::c_int && sigs == 0 as ::core::ffi::c_int {
         if ungot.is_null() {
             c = getchr_timeout(timeout_ms);
+            // A signal can arrive after the terminal read has returned but
+            // before its byte reaches the command dispatcher. Deliver the
+            // notification first. Benign events retain that byte for the
+            // next command read; interrupt and termination discard it.
+            crate::signal::collect_pending_signals();
+            if sigs != 0 {
+                if c >= 0 && sigs & (1 | 2 | 64) == 0 {
+                    ungetcc(c as ::core::ffi::c_char);
+                }
+                return 0;
+            }
             if c == -4 as ::core::ffi::c_int {
                 return -1 as ::core::ffi::c_int;
             }
@@ -1571,6 +1590,27 @@ pub unsafe extern "C" fn getcc() -> ::core::ffi::c_char {
         },
         b"\n\0".as_ptr() as *const ::core::ffi::c_char,
     );
+}
+
+// A few command prompts act on a character before returning to the main
+// command loop. Dispatch notifications at the same boundary as ordinary
+// commands, while retaining the character across benign notifications.
+unsafe fn read_prompt_char() -> Option<::core::ffi::c_char> {
+    loop {
+        let c = getcc();
+        crate::signal::collect_pending_signals();
+        if sigs == 0 {
+            return Some(c);
+        }
+        let cancelled = sigs & (1 | 2 | 64) != 0;
+        if !cancelled && c != 0 {
+            ungetcc(c);
+        }
+        psignals();
+        if cancelled {
+            return None;
+        }
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn ungetcc(mut c: ::core::ffi::c_char) {
@@ -1778,6 +1818,22 @@ unsafe extern "C" fn get_pipe_pos(
     }
     loop {
         c = getcc();
+        // This nested prompt does not return through the main command-loop
+        // signal check. Dispatch before interpreting the byte, or a pending
+        // termination makes getcc() return zero forever while we ring the
+        // bell in this loop.
+        crate::signal::collect_pending_signals();
+        if sigs != 0 {
+            let cancelled = sigs & (1 | 2 | 64) != 0;
+            if !cancelled && c != 0 {
+                ungetcc(c);
+            }
+            psignals();
+            if cancelled {
+                return -1;
+            }
+            continue;
+        }
         if spec_char as ::core::ffi::c_int != '\0' as ::core::ffi::c_int
             && c as ::core::ffi::c_int == spec_char as ::core::ffi::c_int
         {
@@ -1855,6 +1911,7 @@ pub unsafe extern "C" fn commands() {
     search_type = (1 as ::core::ffi::c_int) << 0 as ::core::ffi::c_int;
     newaction = 101 as ::core::ffi::c_int;
     's_36: loop {
+        crate::signal::collect_pending_signals();
         clear_mca();
         cmd_accept();
         number = 0 as LINENUM;
@@ -1880,7 +1937,13 @@ pub unsafe extern "C" fn commands() {
                     if c as ::core::ffi::c_int == -3 as ::core::ffi::c_int {
                         continue 's_36;
                     }
+                    // Cover delivery after getcc() returned, including an
+                    // already completed newline that would start a helper.
+                    crate::signal::collect_pending_signals();
                     if sigs != 0 {
+                        if newaction == 101 && c != 0 && sigs & (1 | 2 | 64) == 0 {
+                            ungetcc(c);
+                        }
                         continue 's_36;
                     }
                     if newaction != 101 as ::core::ffi::c_int {
@@ -2625,7 +2688,10 @@ pub unsafe extern "C" fn commands() {
                             optflag = 1 as ::core::ffi::c_int;
                             optgetname = lbool::LFALSE;
                             mca_opt_toggle();
-                            c = getcc();
+                            c = match read_prompt_char() {
+                                Some(c) => c,
+                                None => continue 's_36,
+                            };
                             msg = opt_toggle_disallowed(c as ::core::ffi::c_int);
                             if msg.is_null() {
                                 continue;
@@ -2690,7 +2756,10 @@ pub unsafe extern "C" fn commands() {
                                     ::core::ptr::null_mut::<::core::ffi::c_void>(),
                                     0 as ::core::ffi::c_int,
                                 );
-                                c = getcc();
+                                c = match read_prompt_char() {
+                                    Some(c) => c,
+                                    None => continue 's_36,
+                                };
                                 make_display();
                                 cmd_exec();
                                 if is_erase_char(c).0 != 0 || is_newline_char(c).0 != 0 {
@@ -2716,7 +2785,10 @@ pub unsafe extern "C" fn commands() {
                                 ::core::ptr::null_mut::<::core::ffi::c_void>(),
                                 0 as ::core::ffi::c_int,
                             );
-                            c = getcc();
+                            c = match read_prompt_char() {
+                                Some(c) => c,
+                                None => continue 's_36,
+                            };
                             cmd_exec();
                             if is_erase_char(c).0 != 0 || is_newline_char(c).0 != 0 {
                                 continue 's_36;
@@ -2732,7 +2804,10 @@ pub unsafe extern "C" fn commands() {
                                 ::core::ptr::null_mut::<::core::ffi::c_void>(),
                                 0 as ::core::ffi::c_int,
                             );
-                            c = getcc();
+                            c = match read_prompt_char() {
+                                Some(c) => c,
+                                None => continue 's_36,
+                            };
                             if is_erase_char(c).0 != 0 || is_newline_char(c).0 != 0 {
                                 continue 's_36;
                             }

@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:afa9f72c2fe7f61e5045e10f",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "LOG_FAILED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The LOG_FAILED AtomicBool owns a sticky log-output failure bit initialized false; it owns neither logfile nor namelogfile.",
+      "invariant": "The failure latch contains no resource pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "LOG_FAILED owns a diagnostic latch and no logger descriptor."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "logfile_failed copies LOG_FAILED; swap changes no input-buffer reference and exposes no address to a caller.",
+      "invariant": "Observers receive values rather than mutable aliases.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 15,
+          "end_line": 22,
+          "excerpt_sha256": "ea6facb114d46786cfc5702bf3dd54b279b68e54de55e16a819a8a7fc1b91d33"
+        }
+      ],
+      "limitations": [
+        "Atomic access cannot preserve the lifetime of the logger state."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The first transition calls io_error_diagnostic directly with a static byte string; the LOG_FAILED flag cannot store a logging callback.",
+      "invariant": "Failure reporting does not retain a callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 19,
+          "end_line": 22,
+          "excerpt_sha256": "4471a99c7c3a1a1fd515bcb0a7d021cf37090a5d80b658e47b1bb4a641d3a1a4"
+        }
+      ],
+      "limitations": [
+        "No callback or owning handle is stored in LOG_FAILED."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The LOG_FAILED bit is never reset in maintained code, so later buffer/file replacement cannot invalidate the previously recorded failure.",
+      "invariant": "A logged failure remains sticky until process exit.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "swap(true) precedes the diagnostic; Relaxed is sufficient because the LOG_FAILED latch does not publish any accompanying owned payload.",
+      "invariant": "The first reporter records failure before emitting output.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 19,
+          "end_line": 22,
+          "excerpt_sha256": "4471a99c7c3a1a1fd515bcb0a7d021cf37090a5d80b658e47b1bb4a641d3a1a4"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "LOG_FAILED owns no FD or filename; write_log_buffer/end_logfile separately close logfile and free namelogfile.",
+      "invariant": "Resource cleanup is separate from the failure bit.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 28,
+          "end_line": 47,
+          "excerpt_sha256": "6845c381a0daa89581ad649b661b13e3882ae41ddf54daa5820248bc8d661b12"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 782,
+          "end_line": 814,
+          "excerpt_sha256": "e66007d3766e58a3993b283831c8217c6bb4c430f4d687c771fcc63f57c54d14"
+        }
+      ],
+      "limitations": [
+        "Clearing or dropping the latch cannot close or free logger resources."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "A failed best-effort diagnostic leaves LOG_FAILED set and acquires no new diagnostic allocation requiring cleanup.",
+      "invariant": "Reporting failure cannot reset the recorded log error.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 19,
+          "end_line": 22,
+          "excerpt_sha256": "4471a99c7c3a1a1fd515bcb0a7d021cf37090a5d80b658e47b1bb4a641d3a1a4"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "Atomic accesses protect this LOG_FAILED bit only; they do not make input lists, log descriptor teardown or asynchronous quit safe.",
+      "invariant": "Latch review does not approve surrounding handler reentry.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 8,
+          "end_line": 22,
+          "excerpt_sha256": "f36fa20c4efe46b348834d1db0a91b16ebcc3955e7e04b650314e5674f3a992b"
+        }
+      ],
+      "limitations": [
+        "Only this failure latch is clear; M0-IO-004 and raw file/log ownership remain separate open obligations."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {
+    "M0-IO-004": "LOG_FAILED is only atomic diagnostic suppression. M0-IO-004 concerns the drain, short-write and completion behavior of logger-owned state; that behavior cannot be approved from the latch and remains open."
+  }
+}

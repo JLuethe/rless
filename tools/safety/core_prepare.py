@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 from common import Evidence, PINS, ROOT, environment, sha
-from run import detectors, nightly_environment
+from safety_runner import detectors, nightly_environment
 
 ACTIVE_EVIDENCE = None
 

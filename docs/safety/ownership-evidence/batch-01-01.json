@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:build.rs",
+    "kind": "source-file",
+    "paths": [
+      "build.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "build.rs owns the build-time TARGET string. Cargo creates the TARGET String in main; the build script owns that value until its stack scope ends.",
+      "invariant": "The target value is a Rust-owned String.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 3,
+          "excerpt_sha256": "6c3dcc7d2dbc911c148c993af39827318940fbf55df54a8d36becf230c29b2bb"
+        }
+      ],
+      "limitations": [
+        "TARGET ownership here excludes any allocation in the pager executable."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "build.rs keeps TARGET borrows within main. The comparison and assertion borrow TARGET locally; no reference is returned or written into generated source.",
+      "invariant": "No borrowed TARGET data survives main.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 2,
+          "end_line": 6,
+          "excerpt_sha256": "b408e4262b1592cf297f55030a9c4ee14b60a61f010e5120e0ad7d12b1b3a577"
+        }
+      ],
+      "limitations": [
+        "The TARGET string never crosses the build-script process boundary."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "build.rs emits a linker directive rather than installing a callback. The only invoked interfaces are std::env::var, assert_eq and println; cargo:rustc-link-lib=tinfo is build metadata, not a runtime callback.",
+      "invariant": "Build metadata stores no function pointers.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 6,
+          "end_line": 8,
+          "excerpt_sha256": "cfc1e9c02ddf063462e919abb0f0c143e1f4a47405a02db4fd773f9d568a6cab"
+        }
+      ],
+      "limitations": [
+        "The tinfo linker directive does not establish the runtime provider contract."
+      ]
+    },
+    "invalidation": {
+      "analysis": "build.rs never replaces its TARGET value. The TARGET String is neither replaced nor resized after creation; its borrows end before ordinary Rust drop.",
+      "invariant": "No live pointer is invalidated by replacement.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 6,
+          "excerpt_sha256": "deedc29454642e0a252af20d1dac21a2e4cc748c47f1db0a473b304ef75bf475"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "build.rs rejects unsupported targets before linker metadata. The x86_64 GNU/Linux assertion precedes the linker directive, so unsupported targets cannot proceed as a successful supported build.",
+      "invariant": "The target check precedes link metadata emission.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 2,
+          "end_line": 8,
+          "excerpt_sha256": "1f0f07c6bc1c89cb0d705026d9918e243085faf6c7a0bb249fa835e555ebe2ab"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "build.rs leaves string destruction to Rust. String allocation belongs to std and is released by its destructor; no malloc buffer, file descriptor or tinfo handle is acquired here.",
+      "invariant": "Rust drops the sole temporary allocation.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "String destruction on Rust return is distinct from Cargo process termination."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "build.rs fails the build before pager startup. Missing TARGET or a mismatched target terminates the build with a diagnostic; unwinding or process exit retains no pager state.",
+      "invariant": "Build failure cannot leave runtime pager owners.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 2,
+          "end_line": 6,
+          "excerpt_sha256": "b408e4262b1592cf297f55030a9c4ee14b60a61f010e5120e0ad7d12b1b3a577"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "build.rs executes before pager handlers exist. This program executes in Cargo before the pager exists; it installs no handler and hands no pointer to another process.",
+      "invariant": "Cargo sees text, never an owned application pointer.",
+      "source_refs": [
+        {
+          "target": "source:build.rs",
+          "sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2",
+          "start_line": 1,
+          "end_line": 8,
+          "excerpt_sha256": "d0ce7bab79d7e3ced1e6b3df7bf12df76036ab5440f99aa750a2befa114d4ba2"
+        }
+      ],
+      "limitations": [
+        "This checks the maintained build script; native tinfo provider identity remains a separate runtime obligation."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

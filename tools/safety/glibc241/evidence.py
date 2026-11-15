@@ -16,6 +16,21 @@ from native_alloc import RUSTFLAGS as ALLOC_RUSTFLAGS, CFLAGS as ALLOC_CFLAGS, v
 
 PROCEDURE = 'REFERENCE-GLIBC-2.41-ASAN-OFFLINE-v1'
 
+# The pinned environment lock predates the GNU regex register probe. Retain
+# its original hash while requiring every added field and its exact value.
+REGEX_PROBE_EXTENSION = dict(
+    regs_fixed=2, regoff_bytes=4, registers_bytes=24,
+    registers_start_offset=8, registers_end_offset=16,
+    regs_flag_byte_offset=56, regs_fixed_mask=4,
+    fixed_register_probe=True,
+)
+
+
+def abi_probe_matches(actual, locked):
+    return (all(key not in locked or locked[key] == value
+                for key, value in REGEX_PROBE_EXTENSION.items())
+            and actual == {**locked, **REGEX_PROBE_EXTENSION})
+
 
 def require(condition, message):
     if not condition:
@@ -111,7 +126,7 @@ def validate_asan_report(path, root=ROOT):
     require(inner == outer['result'], 'altered nested report')
     require(inner['status'] == 'passed' and inner['procedure'] == PROCEDURE and
             inner['source_manifest_sha256'] == outer['source_manifest_sha256'], 'wrong inner snapshot/procedure')
-    require(inner['runtime'] == 'glibc 2.41' and inner['header_probe'] == lock['header_probe'], 'wrong runtime or ABI layout')
+    require(inner['runtime'] == 'glibc 2.41' and abi_probe_matches(inner['header_probe'], lock['header_probe']), 'wrong runtime or ABI layout')
     require(inner['instrumentation_scope'] == PINS['instrumentation_scope'], 'instrumentation scope changed')
     for name, digest in inner['environment_manifests'].items():
         file = checked(work / 'report' / name, digest)
@@ -204,6 +219,8 @@ def validate_asan_report(path, root=ROOT):
     oracle_path = checked(work / 'report/fault-oracles.json', inner['oracle_report_sha256'])
     alloc_binary=validate_allocation_binding(inner,work,root,'asan')
     fault_oracles=json.loads(oracle_path.read_text())
+    from native_callback import validate_observations
+    validate_observations(fault_oracles, lambda binary: work_path(binary, work))
     allowed_binaries={'/work/normal/'+PINS['target']+'/debug/rless',
                       '/work/injected/'+PINS['target']+'/debug/rless','/reference/less',alloc_binary}
     require(all(observation['binary'] in allowed_binaries for row in fault_oracles['records']
@@ -211,6 +228,8 @@ def validate_asan_report(path, root=ROOT):
     require(json.loads(oracle_path.read_text())['repetitions']==outer['repetitions'],
             'executed fault repetitions differ from selected campaign')
     records.extend(fault_records(oracle_path, work / 'report/fault-path-tests.log', root, 'ASAN'))
+    from .boundary_receipts import rederive as rederive_boundaries
+    records.extend(rederive_boundaries(outer,inner,work,'ASAN',root))
     for record in records:
         record['_validated_m0_controls']=list(record['oracle_metadata']['m0_controls'])
     return dict(schema_version=1, source_commit=outer['source_commit'], input_fingerprints=fingerprint(root),
@@ -309,7 +328,7 @@ def validate_native_report(path, root=ROOT):
     inner_path = checked(work / 'report/result.json', outer['inner_report_sha256'])
     inner = json.loads(inner_path.read_text())
     require(inner == outer['result'] and inner['status'] == 'passed' and inner['runtime'] == 'glibc 2.41'
-            and inner['header_probe'] == lock['header_probe'], 'native target identity mismatch')
+            and abi_probe_matches(inner['header_probe'], lock['header_probe']), 'native target identity mismatch')
     for target, digest in inner['evidence_files'].items():
         checked(work_path(target, work), digest)
     environment = json.loads((work / 'report/environment.json').read_text())
@@ -402,12 +421,16 @@ def validate_native_report(path, root=ROOT):
                             '/work/cleanup.so','/work/short-write.so','/work/native-io.so',alloc_binary,'/work/alloc-fault.o'}
     require(set(inner['test_binaries'])==expected_test_binaries,'native fault binary manifest incomplete')
     fault_oracles=json.loads((work/'report/fault-oracles.json').read_text())
+    from native_callback import validate_observations
+    validate_observations(fault_oracles, lambda binary: work_path(binary, work))
     require(all(observation['binary'] in {'/work/source/target/debug/rless','/work/injected/debug/rless','/reference/less',alloc_binary}
                 for row in fault_oracles['records'] for observation in row['observations']),
             'native fault oracle selected an unexpected binary')
     require(fault_oracles['repetitions']==100,
             'native actual fault suite did not run the declared 100 repetitions')
     records.extend(fault_records(work / 'report/fault-oracles.json', work / 'report/fault-path-tests.log', root, 'NATIVE'))
+    from .boundary_receipts import rederive as rederive_boundaries
+    records.extend(rederive_boundaries(outer,inner,work,'NATIVE',root))
     for record in records:
         record['_validated_m0_controls']=list(record['oracle_metadata']['m0_controls'])
     return dict(schema_version=1, source_commit=outer['source_commit'], input_fingerprints=fingerprint(root),

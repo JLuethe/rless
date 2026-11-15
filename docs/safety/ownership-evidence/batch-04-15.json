@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/edit.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/edit.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/edit.rs manages the selected IFILE together with ch input state, ordinary descriptors, alternate FILE pipes and allocated alternate names. edit_ifile stages candidate resource values before replacing curr_ifile.",
+      "invariant": "Selected-file identity and each native resource need separate lifetimes.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 948,
+          "end_line": 978,
+          "excerpt_sha256": "d3facf6f494e4dfa82be8f0746814601e0b7c02c7bfa9fac17a459404e7dd18c"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1093,
+          "end_line": 1099,
+          "excerpt_sha256": "97653a614d25101af42c8bd01d4b0b40928af1d2b17c4c1610a17cabe95a1da9"
+        }
+      ],
+      "limitations": [
+        "The raw IFILE handle is not a Rust-owned aggregate of all these resources."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/edit.rs borrows filename/alternate-name pointers from IFILE and retains saved handles across switching. save_curr_ifile increments a hold counter; reedit releases it before trying saved/neighbor entries.",
+      "invariant": "A saved handle must remain valid through reopen or fallback selection.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 968,
+          "end_line": 978,
+          "excerpt_sha256": "01307f24e59f4cd59efdfb0f753dd696d2e9cf0c530b1f2cce30c5f2e69c16de"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1314,
+          "end_line": 1346,
+          "excerpt_sha256": "6836db2f16675973778e6047a49ba17a621e7f7d9c1164235405bd6498de5eec"
+        }
+      ],
+      "limitations": [
+        "A hold count alone does not encode every raw alias retirement rule."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/edit.rs uses direct open/pipe/modeline/history calls; terminate can reach edit(NULL) through quit. The latter dispatches edit_ifile(NULL), which closes the currently selected file.",
+      "invariant": "Cleanup entry must not overlap an active file-owner mutation.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 967,
+          "end_line": 970,
+          "excerpt_sha256": "2a78429734be51bf32abdc07c2aa2234a35d9c827e8170b6833ad67646470f26"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1078,
+          "end_line": 1091,
+          "excerpt_sha256": "455874be3bab1068d9457761e51c9fc72db06d0d952caa0bf1ebc586147c6b84"
+        }
+      ],
+      "limitations": [
+        "The source-traced asynchronous cleanup route remains M0-SIG-003."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/edit.rs close_file obtains screen position before ch_close, closes alternate input and nulls alternate filename/curr_ifile. Later activation clears positions, line numbers and highlights for the selected file.",
+      "invariant": "File replacement must invalidate every associated navigation/render alias.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 921,
+          "excerpt_sha256": "31c55c46cded87c782420977a2db6b37dc80297741a6a0f86c1ad307b06a3b90"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1148,
+          "end_line": 1155,
+          "excerpt_sha256": "bcdf062db8de84cf87844144d98d755501914f5389cbb42d32f43e71c6b71c85"
+        }
+      ],
+      "limitations": [
+        "The sequence depends on coordinated cross-module raw state."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/edit.rs closes the old selected owner before assigning the new curr_ifile and calling ch_init/check_modelines. The switch is a sequence of shared writes and resource calls rather than one reversible aggregate commit.",
+      "invariant": "Candidate and old resource ownership must be identifiable at each switch step.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1079,
+          "end_line": 1106,
+          "excerpt_sha256": "fe597a5e07af91f16490e43fcb136fbb20def805d182afe7796996459ff869be"
+        }
+      ],
+      "limitations": [
+        "This review does not prove rollback of every post-activation operation."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/edit.rs close_pipe uses pclose for a FILE stream and frees only its allocated error message; close_altpipe clears its stored alias afterward. close_file delegates ordinary input release to ch_close.",
+      "invariant": "A FILE stream must use its process-stream counterpart, not a bare descriptor free.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 816,
+          "end_line": 835,
+          "excerpt_sha256": "1fbb2110504783d078c9c6fcb8f2ad04629b23bcdeac2127cd4e72908eea8d28"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 881,
+          "end_line": 887,
+          "excerpt_sha256": "86fe2c2fdaea2cb5cd7b4ec8318b335aa0e93012af4cdfe040660c37d8e3550c"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 912,
+          "end_line": 919,
+          "excerpt_sha256": "268307d9c99f392384fa2092c13c9799bec4b98486b3e9c9c3bdf735ee9a0304"
+        }
+      ],
+      "limitations": [
+        "Retained-input flags still affect whether an alternate pipe is closed."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/edit.rs handles a failed saved-file reopen by trying neighbors and eventually quit; close_pipe diagnoses pclose failure but has already consumed the stream. Errors cannot be described as leaving all original owners intact.",
+      "invariant": "Error paths must distinguish a consumed resource from a reusable handle.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 826,
+          "end_line": 835,
+          "excerpt_sha256": "b8fa3391d48bd67fc87ec68b6922bb96fafe8bd6c2e0ff4c26fdfa15ec01f5bd"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1327,
+          "end_line": 1346,
+          "excerpt_sha256": "a9c742c4aab6999da2640551e19bc5dd9684515b35c4acfb458ab60afa7ddcd0"
+        }
+      ],
+      "limitations": [
+        "No global primary-error and rollback proof is inferred from local diagnostics."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/edit.rs is directly reachable from terminate -> quit -> edit(NULL); close_file then reads position and invokes cache/alternate-input cleanup. M0-SIG-003 and M0-MEM-001 remain open for reentrant owner coordination.",
+      "invariant": "Asynchronous quit must not retire owners borrowed by suspended operations.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 83,
+          "end_line": 85,
+          "excerpt_sha256": "a0a22bd2b216aa8ad5dc5353cec01c4e0fe6838ad41b1f8913e533c07b2f7e9d"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 967,
+          "end_line": 970,
+          "excerpt_sha256": "2a78429734be51bf32abdc07c2aa2234a35d9c827e8170b6833ad67646470f26"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 919,
+          "excerpt_sha256": "fa052099dc018886009707731ac7c648359c4fd3e875afcf75b833fc2203eac4"
+        }
+      ],
+      "limitations": [
+        "This packet records the route without independently executing it."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "terminate at src/signal.rs:83-85 enters quit without deferring cleanup; edit.rs is reached from that asynchronous owner-retirement path."
+    },
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "quit calls edit(NULL) at src/pager.rs:967-970, establishing the external entry into edit_ifile(NULL) and close_file rather than a speculative editor reentry."
+    }
+  }
+}

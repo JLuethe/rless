@@ -44,8 +44,7 @@
       {
         "send": "\u000fo",
         "await": [
-          "@@READY@@",
-          "(press RETURN)"
+          "link done"
         ],
         "snapshot": true
       },

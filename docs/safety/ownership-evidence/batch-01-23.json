@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:e10ead5254340eb5268da696",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/help.rs"
+    ],
+    "symbol": "size_helpdata",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The size_helpdata exported c_int owns the default help payload length, zero-initialized then assigned 17587 minus one by the static initializer.",
+      "invariant": "Default help size is a representable inline integer.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17600,
+          "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
+        }
+      ],
+      "limitations": [
+        "size_helpdata owns the literal-size scalar rather than the selected help owner."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "lmsg.rs:2592 copies the size_helpdata value into size_help_data; no source hands out an owning pointer to this integer.",
+      "invariant": "The default length is copied rather than transferred.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17600,
+          "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2592,
+          "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2592,
+          "end_line": 2592,
+          "excerpt_sha256": "3254c87bde9764cc6ac71c5bb1217bdf3cf164d34f9c85b386731fc521173bdd"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews.",
+        "The copied default size does not validate a later translated help_data allocation."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "c2rust_run_static_initializers is the sole writer, selected by INIT_ARRAY; the size_helpdata length itself is never interpreted as a callback.",
+      "invariant": "Callback dispatch is separate from the size value.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": [
+        "Static initialization determines default size without a retained runtime callback."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The size_helpdata integer retains its image address and value after startup; translated help changes a different size_help_data variable.",
+      "invariant": "Changing translated help cannot resize this field.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17600,
+          "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2554,
+          "end_line": 2561,
+          "excerpt_sha256": "edc414461af9bdf0009705cdb0e45860f4da40e7fbdb6210aff04a6a3122f8fd"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The size_helpdata initializer derives length from the exact array type and subtracts one; 17586 fits c_int on the supported target.",
+      "invariant": "Default length matches the compiled backing array.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17600,
+          "excerpt_sha256": "cb64b79539e800eaf00623936f74fabee8eba6007c326eb7947b6d321dba2a71"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The size_helpdata scalar needs no free/close pair; copying it into message state transfers no ownership of the default help bytes.",
+      "invariant": "Length metadata has no independent release obligation.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17600,
+          "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
+        }
+      ],
+      "limitations": [
+        "A size reset cannot release allocated translation text."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "The size_helpdata initializer computes size_of of a nonempty fixed array minus one; it acquires no fallible resource.",
+      "invariant": "Size initialization cannot leave a partial allocation.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17600,
+          "excerpt_sha256": "cb64b79539e800eaf00623936f74fabee8eba6007c326eb7947b6d321dba2a71"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The loader invokes the size_helpdata initializer before application main and registered handlers; there is no later maintained writer.",
+      "invariant": "Default size is fixed before application signal setup.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {
+    "src/lmsg.rs": {
+      "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+      "relationship": "src/lmsg.rs:2587-2592 copies size_helpdata when restoring default help, while src/lmsg.rs:2554-2561 installs a translated size. Thus the static default scalar does not own selected help_data geometry."
+    }
+  },
+  "finding_context": {}
+}

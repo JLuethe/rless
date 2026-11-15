@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:bdc3263b9cb0367972cccdad",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "ignore_eoi",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The ignore_eoi exported lbool owns the follow-mode policy that treats end-of-input as temporary; it does not own the file or its cached bytes.",
+      "invariant": "Follow policy is distinct from input ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 530,
+          "excerpt_sha256": "68a778617e4ea627e62ad253ebf7e6c942d58def237643e76c96cd620209310b"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": [
+        "ignore_eoi is follow policy and owns no filestate or bytes."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "command.rs saves/restores this global around following and ch_length/ch_get read ignore_eoi by value; copied policy does not keep thisfile live.",
+      "invariant": "Policy readers still require a valid filestate owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1336,
+          "end_line": 1352,
+          "excerpt_sha256": "8b6950a4194288c47e9471b6019f44c74207cae6c0551d14cdde4bbe320fde44"
+        }
+      ],
+      "limitations": [
+        "A policy snapshot must agree with the selected thisfile and file size."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "A true policy enables waiting and direct wait_message/ixerror/sleep calls, which may reenter display state; the ignore_eoi bit stores no callback itself.",
+      "invariant": "Follow waiting crosses display owners through direct calls.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 710,
+          "end_line": 743,
+          "excerpt_sha256": "397c640cbae420647c7baf4a8a563e584e24916af4d137d6e467808189e4b4cb"
+        }
+      ],
+      "limitations": [
+        "Direct read/seek branches consume policy without storing a callback in it."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Changing policy alters whether known fsize is exposed; positions and retained cache aliases are not retired by the ignore_eoi scalar assignment.",
+      "invariant": "Toggling follow does not validate retained positions.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 981,
+          "end_line": 995,
+          "excerpt_sha256": "ceedb00fe46c9966375ab07af5712604510f5fc07a1341ca4247717a5431d734"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The ignore_eoi policy update is not jointly committed with file selection, cached EOF or pending signal state; readers rely on command-loop sequencing.",
+      "invariant": "Follow policy and active-file state lack a typed joint owner.",
+      "source_refs": [
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1336,
+          "end_line": 1352,
+          "excerpt_sha256": "8b6950a4194288c47e9471b6019f44c74207cae6c0551d14cdde4bbe320fde44"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1700,
+          "end_line": 1725,
+          "excerpt_sha256": "d0cecdf98cc6166b8415d841f978e07a33bb05b33d321e4843fc27e821378b12"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "No free applies to the ignore_eoi policy; stopping follow mode does not itself close the file, free cache nodes or end an ifile lifetime.",
+      "invariant": "Leaving follow mode cannot release borrowed storage.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1240,
+          "excerpt_sha256": "f2d7b26dcc65a7358c51c2ccc9c06d4b325a3ecf83d790ed0c7119d4d3c40fb7"
+        }
+      ],
+      "limitations": [
+        "Restoring policy after a command does not release input resources."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "With ignore_eoi enabled, a hard read error still sets read_error and returns -1 before fpos/datasize advance. No FD or buffer is released there; ch_close later chooses retain/free by ownership flags.",
+      "invariant": "Follow policy does not establish correct I/O failure status.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 671,
+          "end_line": 684,
+          "excerpt_sha256": "5491ce2eeb16077bc3e14181fe0e97463e421cbbc44d5fc115cab523fc1d0d14"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1267,
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The translated mutable global is read amid signal polling and command changes; ignore_eoi's lifecycle remains within the broad raw-core ownership finding.",
+      "invariant": "M0-MEM-001 remains recorded for coupled follow state.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 710,
+          "end_line": 743,
+          "excerpt_sha256": "397c640cbae420647c7baf4a8a563e584e24916af4d137d6e467808189e4b4cb"
+        }
+      ],
+      "limitations": [
+        "Source review of policy coupling only; no claim that the retained M0-IO-001 read campaign finding is resolved.",
+        "The scoped concern is a reentrant reader observing follow policy independently of thisfile/fsize, not a dangling pointer inside ignore_eoi."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "Command repaint saves, clears and restores ignore_eoi at src/command.rs:1336-1352; follow-mode commands set and clear it at src/command.rs:1700-1725. These are policy changes outside ch.rs."
+    }
+  },
+  "finding_context": {}
+}

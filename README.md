@@ -43,6 +43,11 @@ See [CONTRIBUTING](CONTRIBUTING.md) for a fresh Linux setup with Python dependen
 The optional maintainer environment in `../rless-env` is not required to build.
 Only `x86_64-unknown-linux-gnu` is supported; no musl, ARM, macOS or Windows support
 is claimed.
+Input opening in this security candidate requires a mounted `/proc/self/fd` and
+Linux 5.9 or newer. It uses atomic pidfds (`CLONE_PIDFD`), `pidfd_send_signal`,
+and `close_range` to keep a blocked FIFO open cancellable without inheriting
+the pager's descriptors. On systems without these facilities, affected opens
+fail with a reported error; the pager does not fall back to a blocking open.
 
 ## Test
 

@@ -444,7 +444,7 @@ unsafe extern "C" fn compile_pattern2(
     }
     let mut comp: *mut re_pattern_buffer =
         ecalloc(1 as size_t, ::core::mem::size_of::<re_pattern_buffer>()) as *mut re_pattern_buffer;
-    re_set_syntax(
+    let previous_syntax = re_set_syntax(
         ((1 as reg_syntax_t) << 1 as ::core::ffi::c_int) << 1 as ::core::ffi::c_int
             | ((((((1 as reg_syntax_t) << 1 as ::core::ffi::c_int) << 1 as ::core::ffi::c_int)
                 << 1 as ::core::ffi::c_int)
@@ -553,7 +553,11 @@ unsafe extern "C" fn compile_pattern2(
     let injected_failure = crate::fault::hit(crate::fault::Site::Regex);
     #[cfg(not(feature = "safety-injection"))]
     let injected_failure = false;
-    if injected_failure || !re_compile_pattern(pattern, strlen(pattern), comp).is_null() {
+    let failed = injected_failure || !re_compile_pattern(pattern, strlen(pattern), comp).is_null();
+    // GNU compilation consumes a process-global syntax setting. Restore it on
+    // both success and failure before calling any pager error/recovery path.
+    re_set_syntax(previous_syntax);
+    if failed {
         free(comp as *mut ::core::ffi::c_void);
         if show_error != 0 {
             error(
@@ -806,6 +810,8 @@ mod ownership_tests {
     #[test]
     fn fixed_registers_preserve_gnu_ranges_and_repeated_lifetimes() {
         unsafe {
+            let sentinel_syntax = 1;
+            let original_syntax = re_set_syntax(sentinel_syntax);
             for (expression, input, offset, notbol, expected) in [
                 ("(a|aa)", "xaa", 0, 0, Some((1, 3))),
                 ("((a)(b))\\1", "zabab", 0, 0, Some((1, 5))),
@@ -824,6 +830,7 @@ mod ownership_tests {
                     compile_pattern2(expression.as_ptr(), 0, &raw mut compiled, 0),
                     0
                 );
+                assert_eq!(re_set_syntax(sentinel_syntax), sentinel_syntax);
                 // Reuse a compiled pattern after the previous stack registers
                 // have gone out of scope; LSan must also see no per-match growth.
                 for _ in 0..256 {
@@ -857,8 +864,10 @@ mod ownership_tests {
             assert_eq!(compile_pattern2(c"a".as_ptr(), 0, &raw mut compiled, 0), 0);
             let previous = compiled;
             assert_eq!(compile_pattern2(c"[".as_ptr(), 0, &raw mut compiled, 0), -1);
+            assert_eq!(re_set_syntax(sentinel_syntax), sentinel_syntax);
             assert_eq!(compiled, previous);
             uncompile_pattern(&raw mut compiled);
+            re_set_syntax(original_syntax);
         }
     }
 }

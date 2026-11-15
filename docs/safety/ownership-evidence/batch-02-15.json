@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:060b78c166c658148ddb3024",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ifile.rs"
+    ],
+    "symbol": "ifiles",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The ifiles private c_int owns the count of linked nodes, initially zero and adjusted by link_ifile/unlink_ifile; it owns no node memory itself.",
+      "invariant": "File count is metadata, not a resource owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 143,
+          "excerpt_sha256": "38e642a23ff0d660948145ccf14ecac9c979e37b50bc7cc41a38d6305109c9c0"
+        }
+      ],
+      "limitations": [
+        "ifiles counts membership and owns no node or filename."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "nifile copies the ifiles count to callers; no address escapes, but count accuracy depends on raw list updates completing together.",
+      "invariant": "A copied count cannot establish node lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 217,
+          "end_line": 219,
+          "excerpt_sha256": "c5ea60d75d53bc315edbff9bf0cbfd48edec17865c58a606a2b9a7a7cb8f0f38"
+        }
+      ],
+      "limitations": [
+        "A count value cannot prove circular links or held IFILE handles are valid."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "There is no callback stored in this ifiles integer; surrounding mark/disposal calls belong to the node operations that adjust it.",
+      "invariant": "Count metadata cannot register callback ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 122,
+          "end_line": 174,
+          "excerpt_sha256": "ce7fa969aef5fa83723d61cf3b55591e894e04dd44e14dfb59348e2af504cb6c"
+        }
+      ],
+      "limitations": [
+        "List mutation calls update the count without an owning callback context."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Deleting a node decrements the ifiles value without retiring any caller-held node pointer; count changes cannot be used as generation checks.",
+      "invariant": "Count decrements do not invalidate external aliases safely.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 135,
+          "end_line": 174,
+          "excerpt_sha256": "b9ceb0cec851df1540b4d9fcd6b18cf04503c3e06049afc46dae14d17bec590b"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "ifiles increments/decrements only after neighboring links and indexes change; an interruption can separate count and membership publication.",
+      "invariant": "Count and list membership lack a joint commit guard.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 122,
+          "end_line": 143,
+          "excerpt_sha256": "3716b30e35d22cf4c0cc82bb1cd3ff7b2fadfb51069c7c90450ad1eda61bd490"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "This ifiles scalar is not freed; freeing a node only logically removes one count contribution and must not release the count object.",
+      "invariant": "Static count storage survives every node deletion.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 118,
+          "end_line": 143,
+          "excerpt_sha256": "38e642a23ff0d660948145ccf14ecac9c979e37b50bc7cc41a38d6305109c9c0"
+        }
+      ],
+      "limitations": [
+        "Decrementing ifiles does not substitute for del_ifile node and name release."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "No overflow/error policy protects the signed count or restores ifiles after partial list mutation; this limitation belongs to the existing raw-core finding.",
+      "invariant": "Count arithmetic has no proved upper-bound contract here.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 122,
+          "end_line": 143,
+          "excerpt_sha256": "3716b30e35d22cf4c0cc82bb1cd3ff7b2fadfb51069c7c90450ad1eda61bd490"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The ifiles counter is a mutable static rather than atomic main-loop-owned state; interrupted traversal or cleanup has no synchronization contract.",
+      "invariant": "Count review cannot clear M0-MEM-001.",
+      "source_refs": [
+        {
+          "target": "source:src/ifile.rs",
+          "sha256": "cbb80895170804c66f18ba274c12c66f2f01d2683accbab133764ff48ad1bc8d",
+          "start_line": 122,
+          "end_line": 174,
+          "excerpt_sha256": "ce7fa969aef5fa83723d61cf3b55591e894e04dd44e14dfb59348e2af504cb6c"
+        }
+      ],
+      "limitations": [
+        "Only this membership counter is reviewed; a count match does not prove circular-list, held-handle or descriptor correctness."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

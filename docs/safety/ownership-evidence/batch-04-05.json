@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-07",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/position.rs",
+      "src/jump.rs",
+      "src/linenum.rs",
+      "src/mark.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-07 combines the heap position table, a static 1024-node line-number pool and static mark arrays whose filename fields may own saved strings. A common numeric position is not a common storage owner.",
+      "invariant": "Navigation metadata must retain the identity of its backing owner.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 191,
+          "excerpt_sha256": "6e8858d58e089418d842bfb6bb4ce036cbafae3f2587f9a0897217abd9d35d0e"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 427,
+          "end_line": 442,
+          "excerpt_sha256": "5af51ba9fa477f9c6eb1687dc8cf1ac3fe16b6c2d0abc4fda89f4d90aaa22f0b"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 479,
+          "end_line": 503,
+          "excerpt_sha256": "b7b37d2228a1e9a9d0baabeb10700f359c653fad0ee005db9a24fecf118c6eb0"
+        }
+      ],
+      "limitations": [
+        "Static line-cache nodes are not position-table allocations."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-07 mark records retain raw IFILE handles and copied screen coordinates; line-number lists retain raw links into a static pool. Neither pointer nor scalar copy carries a file-generation token.",
+      "invariant": "Coordinates and raw handles require current-file validation.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 491,
+          "end_line": 503,
+          "excerpt_sha256": "30e72f48573829559572b5fb98947280dbb0b9e70c271ef5ff74c5a2ecaec8bc"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 534,
+          "end_line": 550,
+          "excerpt_sha256": "dd11331bb06cb0e107797f492fed0addfaf3318d164dbb77d2850aa1044b1c85"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 480,
+          "end_line": 501,
+          "excerpt_sha256": "ed8c3eaf6fbb150b1023122a3226aaf4595f98791c11a1899d5d1034bc9b82f6"
+        }
+      ],
+      "limitations": [
+        "A valid numeric offset does not prove a live or matching IFILE."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-07 jump_loc directly calls next_unfiltered, onscreen and forward/backward rendering. Mark selection can call history save after publication, crossing another mutable owner domain.",
+      "invariant": "Navigation calls must preserve selected file and position coherence.",
+      "source_refs": [
+        {
+          "target": "source:src/jump.rs",
+          "sha256": "c0dc0f2ddc3b77ab9ad5afedfb6cf4194e97ad8654da8af4e15ece6c8ae84f24",
+          "start_line": 597,
+          "end_line": 620,
+          "excerpt_sha256": "01c99b5f70525374eb279ab472bd6303a04e9acf9fc69d3c41d59ba27d3ccc65"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 731,
+          "end_line": 737,
+          "excerpt_sha256": "ad7f27c075e252c00f34a015018d4f49c3fd4e05f0165a7a80a985b591ecaf8b"
+        }
+      ],
+      "limitations": [
+        "No stored callback in these functions extends coordinate lifetime."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-07 unmark invalidates positions for a removed IFILE and clears last-search position, while clr_linenum rebuilds its pool links. pos_init invalidates changed rows within existing capacity.",
+      "invariant": "File deletion and resize must invalidate every dependent navigation record.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 844,
+          "end_line": 855,
+          "excerpt_sha256": "a9616bd6eea8699189fb68561b4df9147b473a81eb83fc1bf184c55270c8fb85"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 446,
+          "end_line": 465,
+          "excerpt_sha256": "a9491d59fd9f182b9992d69e0ac3ecb412d8440381cad7aa41eac11521962460"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 173,
+          "end_line": 180,
+          "excerpt_sha256": "a537f7ea52dc474db211671692ac7307a79a3b7a443781daa994c34d52f541a4"
+        }
+      ],
+      "limitations": [
+        "IND-POS-F4 remains open despite the current shrink invalidation code."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-07 table growth frees the old array before ecalloc can return the replacement and before publishing new capacity/rows. Static mark writes and list publication likewise update multiple fields separately.",
+      "invariant": "Owner replacement must not publish stale backing metadata.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 193,
+          "excerpt_sha256": "f3a4d843686bdff00bf6b795c2cb5b554c691eb4caa7800f1c7b1ae749f5a468"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 491,
+          "end_line": 503,
+          "excerpt_sha256": "30e72f48573829559572b5fb98947280dbb0b9e70c271ef5ff74c5a2ecaec8bc"
+        }
+      ],
+      "limitations": [
+        "The precise failed-growth lifetime concern is M0-MEM-004, not a new geometry reproduction."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-07 cmark releases a saved filename before nulling it, and mark_check_ifile frees temporary canonical names after matching. Line-number pool recycling performs link changes, not allocator frees.",
+      "invariant": "Only saved or temporary filename allocations take free.",
+      "source_refs": [
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 491,
+          "end_line": 503,
+          "excerpt_sha256": "30e72f48573829559572b5fb98947280dbb0b9e70c271ef5ff74c5a2ecaec8bc"
+        },
+        {
+          "target": "source:src/mark.rs",
+          "sha256": "77539c165e780b51c9bbf49fe978f7ac837fdd932bed8f8cc3bf9a8dca7e56f5",
+          "start_line": 858,
+          "end_line": 873,
+          "excerpt_sha256": "511d91664cbe374cdcc3bb57f3c134339ec78c4f3829debda9d1407c667b9ff1"
+        },
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 505,
+          "end_line": 517,
+          "excerpt_sha256": "c96beb656ebee9f6827b1cc3fbe8ee7096d65048641d95b0f01d037e7cbf3f98"
+        }
+      ],
+      "limitations": [
+        "The image pool and mark arrays must remain allocated for image lifetime."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-07 failed position growth can enter ecalloc -> out_of_memory -> quit -> edit(NULL) -> close_file -> get_scrpos while table is stale. The current tty-file and at-least-two-row conditions remain essential to M0-MEM-004.",
+      "invariant": "Cleanup reads require live backing storage, not just nonnull metadata.",
+      "source_refs": [
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 860,
+          "end_line": 887,
+          "excerpt_sha256": "477e15342e8cb8885a78cc46eaf268356aff029fc5cf1e053bb03c0836e62330"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 969,
+          "excerpt_sha256": "54bd56b0d427e831ff86929d935fd0a3e0251c6d7e7fe24e1dccc7166ecc787a"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1078,
+          "end_line": 1083,
+          "excerpt_sha256": "2b997a8f7c13dcf535481729891283def45315511bd82bcdd437d26d7046b153"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 907,
+          "excerpt_sha256": "5f8591bb715bbac9cbf69a6dd7180f660031e7eab030c6608391e419d875e7c3"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 274,
+          "end_line": 282,
+          "excerpt_sha256": "90616eacd2eef93332912f5737ec1c16dec941bf63b4ce413845ba5d7a763788"
+        }
+      ],
+      "limitations": [
+        "M0-MEM-003 and IND-POS-F4 describe separate maintained geometry obligations."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-07 line-number scans poll sigs and abort local scanning, but that does not establish exclusive ownership of mark/table state during another entry. No new asynchronous navigation failure is claimed.",
+      "invariant": "Polling must not be confused with a file-generation handoff.",
+      "source_refs": [
+        {
+          "target": "source:src/linenum.rs",
+          "sha256": "563e71685006f8497041a772af9b5f54b8c250baafb66e0d69e92629738e539b",
+          "start_line": 595,
+          "end_line": 607,
+          "excerpt_sha256": "d975a9828e45a2c9fe9b3adee8a62d4dbdad2c62022762d339ee7ad861d1c9e2"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": [
+        "The raw navigation owner concern remains linked to M0-MEM-001."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "ecalloc/out_of_memory at src/pager.rs:860-887 can enter quit; src/pager.rs:948-969 calls edit(NULL) before position-table replacement can finish."
+    },
+    "src/edit.rs": {
+      "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+      "relationship": "edit(NULL) at src/edit.rs:924-927 enters edit_ifile; src/edit.rs:1078-1083 closes the current file, whose src/edit.rs:899-907 get_scrpos call reads position state during failed growth."
+    }
+  }
+}

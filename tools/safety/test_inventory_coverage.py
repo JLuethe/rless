@@ -10,7 +10,7 @@ from common import sha
 from inventory_format import (EXPANDED_CONFIGURATIONS, all_statics, boundary_comparison,
                               expanded_review_sites, source_inputs, REGION_REGISTER)
 from ownership import CHECKLIST, seed, validate
-from run import source_file_summaries
+from safety_runner import source_file_summaries
 
 
 class SourceCoverage(unittest.TestCase):
@@ -63,7 +63,7 @@ class InventoryV2Controls(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         (self.root / 'src').mkdir()
-        (self.root / 'src/lib.rs').write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n')
+        (self.root / 'src/lib.rs').write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n' + '// Synthetic topic extent.\n'*8)
         (self.root / 'review.txt').write_text('Independently reviewed fixture owner and expanded boundary.')
         self.records = self.static_records('src/lib.rs')
         raw = self.root / 'syntax.json'
@@ -71,9 +71,9 @@ class InventoryV2Controls(unittest.TestCase):
         configurations = {}
         for name, parameters in EXPANDED_CONFIGURATIONS.items():
             source = self.root / (name + '.rs')
-            source.write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n')
+            source.write_text('static SHARED: AtomicUsize = AtomicUsize::new(0);\n' + '// Synthetic topic extent.\n'*8)
             syntax = self.root / (name + '.tsv')
-            records = self.static_records(str(source))
+            records = self.static_records(source.name)
             syntax.write_text('\n'.join('\t'.join(str(record[key]) for key in (
                 'kind', 'file', 'line', 'column', 'context', 'symbol')) for record in records) + '\n')
             configurations[name] = dict(**copy.deepcopy(parameters),
@@ -139,7 +139,26 @@ class InventoryV2Controls(unittest.TestCase):
                 item['expanded_review_map'] = dict(path=path.name, sha256=sha(path))
                 item['evidence_paths'].append(path.name)
                 item['evidence_sha256'][path.name] = sha(path)
+            from ownership_fixtures import packet
+            packet(item,review,self.inventory,self.root)
         return review
+
+    def test_fresh_inventory_metadata_keeps_source_bound_review_valid(self):
+        self.inventory.update(source_fingerprint='a'*64, recorded_at_utc='old')
+        review = self.completed_review()
+        self.check(review, complete=True)
+        # A new run after changes to tests/findings has new metadata and paths,
+        # but the source AST, compiler output and build inputs are identical.
+        self.inventory.update(source_fingerprint='b'*64, recorded_at_utc='new')
+        self.assertEqual(self.check(review, complete=True)['status'], 'reviewed')
+        self.inventory['derivation_inputs_sha256'] = '2'*64
+        with self.assertRaisesRegex(ValueError, 'derivation inputs'):
+            self.check(review)
+        self.inventory['derivation_inputs_sha256'] = '1'*64
+        source = self.root/'src/lib.rs'
+        source.write_text(source.read_text()+'// changed source byte\n')
+        with self.assertRaisesRegex(ValueError, 'stale inventory source'):
+            self.check(review)
 
     def test_shared_static_has_review_row_and_omission_is_rejected(self):
         review = seed(self.inventory, self.regions, self.root)

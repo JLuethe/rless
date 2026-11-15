@@ -17,7 +17,7 @@ from inventory_format import REGION_REGISTER
 class ReviewControls(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
-        (self.root/'src').mkdir();(self.root/'src/fixture.rs').write_text('static mut OBJECT: i32 = 0;')
+        (self.root/'src').mkdir();(self.root/'src/fixture.rs').write_text('static mut OBJECT: i32 = 0; extern \"C\" { fn free(); } fn callback() {}' + '\n' + '// Synthetic topic extent.\n'*8)
         (self.root/'review.md').write_text('Fixture owner, callback and error-path review.')
         self.inventory=dict(files={'src/fixture.rs':{'sha256':sha(self.root/'src/fixture.rs')}},
             mutable_static_definitions=[dict(file='src/fixture.rs',context='',symbol='OBJECT')],
@@ -45,6 +45,8 @@ class ReviewControls(unittest.TestCase):
         for item in self.review['entries']:
             item.update(status='reviewed-clear',reviewer='Fixture Reviewer',packet='M0.2',evidence_paths=['review.md'],evidence_sha256={'review.md':sha(self.root/'review.md')},
                         checklist={key:'Fixture analysis with explicit owner/alias/release invariant.' for key in CHECKLIST})
+            from ownership_fixtures import packet
+            packet(item,self.review,self.inventory,self.root)
 
     def check(self):return validate(self.review,self.inventory,self.regions,self.findings,self.root)
 
@@ -52,6 +54,50 @@ class ReviewControls(unittest.TestCase):
         with self.assertRaises(ValueError):self.check()
         self.assertEqual(len(self.review['entries']),5)
         self.complete();self.assertEqual(self.check()['status'],'reviewed')
+
+    def test_regenerated_inventory_storage_does_not_invalidate_source_review(self):
+        from ownership import inventory_digest
+        self.inventory.update(recorded_at_utc='first',raw_inventory={'path':'/old/raw','sha256':'a'*64})
+        self.review=seed(self.inventory,self.regions,self.root)
+        self.complete()
+        first=inventory_digest(self.inventory)
+        self.inventory['recorded_at_utc']='second'
+        self.inventory['raw_inventory']['path']='/new/raw'
+        self.assertEqual(first,inventory_digest(self.inventory))
+        self.assertEqual(self.check()['status'],'reviewed')
+        self.inventory['raw_inventory']['sha256']='b'*64
+        with self.assertRaisesRegex(ValueError,'stale review inventory_sha256'):
+            self.check()
+
+    def test_unmigrated_review_cannot_gain_content_binding_implicitly(self):
+        self.complete()
+        self.review.pop('inventory_binding')
+        with self.assertRaisesRegex(ValueError,'explicit migration'):
+            self.check()
+
+    def test_readme_and_na_text_are_not_an_ownership_review(self):
+        item=self.review['entries'][0]
+        (self.root/'README.md').write_text('Unrelated project overview.')
+        item.update(status='reviewed-clear',reviewer='Fixture Reviewer',packet='M0.2',
+                    evidence_paths=['README.md'],evidence_sha256={'README.md':sha(self.root/'README.md')},
+                    checklist={key:'n/a' for key in CHECKLIST})
+        with self.assertRaisesRegex(ValueError,'entry-specific review packet'):
+            self.check()
+
+    def test_review_packet_for_another_entry_cannot_be_reused(self):
+        self.complete()
+        self.review['entries'][0]['review_packet']=self.review['entries'][1]['review_packet']
+        with self.assertRaises(ValueError):self.check()
+
+    def test_source_excerpt_cannot_be_forged_by_rehashing_the_packet(self):
+        self.complete();item=self.review['entries'][0]
+        reference=item['review_packet'];path=self.root/reference['path']
+        packet=json.loads(path.read_text())
+        packet['checklist']['release_pair']['source_refs'][0]['excerpt_sha256']='0'*64
+        item['checklist']=packet['checklist'];path.write_text(json.dumps(packet))
+        reference['sha256']=sha(path);item['evidence_sha256'][reference['path']]=sha(path)
+        with self.assertRaisesRegex(ValueError,'source excerpt changed'):
+            self.check()
 
     def test_historical_inventory_cannot_approve_complete_review(self):
         self.inventory['schema_version']=1

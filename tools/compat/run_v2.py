@@ -119,7 +119,7 @@ class Screen(pyte.Screen):
         return result
 
 
-def run_case(binary, case):
+def run_case(binary, case, *, checkpoint_observer=None):
     if case.get('executable'):
         if case['executable'] not in ('lessecho',):
             raise ValueError('unsupported companion executable')
@@ -168,7 +168,7 @@ def run_case(binary, case):
             observed = dict(status=result.returncode, stdout_b64=b64(norm(result.stdout)),
                             stderr_b64=b64(norm(result.stderr)))
         else:
-            observed = run_pty(argv, env, work, case, norm)
+            observed = run_pty(argv, env, work, case, norm, checkpoint_observer=checkpoint_observer)
         observed['files'] = {}
         for path in sorted(work.rglob('*')):
             if path.is_file():
@@ -178,7 +178,7 @@ def run_case(binary, case):
         return observed
 
 
-def run_pty(argv, env, work, case, norm):
+def run_pty(argv, env, work, case, norm, *, checkpoint_observer=None):
     master, slave = pty.openpty()
     rows, columns = case.get('size', [24, 80])
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', rows, columns, 0, 0))
@@ -255,7 +255,7 @@ def run_pty(argv, env, work, case, norm):
         transcript.extend(data)
         terminal_feed(data)
         return True
-    def wait(patterns, start):
+    def wait(patterns, start, require_terminal_input=False):
         def input_checkpoint():
             # A prompt can be printed between two queued commands, or followed
             # by a repaint split across writes. Wait until the Linux child is
@@ -270,13 +270,40 @@ def run_pty(argv, env, work, case, norm):
                 return True
             if state != 'S':
                 return False
-            call = (proc/'syscall').read_text().split()[0]
+            syscall = (proc/'syscall').read_text().split()
+            call = syscall[0]
             # Linux x86_64 read, poll, select, pselect6 and ppoll.
             allowed = ('0', '7', '23', '270', '271')
             if 'Waiting for data' in patterns:
                 # Follow mode also waits between probes with nanosleep.
                 allowed += ('35', '230')
-            return call in allowed
+            if call not in allowed:
+                return False
+            if require_terminal_input and call in ('7', '271'):
+                # A blocked output worker acknowledgment is also ppoll. Read
+                # its pollfd set so a screen marker is not mistaken for a
+                # terminal-input checkpoint while rendering is still active.
+                try:
+                    address = int(syscall[1], 16)
+                    count = int(syscall[2], 16)
+                    if count < 1 or count > 64:
+                        return False
+                    memory = os.open(proc/'mem', os.O_RDONLY)
+                    try:
+                        entries = os.pread(memory, count * 8, address)
+                    finally:
+                        os.close(memory)
+                    if len(entries) != count * 8:
+                        return False
+                    for index in range(count):
+                        descriptor = struct.unpack_from('i', entries, index * 8)[0]
+                        target = os.readlink(proc/'fd'/str(descriptor))
+                        if target == '/dev/tty' or target.startswith('/dev/pts/'):
+                            return True
+                    return False
+                except (OSError, ValueError, IndexError):
+                    return False
+            return True
 
         deadline = time.monotonic() + case.get('timeout', 5)
         while time.monotonic() < deadline:
@@ -338,7 +365,11 @@ def run_pty(argv, env, work, case, norm):
                 os.close(write_fd)
                 write_fd = None
             if 'await' in event:
-                wait(event['await'], start)
+                wait(event['await'], start, event.get('require_terminal_input', False))
+            if 'heap_checkpoint' in event:
+                if 'await' not in event or checkpoint_observer is None:
+                    raise ValueError('heap observation requires an input barrier and explicit observer')
+                checkpoint_observer(pid, event['heap_checkpoint'])
             if event.get('snapshot'):
                 checkpoints.append(screen.state())
             if event.get('resources'):
@@ -370,6 +401,8 @@ def run_pty(argv, env, work, case, norm):
         final['rows'] = [line.replace(str(work), '{ROOT}') for line in final['rows']]
         observed = dict(status=status, checkpoints=checkpoints, final_terminal=final,
                         termios_restored=before == after)
+        if case.get('include_transcript'):
+            observed['transcript_b64'] = b64(norm(bytes(transcript)))
         if resource_checkpoints:
             observed['resource_checkpoints'] = resource_checkpoints
         return observed

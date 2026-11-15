@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-05",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/search.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-05 allocates pattern_info nodes with owned text/compiled fields and allocates highlight storage blocks containing node arrays. Global filter/tree anchors retain the published owners.",
+      "invariant": "Pattern and highlight allocations need distinct owner roots.",
+      "source_refs": [
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 1260,
+          "end_line": 1280,
+          "excerpt_sha256": "bf68a7d5499c91f6504c140204b219920ecd84ed86d066c3bad2ca1818498076"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 2834,
+          "end_line": 2837,
+          "excerpt_sha256": "1f9df357f96b0a3b1004b88b5d5f844d50e69db4831951ec34b88b3aa9b52a2a"
+        }
+      ],
+      "limitations": [
+        "Native compiled internals are delegated to the pattern module."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-05 matches_filters retains a filter node while lending its compiled/text fields and converted line to match_pattern, then reads the successor after return.",
+      "invariant": "A filter node must outlive the native-match borrow and successor read.",
+      "source_refs": [
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 1658,
+          "end_line": 1682,
+          "excerpt_sha256": "472022f4a2ec888158ea8f0a66d4b3d975b9f506f57006cbf3c44abf9cd6af92"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 1693,
+          "end_line": 1698,
+          "excerpt_sha256": "315791efb9eb84c02f9f529db12eea96672c07afce5265fcc594df2a406b853e"
+        }
+      ],
+      "limitations": [
+        "The local raw pointer carries no exclusion against handler retirement."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-05 can be entered from u_interrupt: the handler calls set_filter_pattern(NULL,0), whose null branch clears compiled/text owners and frees every filter node.",
+      "invariant": "Filter retirement must not run inside an interrupting handler.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 44,
+          "end_line": 56,
+          "excerpt_sha256": "2fede7e9243c7596a9beaa708adb9c8833d2c2038a8a592a70e0ade8bc20db5a"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 2822,
+          "end_line": 2832,
+          "excerpt_sha256": "f18f21f90a975bf2f4504b3367a68e853ab3a6a235628fcceae09b38941c7ea8"
+        }
+      ],
+      "limitations": [
+        "M0-SIG-001 remains a source-traced asynchronous lifetime concern."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-05 clr_hlist frees node arrays and storage records before nulling all tree aliases and preparation bounds. set_filter_pattern also invalidates the whole old filter chain on clear.",
+      "invariant": "No old tree or filter alias survives its clear operation.",
+      "source_refs": [
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 985,
+          "end_line": 1000,
+          "excerpt_sha256": "4842865caece29aed668843ec6cf73dd2465dae2e6240f64e6b8c664e1399fed"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 2824,
+          "end_line": 2832,
+          "excerpt_sha256": "c6404f8b20004c739fecde27f525211e16db3be1b19dcc6c62a960251ebe8b65"
+        }
+      ],
+      "limitations": [
+        "Nulling roots afterward cannot revoke an already suspended raw alias."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-05 compiles a new filter before linking it to filter_infos, with explicit pre/post-commit injection points. set_pattern first un-compiles an existing compiled field, so replacement is not uniformly transactional.",
+      "invariant": "Commit boundaries must identify old and staged owner lifetimes.",
+      "source_refs": [
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 772,
+          "end_line": 787,
+          "excerpt_sha256": "a3558b8a444fe52f054ab5d735ae6d03981e278495bc34bfdfa8e39a248317ed"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 2834,
+          "end_line": 2859,
+          "excerpt_sha256": "eb97bd1350025584ea96a3200e1c6f2ecd65b2b788d7dfe8e13e1076b274c126"
+        }
+      ],
+      "limitations": [
+        "Pre-commit staging of a fresh node does not approve every existing-pattern update."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-05 clear_pattern frees text and un-compiles native state; clearing filters then frees outer nodes. A successful matches_filters branch also consumes cline and chpos before returning true.",
+      "invariant": "Callers must not release converted buffers again after a consuming match.",
+      "source_refs": [
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 749,
+          "end_line": 755,
+          "excerpt_sha256": "de99a51583eec63db6e34f06b4eb642f0a910cac30309e262daf65dcb1f61472"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 2825,
+          "end_line": 2830,
+          "excerpt_sha256": "0d16d52b71cf0e862deea7eaceb5c5da5f54729f6b24b52e2bdd374de2d1e68e"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 1683,
+          "end_line": 1695,
+          "excerpt_sha256": "bfb86f2bdea2e97f2a1913f8b6f91ee539502f7d3320571dafed02477e031bc7"
+        }
+      ],
+      "limitations": [
+        "False-match paths leave those buffers for the enclosing caller."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-05 failed fresh filter compilation frees its outer candidate; the before-commit hook explicitly clears candidate pattern fields before free. These local exits do not protect owners interrupted by SIGINT.",
+      "invariant": "Error cleanup must follow whether the candidate has been published.",
+      "source_refs": [
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 2834,
+          "end_line": 2851,
+          "excerpt_sha256": "47854100cfa936c0320cfe74b15a1c838d768d291231122c00427ef5775519f8"
+        }
+      ],
+      "limitations": [
+        "No failure-injection campaign is rerun by this source review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-05 leaves M0-SIG-001 open: u_interrupt replaces filter state directly while matches_filters can retain a node across match_pattern and successor access. There is no deferred owner-retirement handoff in these paths.",
+      "invariant": "Handler notifications must precede ordinary-loop filter mutation.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 44,
+          "end_line": 56,
+          "excerpt_sha256": "2fede7e9243c7596a9beaa708adb9c8833d2c2038a8a592a70e0ade8bc20db5a"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 1668,
+          "end_line": 1682,
+          "excerpt_sha256": "b5dc0a521792f886bc104fbffdc7b8dd434cf5cc6c8276b87a8f1495bc029e4c"
+        },
+        {
+          "target": "source:src/search.rs",
+          "sha256": "53450e94db4e553ee44ba566c98a984318391e097396044bd0700bf3c54b162a",
+          "start_line": 1697,
+          "end_line": 1698,
+          "excerpt_sha256": "9ae8bc1657e6829348883420cda49a50cd9471e57cc46840a43513852e789415"
+        }
+      ],
+      "limitations": [
+        "This packet records the route without claiming a reproduced failure."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "u_interrupt at src/signal.rs:44-56 calls set_filter_pattern(NULL,0), entering the filter/tree retirement analyzed by OWN-05 while ordinary search may retain a filter node."
+    }
+  }
+}

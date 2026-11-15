@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:e956bb6707cfd766d532906a",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/position.rs"
+    ],
+    "symbol": "table_size",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_int",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The table_size c_int owns allocated table capacity, initialized zero and assigned sc_height only after a successful ecalloc return.",
+      "invariant": "Capacity records storage size rather than current screen rows.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 53,
+          "excerpt_sha256": "d82407230701dd38697fcfd93dc629863b590ff43d34b17f23ed6496dfa4bc7a"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": [
+        "table_size records capacity and owns no allocation independently of table."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "pos_init reads it by value to choose reuse versus growth; no external pointer to the table_size field escapes, but its meaning depends on the live table owner.",
+      "invariant": "A capacity number alone cannot validate a table address.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 180,
+          "excerpt_sha256": "662fe9dfafbb0ed6c6cf2bdc6c239fb100577598d4311a3211a4b7f6002efaa3"
+        }
+      ],
+      "limitations": [
+        "Its old positive value does not establish that the published table is still live."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "No callback is stored; the allocation selected by the table_size capacity comparison may invoke fatal cleanup before the next value is assigned.",
+      "invariant": "Capacity decisions can enter owner-sensitive cleanup.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        }
+      ],
+      "limitations": [
+        "Fatal allocation cleanup can run before the new capacity assignment."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Shrink preserves table_size as capacity, but growth frees its backing allocation before table_size is replaced, leaving stale capacity metadata on failure.",
+      "invariant": "Capacity lifetime must follow allocation lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "table_size is the old capacity while pos_init frees table and calls ecalloc. The new table_size = sc_height assignment follows successful pointer replacement, so failure preserves a positive capacity describing storage that no longer exists. The scalar is not itself freed; its stale capacity claim accompanies M0-MEM-004.",
+      "invariant": "Capacity publication is not failure-atomic with the owner.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The table_size integer requires no free; only the array described by it is allocated, and retained capacity after shrink is intentional.",
+      "invariant": "Capacity metadata must not be released as storage.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 50,
+          "end_line": 53,
+          "excerpt_sha256": "d82407230701dd38697fcfd93dc629863b590ff43d34b17f23ed6496dfa4bc7a"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        }
+      ],
+      "limitations": [
+        "Changing capacity metadata cannot release the old position array safely."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "table_size is not consulted by the get_scrpos cleanup guard. Failed ecalloc enters out_of_memory -> quit -> edit(NULL) -> edit_ifile(NULL) -> close_file -> get_scrpos with the old table_size still published, but nonnull table and min(sc_height,table_rows) >=2 admit the read. The hazard is stale backing ownership, not an out-of-range table_size dereference (M0-MEM-004).",
+      "invariant": "Failed growth cannot prove the old capacity remains owned.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 182,
+          "end_line": 195,
+          "excerpt_sha256": "92b7d1aac7328499cb88628a581614ddf060e162929f46a40f2ef3ab414aa455"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 860,
+          "end_line": 887,
+          "excerpt_sha256": "477e15342e8cb8885a78cc46eaf268356aff029fc5cf1e053bb03c0836e62330"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 948,
+          "end_line": 969,
+          "excerpt_sha256": "54bd56b0d427e831ff86929d935fd0a3e0251c6d7e7fe24e1dccc7166ecc787a"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 924,
+          "end_line": 927,
+          "excerpt_sha256": "d73c507242da23fff5cdae397efdf97c1ba0e58fd958a84e8a7e4d08911f7655"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1078,
+          "end_line": 1083,
+          "excerpt_sha256": "2b997a8f7c13dcf535481729891283def45315511bd82bcdd437d26d7046b153"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 899,
+          "end_line": 907,
+          "excerpt_sha256": "5f8591bb715bbac9cbf69a6dd7180f660031e7eab030c6608391e419d875e7c3"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 238,
+          "end_line": 244,
+          "excerpt_sha256": "30415c103a0070e6c4f860f8f3ac561a244f027e9ba1760070e4a5fe50c673d8"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 274,
+          "end_line": 282,
+          "excerpt_sha256": "90616eacd2eef93332912f5737ec1c16dec941bf63b4ce413845ba5d7a763788"
+        },
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 293,
+          "end_line": 295,
+          "excerpt_sha256": "6a5ca53b6e43cf1bc88d129a7fa1d5b4dc3f996177a65c075c057c55dbe64e51"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "table_size relies on ordinary resize ordering; a handler-driven or fatal cleanup may observe it during replacement without an owner guard.",
+      "invariant": "That sequencing is not yet a proved handoff contract.",
+      "source_refs": [
+        {
+          "target": "source:src/position.rs",
+          "sha256": "9e9b25f3c9f01187f46d2801d723e29e18a025b24126a112bcd030c06b28df52",
+          "start_line": 171,
+          "end_line": 195,
+          "excerpt_sha256": "1ce7027eae2ea1a6df68bab3a85e9ac3d96410a51f79b125ce40c343e1132b5e"
+        }
+      ],
+      "limitations": [
+        "Source-level growth/fatal-cleanup ordering concern is recorded under existing M0-MEM-001; no new runtime proof or fix is claimed. M0-MEM-003 and IND-POS-F4 remain open."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "The out_of_memory -> quit route at src/pager.rs:860-887 and src/pager.rs:948-969 runs before failed growth can assign a new table_size; old capacity metadata remains visible during cleanup."
+    },
+    "src/edit.rs": {
+      "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+      "relationship": "File-close cleanup reaches get_scrpos through src/edit.rs:924-927 and src/edit.rs:1078-1083 to src/edit.rs:899-907. That reader does not consult table_size as proof of live storage."
+    }
+  },
+  "finding_context": {}
+}

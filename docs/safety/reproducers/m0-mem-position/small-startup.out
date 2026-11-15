@@ -1,0 +1,92 @@
+=================================================================
+[1m[31m==1927182==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b9a09de0898 at pc 0x558f2041cdc1 bp 0x7ffc8af664f0 sp 0x7ffc8af664e8
+[1m[0m[1m[34mREAD of size 8 at 0x7b9a09de0898 thread T0[1m[0m
+    #0 0x558f2041cdc0 in get_scrpos_pos /home/john/Code/rless/compat/.runs/io-fix-worktree/src/position.rs:193:16
+    #1 0x558f2041c8ab in get_scrpos /home/john/Code/rless/compat/.runs/io-fix-worktree/src/position.rs:208:5
+    #2 0x558f203b98d2 in lastmark /home/john/Code/rless/compat/.runs/io-fix-worktree/src/mark.rs:764:5
+    #3 0x558f2036813e in jump_loc /home/john/Code/rless/compat/.runs/io-fix-worktree/src/jump.rs:674:9
+    #4 0x558f203f9879 in rless::command::make_display::h9e083aa5390bb298 /home/john/Code/rless/compat/.runs/io-fix-worktree/src/command.rs:1334:13
+    #5 0x558f203fca90 in rless::command::prompt::hd7f13835e2cc5c60 /home/john/Code/rless/compat/.runs/io-fix-worktree/src/command.rs:1390:5
+    #6 0x558f203ff749 in commands /home/john/Code/rless/compat/.runs/io-fix-worktree/src/command.rs:1870:9
+    #7 0x558f20389b63 in rless::pager::main_0::h0c46dceca492cd2c /home/john/Code/rless/compat/.runs/io-fix-worktree/src/pager.rs:835:5
+    #8 0x558f2038850c in rless::pager::main::heb1234156ca0a4ae /home/john/Code/rless/compat/.runs/io-fix-worktree/src/pager.rs:1003:30
+    #9 0x558f2034eb5f in rless::main::h3ab3693e74ba837b /home/john/Code/rless/compat/.runs/io-fix-worktree/src/bin/rless.rs:3:5
+    #10 0x558f2034eb0d in core::ops::function::FnOnce::call_once::h6804f4100f508038 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+    #11 0x558f2034ed80 in std::sys::backtrace::__rust_begin_short_backtrace::h7f003a2bf273fab3 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/backtrace.rs:158:18
+    #12 0x558f2034ed33 in std::rt::lang_start::_$u7b$$u7b$closure$u7d$$u7d$::h292d76cb418b3a77 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/rt.rs:206:18
+    #13 0x558f20433fff in core::ops::function::impls::_$LT$impl$u20$core..ops..function..FnOnce$LT$A$GT$$u20$for$u20$$RF$F$GT$::call_once::h1c9bfa347d1c1bf9 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/core/src/ops/function.rs:287:21
+    #14 0x558f20433fff in std::panicking::catch_unwind::do_call::h8fefcbc8f68af590 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:590:40
+    #15 0x558f20433fff in std::panicking::catch_unwind::h1d277c413bad30fb /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19
+    #16 0x558f20433fff in std::panic::catch_unwind::h3f13904d15858cb8 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14
+    #17 0x558f20433fff in std::rt::lang_start_internal::_$u7b$$u7b$closure$u7d$$u7d$::h8d30a79a701f3658 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:175:24
+    #18 0x558f20433fff in std::panicking::catch_unwind::do_call::h20e3ee8c528e7474 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:590:40
+    #19 0x558f20433fff in std::panicking::catch_unwind::hc0ebd6ee5d722ceb /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19
+    #20 0x558f20433fff in std::panic::catch_unwind::hc8f7f3a47dd60ea5 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14
+    #21 0x558f20433fff in std::rt::lang_start_internal::hb277082aa14cdf53 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:171:5
+    #22 0x558f2034ec9f in std::rt::lang_start::hd307e6cdf062929a /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/rt.rs:205:5
+    #23 0x558f2034eb90 in main (/home/john/Code/rless/compat/.runs/io-fix-worktree/compat/.runs/iofix-asan-smoke-20261031T073500Z/normal/x86_64-unknown-linux-gnu/debug/rless+0x228b90) (BuildId: e0d71eb56408a44232b6ac34f563e75a7daae65d)
+    #24 0x7f7a0aa27780 in __libc_start_call_main /usr/src/debug/glibc/glibc/csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #25 0x7f7a0aa278b8 in __libc_start_main /usr/src/debug/glibc/glibc/csu/../csu/libc-start.c:372:3
+    #26 0x558f20293474 in _start (/home/john/Code/rless/compat/.runs/io-fix-worktree/compat/.runs/iofix-asan-smoke-20261031T073500Z/normal/x86_64-unknown-linux-gnu/debug/rless+0x16d474) (BuildId: e0d71eb56408a44232b6ac34f563e75a7daae65d)
+
+[1m[32m0x7b9a09de0898 is located 0 bytes after 8-byte region [0x7b9a09de0890,0x7b9a09de0898)
+[1m[0m[1m[35mallocated by thread T0 here:[1m[0m
+    #0 0x558f20320899 in calloc /rustc/llvm/src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:74:3
+    #1 0x558f2038a46d in ecalloc /home/john/Code/rless/compat/.runs/io-fix-worktree/src/pager.rs:880:13
+    #2 0x558f2041da2d in pos_init /home/john/Code/rless/compat/.runs/io-fix-worktree/src/position.rs:114:13
+    #3 0x558f203da1cf in update_term /home/john/Code/rless/compat/.runs/io-fix-worktree/src/screen.rs:1404:5
+    #4 0x558f203d59aa in get_term /home/john/Code/rless/compat/.runs/io-fix-worktree/src/screen.rs:1399:5
+    #5 0x558f20388d45 in rless::pager::main_0::h0c46dceca492cd2c /home/john/Code/rless/compat/.runs/io-fix-worktree/src/pager.rs:721:9
+    #6 0x558f2038850c in rless::pager::main::heb1234156ca0a4ae /home/john/Code/rless/compat/.runs/io-fix-worktree/src/pager.rs:1003:30
+    #7 0x558f2034eb5f in rless::main::h3ab3693e74ba837b /home/john/Code/rless/compat/.runs/io-fix-worktree/src/bin/rless.rs:3:5
+    #8 0x558f2034eb0d in core::ops::function::FnOnce::call_once::h6804f4100f508038 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+    #9 0x558f2034ed80 in std::sys::backtrace::__rust_begin_short_backtrace::h7f003a2bf273fab3 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/backtrace.rs:158:18
+    #10 0x558f2034ed33 in std::rt::lang_start::_$u7b$$u7b$closure$u7d$$u7d$::h292d76cb418b3a77 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/rt.rs:206:18
+    #11 0x558f20433fff in core::ops::function::impls::_$LT$impl$u20$core..ops..function..FnOnce$LT$A$GT$$u20$for$u20$$RF$F$GT$::call_once::h1c9bfa347d1c1bf9 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/core/src/ops/function.rs:287:21
+    #12 0x558f20433fff in std::panicking::catch_unwind::do_call::h8fefcbc8f68af590 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:590:40
+    #13 0x558f20433fff in std::panicking::catch_unwind::h1d277c413bad30fb /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19
+    #14 0x558f20433fff in std::panic::catch_unwind::h3f13904d15858cb8 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14
+    #15 0x558f20433fff in std::rt::lang_start_internal::_$u7b$$u7b$closure$u7d$$u7d$::h8d30a79a701f3658 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:175:24
+    #16 0x558f20433fff in std::panicking::catch_unwind::do_call::h20e3ee8c528e7474 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:590:40
+    #17 0x558f20433fff in std::panicking::catch_unwind::hc0ebd6ee5d722ceb /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19
+    #18 0x558f20433fff in std::panic::catch_unwind::hc8f7f3a47dd60ea5 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14
+    #19 0x558f20433fff in std::rt::lang_start_internal::hb277082aa14cdf53 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:171:5
+    #20 0x558f2034ec9f in std::rt::lang_start::hd307e6cdf062929a /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/rt.rs:205:5
+    #21 0x558f2034eb90 in main (/home/john/Code/rless/compat/.runs/io-fix-worktree/compat/.runs/iofix-asan-smoke-20261031T073500Z/normal/x86_64-unknown-linux-gnu/debug/rless+0x228b90) (BuildId: e0d71eb56408a44232b6ac34f563e75a7daae65d)
+    #22 0x7f7a0aa27780 in __libc_start_call_main /usr/src/debug/glibc/glibc/csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #23 0x7f7a0aa278b8 in __libc_start_main /usr/src/debug/glibc/glibc/csu/../csu/libc-start.c:372:3
+    #24 0x558f20293474 in _start (/home/john/Code/rless/compat/.runs/io-fix-worktree/compat/.runs/iofix-asan-smoke-20261031T073500Z/normal/x86_64-unknown-linux-gnu/debug/rless+0x16d474) (BuildId: e0d71eb56408a44232b6ac34f563e75a7daae65d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/john/Code/rless/compat/.runs/io-fix-worktree/src/position.rs:193:16 in get_scrpos_pos
+Shadow bytes around the buggy address:
+  0x7b9a09de0600: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m07[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0680: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m07[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m05[1m[0m
+  0x7b9a09de0700: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m02[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m02[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m05[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0780: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m07[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m03[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[35mfd[1m[0m
+  0x7b9a09de0800: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m07[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[35mfd[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m [1m[0m03[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m02[1m[0m [1m[31mfa[1m[0m
+=>0x7b9a09de0880: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m00[1m[0m[[1m[31mfa[1m[0m][1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[0m07[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0900: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0980: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0a00: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0a80: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+  0x7b9a09de0b00: [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m [1m[31mfa[1m[0m
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           [1m[0m00[1m[0m
+  Partially addressable: [1m[0m01[1m[0m [1m[0m02[1m[0m [1m[0m03[1m[0m [1m[0m04[1m[0m [1m[0m05[1m[0m [1m[0m06[1m[0m [1m[0m07[1m[0m 
+  Heap left redzone:       [1m[31mfa[1m[0m
+  Freed heap region:       [1m[35mfd[1m[0m
+  Stack left redzone:      [1m[31mf1[1m[0m
+  Stack mid redzone:       [1m[31mf2[1m[0m
+  Stack right redzone:     [1m[31mf3[1m[0m
+  Stack after return:      [1m[35mf5[1m[0m
+  Stack use after scope:   [1m[35mf8[1m[0m
+  Global redzone:          [1m[31mf9[1m[0m
+  Global init order:       [1m[36mf6[1m[0m
+  Poisoned by user:        [1m[34mf7[1m[0m
+  Container overflow:      [1m[34mfc[1m[0m
+  Array cookie:            [1m[31mac[1m[0m
+  Intra object redzone:    [1m[33mbb[1m[0m
+  ASan internal:           [1m[33mfe[1m[0m
+  Left alloca redzone:     [1m[34mca[1m[0m
+  Right alloca redzone:    [1m[34mcb[1m[0m
+==1927182==ABORTING

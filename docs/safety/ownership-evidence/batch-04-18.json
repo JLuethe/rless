@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/forwback.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/forwback.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/forwback.rs keeps stack scroll counters/positions and mutates shared navigation/display state. overlay_header borrows line rendering and position services rather than acquiring an independent rendered byte owner.",
+      "invariant": "Scroll positions are values, not ownership of the rendered line.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 528,
+          "end_line": 545,
+          "excerpt_sha256": "d5d4690e3f66b0dd3edea9ae2329193e2d31eeca9dbbf82dcdd526708e361ca6"
+        },
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 577,
+          "end_line": 590,
+          "excerpt_sha256": "27458ab1474c9a0c4684465d07b7c5963b0cd087c1c729d7a00991ad5edd2dbb"
+        }
+      ],
+      "limitations": [
+        "The actual byte/attribute owners remain in the line module."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/forwback.rs obtains each header position from navigation, renders through forw_line/forw_line_pfx and consumes the shared line with put_line. The rendered content must survive that call sequence.",
+      "invariant": "A rendered-line borrow must match the current position and header geometry.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 548,
+          "end_line": 568,
+          "excerpt_sha256": "db1f6a9479723fec08031de25130fa29cda8f3201018bf12b2a858d5e06e577f"
+        }
+      ],
+      "limitations": [
+        "No generation token binds the temporary position to line-buffer content."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/forwback.rs calls line generation, attribute selection, output and repaint directly; no function pointer or heap callback context is retained by overlay_header or the scroll completion path.",
+      "invariant": "Named rendering calls must preserve their caller-visible owner contract.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 535,
+          "end_line": 544,
+          "excerpt_sha256": "82ad6c3a4f145efbf41a547e02335a11bc70f2a877500b388675bb477bc25d15"
+        },
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 700,
+          "end_line": 722,
+          "excerpt_sha256": "4256e836ccd780f6548543f083e39791a3f39773f81662476869b8c9a2475f5f"
+        }
+      ],
+      "limitations": [
+        "Direct dispatch does not prevent another callee from changing shared display state."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/forwback.rs can clear navigation positions before repaint and repeatedly replace the current rendered line while scrolling. Existing copied coordinates need revalidation when that shared state changes.",
+      "invariant": "Logical screen invalidation must precede reusing old coordinates.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 613,
+          "end_line": 620,
+          "excerpt_sha256": "1c26b235b63a082574b4bb1c245e99c523ce795b43a1f5227bbc86d35cd7c202"
+        },
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 700,
+          "end_line": 722,
+          "excerpt_sha256": "4256e836ccd780f6548543f083e39791a3f39773f81662476869b8c9a2475f5f"
+        }
+      ],
+      "limitations": [
+        "This file does not own or release the position-table allocation itself."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/forwback.rs publishes forward positions after rendering and updates first_time/current-line state separately; EOF and repaint decisions depend on the same mutable screen/input snapshot.",
+      "invariant": "Position publication must agree with the content actually displayed.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 700,
+          "end_line": 722,
+          "excerpt_sha256": "4256e836ccd780f6548543f083e39791a3f39773f81662476869b8c9a2475f5f"
+        }
+      ],
+      "limitations": [
+        "These are incremental display updates, not an all-or-nothing frame transaction."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/forwback.rs acquires no local heap block in the header/scroll paths; it borrows rendered line and position owners and must not free their storage. Ending stack counters releases no native resource.",
+      "invariant": "The consuming display layer must not become a second allocator owner.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 528,
+          "end_line": 545,
+          "excerpt_sha256": "d5d4690e3f66b0dd3edea9ae2329193e2d31eeca9dbbf82dcdd526708e361ca6"
+        },
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 577,
+          "end_line": 590,
+          "excerpt_sha256": "27458ab1474c9a0c4684465d07b7c5963b0cd087c1c729d7a00991ad5edd2dbb"
+        }
+      ],
+      "limitations": [
+        "This local no-free observation does not prove global rendering owners are balanced."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/forwback.rs backward scanning checks a -1 line result and signal flags to decide whether to stop or continue. It has no local typed distinction proving every lower-layer read/error was diagnosed.",
+      "invariant": "An input sentinel and an owner-release obligation must not be conflated.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 754,
+          "end_line": 770,
+          "excerpt_sha256": "8d9163372263daf859044306956572aaedd23d7c6fa2631ce1656ac8a70a98d9"
+        }
+      ],
+      "limitations": [
+        "No new compatibility or permanent-I/O-failure campaign ran for these branches."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/forwback.rs polls sigs before forward/backward work, yet retains shared display and navigation assumptions across many direct calls. M0-MEM-001 remains open for that coordination.",
+      "invariant": "Signal polling is not an exclusive owner-handoff mechanism.",
+      "source_refs": [
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 591,
+          "end_line": 598,
+          "excerpt_sha256": "853f4eb3fcb6b9ffc88f6bd2ccb4c060821723481be2707985cb68f1f8368071"
+        },
+        {
+          "target": "source:src/forwback.rs",
+          "sha256": "77619662d886f0d86dbd34e83ecd9634378b26ffddc7e6ed8f3b938d065207b3",
+          "start_line": 735,
+          "end_line": 743,
+          "excerpt_sha256": "ebab9b6c9a58448aefa1f4dad0f9be6dd979f92225699566f2d2dc512ee9fbc3"
+        }
+      ],
+      "limitations": [
+        "No specific handler-induced line replacement is claimed from polling alone."
+      ]
+    }
+  }
+}

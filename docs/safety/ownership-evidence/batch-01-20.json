@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:ef18f0df7355fd2d850830c3",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/output.rs"
+    ],
+    "symbol": "OUTPUT_FAILED",
+    "context": "",
+    "declared_type": "AtomicBool",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The OUTPUT_FAILED AtomicBool owns a sticky process output-failure bit, initially false and distinct from the translated output buffer owner.",
+      "invariant": "The flag owns no output bytes or descriptor.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 490,
+          "end_line": 492,
+          "excerpt_sha256": "705a26d94fee17c3e0c0ba4cf5e5bb9937b5722fada3fa382323891059ae9e07"
+        }
+      ],
+      "limitations": [
+        "OUTPUT_FAILED owns sticky failure state rather than output bytes."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "output_failed copies the OUTPUT_FAILED value; flush_buffer swaps it to true, and pager.rs:768/974 reads through output_failed rather than borrowing the flag.",
+      "invariant": "Failure observation exports only a Boolean.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 494,
+          "end_line": 496,
+          "excerpt_sha256": "92d0784a4ddeb79b963c04cdacf5b56219163c4917f45d8374541f266af9769d"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 554,
+          "end_line": 560,
+          "excerpt_sha256": "89ee112a3708f5dea45fe8876d9e5c86e5938c9b71f1517149677ad97cf1c922"
+        },
+        {
+          "target": "source:src/pager.rs",
+          "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+          "start_line": 768,
+          "end_line": 768,
+          "excerpt_sha256": "22984a3eb86c54a865c32028cc4cdb62e3efa2d980356711bf3ec085fe4c3032"
+        }
+      ],
+      "limitations": [
+        "The atomic latch cannot retain a buffer being flushed."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The first false-to-true result permits one direct io_error_diagnostic call; the OUTPUT_FAILED bit contains no callback or error object pointer.",
+      "invariant": "The failure latch cannot retain diagnostic buffers.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 554,
+          "end_line": 560,
+          "excerpt_sha256": "89ee112a3708f5dea45fe8876d9e5c86e5938c9b71f1517149677ad97cf1c922"
+        }
+      ],
+      "limitations": [
+        "Fatal output handling can enter quit independently of atomic storage safety."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The OUTPUT_FAILED flag remains true after an error; terminal recovery may still attempt output, but no reset invalidates an observed failure.",
+      "invariant": "Output failure remains sticky for process lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 490,
+          "end_line": 496,
+          "excerpt_sha256": "b901e5b0d50891f8021a628b3722ae3dbb4dab70ec8c9db23ae3a718cc52f9f3"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 554,
+          "end_line": 560,
+          "excerpt_sha256": "89ee112a3708f5dea45fe8876d9e5c86e5938c9b71f1517149677ad97cf1c922"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "swap(true) commits failure before diagnostic and screen recovery; Relaxed is sufficient because the OUTPUT_FAILED bit publishes no other memory payload.",
+      "invariant": "Failure is recorded before recovery callbacks execute.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 554,
+          "end_line": 560,
+          "excerpt_sha256": "89ee112a3708f5dea45fe8876d9e5c86e5938c9b71f1517149677ad97cf1c922"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "OUTPUT_FAILED owns no allocation; io_error_diagnostic separately borrows a static diagnostic slice and acquires no flag-owned resource.",
+      "invariant": "Failure cleanup never frees the failure flag.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 490,
+          "end_line": 496,
+          "excerpt_sha256": "b901e5b0d50891f8021a628b3722ae3dbb4dab70ec8c9db23ae3a718cc52f9f3"
+        }
+      ],
+      "limitations": [
+        "Setting OUTPUT_FAILED is not the release of a buffered write owner."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "EINTR retries do not set OUTPUT_FAILED; zero or hard write failure sets it and returns false without recursive error/putstr calls.",
+      "invariant": "Retryable interruption is not a sticky failure.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 519,
+          "end_line": 562,
+          "excerpt_sha256": "7083abc6b6670df92a8f2a757ba1ff91b33443752b6cf897bb5f9a985f82f16a"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "Atomic accesses protect the OUTPUT_FAILED latch itself; the separate mutable obuf/ob reentrancy contract remains pending and is not approved by this entry.",
+      "invariant": "Latch review does not approve output-buffer aliasing.",
+      "source_refs": [
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 490,
+          "end_line": 496,
+          "excerpt_sha256": "b901e5b0d50891f8021a628b3722ae3dbb4dab70ec8c9db23ae3a718cc52f9f3"
+        },
+        {
+          "target": "source:src/output.rs",
+          "sha256": "e304ef3fd7fe041905b07f7e1280b6d130edfe05cfb1982615f33d9dc2cd7f20",
+          "start_line": 554,
+          "end_line": 560,
+          "excerpt_sha256": "89ee112a3708f5dea45fe8876d9e5c86e5938c9b71f1517149677ad97cf1c922"
+        }
+      ],
+      "limitations": [
+        "Only OUTPUT_FAILED storage is reviewed; output buffering and legacy handler cleanup remain distinct ownership obligations."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/pager.rs": {
+      "sha256": "571e8d48ea6a9ce98f3b71d7b1992ced373124ac67e86d0cec9d2934ed882d0e",
+      "relationship": "The copy loop at src/pager.rs:768 tests output_failed and stops processing files. It consumes OUTPUT_FAILED sticky state but does not own or release the output buffer through the latch."
+    }
+  },
+  "finding_context": {}
+}

@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/help.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/help.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/help.rs defines the static help image and size. The module owns the 17587-byte help array, its default size scalar and a one-entry static constructor table; all are image storage.",
+      "invariant": "All module owners have static image lifetime.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17589,
+          "end_line": 17605,
+          "excerpt_sha256": "8acc3f0c9ae087f09003cda3bd36928bc9dfda51e03077a528cf2f3556e2bffe"
+        }
+      ],
+      "limitations": [
+        "The 17587-byte literal and default size do not own loaded translations."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/help.rs lends default help bytes to lmsg. The exported array and size are borrowed/copied by lmsg; allocated translations replace help_data and size_help_data separately from these owners.",
+      "invariant": "The default image and allocated translations stay distinct.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2592,
+          "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
+        }
+      ],
+      "limitations": [
+        "lmsg help_data may point elsewhere while helpdata stays image-owned."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/help.rs registers the size initializer in init_array. The only function is c2rust_run_static_initializers; INIT_ARRAY retains its exact C-ABI target to initialize the default size.",
+      "invariant": "Every module callback target is explicitly enumerated.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": [
+        "INIT_ARRAY review is limited to the size constructor target."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/help.rs does not replace the literal help array. The complete byte table was inspected as literals only; the maintained tree contains no array replacement or post-startup size assignment.",
+      "invariant": "Default help backing storage is never resized.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17595,
+          "end_line": 17600,
+          "excerpt_sha256": "2bd2243663f8f1a41227bfb564ad721e1a5d7ab9497ccd9b71f7c0811373273b"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "src/help.rs derives help size during static initialization. Literal bytes exist before constructors; the size callback derives 17586 non-NUL bytes from the compiled array type.",
+      "invariant": "Help length is established before application reads.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17589,
+          "end_line": 17600,
+          "excerpt_sha256": "5d24005208381bd1eff9a716e629432398985f8d3e1d35e6197a390744a778b3"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "src/help.rs requires default help storage to remain unfreed. The module acquires no allocator block; default storage must not be freed, and lmsg uses owned_help to distinguish heap replacements.",
+      "invariant": "Static help bytes are excluded from heap cleanup.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 5,
+          "end_line": 9,
+          "excerpt_sha256": "773e3f1c663a033bb90d134362271a01c9de1f64b16056e15d78ad860d4272e9"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2587,
+          "end_line": 2592,
+          "excerpt_sha256": "ad3046c40c4d552f642cbcb765fe7a27d98ba04ece64ccf5a362581d9985740c"
+        }
+      ],
+      "limitations": [
+        "Heap translations need their separate owned_help release policy."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/help.rs performs no fallible translation loading. There is no fallible I/O or allocation in this file; failed translation loading must retain a valid static fallback in its separate owner.",
+      "invariant": "Default-help initialization cannot abandon resources.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17600,
+          "excerpt_sha256": "cb64b79539e800eaf00623936f74fabee8eba6007c326eb7947b6d321dba2a71"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2591,
+          "end_line": 2604,
+          "excerpt_sha256": "696f0d5d07549b814ae28b2ecd119f85007d0bf67743e81e42aa57c579549d8a"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "src/help.rs initializes size before handler registration. The one constructor runs before application handlers and only writes the size; text aliases are read-only in maintained application code.",
+      "invariant": "No callback mutates default help text during paging.",
+      "source_refs": [
+        {
+          "target": "source:src/help.rs",
+          "sha256": "7ca42bdc46d3c88e6468854499a1f9122706dad332e79d6f94715e2068449dd4",
+          "start_line": 17597,
+          "end_line": 17605,
+          "excerpt_sha256": "57e39984a8074bb52f1962a816b1d97400c800702fcd9255746cbedc14ff82ac"
+        }
+      ],
+      "limitations": [
+        "The fixed help image is reviewed here; lmsg allocated replacements, help_data aliases and retained-input owners remain separate pending reviews."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/lmsg.rs": {
+      "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+      "relationship": "init_lmsg at src/lmsg.rs:2587-2592 frees owned_help before restoring borrowed helpdata and size_helpdata. The selected message owner is distinct from the image array in help.rs."
+    }
+  },
+  "finding_context": {}
+}

@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/lesskey_parse.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/lesskey_parse.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/lesskey_parse.rs initializes caller-supplied command/edit/variable xbuffer descriptors and points currtable at a field inside that caller object. File parsing separately owns a saved path and an optional opened stream.",
+      "invariant": "The table descriptor must outlive its interior currtable pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 917,
+          "end_line": 929,
+          "excerpt_sha256": "7bdf3c0d3b5bc840235d0a93b200cd06d8998a629a18e6b7a12bbcbbd039eb5f"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1624,
+          "end_line": 1638,
+          "excerpt_sha256": "f8d6158ad5763a4ff28da1471f5fe981e93fa7f6fd66786a088d9a3c0cd86ec6"
+        }
+      ],
+      "limitations": [
+        "Copying the aggregate does not rebase its internal pointer automatically."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/lesskey_parse.rs borrows input content and fills bounded stack line arrays before passing them to parse_line. Returned table buffers remain outside those stack arrays and must be retained or released by the caller.",
+      "invariant": "No stack line address may become a persistent published table owner.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1703,
+          "end_line": 1726,
+          "excerpt_sha256": "42361e01a085bbe5cc0e7c9448a16c87a39e9360d809c7e85859f4cdcf2c8771"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 917,
+          "end_line": 929,
+          "excerpt_sha256": "7bdf3c0d3b5bc840235d0a93b200cd06d8998a629a18e6b7a12bbcbbd039eb5f"
+        }
+      ],
+      "limitations": [
+        "The raw tables argument still requires a valid writable aggregate."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/lesskey_parse.rs calls local parse_line and xbuffer helpers directly; parse_lesskey reads native FILE data synchronously and has no stored runtime callback selector.",
+      "invariant": "Parser callees must copy any stack line bytes they retain.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1658,
+          "end_line": 1668,
+          "excerpt_sha256": "3c93a8e3a09974e5ff1157ebbee25b747c378004aecff66f111f6937636ff2a2"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1724,
+          "end_line": 1726,
+          "excerpt_sha256": "2faf728020a470a3b9814f7c16b5b4c50c3b5b4bae6fe73788f04adb55a3eba7"
+        }
+      ],
+      "limitations": [
+        "Direct calls do not establish safe reuse of an already live table descriptor."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/lesskey_parse.rs init_tables resets each xbuffer pointer rather than releasing an old live buffer. The current decode caller supplies a fresh staging aggregate and explicitly transfers/releases buffers, repairing M0-LEAK-003.",
+      "invariant": "Reuse requires prior owner retirement before descriptor reset.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 917,
+          "end_line": 929,
+          "excerpt_sha256": "7bdf3c0d3b5bc840235d0a93b200cd06d8998a629a18e6b7a12bbcbbd039eb5f"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2921,
+          "end_line": 2958,
+          "excerpt_sha256": "c1f7b8c0b1c7ed9ef665854d953762535027d152346dba7aef487b5f3685fd66"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2979,
+          "end_line": 2991,
+          "excerpt_sha256": "341b577f87682dd6be3304a19e71e32cdd174cd54376b148963715115f245ed8"
+        }
+      ],
+      "limitations": [
+        "The parser API itself remains raw and does not enforce freshness by type."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "src/lesskey_parse.rs appends parsed lines into caller tables while mutating global errors/linenum. Publication into active table lists occurs in decode only after the parser returns successfully.",
+      "invariant": "Staged parse buffers must not become active tables before parse success.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1682,
+          "end_line": 1694,
+          "excerpt_sha256": "5eecc4f25acec5b67f8d4ebd91c80ea546a6a5b3c983a92e17de8aca8ce79349"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1724,
+          "end_line": 1732,
+          "excerpt_sha256": "31c05860dc9fae3b132b0b8122d3623a994088ca13541e8ba48424aa0eadb0ed"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2970,
+          "end_line": 2991,
+          "excerpt_sha256": "6e81409f77d26722a7de8a62e63f5de319980d84cba82f9d48c08e10af7b99a5"
+        }
+      ],
+      "limitations": [
+        "This file does not own the whole configuration publication transaction."
+      ]
+    },
+    "release_pair": {
+      "analysis": "src/lesskey_parse.rs closes only an opened non-stdin FILE, frees its saved lesskey_file and nulls that global. Table buffers are intentionally returned to the staging caller, whose failure path deinitializes them.",
+      "invariant": "Borrowed stdin must not take the opened-stream fclose path.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1669,
+          "end_line": 1675,
+          "excerpt_sha256": "c8c265abbb788498086e4cef5b044abbe6e9421cd22de8389fd452fd80e32f45"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2970,
+          "end_line": 2977,
+          "excerpt_sha256": "45d94606fdf8232b4607825259fe276b7e5835d45a284fcaec09447655a98de5"
+        }
+      ],
+      "limitations": [
+        "Normal file/path release is separate from returned table-buffer ownership."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/lesskey_parse.rs can return an injected parser failure after earlier lines appended data; decode then deinitializes all three unpublished buffers. Missing file-name allocation returns before init, relying on the fresh zeroed caller descriptor.",
+      "invariant": "Rollback must release only this parse attempt and not prior published data.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1630,
+          "end_line": 1638,
+          "excerpt_sha256": "92ce6272f1a5c6966c497fc4d411287dbc56860f396aa2e2c8d7367c2f5c027d"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1695,
+          "end_line": 1702,
+          "excerpt_sha256": "534f07d181b788f9ffeb15e575728816420b94bdd36c4be2f7f9c6e5388deac1"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2970,
+          "end_line": 2977,
+          "excerpt_sha256": "45d94606fdf8232b4607825259fe276b7e5835d45a284fcaec09447655a98de5"
+        }
+      ],
+      "limitations": [
+        "No independent parser campaign is rerun in this review."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "src/lesskey_parse.rs global lesskey_file/errors/linenum and the raw currtable cursor assume ordinary serialized parsing. The file registers no signal handoff; M0-MEM-001 remains open for aggregate/caller lifetime rules.",
+      "invariant": "Concurrent or reentrant parses must not share mutable parser globals.",
+      "source_refs": [
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1682,
+          "end_line": 1694,
+          "excerpt_sha256": "5eecc4f25acec5b67f8d4ebd91c80ea546a6a5b3c983a92e17de8aca8ce79349"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1731,
+          "end_line": 1732,
+          "excerpt_sha256": "01fd527b90b2542bdc35c83b56e379e970cde7845fdfea98e86f5fc7eb85aac5"
+        }
+      ],
+      "limitations": [
+        "No concrete handler-to-parser route is established by these definitions."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/decode.rs": {
+      "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+      "relationship": "lesskey_text at src/decode.rs:2921-2958 supplies fresh staging descriptors; src/decode.rs:2970-2991 releases failed buffers and transfers successful ones, bounding the parser caller-lifetime contract."
+    }
+  }
+}

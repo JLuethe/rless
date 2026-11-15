@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Seed and validate source-bound ownership reviews, never infer review from counts."""
 import argparse
+import copy
+from collections import Counter
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from common import ROOT, sha, write_json
@@ -59,7 +62,7 @@ def validate_inventory_v2(inventory, root):
             raise ValueError('expanded source does not match current compiler/configuration: ' + name)
         if [{k:v for k,v in item.items() if k != 'file'} for item in expanded] != expected['records']:
             raise ValueError('expanded AST is not the complete current compiler output: ' + name)
-        if any((root / item['file']).resolve() != source.resolve() for item in expanded):
+        if any(item['file'] != source.name for item in expanded):
             raise ValueError('expanded syntax belongs to a different artifact')
         if configuration['review_sites'] != expanded_review_sites(expanded):
             raise ValueError('missing, extra or changed expanded review site: ' + name)
@@ -147,18 +150,43 @@ def expected_entries(inventory, regions, root=ROOT):
     if version == 2:
         for name, configuration in inventory['expanded_configurations'].items():
             entries['EXPANDED:' + name] = dict(kind='expanded-source', paths=[], packet=None,
-                configuration=name, source_artifact=configuration['source'],
-                syntax_artifact=configuration['syntax'],
+                configuration=name, source_artifact={'sha256': configuration['source']['sha256']},
+                syntax_artifact={'sha256': configuration['syntax']['sha256']},
                 site_ids=[site['id'] for site in configuration['review_sites']],
                 review_sites_sha256=hashlib.sha256(json.dumps(configuration['review_sites'], sort_keys=True).encode()).hexdigest(),
                 scope='Review compiler-generated code and configuration-specific owner/native/callback reachability.')
     return entries
 
 
+INVENTORY_BINDING = 'source-inventory-content-v1'
+
+
+def inventory_digest(inventory):
+    """Bind source and derivation content, independently of run metadata.
+
+    Artifact hashes, compiler configurations, build derivation hashes and every
+    source/static/native/indirect/expanded site remain bound. validate_inventory_v2
+    still checks actual retained artifacts against a fresh source derivation.
+    """
+    value = copy.deepcopy(inventory)
+    value.pop('recorded_at_utc', None)
+    # This broad runner fingerprint includes tests, review tools and findings.
+    # Those are not source inventory facts. Source bytes and parser/build inputs
+    # remain bound separately and are freshly derived by validate_inventory_v2.
+    value.pop('source_fingerprint', None)
+    if isinstance(value.get('raw_inventory'), dict):
+        value['raw_inventory'].pop('path', None)
+    for config in value.get('expanded_configurations', {}).values():
+        for kind in ('source', 'syntax'):
+            if isinstance(config.get(kind), dict):
+                config[kind].pop('path', None)
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
 def seed(inventory, regions, root=ROOT):
     entries = expected_entries(inventory, regions, root)
-    return dict(schema_version=1, scope='Pending review entries; seeding is not review completion.',
-                inventory_sha256=hashlib.sha256(json.dumps(inventory, sort_keys=True).encode()).hexdigest(),
+    return dict(schema_version=2, inventory_binding=INVENTORY_BINDING, scope='Pending review entries; seeding is not review completion.',
+                inventory_sha256=inventory_digest(inventory),
                 region_register_sha256=hashlib.sha256(json.dumps(regions, sort_keys=True).encode()).hexdigest(),
                 source_files_sha256={p:sha(root / p) for p in inventory['files']},
                 status='not-verified', entries=[dict(id=key, **item, status='pending', reviewer=None,
@@ -222,10 +250,146 @@ def validate_expanded_review(item, entries, configuration, root):
         raise ValueError('unreviewed expanded sites remain')
 
 
+REVIEW_PACKET_KIND = 'entry-specific-ownership-v1'
+MAX_CITATION_LINES = 150
+# A declaration-only file can support several topics with the same literal.
+# Permit at most half the checklist to share one set; a majority must not.
+MAX_IDENTICAL_TOPICS = 4
+TARGET_FIELDS = ('id', 'kind', 'paths', 'symbol', 'context', 'configuration', 'declared_type',
+                 'binding_mutability', 'site_ids', 'review_sites_sha256')
+
+
+def review_target(item):
+    return {key: item[key] for key in TARGET_FIELDS if key in item}
+
+
+def validate_review_packet(item, review, inventory, root):
+    reference = item.get('review_packet')
+    if not isinstance(reference, dict) or set(reference) != {'path', 'sha256'}:
+        raise ValueError('reviewed entry needs an entry-specific review packet')
+    name = reference['path']; path = (root / name).resolve()
+    if (not name.startswith('docs/safety/ownership-evidence/') or not name.endswith('.json')
+            or not path.is_relative_to(root.resolve()) or not path.is_file()
+            or path.is_symlink() or sha(path) != reference['sha256']
+            or name not in item['evidence_paths']):
+        raise ValueError('missing, escaping or unbound ownership review packet')
+    packet = json.loads(path.read_text())
+    if (packet.get('schema_version') != 1 or packet.get('review_kind') != REVIEW_PACKET_KIND
+            or packet.get('target') != review_target(item)
+            or packet.get('inventory_sha256') != review['inventory_sha256']
+            or packet.get('reviewer') != item['reviewer']
+            or packet.get('checklist') != item['checklist']
+            or packet.get('finding_context', {}) != item.get('finding_context', {})):
+        raise ValueError('ownership packet target/reviewer/inventory/checklist mismatch')
+    if set(item['checklist']) != set(CHECKLIST):
+        raise ValueError('ownership packet checklist incomplete')
+    scoped = set(item['paths'])
+    source_targets = set(inventory['files'])
+    target_name = item.get('symbol') or item['id'].removeprefix('FILE:')
+    related = packet.get('related_sources', {})
+    if not isinstance(related, dict):
+        raise ValueError('invalid related-source relationships')
+    for name, link in related.items():
+        if (name not in source_targets or name in scoped or not isinstance(link, dict)
+                or set(link) != {'sha256', 'relationship'} or sha(root/name) != link['sha256']
+                or not isinstance(link['relationship'], str) or len(link['relationship'].strip()) < 40):
+            raise ValueError('unbound or unexplained related source')
+    extent_sets, limitation_sets, primary_excerpts, used_related = [], [], [], set()
+    for topic in CHECKLIST:
+        analysis = item['checklist'][topic]
+        if (not isinstance(analysis, dict) or set(analysis) != {'analysis', 'invariant', 'source_refs', 'limitations'}
+                or not isinstance(analysis['analysis'], str) or len(analysis['analysis'].strip()) < 40
+                or not isinstance(analysis['invariant'], str) or len(analysis['invariant'].strip()) < 24
+                or not isinstance(analysis['limitations'], list)
+                or any(not isinstance(x, str) or len(x.strip()) < 12 for x in analysis['limitations'])
+                or not isinstance(analysis['source_refs'], list) or not analysis['source_refs']):
+            raise ValueError('missing structured ownership analysis: ' + topic)
+        # Introductory labels and location clauses are not ownership claims.
+        body = analysis['analysis'].strip()
+        body = re.sub(r'^\s*(?:' + re.escape(item.get('symbol') or item['id'])
+                      + r')(?:\s*\([^)]*\))?\s*:\s*', '', body, count=1)
+        body = re.sub(r'^(?:In|For|Regarding|Concerning|With respect to)\s+[^,;:]+[,;:]\s*', '', body, count=1)
+        if not re.search(r'(?<![A-Za-z0-9_])' + re.escape(target_name) + r'(?![A-Za-z0-9_])', body):
+            raise ValueError('analysis names target only in its label or opening clause: ' + topic)
+        extent_sets.append(tuple(sorted({(c.get('target',''), c.get('start_line',0), c.get('end_line',0))
+                                        for c in analysis['source_refs']})))
+        limitation_sets.append(tuple(sorted(set(analysis['limitations']))))
+        for citation in analysis['source_refs']:
+            if not isinstance(citation, dict) or set(citation) != {'target', 'sha256', 'start_line', 'end_line', 'excerpt_sha256'}:
+                raise ValueError('invalid ownership source citation')
+            target = citation['target']
+            if target.startswith('source:'):
+                name = target.removeprefix('source:')
+                if name not in source_targets or scoped and name not in scoped and name not in related:
+                    raise ValueError('ownership source citation is unrelated to target')
+                source = root / name
+                if name in related:
+                    used_related.add(name)
+            elif target.startswith('expanded:') and item['kind'] == 'expanded-source':
+                configuration = target.removeprefix('expanded:')
+                if configuration != item['configuration']:
+                    raise ValueError('ownership expanded citation has wrong configuration')
+                source = checked_artifact(inventory['expanded_configurations'][configuration]['source'], root)
+            else:
+                raise ValueError('ownership evidence must cite maintained source or exact expansion')
+            if not source.is_file() or sha(source) != citation['sha256']:
+                raise ValueError('ownership source citation changed')
+            lines = source.read_text().splitlines(keepends=True)
+            a, b = citation['start_line'], citation['end_line']
+            if type(a) is not int or type(b) is not int or not 1 <= a <= b <= len(lines):
+                raise ValueError('ownership source citation has invalid extent')
+            if b - a + 1 > MAX_CITATION_LINES:
+                raise ValueError('ownership citation exceeds 150-line limit: ' + topic)
+            excerpt = ''.join(lines[a-1:b]).encode()
+            if hashlib.sha256(excerpt).hexdigest() != citation['excerpt_sha256']:
+                raise ValueError('ownership source excerpt changed')
+            if target.startswith('source:') and (not scoped or name in scoped):
+                primary_excerpts.append(excerpt.decode())
+    if len(set(extent_sets)) == 1:
+        raise ValueError('identical citation extents across all eight topics')
+    if len(set(limitation_sets)) == 1:
+        raise ValueError('identical limitations across all eight topics')
+    if max(Counter(extent_sets).values()) > MAX_IDENTICAL_TOPICS:
+        raise ValueError('identical citation extents shared by more than four topics')
+    if max(Counter(limitation_sets).values()) > MAX_IDENTICAL_TOPICS:
+        raise ValueError('identical limitations shared by more than four topics')
+    if set(related) != used_related:
+        raise ValueError('unused related-source relationship')
+    if item['kind'] != 'expanded-source' and (not primary_excerpts or item.get('symbol')
+            and not any(item['symbol'].split('::')[-1] in text for text in primary_excerpts)):
+        raise ValueError('ownership source excerpts do not anchor the reviewed target')
+
+
+def validate_finding_mentions(item, findings):
+    known = {f['id']: f for f in findings['findings']}
+    ids = item.get('finding_ids', [])
+    if not isinstance(ids, list) or len(ids) != len(set(ids)) or not set(ids) <= set(known):
+        raise ValueError('unknown or duplicate ownership finding reference')
+    text = json.dumps(item['checklist'])
+    mentioned = {identity for identity in known if re.search(
+        r'(?<![A-Za-z0-9_-])' + re.escape(identity) + r'(?![A-Za-z0-9_-])', text)}
+    if not mentioned <= set(ids):
+        raise ValueError('finding named in analysis but missing from finding_ids: ' + ', '.join(sorted(mentioned-set(ids))))
+    if item['status'] == 'reviewed-clear' and ids:
+        context = item.get('finding_context', {})
+        target = item.get('symbol') or item['id'].removeprefix('FILE:')
+        def names(text, token):
+            return re.search(r'(?<![A-Za-z0-9_-])'+re.escape(token)+r'(?![A-Za-z0-9_-])', text)
+        if (not isinstance(context, dict) or set(context) != set(ids)
+                or any(not isinstance(v, str) or len(v.strip()) < 40
+                       or not names(v, target) or not names(v, identity)
+                       for identity, v in context.items())
+                or len({re.sub(r'\b(?:M0|IND)-[A-Z0-9-]+\b', '<finding>', v).strip()
+                        for v in context.values()}) != len(ids)):
+            raise ValueError('clear entry needs an explicit context-only finding explanation naming entry and finding, distinct per ID')
+
+
 def validate(review, inventory, regions, findings, root=ROOT, complete=True):
     if complete and inventory.get('schema_version', 1) != 2:
         raise ValueError('complete ownership review requires source-derived schema-2 inventory')
     expected = seed(inventory, regions, root)
+    if review.get('schema_version') != 2 or review.get('inventory_binding') != INVENTORY_BINDING:
+        raise ValueError('ownership review requires explicit migration to source-inventory-content-v1')
     for field in ('inventory_sha256', 'region_register_sha256', 'source_files_sha256'):
         if review[field] != expected[field]:
             raise ValueError('stale review ' + field)
@@ -247,9 +411,8 @@ def validate(review, inventory, regions, findings, root=ROOT, complete=True):
             continue
         if item.get('packet') not in PACKETS or not item.get('reviewer') or not item.get('evidence_paths'):
             raise ValueError('review metadata/evidence missing')
-        for field in CHECKLIST:
-            if not isinstance(item['checklist'].get(field), str) or not item['checklist'][field].strip():
-                raise ValueError('missing owner/alias/callback/release analysis')
+        validate_review_packet(item, review, inventory, root)
+        validate_finding_mentions(item, findings)
         for path in item['evidence_paths']:
             resolved = (root / path).resolve()
             if not resolved.is_relative_to(root.resolve()) or not resolved.is_file():

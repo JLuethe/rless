@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/version.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/version.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/version.rs defines image-owned version bytes. The module defines one four-byte C character array initialized from the exact 712 NUL literal; no allocator or initializer callback creates it.",
+      "invariant": "Version bytes reside in static storage.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "The four-byte version object includes its terminal NUL; output buffers are separate owners."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/version.rs exports version as borrowed C bytes. The exported version symbol is borrowed by command::dispversion, optfunc::opt__V and lesskey_parse numeric parsing; maintained call sites read its bytes.",
+      "invariant": "C string readers borrow a four-byte NUL string.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1454,
+          "end_line": 1463,
+          "excerpt_sha256": "31ab95e43561bb28aaa0fe1ce2a0ee2a8eea3beb71104c429a87e0c2112b4a10"
+        },
+        {
+          "target": "source:src/optfunc.rs",
+          "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+          "start_line": 1085,
+          "end_line": 1104,
+          "excerpt_sha256": "b76e6f0a3f63c810a23292b265c3ebcc2771e5f78f779248f516b95c1ae9d998"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1641,
+          "end_line": 1647,
+          "excerpt_sha256": "6051960e9ee290e42150bb85def5db448f4681edf8e1b71e0bc8761e79af0d59"
+        }
+      ],
+      "limitations": [
+        "Public C mutability permits external writes beyond the inspected readers."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/version.rs uses transmute for array representation only. The transmute changes the four-byte array element representation only; the module registers no callback or code pointer.",
+      "invariant": "Array conversion cannot create callback ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 6,
+          "end_line": 7,
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
+        }
+      ],
+      "limitations": [
+        "The array transmute establishes no function-pointer ABI guarantee."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/version.rs has no runtime replacement of version. There is no replace, resize or free operation in the module, and repository references contain no assignment to the array.",
+      "invariant": "The backing array address remains stable.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "src/version.rs initializes the version array as one object. The entire initialized array is installed by static initialization; readers never see a length/pointer pair being committed separately.",
+      "invariant": "All four version bytes are initialized before main.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 6,
+          "end_line": 7,
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "src/version.rs requires version aliases to remain unfreed. Neither the exported symbol nor pointers into it may be passed to free; its owner is the loaded image for the process lifetime.",
+      "invariant": "Static image storage is never heap-released.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "No caller may infer malloc ownership from the exported version address."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/version.rs needs no allocation recovery for version. Initialization is infallible; display or parse failure does not transfer ownership of the array to its caller.",
+      "invariant": "Reader errors retain the original version owner.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 6,
+          "end_line": 7,
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "src/version.rs installs no asynchronous writer of version. Version display may run during command processing but this module installs no signal handler and performs no asynchronous writes.",
+      "invariant": "Current maintained users only read version storage.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "The C symbol is mutable in its ABI; this review assumes maintained callers and does not certify an external writer."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "dispversion at src/command.rs:1454-1463 borrows the version array address into PARG and calls error; the command does not acquire or free those image bytes."
+    },
+    "src/optfunc.rs": {
+      "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+      "relationship": "The version option handler at src/optfunc.rs:1085-1104 lends the static version pointer for formatted output; its output storage is separate from version.rs ownership."
+    },
+    "src/lesskey_parse.rs": {
+      "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+      "relationship": "Version initialization at src/lesskey_parse.rs:1641-1647 parses the static version C string into numeric state without taking ownership of its bytes."
+    }
+  },
+  "finding_context": {}
+}

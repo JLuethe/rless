@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "FILE:src/bin/rless.rs",
+    "kind": "source-file",
+    "paths": [
+      "src/bin/rless.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "src/bin/rless.rs delegates startup to process and pager. This executable wrapper creates no owned heap or raw state; it invokes process initialization then pager::main.",
+      "invariant": "The wrapper owns no retained application data.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 1,
+          "end_line": 4,
+          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+        }
+      ],
+      "limitations": [
+        "Pager-created arguments and buffers are outside this wrapper ownership boundary."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "src/bin/rless.rs lends no wrapper-owned data to pager. No parameters or local references are lent across either call; pager::main owns any later argument storage itself.",
+      "invariant": "No wrapper-local alias can escape delegation.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 1,
+          "end_line": 3,
+          "excerpt_sha256": "9cbeeb99c762cf22e51f03ab638a10ae7d0d2586290a58c58aade27692b83de9"
+        }
+      ],
+      "limitations": [
+        "No wrapper local can establish the lifetime of pager aliases."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "src/bin/rless.rs names both startup callees directly. Both call targets are statically named Rust functions, not callbacks chosen from a pointer table.",
+      "invariant": "Entry dispatch uses fixed Rust call targets.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 2,
+          "end_line": 3,
+          "excerpt_sha256": "50ee2820cd010ef0f46f9f9cab5cb934f084591b7cbfab0e194d511bf342c28f"
+        }
+      ],
+      "limitations": [
+        "Direct calls here do not validate callbacks later installed by pager startup."
+      ]
+    },
+    "invalidation": {
+      "analysis": "src/bin/rless.rs holds no wrapper owner across pager main. The wrapper has no local storage that can be invalidated while pager::main runs or exits.",
+      "invariant": "Delegation cannot outlive wrapper-owned buffers.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 1,
+          "end_line": 4,
+          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "src/bin/rless.rs orders process initialization before pager main. Process::init runs before pager::main, restoring inherited SIGPIPE before translated application processing.",
+      "invariant": "Signal startup ordering precedes pager delegation.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 2,
+          "end_line": 3,
+          "excerpt_sha256": "50ee2820cd010ef0f46f9f9cab5cb934f084591b7cbfab0e194d511bf342c28f"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "src/bin/rless.rs acquires no wrapper resource to release. No resource is acquired here and no manual release is required by a return or pager process exit.",
+      "invariant": "Wrapper exit cannot abandon a locally owned resource.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 1,
+          "end_line": 4,
+          "excerpt_sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016"
+        }
+      ],
+      "limitations": [
+        "Process exit in pager main does not prove cleanup of pager-owned objects."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "src/bin/rless.rs delegates failure handling to its callees. This wrapper has no local fallible commit or cleanup block; failure/exit behavior belongs to the named callees reviewed separately.",
+      "invariant": "Callee failures leave no wrapper owner to retire.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 2,
+          "end_line": 4,
+          "excerpt_sha256": "c8d6f2680ef1bdea462f759745ae9bcc6b07914cb0449592eb37c33582492cb1"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "src/bin/rless.rs restores disposition before application entry. There is no handler installed in this file; the first direct call restores disposition and the second enters ordinary startup.",
+      "invariant": "The wrapper never transfers data to a signal handler.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/rless.rs",
+          "sha256": "0795947b8d43b488d7542b5a3a4f18149d73654d56b55c47d126fb8d4ca66016",
+          "start_line": 2,
+          "end_line": 3,
+          "excerpt_sha256": "50ee2820cd010ef0f46f9f9cab5cb934f084591b7cbfab0e194d511bf342c28f"
+        }
+      ],
+      "limitations": [
+        "This source-file review covers the four-line entry wrapper only; pager::main and process signal behavior retain separate entries."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

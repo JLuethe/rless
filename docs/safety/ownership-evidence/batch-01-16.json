@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:321104f5dace2f6dbf6660ba",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "openquote",
+    "context": "",
+    "declared_type": ":: core :: ffi :: c_char",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The openquote c_char owns one opening-quote byte, initialized to double quote; -o copies a byte and -p copies a parsed numeric value.",
+      "invariant": "Opening quote owns one byte rather than an argv pointer.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 90,
+          "end_line": 91,
+          "excerpt_sha256": "194a6ba271826cdc6c7c0c7af52bfe6efa3065e3da2aad9cf17eb9db68033405"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 303,
+          "end_line": 323,
+          "excerpt_sha256": "37259796b4c9d14a32601f643b59946625b0f18eea805a5b269d536ab58b274b"
+        }
+      ],
+      "limitations": [
+        "openquote owns one delimiter byte rather than a string buffer."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "openquote retains only a copied byte from the local arg pointer; printf receives an integer promotion, not ownership of argv.",
+      "invariant": "Opening quote does not borrow argument storage.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 303,
+          "end_line": 323,
+          "excerpt_sha256": "37259796b4c9d14a32601f643b59946625b0f18eea805a5b269d536ab58b274b"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 383,
+          "end_line": 389,
+          "excerpt_sha256": "abbcc8492a8372ee97dfb3afe5c860e641126cd6806bbb1bb779eec4f24cf538"
+        }
+      ],
+      "limitations": [
+        "Reading the delimiter by value creates no surviving pointer alias."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The quoted-output printf receives a promoted integer, not a callback or address of openquote.",
+      "invariant": "Opening quote is passed as character data.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 383,
+          "end_line": 389,
+          "excerpt_sha256": "abbcc8492a8372ee97dfb3afe5c860e641126cd6806bbb1bb779eec4f24cf538"
+        }
+      ],
+      "limitations": [
+        "putchar consumes a copied byte and retains no delimiter callback."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Changing openquote replaces an inline byte before output and invalidates no retained string pointer.",
+      "invariant": "Replacing the quote cannot invalidate aliases.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 303,
+          "end_line": 323,
+          "excerpt_sha256": "37259796b4c9d14a32601f643b59946625b0f18eea805a5b269d536ab58b274b"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The -p branch assigns openquote then rejects unconsumed numeric input by exiting before any argument output.",
+      "invariant": "Invalid numeric options cannot proceed to output.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 307,
+          "end_line": 323,
+          "excerpt_sha256": "43e34bf07bdd934116320b91db6c96bef3f079d7ba56dbb9dc87a48ad042f9fe"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The openquote static byte owns no allocation, and the arg storage remains owned by the main Vecs.",
+      "invariant": "Quote cleanup cannot free argument bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 90,
+          "end_line": 91,
+          "excerpt_sha256": "194a6ba271826cdc6c7c0c7af52bfe6efa3065e3da2aad9cf17eb9db68033405"
+        }
+      ],
+      "limitations": [
+        "The delimiter has no free or close counterpart."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "Missing numeric input for openquote calls pr_error; no newly allocated quote object needs rollback.",
+      "invariant": "Error exit leaves no opening-quote owner unresolved.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 311,
+          "end_line": 323,
+          "excerpt_sha256": "660b712a1b5df12e46a4ab1143a2cb1910603d0650e0e1b51f6d7eb53ba9742c"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "No helper handler mutates openquote; all writes occur while processing options on the startup thread.",
+      "invariant": "The opening byte is stable during argument output.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 235,
+          "end_line": 263,
+          "excerpt_sha256": "f1c24447888f488701f76766d163d91d8e7e426c344a4964be4e389b8e1e38f5"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 303,
+          "end_line": 323,
+          "excerpt_sha256": "37259796b4c9d14a32601f643b59946625b0f18eea805a5b269d536ab58b274b"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

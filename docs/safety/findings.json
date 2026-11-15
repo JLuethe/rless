@@ -204,12 +204,14 @@
         "compat/.runs/resume-fault-paths-native-4/summary.json",
         "compat/.runs/resume-fault-paths-asan-2/summary.json",
         "docs/verification/claude-m0-probes-2026-10-30.json",
-        "docs/safety/claude-m0-review-2026-10-30.md"
+        "docs/safety/claude-m0-review-2026-10-30.md",
+        "tools/safety/test_fault_paths.py:test_read_error_reports_failure_without_discarding_status"
       ],
       "blocks_final_safety_gate": true,
       "fix_commit": null,
-      "regression": "test_diagnostic_read_error_reproduces_unreported_legacy_failure",
-      "rerun_evidence": null
+      "regression": "test_read_error_reports_failure_without_discarding_status",
+      "rerun_evidence": null,
+      "candidate_status": "Candidate reports permanent I/O failure and preserves nonzero status; independent native/ASan/reference-ABI regression and full qualification pending. Historical C divergence evidence retained; finding remains open."
     },
     {
       "id": "M0-IO-002",
@@ -226,12 +228,14 @@
         "compat/.runs/resume-fault-paths-native-4/summary.json",
         "compat/.runs/resume-fault-paths-asan-2/summary.json",
         "docs/verification/claude-m0-probes-2026-10-30.json",
-        "docs/safety/claude-m0-review-2026-10-30.md"
+        "docs/safety/claude-m0-review-2026-10-30.md",
+        "tools/safety/test_fault_paths.py:test_write_error_reports_failure_without_discarding_status"
       ],
       "blocks_final_safety_gate": true,
       "fix_commit": null,
-      "regression": "test_diagnostic_write_error_reproduces_unreported_legacy_failure",
-      "rerun_evidence": null
+      "regression": "test_write_error_reports_failure_without_discarding_status",
+      "rerun_evidence": null,
+      "candidate_status": "Candidate reports permanent I/O failure and preserves nonzero status; independent native/ASan/reference-ABI regression and full qualification pending. Historical C divergence evidence retained; finding remains open."
     },
     {
       "id": "M0-LEAK-003",
@@ -359,6 +363,433 @@
       "blocks_final_safety_gate": true,
       "fix_commit": null,
       "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_duplicate_startup_options_release_previous_saved_strings and ActualFaultPaths.test_stdin_tags_reset_releases_saved_filename",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-COV-002",
+      "title": "PTY descriptor and exit-leak observations do not prove live heap conservation",
+      "status": "open",
+      "classification": "Independent mutation control skipped filter candidate cleanup; pinned LSAN missed the fully retained candidate via conservative stack roots. An in-process allocation balance/growth oracle and retained mutation controls are required.",
+      "severity": "evidence coverage gap; not exploit-assessed",
+      "delivery_packet": "M0.3",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-VER-006"
+      ],
+      "evidence_refs": [
+        "docs/safety/claude-hook-review-2026-10-31.md",
+        "compat/.runs/claude-hook-review-20261031/logs/p5c_filter_leak_roots.log"
+      ],
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-FFI-002",
+      "title": "Saving an empty unallocated message buffer passes null to strncpy",
+      "status": "open",
+      "classification": "Independent source/header review confirms a reachable empty-message path violates the native nonnull precondition even with n=0; candidate skips the C copy for zero length.",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.1",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "evidence_refs": [
+        "src/lmsg.rs:lmsg_line",
+        "src/pager.rs:saven",
+        "compat/.runs/native-inventory-review-20261031",
+        "compat/.runs/ownership-audit-20261030/source-review.md"
+      ],
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "source_files_sha256": {
+        "src/lmsg.rs": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+        "src/pager.rs": "286fdc420007c27e5c35f1b53a6729125c5926b79dab436887029706a43c5542"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "ActualFaultPaths.test_duplicate_message_and_help_definitions_release_previous_overrides (empty message/help cases)",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-NUM-001",
+      "title": "Search position delta narrows to c_int before C abs",
+      "status": "open",
+      "classification": "source-inspection undefined-behavior candidate",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M2.2",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "evidence_refs": [
+        "src/search.rs:2108",
+        "src/search.rs:556"
+      ],
+      "source_files_sha256": {
+        "src/search.rs": "2a2359d53017843a10fc59b45be3a0d0b19ac9c532dd1655fab84413698ad5bf"
+      },
+      "analysis": "In search_range, pos and oldpos have POSITION = less_off_t = c_long. After the pos == -1 branch, their difference is narrowed to c_int and passed to C abs. If the narrowed value is INT_MIN, C abs has no representable result and its behavior is undefined. Deltas beyond 32 bits also lose magnitude, so add_lnum may be skipped incorrectly. The condition is executed only when linenums != 0; file positions can exceed 32-bit range on the claimed x86_64 target. The oldpos/pos sentinel branch should be considered when replacing with full-width abs_diff.",
+      "next_step": "Root to disposition in maintained findings register, then fix with full-width difference after checking position/sentinel invariants and add a sparse >2 GiB regression where feasible.",
+      "minimal_fix": "In search.rs replace the narrowing/C abs with full-width `pos.abs_diff(oldpos) > 2048` after confirming both values are initialized valid POSITIONs; retain the existing -1 branch before this comparison.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": "search::position_tests::cache_interval_handles_full_width_positions_in_both_directions",
+      "candidate_status": "Full-width unsigned abs_diff replaces narrowed C abs; focused boundary regression pending independent execution."
+    },
+    {
+      "id": "M0-FFI-001",
+      "title": "GNU regex syntax setting is mutated globally without restore",
+      "status": "open",
+      "classification": "source-inspection native-global-state hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.2",
+      "requirement_ids": [
+        "SAFE-FFI-003"
+      ],
+      "evidence_refs": [
+        "src/pattern.rs:compile_pattern2",
+        "src/pattern.rs:447",
+        "src/pattern.rs:556"
+      ],
+      "source_files_sha256": {
+        "src/pattern.rs": "c885740d56800c41100eeb83c6066b61aa4a7ea7366e33dd95966e37280426eb"
+      },
+      "analysis": "compile_pattern2 calls re_set_syntax before each re_compile_pattern, discards the prior syntax returned by GNU regex, and has no restoration on success or on injected/native compile failure. re_set_syntax changes process-global native regex state; other callers could observe the changed syntax. SAFE-FFI-003 requires serialized/restored state or a documented scope proof. This record does not claim a concurrency exploit or a failed test.",
+      "next_step": "Root to disposition in maintained findings register; establish full callgraph/threading proof or scope/restore native syntax in M4.2, including error paths.",
+      "minimal_fix": "At minimum save `re_set_syntax` return and restore it after `re_compile_pattern` on both success/failure; process-global use still needs a serialized call scope or documented single-thread/no-concurrent-native-regex proof.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": "pattern::ownership_tests::fixed_registers_preserve_gnu_ranges_and_repeated_lifetimes",
+      "candidate_status": "Prior GNU syntax restored before success/error handling; focused regression pending. Serialized single-thread pager scope remains to be reviewed; no general library thread-safety claim."
+    },
+    {
+      "id": "M0-HIST-001",
+      "title": "History temp file writes proceed when privacy mode change fails",
+      "status": "open",
+      "classification": "source-inspection persistence/error-path hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "src/cmdbuf.rs:make_tempname",
+        "src/cmdbuf.rs:make_file_private",
+        "src/cmdbuf.rs:2062-2069",
+        "src/cmdbuf.rs:2105-2142"
+      ],
+      "source_files_sha256": {
+        "src/cmdbuf.rs": "a78d8d8fd859f46e004fde4a07678d391d24fe20ef70b0fedf42bde0db356df0"
+      },
+      "analysis": "save_cmdhist derives a deterministic temp path by replacing the final byte of histname, then fopen(tempname, \"w\") creates or truncates it before make_file_private. make_file_private skips chmod when fstat fails or reports non-regular, and ignores fchmod(..., 0600) failure. Regardless, save_cmdhist writes history contents, closes, and renames the temp path over the history path without checking those results. A pre-existing permissive regular temp file retains its mode until chmod succeeds; failure leaves history data under those permissions. Even when chmod succeeds there is a create/truncate-before-chmod interval. A pre-existing symlink at the deterministic temp path is followed by fopen on Linux; the code still writes through the stream. The precise operational impact depends on path permissions and external actors.",
+      "next_step": "Root to disposition in maintained findings register and decide whether this is a legacy compatibility/security issue; test with a controlled existing permissive temp file and forced chmod/fstat failure, then handle creation mode, symlink and commit/error behavior in M3.4.",
+      "minimal_fix": "Create the temp file privately before any bytes are written (open with O_CREAT|O_EXCL|O_NOFOLLOW mode 0600 then fdopen), abort and unlink on mode/setup failure; check fclose/rename as commit operations. Preserve established overwrite behavior explicitly.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": null,
+      "candidate_status": "Exclusive mode0600 same-directory temporary creation; check stream/close/rename, preserve previous destination and dirty state on error. Independent validation pending."
+    },
+    {
+      "id": "M0-IO-003",
+      "title": "Shell handoff can lose stdin when dup of fd 0 fails",
+      "status": "open",
+      "classification": "source-inspection descriptor-lifecycle hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "src/lsystem.rs:496-501",
+        "src/lsystem.rs:545-551"
+      ],
+      "source_files_sha256": {
+        "src/lsystem.rs": "0b3560e07f741d55c673fd463ac2b18769d9b1f16ffb6e00e9df694ab9a3e8be"
+      },
+      "analysis": "lsystem calls inp=dup(0) without checking -1, immediately closes fd 0 and may open the tty into fd 0. If the initial dup fails (for example descriptor exhaustion), both restoration attempts dup(inp) pass -1; the code closes fd 0 after system and continues with original stdin lost. The second restoration call return is unchecked even after successful initial duplication. This is a descriptor ownership/handoff failure; no reproducibility claim is made yet.",
+      "next_step": "Root to record/disposition, then fault-inject dup failure in an isolated helper session and require early abort or tracked restoration before closing fd 0.",
+      "minimal_fix": "Check the first dup(0) before closing fd 0; if it fails, abort helper handoff with original stdin/terminal state intact. Check restoration dup2 or equivalent and report failure before returning to pager.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": null,
+      "candidate_status": "Acquire CLOEXEC stdin backup before teardown; checked dup2 swaps and restores; fatal cooked-state exit if restoration impossible. Independent validation pending."
+    },
+    {
+      "id": "M0-IO-004",
+      "title": "Logfile sync treats short or failed write as complete",
+      "status": "open",
+      "classification": "source-inspection native-write error-path hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.4",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "src/ch.rs:sync_logfile",
+        "src/ch.rs:786-793"
+      ],
+      "source_files_sha256": {
+        "src/ch.rs": "eb1eef41e7c1c57d481b0000bbcf64c6d53dd8b4a9f790d45c77a0589ac1c696"
+      },
+      "analysis": "sync_logfile invokes write(logfile, buffer, datasize) but discards the ssize_t return, then sets wrote=true and breaks. A short successful write or -1 (EINTR/EIO/etc.) can leave the log block partially or wholly absent while the routine treats it as written. The broader M0-IO-002 finding covers src/output.rs::flush EIO, but this separate caller is not in its current evidence refs.",
+      "minimal_fix": "Loop over the remaining bytes on positive short writes, retry EINTR, and on permanent failure report/retain the incomplete log state rather than setting wrote=true.",
+      "next_step": "Root to decide whether to extend M0-IO-002 with this source path and regression or maintain this separate finding; no native-failure test has been run here.",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "regression": null,
+      "candidate_status": "Retry exact remaining log bytes on partial/EINTR; permanent write/close failure disables log, diagnoses, and upgrades eventual success exit to1. End-log drain stops on failure. Independent validation pending."
+    },
+    {
+      "id": "M0-MEM-003",
+      "title": "Position table scans use unsupported one-row geometry or new height before allocation growth",
+      "status": "open",
+      "classification": "Independent ASAN reproduction: LESS_LINES=1 plus one-row PTY overflows get_scrpos_pos on empty and small startup inputs. Additional source hazards include pre-growth scans at new capacity and negative LESS_SHELL_LINES sentinel indexing.",
+      "severity": "out-of-bounds source hazard; not exploit-assessed",
+      "delivery_packet": "M2.2",
+      "requirement_ids": [
+        "SAFE-MEM-002"
+      ],
+      "evidence_refs": [
+        "src/position.rs:position",
+        "src/position.rs:pos_init",
+        "src/position.rs:get_scrpos_pos",
+        "src/screen.rs:scrsize",
+        "compat/.runs/ownership-audit-20261030/source-review.md",
+        "docs/safety/reproducers/m0-mem-position/manifest.json"
+      ],
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "source_files_sha256": {
+        "src/position.rs": "86eedbe6b76173ca3efd8754438df93698dba841b0c3b778ccc1e473a6d15a63",
+        "src/screen.rs": "bed02abfb79d3d95879bb1f1a7fcb4bb828fbe9037d02804b1847dd992bcba56"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "position::bounds_tests::small_geometry_and_growth_never_scan_outside_owned_table",
+      "rerun_evidence": null,
+      "candidate_status": "Minimum logical height two, shell-lines lower bound one; query/scan bounds use actual owned capacity including growth. Independent fixed-candidate validation pending."
+    },
+    {
+      "id": "M0-TERM-001",
+      "title": "Permanent tcsetattr restoration failure is silent",
+      "status": "open",
+      "classification": "source-inspection terminal-error-path hazard",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.3",
+      "requirement_ids": [
+        "SAFE-FFI-004",
+        "SAFE-STATE-003"
+      ],
+      "evidence_refs": [
+        "src/screen.rs:raw_mode",
+        "src/screen.rs:341-354"
+      ],
+      "source_files_sha256": {
+        "src/screen.rs": "bed02abfb79d3d95879bb1f1a7fcb4bb828fbe9037d02804b1847dd992bcba56"
+      },
+      "analysis": "raw_mode(on) retries tcsetattr after EINTR but returns immediately on any other error. During raw_mode(false), the saved termios restoration can fail permanently; caller receives no status or diagnostic, and the code leaves in_raw_mode unchanged. The source comment says reporting permanent terminal errors is a tracked legacy gap, but the maintained findings register has no precise terminal-restore ID. The exact OS mode after failure is not re-read or proven.",
+      "minimal_fix": "Give the mode transition a checked result (or explicit recorded terminal-error state), preserve the prior saved mode until a verified successful tcsetattr, and report a permanent restore failure through the owning terminal/session cleanup path.",
+      "next_step": "Root to record/disposition; add an isolated PTY tcsetattr permanent-error fault oracle and verify primary error plus cleanup behavior without claiming mode restored.",
+      "blocks_final_safety_gate": true,
+      "source_commit": "ce73b92bc06aa1bdfb4ef637ee2d77d3a2f1311e",
+      "fix_commit": null,
+      "regression": null,
+      "rerun_evidence": null,
+      "candidate_status": "Record and diagnose permanent tcsetattr failure without claiming mode transition committed; upgrade successful quit status to1. Actual unsuccessful termios restore remains failure. Independent validation pending."
+    },
+    {
+      "id": "IND-IO-F1",
+      "title": "src/cmdbuf.rs:history_save_error/save_cmdhist",
+      "status": "closed",
+      "classification": "observed, corrected and independently retested",
+      "severity": "P2",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/claude-probe-replay.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/autosave-f1f2-oracle.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/autosave-f1f2-asan-oracle.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": false,
+      "fix_commit": null,
+      "rerun_evidence": "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/review.md",
+      "candidate_status": "Corrected and independently retested on the F1/F2 candidate: native and pinned ASAN, 29/29 each, normal and safety-injection Cargo suites. Evidence predates the memory/F3/F4 corrections; fresh whole-candidate retest pending."
+    },
+    {
+      "id": "IND-TERM-F2",
+      "title": "src/screen.rs:raw_mode; src/pager.rs:quit",
+      "status": "closed",
+      "classification": "observed, corrected and independently retested",
+      "severity": "P2",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/term-results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/term-f1f2-oracle.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/term-f1f2-asan-oracle.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/claude-probe-f1f2.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": false,
+      "fix_commit": null,
+      "rerun_evidence": "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/review.md",
+      "candidate_status": "Corrected and independently retested on the F1/F2 candidate: native and pinned ASAN, 29/29 each, normal and safety-injection Cargo suites. Evidence predates the memory/F3/F4 corrections; fresh whole-candidate retest pending."
+    },
+    {
+      "id": "IND-MEM-FIRSTBUF",
+      "title": "src/ch.rs:ch_get/ch_addbuf lines 585-592",
+      "status": "open",
+      "classification": "observed, open",
+      "severity": "P1",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-native-results/results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-native-results/hit.stderr",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-asan-results/results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-asan-results/hit.stderr",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-native-build.log",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/first-buffer-asan/build.log"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "IND-MEM-STDIN-DELETE",
+      "title": "src/ch.rs:ch_close; src/ifile.rs:del_ifile; src/command.rs:delete-file command",
+      "status": "open",
+      "classification": "observed, open",
+      "severity": "P1",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/stdin-delete-results/results.json",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/stdin-delete-results/retain.raw",
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/stdin-delete-results/delete.raw"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "IND-FD-F3",
+      "title": "src/lsystem.rs:lsystem; src/ttyin.rs:open_tty",
+      "status": "open",
+      "classification": "source-only, no observed normal-startup defect",
+      "severity": "P3",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/f1f2-29-native/summary.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "IND-POS-F4",
+      "title": "src/position.rs:pos_init/get_scrpos after shrink",
+      "status": "open",
+      "classification": "source-only semantic hazard",
+      "severity": "P3",
+      "evidence_refs": [
+        "/home/john/Code/rless/compat/.runs/next-independent-review-20261031/boundaries/f1f2-29-native/summary.json"
+      ],
+      "source_commit": "f37fd3539eef6673f4940bbf80059f5114d330de + uncommitted IO candidate",
+      "source_files_sha256": {
+        "src/ch.rs": "801c22239f90a89f404ede176f331e7514f204577ee3816eb3f87541a3fa7285",
+        "src/cmdbuf.rs": "7061808edd067e31ce0c309acd675828c20e2fdb89597f93ba536af074a8afff",
+        "src/screen.rs": "8e1de8b69ccb5e2fffa8c6cfc5284175503f7a32bb2f3c75cc9daaa4f2185944",
+        "src/ifile.rs": "631b243b940d81167f9b361252a69d84f6979726c8132241389a3ca7e10204c1",
+        "src/pager.rs": "72ea92e3801df290c03d7f557c36ef664cfdb09bc1c74efdc335e8c9f76bf3fd",
+        "src/position.rs": "22466aa9afee9ad52f8519bc3da002adf2ea9df4633ef05e0e7a0ed03a231f9f",
+        "src/ttyin.rs": "12648fdb7f96c0ac4ccd2d3ca504a427d5df1541fd334800335611be4903f599"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "rerun_evidence": null,
+      "candidate_status": "Corrected in IO worktree; independent corrected-candidate retest pending. See docs/safety/boundary-followup-20261031.md."
+    },
+    {
+      "id": "M0-MEM-004",
+      "title": "Position growth leaves a freed table pointer visible to fatal allocation cleanup",
+      "status": "open",
+      "classification": "source-inspection hazard",
+      "severity": "medium; conditional source concern, not runtime reproduced",
+      "delivery_packet": "M3.2",
+      "requirement_ids": [
+        "SAFE-MEM-006",
+        "SAFE-STATE-003"
+      ],
+      "blocks_final_safety_gate": true,
+      "evidence_refs": [
+        "src/position.rs:182-190: free(table) precedes the RHS ecalloc call; table is not cleared before that call",
+        "src/pager.rs:860-887: null allocation calls out_of_memory then quit",
+        "src/pager.rs:948-969: quit calls edit(NULL)",
+        "src/edit.rs:924-927 and 1078-1083: edit(NULL) enters edit_ifile and closes an existing current file",
+        "src/edit.rs:899-907: with is_tty, close_file calls get_scrpos",
+        "src/position.rs:238-244 and 274-282: nonnull table with available rows >=2 is dereferenced"
+      ],
+      "conditions": [
+        "Replacement allocation fails during position-table growth.",
+        "Cleanup has a current file, is_tty is set and min(sc_height, table_rows) is at least two."
+      ],
+      "mechanism": "The previous array is freed without clearing table. Assignment occurs only after ecalloc returns; fatal cleanup during a failed RHS allocation can read the stale global pointer.",
+      "fix_commit": null,
+      "regression": null,
       "rerun_evidence": null
     }
   ]

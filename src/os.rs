@@ -37,11 +37,6 @@ extern "C" {
         __requested_time: *const timespec,
         __remaining: *mut timespec,
     ) -> ::core::ffi::c_int;
-    fn setitimer(
-        __which: __itimer_which_t,
-        __new: *const itimerval,
-        __old: *mut itimerval,
-    ) -> ::core::ffi::c_int;
     fn __errno_location() -> *mut ::core::ffi::c_int;
     fn poll(
         __fds: *mut pollfd,
@@ -148,13 +143,13 @@ unsafe extern "C" fn check_poll(
     mut fd: ::core::ffi::c_int,
     mut tty_0: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
-    let mut poller: [pollfd; 2] = [
-        pollfd {
+    let mut poller: [libc::pollfd; 2] = [
+        libc::pollfd {
             fd: fd,
             events: 0x1 as ::core::ffi::c_short,
             revents: 0 as ::core::ffi::c_short,
         },
-        pollfd {
+        libc::pollfd {
             fd: tty_0,
             events: 0x1 as ::core::ffi::c_short,
             revents: 0 as ::core::ffi::c_short,
@@ -177,7 +172,14 @@ unsafe extern "C" fn check_poll(
     if any_data.0 == 0 {
         return 0 as ::core::ffi::c_int;
     }
-    poll(&raw mut poller as *mut pollfd, 2 as nfds_t, timeout);
+    let ready = crate::runtime::poll_interruptible(poller.as_mut_ptr(), 2 as nfds_t, timeout);
+    if ready < 0 {
+        return if *libc::__errno_location() == libc::EINTR {
+            -3
+        } else {
+            -1
+        };
+    }
     if poller[1usize].revents as ::core::ffi::c_int & 0x1 as ::core::ffi::c_int != 0 {
         let mut ch: ::core::ffi::c_int = getchr();
         if ch < 0 as ::core::ffi::c_int || ch == intr_char as ::core::ffi::c_int {
@@ -200,6 +202,18 @@ unsafe extern "C" fn check_poll(
         return -3 as ::core::ffi::c_int;
     }
     return 0 as ::core::ffi::c_int;
+}
+pub(crate) unsafe fn poll_managed_input(fd: i32) -> i32 {
+    if is_tty.0 == 0 || fd == tty || use_poll.0 == 0 || quit_if_one_screen != 0 && one_screen.0 != 0
+    {
+        return 0;
+    }
+    let result = check_poll(fd, tty);
+    if result == -2 {
+        sigs |= 2;
+        getcc_clear();
+    }
+    result
 }
 #[no_mangle]
 pub unsafe extern "C" fn ttyin_ready() -> lbool {
@@ -230,12 +244,19 @@ pub unsafe extern "C" fn supports_ctrl_x() -> lbool {
 pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
     let _waiting = crate::runtime::IoWait::new();
     loop {
+        // A termination may have been collected by the caller after the
+        // previous wait ended. Do not block with only `sigs` holding it.
+        if sigs & 64 != 0 {
+            return -2;
+        }
         if crate::runtime::take_interrupt() {
+            crate::signal::collect_pending_signals();
             return if fd != tty && sigs & 7 == 0 { -3 } else { -2 };
         }
         flush();
         if is_tty.0 != 0
             && fd != tty
+            && !crate::input_worker::contains(fd)
             && use_poll.0 != 0
             && !(quit_if_one_screen != 0 && one_screen.0 != 0)
         {
@@ -249,9 +270,17 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
             }
         }
         if crate::runtime::take_interrupt() {
+            crate::signal::collect_pending_signals();
             return if fd != tty && sigs & 7 == 0 { -3 } else { -2 };
         }
-        let n = crate::runtime::read_interruptible(fd, buf, len);
+        let n = if crate::input_worker::contains(fd) {
+            crate::input_worker::read_with_terminal(fd, buf, len)
+        } else {
+            crate::runtime::read_interruptible(fd, buf, len)
+        };
+        if n == -2 || n == -3 {
+            return n;
+        }
         if n >= 0 {
             if fd != tty && n > 0 {
                 polling_ok();
@@ -268,9 +297,18 @@ pub unsafe extern "C" fn iread(fd: i32, buf: *mut u8, len: size_t) -> ssize_t {
 pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32) -> i32 {
     let _waiting = crate::runtime::IoWait::new();
     loop {
+        if sigs != 0 {
+            let cancel = sigs & 3 != 0;
+            psignals();
+            if cancel {
+                *__errno_location() = libc::EINTR;
+                return -1;
+            }
+        }
         if crate::runtime::take_interrupt() {
+            crate::signal::collect_pending_signals();
             if sigs & 3 != 0 {
-                sigs = 0;
+                psignals();
                 *__errno_location() = libc::EINTR;
                 return -1;
             }
@@ -280,18 +318,34 @@ pub unsafe extern "C" fn iopen(filename: *const ::core::ffi::c_char, flags: i32)
         if crate::fault::hit(crate::fault::Site::Open) {
             return -1;
         }
-        let result = open(filename, flags);
+        let result = if flags == libc::O_RDONLY {
+            crate::input_worker::open(filename)
+        } else {
+            open(filename, flags)
+        };
         if result < 0 && *__errno_location() == libc::EINTR {
             continue;
+        }
+        if result >= 0 {
+            crate::signal::collect_pending_signals();
+            if sigs != 0 {
+                let cancel = sigs & 3 != 0;
+                if cancel {
+                    crate::input_worker::close_or_native(result);
+                }
+                psignals();
+                if cancel {
+                    *__errno_location() = libc::EINTR;
+                    return -1;
+                }
+            }
         }
         return result;
     }
 }
 #[no_mangle]
 pub unsafe extern "C" fn intio() {
-    if crate::runtime::IO_WAITING.load(std::sync::atomic::Ordering::SeqCst) != 0 {
-        crate::runtime::IO_INTERRUPTED.store(true, std::sync::atomic::Ordering::SeqCst);
-    }
+    crate::runtime::interrupt_waiting_io();
 }
 #[no_mangle]
 pub unsafe extern "C" fn polling_ok() {
@@ -383,26 +437,12 @@ pub unsafe extern "C" fn sleep_ms(mut ms: ::core::ffi::c_int) {
     nanosleep(&raw mut t, ::core::ptr::null_mut::<timespec>());
 }
 #[no_mangle]
-pub unsafe extern "C" fn set_mstimer(mut ms: ::core::ffi::c_ulong) {
-    let mut timer: itimerval = itimerval {
-        it_interval: timeval {
-            tv_sec: 0,
-            tv_usec: 0,
-        },
-        it_value: timeval {
-            tv_sec: 0,
-            tv_usec: 0,
-        },
-    };
-    timer.it_value.tv_sec = ms.wrapping_div(1000 as ::core::ffi::c_ulong) as __time_t;
-    timer.it_value.tv_usec = ms
-        .wrapping_rem(1000 as ::core::ffi::c_ulong)
-        .wrapping_mul(1000 as ::core::ffi::c_ulong) as __suseconds_t;
-    timer.it_interval.tv_usec = 0 as __suseconds_t;
-    timer.it_interval.tv_sec = timer.it_interval.tv_usec as __time_t;
-    setitimer(
-        __itimer_which::ITIMER_REAL,
-        &raw mut timer,
-        ::core::ptr::null_mut::<itimerval>(),
-    );
+pub unsafe extern "C" fn set_mstimer(ms: ::core::ffi::c_ulong) -> ::core::ffi::c_int {
+    match crate::signal::transition_mstimer(ms) {
+        Ok(fired) => fired as ::core::ffi::c_int,
+        Err(error) => {
+            *__errno_location() = error;
+            -1
+        }
+    }
 }

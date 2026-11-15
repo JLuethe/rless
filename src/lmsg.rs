@@ -3,9 +3,14 @@
 // See docs/implementation.md for provenance and porting changes.
 
 use ::c2rust_bitfields;
+use std::ffi::CStr;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::OnceLock;
 extern "C" {
     fn free(ptr: *mut ::core::ffi::c_void);
     fn fclose(__stream: *mut FILE) -> ::core::ffi::c_int;
+    fn ferror(__stream: *mut FILE) -> ::core::ffi::c_int;
+    #[link_name = "rless_fopen_read"]
     fn fopen(
         __filename: *const ::core::ffi::c_char,
         __modes: *const ::core::ffi::c_char,
@@ -2377,11 +2382,13 @@ pub static mut size_help_data: ::core::ffi::c_int = 0;
 // literals; only replacements allocated by saven may be released.
 static mut owned_messages: [bool; 340] = [false; 340];
 static mut owned_help: bool = false;
+static LMSG_PARSE_ERRORS: AtomicUsize = AtomicUsize::new(0);
 unsafe extern "C" fn lmsg_error(
     mut err: *const ::core::ffi::c_char,
     mut lmsg_file: *const ::core::ffi::c_char,
     mut linenum: ::core::ffi::c_int,
 ) {
+    LMSG_PARSE_ERRORS.fetch_add(1, Ordering::Relaxed);
     let mut parg: [PARG; 3] = [parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
     }; 3];
@@ -2502,13 +2509,136 @@ unsafe extern "C" fn lmsg_char(
     }
     return mp;
 }
-unsafe extern "C" fn lmsg_line(
+// Keep the conversion spelling and order of each built-in message. Some
+// consumers pass these bytes to native variadic functions; accepting a new
+// conversion would let a translation read or write an unprovided argument.
+static DEFAULT_FORMATS: OnceLock<Vec<Option<Vec<Vec<u8>>>>> = OnceLock::new();
+
+fn format_signature(bytes: &[u8]) -> Option<Vec<Vec<u8>>> {
+    let mut conversions = Vec::new();
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] != b'%' {
+            index += 1;
+            continue;
+        }
+        let begin = index;
+        index += 1;
+        if index >= bytes.len() {
+            return None;
+        }
+        if bytes[index] == b'%' {
+            index += 1;
+        } else {
+            while index < bytes.len() && !bytes[index].is_ascii_alphabetic() {
+                if bytes[index] == b'%' || bytes[index] == 0 {
+                    return None;
+                }
+                index += 1;
+            }
+            if index == bytes.len() {
+                return None;
+            }
+            index += 1;
+        }
+        conversions.push(bytes[begin..index].to_vec());
+    }
+    Some(conversions)
+}
+
+/// Expand a single decimal placeholder without letting translation bytes
+/// reach a native variadic formatter. The caller supplies a writable C buffer.
+pub unsafe fn format_decimal_to_c(
+    template: *const libc::c_char,
+    value: libc::c_int,
+    output: *mut libc::c_char,
+    capacity: usize,
+) -> bool {
+    if template.is_null() || output.is_null() || capacity == 0 {
+        return false;
+    }
+    let input = CStr::from_ptr(template).to_bytes();
+    let mut decimal = [0u8; 12];
+    let mut decimal_start = decimal.len();
+    let mut magnitude = (value as i64).unsigned_abs();
+    loop {
+        decimal_start -= 1;
+        decimal[decimal_start] = b'0' + (magnitude % 10) as u8;
+        magnitude /= 10;
+        if magnitude == 0 {
+            break;
+        }
+    }
+    if value < 0 {
+        decimal_start -= 1;
+        decimal[decimal_start] = b'-';
+    }
+    let mut written = 0;
+    let mut emit = |byte: u8| {
+        if written < capacity - 1 {
+            *output.add(written) = byte as libc::c_char;
+            written += 1;
+        }
+    };
+    let mut index = 0;
+    let mut conversions = 0;
+    while index < input.len() {
+        if input[index] != b'%' {
+            emit(input[index]);
+            index += 1;
+            continue;
+        }
+        if index + 1 == input.len() {
+            *output = 0;
+            return false;
+        }
+        match input[index + 1] {
+            b'%' => emit(b'%'),
+            b'd' => {
+                for &byte in &decimal[decimal_start..] {
+                    emit(byte);
+                }
+                conversions += 1;
+            }
+            _ => {
+                *output = 0;
+                return false;
+            }
+        }
+        index += 2;
+    }
+    if conversions != 1 {
+        *output = 0;
+        return false;
+    }
+    *output.add(written) = 0;
+    true
+}
+
+unsafe fn default_formats() -> &'static [Option<Vec<Vec<u8>>>] {
+    DEFAULT_FORMATS.get_or_init(|| {
+        (0..340)
+            .map(|id| {
+                let ptr = lmsgs[id];
+                if ptr.is_null() {
+                    Some(Vec::new())
+                } else {
+                    format_signature(CStr::from_ptr(ptr).to_bytes())
+                }
+            })
+            .collect()
+    })
+}
+
+unsafe fn lmsg_line(
     mut line: *mut ::core::ffi::c_char,
     mut line_size: size_t,
     mut fd: *mut FILE,
     mut xbuf: *mut xbuffer,
     mut lmsg_file: *const ::core::ffi::c_char,
     mut linenum: *mut ::core::ffi::c_int,
+    staged: &mut [*mut ::core::ffi::c_char],
+    staged_help_len: &mut ::core::ffi::c_int,
 ) -> lbool {
     let mut id: lessmsg_id = lessmsg_id::LM_NULL;
     let mut msg: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -2550,21 +2680,40 @@ unsafe extern "C" fn lmsg_line(
     {
         mp = lmsg_char(mp, line, line_size, fd, xbuf, lmsg_file, linenum);
     }
+    if id.0 != lessmsg_id::LM_HELP.0 {
+        let bytes: &[u8] = if (*xbuf).end == 0 {
+            &[]
+        } else {
+            std::slice::from_raw_parts(xbuf_char_data(xbuf).cast::<u8>(), (*xbuf).end)
+        };
+        if bytes.contains(&0)
+            || format_signature(bytes).as_ref() != default_formats()[id.0 as usize].as_ref()
+        {
+            lmsg_error(
+                b"invalid message format placeholders\0".as_ptr().cast(),
+                lmsg_file,
+                *linenum,
+            );
+            return lbool::LFALSE;
+        }
+    }
     msg = saven(xbuf_char_data(xbuf), (*xbuf).end);
     if id.0 == lessmsg_id::LM_HELP.0 {
-        if owned_help {
-            free(help_data.cast());
+        if (*xbuf).end > ::core::ffi::c_int::MAX as usize {
+            free(msg.cast());
+            lmsg_error(c"help text too large".as_ptr(), lmsg_file, *linenum);
+            return lbool::LFALSE;
         }
-        help_data = msg;
-        owned_help = true;
-        size_help_data = (*xbuf).end as ::core::ffi::c_int;
+        *staged_help_len = (*xbuf).end as ::core::ffi::c_int;
     } else {
-        if owned_messages[id.0 as usize] {
-            free(lmsgs[id.0 as usize].cast());
-        }
-        lmsgs[id.0 as usize] = msg;
-        owned_messages[id.0 as usize] = true;
+        // Duplicates replace only the pending value. Published pointers stay
+        // valid until the whole translation file has parsed successfully.
     }
+    let previous = staged[id.0 as usize];
+    if !previous.is_null() {
+        free(previous.cast());
+    }
+    staged[id.0 as usize] = msg;
     return lbool::LTRUE;
 }
 #[no_mangle]
@@ -2584,12 +2733,11 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     let mut parg: PARG = parg {
         p_string: ::core::ptr::null::<::core::ffi::c_char>(),
     };
-    if owned_help {
-        free(help_data.cast());
-        owned_help = false;
+    default_formats();
+    if help_data.is_null() {
+        help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
+        size_help_data = size_helpdata;
     }
-    help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
-    size_help_data = size_helpdata;
     if isnullenv(lmsg_file).0 != 0 {
         return;
     }
@@ -2602,6 +2750,11 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
         );
         return;
     }
+    LMSG_PARSE_ERRORS.store(0, Ordering::Relaxed);
+    // Ordinary message IDs are 0..340; LM_HELP is the separate ID 340.
+    let mut staged = vec![::core::ptr::null_mut(); 341];
+    let mut staged_help_len = 0;
+    let mut valid = true;
     xbuf_init(&raw mut xbuf);
     linenum = 0 as ::core::ffi::c_int;
     while !fgets(
@@ -2612,17 +2765,131 @@ pub unsafe extern "C" fn lmsg_init(mut lmsg_file: *const ::core::ffi::c_char) {
     .is_null()
     {
         linenum += 1;
-        lmsg_line(
+        if lmsg_line(
             &raw mut line as *mut ::core::ffi::c_char,
             ::core::mem::size_of::<[::core::ffi::c_char; 512]>(),
             fd,
             &raw mut xbuf,
             lmsg_file,
             &raw mut linenum,
-        );
+            &mut staged,
+            &mut staged_help_len,
+        )
+        .0 == 0
+        {
+            valid = false;
+        }
+    }
+    if ferror(fd) != 0 {
+        lmsg_error(c"read error".as_ptr(), lmsg_file, linenum);
+        valid = false;
     }
     xbuf_deinit(&raw mut xbuf);
-    fclose(fd);
+    if fclose(fd) != 0 {
+        lmsg_error(c"close error".as_ptr(), lmsg_file, linenum);
+        valid = false;
+    }
+    valid &= LMSG_PARSE_ERRORS.load(Ordering::Relaxed) == 0;
+    if valid {
+        if owned_help {
+            free(help_data.cast());
+            owned_help = false;
+            help_data = &raw mut helpdata as *mut ::core::ffi::c_char;
+            size_help_data = size_helpdata;
+        }
+        for (id, replacement) in staged.into_iter().enumerate() {
+            if replacement.is_null() {
+                continue;
+            }
+            if id == lessmsg_id::LM_HELP.0 as usize {
+                help_data = replacement;
+                size_help_data = staged_help_len;
+                owned_help = true;
+            } else {
+                if owned_messages[id] {
+                    free(lmsgs[id].cast());
+                }
+                lmsgs[id] = replacement;
+                owned_messages[id] = true;
+            }
+        }
+    } else {
+        for replacement in staged {
+            if !replacement.is_null() {
+                free(replacement.cast());
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod format_tests {
+    use super::*;
+
+    #[test]
+    fn decimal_translation_never_interprets_native_variadic_conversions() {
+        unsafe {
+            let mut out = [0i8; 32];
+            assert!(format_decimal_to_c(
+                c"sub %% %d".as_ptr(),
+                -12,
+                out.as_mut_ptr(),
+                out.len()
+            ));
+            assert_eq!(CStr::from_ptr(out.as_ptr()).to_bytes(), b"sub % -12");
+            for invalid in [c"%n", c"%p", c"%s", c"%1$d", c"%*d", c"%d %d"] {
+                assert!(!format_decimal_to_c(
+                    invalid.as_ptr(),
+                    7,
+                    out.as_mut_ptr(),
+                    out.len()
+                ));
+                assert_eq!(out[0], 0);
+            }
+            assert!(format_decimal_to_c(
+                c"value %d".as_ptr(),
+                123,
+                out.as_mut_ptr(),
+                5
+            ));
+            assert_eq!(CStr::from_ptr(out.as_ptr()).to_bytes(), b"valu");
+            assert!(format_decimal_to_c(
+                c"%d".as_ptr(),
+                i32::MIN,
+                out.as_mut_ptr(),
+                out.len()
+            ));
+            assert_eq!(CStr::from_ptr(out.as_ptr()).to_bytes(), b"-2147483648");
+        }
+    }
+
+    #[test]
+    fn every_builtin_message_has_a_parseable_format_signature() {
+        let signatures = unsafe { default_formats() };
+        assert_eq!(signatures.len(), 340);
+        for (id, signature) in signatures.iter().enumerate() {
+            assert!(
+                signature.is_some(),
+                "invalid built-in message format at ID {id}"
+            );
+        }
+    }
+
+    #[test]
+    fn extra_or_changed_native_conversions_are_rejected() {
+        let expected = format_signature(b"unknown action: \"%s\"").unwrap();
+        assert_eq!(format_signature(b"action: \"%s\"").unwrap(), expected);
+        for bytes in [
+            b"%p".as_slice(),
+            b"%s %p",
+            b"%s %n",
+            b"%1$s",
+            b"%*s",
+            b"%s %s",
+        ] {
+            assert_ne!(format_signature(bytes).as_ref(), Some(&expected));
+        }
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lmsg(mut id: lessmsg_id) -> *const ::core::ffi::c_char {

@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:c596ff34a51d604df6fa29b7",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/version.rs"
+    ],
+    "symbol": "version",
+    "context": "",
+    "declared_type": "[:: core :: ffi :: c_char ; 4]",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The version exported object owns exactly [c_char; 4], created from 712 followed by NUL in the image, rather than a pointer to allocated memory.",
+      "invariant": "The owner is the four-byte static array itself.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "version is image storage rather than a heap string returned to a caller."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "command.rs:1454-1463 lends version's address through PARG; optfunc.rs:1093 and lesskey_parse.rs:1642-1646 also borrow it for reading.",
+      "invariant": "Callers receive a borrowed C string, not ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1454,
+          "end_line": 1463,
+          "excerpt_sha256": "31ab95e43561bb28aaa0fe1ce2a0ee2a8eea3beb71104c429a87e0c2112b4a10"
+        },
+        {
+          "target": "source:src/optfunc.rs",
+          "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+          "start_line": 1085,
+          "end_line": 1104,
+          "excerpt_sha256": "b76e6f0a3f63c810a23292b265c3ebcc2771e5f78f779248f516b95c1ae9d998"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1641,
+          "end_line": 1647,
+          "excerpt_sha256": "6051960e9ee290e42150bb85def5db448f4681edf8e1b71e0bc8761e79af0d59"
+        },
+        {
+          "target": "source:src/optfunc.rs",
+          "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+          "start_line": 1093,
+          "end_line": 1093,
+          "excerpt_sha256": "beb3832d89711f609b8193c53a440192fe0c1b7fd5fcab1ede4c4a6f3bae80f7"
+        },
+        {
+          "target": "source:src/lesskey_parse.rs",
+          "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+          "start_line": 1642,
+          "end_line": 1646,
+          "excerpt_sha256": "cc45de3741e7eee3c8f382686bea7b9667d112cdcd1fd3877a674b498166f607"
+        }
+      ],
+      "limitations": [
+        "Mutability is retained for the translated C ABI; arbitrary external symbol mutation is outside this source review.",
+        "An external C writer remains outside the maintained read-only call-site audit."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The version initializer transmute returns an array value; no slot can hold or dispatch a function pointer.",
+      "invariant": "Version content is data and cannot be a callback.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 6,
+          "end_line": 7,
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
+        }
+      ],
+      "limitations": [
+        "Static array initialization registers no runtime callback."
+      ]
+    },
+    "invalidation": {
+      "analysis": "The address of version remains stable because maintained consumers do not resize, replace or overwrite its four bytes.",
+      "invariant": "Borrowed version pointers do not outlive image data.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "The version initializer establishes three digits and a trailing NUL before the executable enters main.",
+      "invariant": "Static initialization publishes a complete C string.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 6,
+          "end_line": 7,
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "This version object has no allocator pair or close operation; releasing the image at process exit ends its lifetime.",
+      "invariant": "Version pointers must never be passed to free.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": [
+        "free is invalid for version and every interior pointer into its four bytes."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "Readers cannot make a partial allocation commit because no allocation occurs; output errors leave the version array intact.",
+      "invariant": "Failed display leaves version bytes unchanged.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 6,
+          "end_line": 7,
+          "excerpt_sha256": "3a810ee786cdd6fe54231219a39fde4bd8e63aecbe2d066209fb2d32fa840865"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "Maintained callers read version; the definition registers no handler and grants no permission for an external writer.",
+      "invariant": "The review permits reads and excludes external writes.",
+      "source_refs": [
+        {
+          "target": "source:src/version.rs",
+          "sha256": "282a159ae28297fb73534ed7ad2c949f9a5f33b18e14d4060be4c23a15320e78",
+          "start_line": 5,
+          "end_line": 7,
+          "excerpt_sha256": "f463e0e210d3c9dd4f28732487643b43a77a47a7126934236b5939e9f9d257d9"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "dispversion at src/command.rs:1454-1463 lends version bytes through PARG to error formatting, retaining neither an owning copy nor a free obligation."
+    },
+    "src/optfunc.rs": {
+      "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+      "relationship": "The option handler at src/optfunc.rs:1085-1104 passes the image version string for output; no write or allocator release of version occurs in that consumer."
+    },
+    "src/lesskey_parse.rs": {
+      "sha256": "491a14c8b1bfedc8f4856da70bdcd9b556aec07aeb52704fb9d03bf6dade97fc",
+      "relationship": "Numeric version initialization at src/lesskey_parse.rs:1641-1647 reads version without replacing the static array or retaining mutable byte ownership."
+    }
+  },
+  "finding_context": {}
+}

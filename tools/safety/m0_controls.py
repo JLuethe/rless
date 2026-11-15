@@ -19,10 +19,15 @@ LANES = ('static', 'hooks', 'detectors', 'fuzz')
 UNIT_GROUPS = {
     'inventory-coverage': ['test_inventory_coverage'],
     'ownership-mutations': ['test_closure.ReviewControls'],
-    'binding-mutations': ['test_closure.AcceptanceControls', 'test_safety.EvidenceGate',
+    'binding-mutations': ['test_closure.AcceptanceControls', 'test_safety', 'test_boundary_controls', 'test_native_callback',
                           'test_m0_gate', 'test_oracle_controls', 'test_m0_controls'],
 }
-COMPONENT_TEST = 'runtime::tests::nested_key_read_keeps_the_file_read_interruptible'
+COMPONENT_TEST = 'signal_events::tests'
+COMPONENT_CASES = (
+    'command_counter_overflow_remains_visible_after_dispatch',
+    'publication_racing_with_dispatch_is_seen_in_one_of_two_snapshots',
+    'state_bits_coalesce_but_commands_keep_their_count',
+)
 
 
 def require(condition, message):
@@ -111,12 +116,12 @@ def run_hooks(args, evidence):
 
 
 def run_detectors(args, evidence):
-    from run import detectors, nightly_environment
+    from safety_runner import detectors, nightly_environment
     detectors(args, evidence)
     env = nightly_environment(args)
     for seed in PINS['miri_seeds']:
         evidence.run('miri-component-' + str(seed), ['cargo', 'miri', 'test', '--locked', '--offline',
-            '--manifest-path', ROOT / 'tools/safety/components/Cargo.toml', '--lib', COMPONENT_TEST, '--', '--exact'],
+            '--manifest-path', ROOT / 'tools/safety/components/Cargo.toml', '--lib', COMPONENT_TEST, '--', '--test-threads=1'],
             env={**env, 'MIRIFLAGS': f'-Zmiri-seed={seed}'}, profile='MIRI', timeout=600)
 
 
@@ -272,11 +277,12 @@ def validate_detectors(records, out, root, report):
         exact(safe, ['cargo', 'miri', 'run', '--locked', '--manifest-path', manifest, '--bin', 'safe'], profile='MIRI')
         component = records['miri-component-' + str(seed)]
         text = exact(component, ['cargo', 'miri', 'test', '--locked', '--offline', '--manifest-path',
-            root / 'tools/safety/components/Cargo.toml', '--lib', COMPONENT_TEST, '--', '--exact'], profile='MIRI')
+            root / 'tools/safety/components/Cargo.toml', '--lib', COMPONENT_TEST, '--', '--test-threads=1'], profile='MIRI')
         for record in (safe, component):
             require(record['build_flags'].get('MIRIFLAGS') == f'-Zmiri-seed={seed}', 'wrong Miri seed')
-        require('running 1 test' in text and 'test result: ok. 1 passed; 0 failed; 0 ignored;' in text
-                and re.search(r'^test ' + re.escape(COMPONENT_TEST) + r' \.\.\. ok$', text, re.M),
+        require('running 3 tests' in text and 'test result: ok. 3 passed; 0 failed; 0 ignored;' in text
+                and all(re.search(r'^test ' + re.escape(COMPONENT_TEST + '::' + name) + r' \.\.\. ok$', text, re.M)
+                        for name in COMPONENT_CASES),
                 'actual component Miri test did not pass')
     alias = records['miri-alias']
     diagnostic(alias, r'error: Undefined Behavior:.*(?:tag|borrow|alloc)')
@@ -405,7 +411,7 @@ def main():
         evidence.run('observed-host-abi', ['getconf', 'GNU_LIBC_VERSION'], profile='ABI')
         try:
             if lane == 'fuzz':
-                from run import fuzz
+                from safety_runner import fuzz
                 fuzz(args, evidence)
             else:
                 globals()['run_' + lane](args, evidence)

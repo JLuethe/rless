@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:a4e6340411205d17caecbfe3",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/runtime.rs"
+    ],
+    "symbol": "IO_WAITING",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The IO_WAITING AtomicUsize owns the number of active IoWait guards, initialized at zero; each IoWait::new increments once.",
+      "invariant": "Each live guard contributes one wait count.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 5,
+          "end_line": 13,
+          "excerpt_sha256": "06af98af08b1eb0acfbe10a7883dae0f508a748ee557b40319b98c5d398cbd66"
+        }
+      ],
+      "limitations": [
+        "IO_WAITING counts active read/open guards rather than owning their descriptors."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "intio reads IO_WAITING by value to decide whether to post an interrupt; it receives no borrow of a guard or input buffer.",
+      "invariant": "The count does not expose guard storage.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 5,
+          "end_line": 24,
+          "excerpt_sha256": "9dc979d9d75dc7789a89f1517d09142b76f419fe1b1173ba79820708436e86c4"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 290,
+          "end_line": 295,
+          "excerpt_sha256": "38e69c1e295d5862f2031d918eccf1a007b8818ae384bea8bad9fb9431c4407f"
+        }
+      ],
+      "limitations": [
+        "A positive counter does not validate the buffer of a particular waiter."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "IoWait::drop is static Rust destructor dispatch; the IO_WAITING numeric counter stores no dynamically selected destructor or native callback.",
+      "invariant": "Wait count cannot retain a callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 16,
+          "end_line": 24,
+          "excerpt_sha256": "6f902a2b0700b286c9e45152b97528e10614fede5c0ce37375a614e1e46ee214"
+        }
+      ],
+      "limitations": [
+        "The notification protocol stores no per-waiter function target."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Nested IoWait guards each contribute to IO_WAITING; dropping the inner guard leaves the outer count and its interruption state live.",
+      "invariant": "Ending an inner read does not retire its outer wait.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 16,
+          "end_line": 24,
+          "excerpt_sha256": "6f902a2b0700b286c9e45152b97528e10614fede5c0ce37375a614e1e46ee214"
+        },
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 116,
+          "end_line": 128,
+          "excerpt_sha256": "604ea4c3140c31007cacf6c35483652114ac434994d0c5733c48210c30f3a799"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "IO_WAITING.fetch_add/fetch_sub pair guard lifetime, and only the decrement observing one clears IO_INTERRUPTED.",
+      "invariant": "The final guard alone clears pending interruption.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 9,
+          "end_line": 24,
+          "excerpt_sha256": "8dfde3adcf476f66dcc38dc76c781f2fec60e4c38bb8a0ebf2decf58f35d1356"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "A guard releases IO_WAITING's count contribution through Drop on Rust return; no malloc/free or descriptor-close pair belongs to this atomic.",
+      "invariant": "Guard destruction balances a previously added count.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 9,
+          "end_line": 24,
+          "excerpt_sha256": "8dfde3adcf476f66dcc38dc76c781f2fec60e4c38bb8a0ebf2decf58f35d1356"
+        }
+      ],
+      "limitations": [
+        "IoWait Drop balances the count without closing the borrowed FD."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "Early I/O errors return through the IoWait destructor, decrementing IO_WAITING rather than jumping past cleanup.",
+      "invariant": "I/O errors cannot skip ordinary guard destruction.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 81,
+          "end_line": 109,
+          "excerpt_sha256": "d813577c463b1dfbb663e8f6a5e64a6d0b59b90db3afbf263a7a8fa56cfbe121"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 229,
+          "end_line": 236,
+          "excerpt_sha256": "43df32adc233b7b48510b70d621e2e3ec54787068b87cf0b64223fee1d2d2bb0"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 267,
+          "end_line": 275,
+          "excerpt_sha256": "4aa3b7bccbdf007026c6748c8a8332c708ac2ab0cc375fa3eb7f885b53c9af01"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "intio reads IO_WAITING atomically without borrowing a guard; count correctness still depends on paired ordinary Rust guard lifetime.",
+      "invariant": "Handler notification does not mutate guard ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/runtime.rs",
+          "sha256": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+          "start_line": 5,
+          "end_line": 24,
+          "excerpt_sha256": "9dc979d9d75dc7789a89f1517d09142b76f419fe1b1173ba79820708436e86c4"
+        },
+        {
+          "target": "source:src/os.rs",
+          "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+          "start_line": 290,
+          "end_line": 295,
+          "excerpt_sha256": "38e69c1e295d5862f2031d918eccf1a007b8818ae384bea8bad9fb9431c4407f"
+        }
+      ],
+      "limitations": [
+        "Review covers this atomic storage and its wait/interrupt protocol only; M0-SIG-004 remains open for rless_signal sentinel conversions."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/os.rs": {
+      "sha256": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+      "relationship": "iread and iopen at src/os.rs:229-236 and src/os.rs:267-275 create IoWait guards; intio at src/os.rs:290-295 tests IO_WAITING before notification. The count spans active blocking calls."
+    }
+  },
+  "finding_context": {
+    "M0-SIG-004": "IO_WAITING counts active guards and gates intio notification. M0-SIG-004 concerns disposition conversion at registration, independent of balancing wait counts; this counter neither stores nor validates a returned signal target."
+  }
+}

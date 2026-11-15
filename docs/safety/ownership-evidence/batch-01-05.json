@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:6f152cb7136ced769d847ee4",
+    "kind": "shared-static-definition",
+    "paths": [
+      "src/fault.rs"
+    ],
+    "symbol": "FAIL_AT",
+    "context": "",
+    "declared_type": "AtomicUsize",
+    "binding_mutability": "shared"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The FAIL_AT private AtomicUsize owns the requested positive ordinal; initialize resets it to zero and parse_plan rejects zero and overflow.",
+      "invariant": "An enabled plan has a positive representable ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 17,
+          "end_line": 18,
+          "excerpt_sha256": "5d3fb7c5cd6d7730575dc5234e72748256c74c5b7df452b8f8117e6edc0ba79a"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 79,
+          "end_line": 96,
+          "excerpt_sha256": "8445920ae70752657c6a6031c1b1efc573ddb44ff002d7565f15f6cab37e186d"
+        }
+      ],
+      "limitations": [
+        "FAIL_AT owns an ordinal scalar and no allocation request."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "The parsed usize is copied into the FAIL_AT field; hit copies it out, so no borrow of the environment string reaches the hook.",
+      "invariant": "Ordinal storage never retains environment bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 111,
+          "end_line": 117,
+          "excerpt_sha256": "f0b77ae2b681d9b8fcbfa168f640900eefe6b94e127effb4652c818c029321a7"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 146,
+          "end_line": 148,
+          "excerpt_sha256": "ead702ec83fb34e62e7acb4191c94e004b07aa142976778c4bcc0cd6c6a77f65"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
+        }
+      ],
+      "limitations": [
+        "A loaded ordinal must belong to the published FAIL_SITE plan."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The FAIL_AT ordinal is passed by value to next_trigger; it is neither a native pointer nor an indirect-call target.",
+      "invariant": "Ordinal arithmetic cannot dispatch a callback.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 162,
+          "end_line": 176,
+          "excerpt_sha256": "1984820ac5377c74e1453ceda63a248e7d45b3c78dbd4632bd78d84ddc6cf412"
+        }
+      ],
+      "limitations": [
+        "Ordinal comparison invokes no harness-supplied callback."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Dropping the startup OsStrings cannot invalidate FAIL_AT because initialize stores their parsed usize value, not an input pointer.",
+      "invariant": "Dropping parser input cannot invalidate the ordinal.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 99,
+          "end_line": 104,
+          "excerpt_sha256": "5cadcc39e008a068bc94966dfec0fc7de46d81ddf1716572697738d109ccec7e"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 144,
+          "end_line": 149,
+          "excerpt_sha256": "0c0276c17acd0ba0e55b1f51ca2a88e886b423317fa9439a9743fa29c56df85c"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "initialize sets FAIL_AT before the FAIL_SITE Release publication; hit Acquire-checks the site and rejects a zero requested value.",
+      "invariant": "Readers observe the ordinal of the published plan.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 146,
+          "end_line": 148,
+          "excerpt_sha256": "ead702ec83fb34e62e7acb4191c94e004b07aa142976778c4bcc0cd6c6a77f65"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "The FAIL_AT counter configuration is static scalar storage with no destructor-owned external resource.",
+      "invariant": "Ordinal storage has no heap release obligation.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 17,
+          "end_line": 18,
+          "excerpt_sha256": "5d3fb7c5cd6d7730575dc5234e72748256c74c5b7df452b8f8117e6edc0ba79a"
+        }
+      ],
+      "limitations": [
+        "The ordinal needs no allocator cleanup after a selected failure."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "parse_plan rejects zero and checked-arithmetic overflow before FAIL_AT is published; a zero request never fires.",
+      "invariant": "Invalid ordinals do not become executable plans.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 79,
+          "end_line": 96,
+          "excerpt_sha256": "8445920ae70752657c6a6031c1b1efc573ddb44ff002d7565f15f6cab37e186d"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "FAIL_AT is read after the FAIL_SITE Acquire check and is never concurrently reconfigured by the maintained startup sequence.",
+      "invariant": "The configured ordinal is stable while hooks execute.",
+      "source_refs": [
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 141,
+          "end_line": 149,
+          "excerpt_sha256": "d2e0b41fec71d311372f98cd3e0638edc8f26852d7f5d0603dbcc0619b89b0df"
+        },
+        {
+          "target": "source:src/fault.rs",
+          "sha256": "3b0d86e16f83880612161880fd7e91fc24db12c533cdf572edaf4469c03c3cbe",
+          "start_line": 178,
+          "end_line": 185,
+          "excerpt_sha256": "8c710f81f2dbd82486fe17d8791ede10d389036bf5797e5f3c7ac0665d4cf222"
+        }
+      ],
+      "limitations": [
+        "Initialize once before handler registration; M0-SIG-002 caller allocation/queue hazards remain open and are not cleared by this storage review."
+      ]
+    }
+  },
+  "related_sources": {},
+  "finding_context": {
+    "M0-SIG-002": "FAIL_AT is a startup-configured ordinal read after plan publication. M0-SIG-002 remains open for asynchronous environment lookup and command allocation; a valid ordinal does not make those caller operations signal-safe."
+  }
+}

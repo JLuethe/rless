@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:f86bd4ec3b52a6658c4dfd39",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/ch.rs"
+    ],
+    "symbol": "read_error",
+    "context": "",
+    "declared_type": "lbool",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The read_error exported lbool owns the current read-error indication, initially false and set when iread returns a negative hard error.",
+      "invariant": "Read status contains no buffer allocation owner.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 530,
+          "excerpt_sha256": "68a778617e4ea627e62ad253ebf7e6c942d58def237643e76c96cd620209310b"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 679,
+          "end_line": 684,
+          "excerpt_sha256": "f59e7554f68fdb426cb5c866371ebd4275f1597140bfe506148a1ca6bfe01d2e"
+        }
+      ],
+      "limitations": [
+        "read_error records an input failure but does not own its descriptor."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "edit.rs:1155 and command.rs:1358 clear the copied status for new operations; no returned pointer ties read_error to the exact read request or ifile.",
+      "invariant": "A global error bit does not brand its input owner.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1149,
+          "end_line": 1160,
+          "excerpt_sha256": "627bf74b3b2172cfaa435cacdcfccc717b65a1ea7d8410eed5a92619c6076d4d"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1352,
+          "end_line": 1365,
+          "excerpt_sha256": "ce2bed9caa46213ef1d0ad4ddb6869f4b014ba4df62895656bb585317dbf38e9"
+        },
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1155,
+          "end_line": 1155,
+          "excerpt_sha256": "25ec1bcbd8b12a8157887e8ea7e7bda6667516d30fe9395bc5964aa48c2258eb"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1358,
+          "end_line": 1358,
+          "excerpt_sha256": "25ec1bcbd8b12a8157887e8ea7e7bda6667516d30fe9395bc5964aa48c2258eb"
+        }
+      ],
+      "limitations": [
+        "Another file activation can reset the status independently of a saved reader."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The read_error flag is set after the direct iread call; native I/O error/cause handling belongs to that call and its callers, not a callback stored here.",
+      "invariant": "Error status does not retain the I/O callback context.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 660,
+          "end_line": 684,
+          "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
+        }
+      ],
+      "limitations": [
+        "The diagnostic path is direct; the scalar supplies no recovery callback."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Switching files or clearing the read_error bit can discard the earlier indication while cached bytes remain separately owned; callers must consume it at the right boundary.",
+      "invariant": "Resetting status is distinct from retiring input state.",
+      "source_refs": [
+        {
+          "target": "source:src/edit.rs",
+          "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+          "start_line": 1149,
+          "end_line": 1160,
+          "excerpt_sha256": "627bf74b3b2172cfaa435cacdcfccc717b65a1ea7d8410eed5a92619c6076d4d"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 679,
+          "end_line": 684,
+          "excerpt_sha256": "f59e7554f68fdb426cb5c866371ebd4275f1597140bfe506148a1ca6bfe01d2e"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "ch_get sets read_error before returning -1 without publishing new bytes; error, EOF and interruption still require caller-side interpretation of other state.",
+      "invariant": "Failed reads must not commit a new initialized-byte count.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 679,
+          "end_line": 684,
+          "excerpt_sha256": "f59e7554f68fdb426cb5c866371ebd4275f1597140bfe506148a1ca6bfe01d2e"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "read_error owns status only; a failed read leaves the preexisting filestate and FD for their normal owner cleanup paths.",
+      "invariant": "Read failure alone does not transfer FD ownership.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1240,
+          "excerpt_sha256": "f2d7b26dcc65a7358c51c2ccc9c06d4b325a3ecf83d790ed0c7119d4d3c40fb7"
+        }
+      ],
+      "limitations": [
+        "Resetting read_error is not a descriptor close or filestate disposal."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "On a hard iread error, ch_get sets read_error and returns -1 before committing fpos/datasize. Existing cache and FD owners remain live for ch_close or permanent disposal; M0-IO-001 remains open.",
+      "invariant": "Error-bit presence cannot substitute for read failure evidence.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 660,
+          "end_line": 684,
+          "excerpt_sha256": "fd2414a7198d377bfab776b389d6910571edc972b5dd5e0f64648ee0668563cf"
+        },
+        {
+          "target": "source:src/command.rs",
+          "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+          "start_line": 1352,
+          "end_line": 1365,
+          "excerpt_sha256": "ce2bed9caa46213ef1d0ad4ddb6869f4b014ba4df62895656bb585317dbf38e9"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 1207,
+          "end_line": 1267,
+          "excerpt_sha256": "a36d4da2408ef950ebb85339b0024ff0279d4e92ccaf028b5776f5d2f91f540c"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "The read_error flag is non-atomic global metadata, without per-operation identity or exclusion against handler-driven owner changes.",
+      "invariant": "Raw read status remains a coupled state hazard.",
+      "source_refs": [
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 524,
+          "end_line": 530,
+          "excerpt_sha256": "68a778617e4ea627e62ad253ebf7e6c942d58def237643e76c96cd620209310b"
+        },
+        {
+          "target": "source:src/ch.rs",
+          "sha256": "28d19377610be1b35a571a9b0ae8df5fd9de1f8b775df95819bcfd9227fdce89",
+          "start_line": 679,
+          "end_line": 684,
+          "excerpt_sha256": "f59e7554f68fdb426cb5c866371ebd4275f1597140bfe506148a1ca6bfe01d2e"
+        }
+      ],
+      "limitations": [
+        "M0-IO-001 remains linked and open; current diagnostic improvements are not described as a still-reproduced silent failure."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/edit.rs": {
+      "sha256": "1f3d80ac7369147baef027916b51b9021f0332878dddfed03636c98ace308074",
+      "relationship": "File activation clears read_error at src/edit.rs:1149-1160, so a read-status snapshot belongs to the selected input lifecycle rather than permanent error ownership."
+    },
+    "src/command.rs": {
+      "sha256": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+      "relationship": "prompt_message tests, reports and clears read_error at src/command.rs:1352-1365. That consumer can erase the status after displaying the per-input diagnostic."
+    }
+  },
+  "finding_context": {}
+}

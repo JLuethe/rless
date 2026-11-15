@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "STATIC:844f5336864816a0e2578c05",
+    "kind": "mutable-definition",
+    "paths": [
+      "src/bin/lessecho.rs"
+    ],
+    "symbol": "meta_escape_buf",
+    "context": "",
+    "declared_type": "[:: core :: ffi :: c_char ; 2]",
+    "binding_mutability": "mutable"
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "The meta_escape_buf static two-character array owns storage for a numeric -f escape byte and its NUL terminator.",
+      "invariant": "The escape buffer owns exactly two static bytes.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 94,
+          "end_line": 94,
+          "excerpt_sha256": "38c661a57046a39dbc30fbdf0d14a9741b3b3bc8a2ea7fff33bd9b11c5bb08a8"
+        }
+      ],
+      "limitations": [
+        "meta_escape_buf owns two static bytes and no allocation."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "meta_escape borrows meta_escape_buf's address after -f; printf and strlen only read through that pointer during the later output loop.",
+      "invariant": "Escape-buffer aliases are read-only during emission.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 391,
+          "end_line": 396,
+          "excerpt_sha256": "6861e8a347804426f839bd1fe2e36c0337de4465024a671aa6299b8f92f42e9e"
+        }
+      ],
+      "limitations": [
+        "Private single-invocation helper state only; metachars heap ownership and lstrtol arithmetic remain separate pending entries.",
+        "meta_escape may alias these bytes until helper exit."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "The meta_escape_buf array contains characters, not function pointers; consumers are direct libc string operations without retained callbacks.",
+      "invariant": "Two-byte escape storage cannot register code.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 391,
+          "end_line": 396,
+          "excerpt_sha256": "6861e8a347804426f839bd1fe2e36c0337de4465024a671aa6299b8f92f42e9e"
+        }
+      ],
+      "limitations": [
+        "No function target is stored in the two-byte escape buffer."
+      ]
+    },
+    "invalidation": {
+      "analysis": "Repeated -f options overwrite the same static array before output; meta_escape_buf's address never changes and old values have no separate owner.",
+      "invariant": "Reusing the buffer does not invalidate its address.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        }
+      ],
+      "limitations": []
+    },
+    "mutation_commit": {
+      "analysis": "main_0 stores index zero, writes zero to index one, then points meta_escape to the meta_escape_buf buffer.",
+      "invariant": "The NUL terminator precedes pointer publication.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        }
+      ],
+      "limitations": []
+    },
+    "release_pair": {
+      "analysis": "meta_escape_buf has static lifetime and is never freed, including after meta_escape selects another literal or argv tail.",
+      "invariant": "Changing escape selection cannot release this array.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 94,
+          "end_line": 94,
+          "excerpt_sha256": "38c661a57046a39dbc30fbdf0d14a9741b3b3bc8a2ea7fff33bd9b11c5bb08a8"
+        }
+      ],
+      "limitations": [
+        "Static escape bytes cannot be released by a C allocator."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "A failed -f parse exits before output; meta_escape_buf writes remain within its two indices and acquire no allocation.",
+      "invariant": "Failed -f parsing cannot leave an allocated buffer.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 132,
+          "end_line": 135,
+          "excerpt_sha256": "ab1d81051ffb5edddc6366c5ffc16af0a75988e9000c149ef0aac614dd792c19"
+        }
+      ],
+      "limitations": []
+    },
+    "signals_handoff": {
+      "analysis": "Only startup option parsing writes the meta_escape_buf array; the helper has no registered handler using it concurrently.",
+      "invariant": "No supported callback races the two-byte update.",
+      "source_refs": [
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 235,
+          "end_line": 243,
+          "excerpt_sha256": "93aa2721149c87396d30da30908e427c55b6b10a5ac1b0c68a516a760025d851"
+        },
+        {
+          "target": "source:src/bin/lessecho.rs",
+          "sha256": "842afd83730b268fab18bcfe56d2f93ccba0a664b60b1a0c7bf054741584a33f",
+          "start_line": 287,
+          "end_line": 302,
+          "excerpt_sha256": "71154994309bd7d6413647255c3aff1e8843aa3aa97fe645cb73d30919afa328"
+        }
+      ],
+      "limitations": []
+    }
+  },
+  "related_sources": {},
+  "finding_context": {}
+}

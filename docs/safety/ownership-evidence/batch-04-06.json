@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "review_kind": "entry-specific-ownership-v1",
+  "target": {
+    "id": "OWN-08",
+    "kind": "ownership-cycle",
+    "paths": [
+      "src/option.rs",
+      "src/opttbl.rs",
+      "src/optfunc.rs",
+      "src/decode.rs",
+      "src/lesskey_parse.rs",
+      "src/evar.rs",
+      "src/lmsg.rs",
+      "src/prompt.rs"
+    ]
+  },
+  "inventory_sha256": "8253964b1e9ee2b15f475b1a917b4337ed15288949833da0725186e2af0dcb88",
+  "reviewer": "Codex author source review; independent approval pending",
+  "checklist": {
+    "owner_creation": {
+      "analysis": "OWN-08 owns saved prompt prototypes, decoded table nodes/buffers, cached environment copies and allocated message replacements. Static option descriptors only point to these different owner domains.",
+      "invariant": "Configuration pointers must identify their owning storage class.",
+      "source_refs": [
+        {
+          "target": "source:src/prompt.rs",
+          "sha256": "f2d2c149b8686f0c4374958333158bc31ad420c34952cc16b48d54a7f75b075d",
+          "start_line": 132,
+          "end_line": 146,
+          "excerpt_sha256": "de5398796ba6263a16c169fe381d5b187aa8753d1f2f17116cc54e86b5c622ed"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2028,
+          "end_line": 2053,
+          "excerpt_sha256": "1669d1c2d8ac4b8952725a9fd1c2ef0979da531d278968b32e747d41e0c8c77b"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2811,
+          "end_line": 2821,
+          "excerpt_sha256": "bee1a9b9663e50a2b2b05d045791125791b3dcf04ddb94df0c98bbbfdd9088a2"
+        }
+      ],
+      "limitations": [
+        "One configuration precedence rule does not unify allocation lifetimes."
+      ]
+    },
+    "aliases_escapes": {
+      "analysis": "OWN-08 lgetenv can return table bytes, cached copies or borrowed libc environment storage; pr_expand returns shared scratch text. Retaining any result requires the corresponding owner to survive updates.",
+      "invariant": "Borrowed lookup and expansion results must not become independent owners.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2837,
+          "end_line": 2862,
+          "excerpt_sha256": "f749c6c5d4cda4299de5c82a37fa46554074480d6dc4931aa74e30f7cba84f9a"
+        },
+        {
+          "target": "source:src/prompt.rs",
+          "sha256": "f2d2c149b8686f0c4374958333158bc31ad420c34952cc16b48d54a7f75b075d",
+          "start_line": 625,
+          "end_line": 637,
+          "excerpt_sha256": "4e7fb1eff6703a13c9e1e7385800b52c85be6544083592c32c44d2bad4058653"
+        },
+        {
+          "target": "source:src/prompt.rs",
+          "sha256": "f2d2c149b8686f0c4374958333158bc31ad420c34952cc16b48d54a7f75b075d",
+          "start_line": 677,
+          "end_line": 682,
+          "excerpt_sha256": "d20246ae688d29bab0f69cc49ba9bf8c32c02a26d47dc43fd24d81419f89e9d1"
+        }
+      ],
+      "limitations": [
+        "A later prompt expansion overwrites the same message scratch array."
+      ]
+    },
+    "callback_targets": {
+      "analysis": "OWN-08 option scanning invokes the typed ofunc from its selected loption and then frees temporary str. The static table binds the buffer option to opt_b with the same C signature.",
+      "invariant": "Option callbacks must copy any parameter they retain.",
+      "source_refs": [
+        {
+          "target": "source:src/option.rs",
+          "sha256": "0f7c72fc3a85a02af62064ea13c5bb9c981cbde0c035f797c23f08108b41e327",
+          "start_line": 732,
+          "end_line": 738,
+          "excerpt_sha256": "9a032f73992dbd334b92961b34d5108a44eab11c786f23d4de66381d33461069"
+        },
+        {
+          "target": "source:src/opttbl.rs",
+          "sha256": "020c15b3233ac77bde699dc75ade24c6199448d956d5998fa3d6569d981c5a2d",
+          "start_line": 970,
+          "end_line": 980,
+          "excerpt_sha256": "9c192f959eb3b618a8c18a3a833d9164d240d9ec9029f25a83c42cff64bee9c3"
+        }
+      ],
+      "limitations": [
+        "Typing the callback does not establish its shared-state exclusion contract."
+      ]
+    },
+    "invalidation": {
+      "analysis": "OWN-08 prompt replacement frees the selected prototype before saving new text; message initialization explicitly invalidates previously borrowed help pointers. Replacement ordering is not uniformly copy-before-free.",
+      "invariant": "No consumer may retain an invalidated prototype or message alias.",
+      "source_refs": [
+        {
+          "target": "source:src/optfunc.rs",
+          "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+          "start_line": 909,
+          "end_line": 947,
+          "excerpt_sha256": "c0e66488636e540b248d723397bdc00229d3ec2b977d643d8f133c9bf02ade9d"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2571,
+          "end_line": 2592,
+          "excerpt_sha256": "78e248f3e96fe8a92165968dfebe1b272f70800ede05224c0a9aad5d33fe7f83"
+        }
+      ],
+      "limitations": [
+        "M0-MEM-001 covers these raw lifetime contracts without a new failure claim."
+      ]
+    },
+    "mutation_commit": {
+      "analysis": "OWN-08 lesskey_text publishes command/edit buffers directly, copies variable expansion into a distinct owner, then deinitializes parser variable bytes. That current transfer repairs the historical M0-LEAK-003 mechanism.",
+      "invariant": "Published table bytes must outlive the staging parser descriptor.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2970,
+          "end_line": 2991,
+          "excerpt_sha256": "6e81409f77d26722a7de8a62e63f5de319980d84cba82f9d48c08e10af7b99a5"
+        }
+      ],
+      "limitations": [
+        "The existing finding remains open for maintained independent disposition."
+      ]
+    },
+    "release_pair": {
+      "analysis": "OWN-08 release_cmd_table frees only owns_buffer data before the node; prompt saved-option replacement copies before free. Message replacement uses ownership flags to avoid freeing borrowed defaults.",
+      "invariant": "Borrowed defaults must not take owned-allocation release paths.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2173,
+          "end_line": 2193,
+          "excerpt_sha256": "1318a7d37655d302568f91523e258beefe8b401abe9dcdc8203e9cc6d4f91c21"
+        },
+        {
+          "target": "source:src/optfunc.rs",
+          "sha256": "5c88633566c66796be94e176c9adef3db63d19ade7788f0c38f15e904df97b5b",
+          "start_line": 557,
+          "end_line": 566,
+          "excerpt_sha256": "9dcc074260bea0d85f38cb324dce9b23009fcbdbedf8a057ef4c7cf3a805666b"
+        },
+        {
+          "target": "source:src/lmsg.rs",
+          "sha256": "86e2ff814679b6e976c5ada0fe9033bed33e3ae94399e8d277e7aa321ea30cec",
+          "start_line": 2553,
+          "end_line": 2566,
+          "excerpt_sha256": "31111c01490088dc8441d8690ebeafc0d3bfd363f3bfdd063077e5a2a7ff93bb"
+        }
+      ],
+      "limitations": [
+        "Current release repairs do not close M0-LEAK-005 or M0-LEAK-006."
+      ]
+    },
+    "error_cleanup": {
+      "analysis": "OWN-08 failed parsing deinitializes all three staged buffers before returning, and evar expansion frees copied lookup values and replacement nodes on normal completion. Fatal allocation still lacks a general RAII transaction.",
+      "invariant": "Parse failure must not free data retained by an older table.",
+      "source_refs": [
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2970,
+          "end_line": 2977,
+          "excerpt_sha256": "45d94606fdf8232b4607825259fe276b7e5835d45a284fcaec09447655a98de5"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 117,
+          "end_line": 122,
+          "excerpt_sha256": "262682f7ce514fb6c6a87463ae723fec02b7c2907484cb80245abdb55d70afd6"
+        },
+        {
+          "target": "source:src/evar.rs",
+          "sha256": "1daafdf1305baa3fdba8ada208a21a3231d1997af3390726fd507ca913e125cd",
+          "start_line": 229,
+          "end_line": 243,
+          "excerpt_sha256": "49040d6cc60963f319de383750770591956d2c07b695a2992fd23448ca7380db"
+        }
+      ],
+      "limitations": [
+        "Normal-return cleanup is not a proof for every fatal allocation boundary."
+      ]
+    },
+    "signals_handoff": {
+      "analysis": "OWN-08 remains reachable from sigusr environment lookup and queue creation. lgetenv can allocate cache nodes, so source-correct parsing and precedence do not make configuration access signal-safe (M0-SIG-002).",
+      "invariant": "Handler dispatch must defer lookup and allocation to ordinary execution.",
+      "source_refs": [
+        {
+          "target": "source:src/signal.rs",
+          "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+          "start_line": 86,
+          "end_line": 100,
+          "excerpt_sha256": "dcc3243b7c2a3c41f372fdd7d224724bff45db638538a2df36016ff0074c9fdd"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2811,
+          "end_line": 2821,
+          "excerpt_sha256": "bee1a9b9663e50a2b2b05d045791125791b3dcf04ddb94df0c98bbbfdd9088a2"
+        },
+        {
+          "target": "source:src/decode.rs",
+          "sha256": "ccfab22e9bf053253a3106053c222d108a74fab1a4341ffa2a6f0297899c91e5",
+          "start_line": 2837,
+          "end_line": 2862,
+          "excerpt_sha256": "f749c6c5d4cda4299de5c82a37fa46554074480d6dc4931aa74e30f7cba84f9a"
+        }
+      ],
+      "limitations": [
+        "No configuration-source changes or runtime campaigns are performed here."
+      ]
+    }
+  },
+  "related_sources": {
+    "src/signal.rs": {
+      "sha256": "addf465529547cdf3ef05820e6ac8089f9fce3eaa41a0b83c26a519da1585f08",
+      "relationship": "sigusr at src/signal.rs:86-100 calls lgetenv before ungetsc; that invokes the shared configuration lookup/cache path covered by OWN-08 from an asynchronous handler."
+    }
+  }
+}
