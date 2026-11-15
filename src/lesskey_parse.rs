@@ -1693,6 +1693,13 @@ pub unsafe extern "C" fn parse_lesskey_content(
         );
     }
     while *content.offset(cx as isize) as ::core::ffi::c_int != '\0' as ::core::ffi::c_int {
+        // Count actual line transactions. Later ordinals exercise rollback of
+        // already staged command/variable bytes before any table is published.
+        #[cfg(feature = "safety-injection")]
+        if crate::fault::hit(crate::fault::Site::Parser) {
+            lesskey_file = ::core::ptr::null_mut();
+            return -1;
+        }
         let mut line: [::core::ffi::c_char; 1024] = [0; 1024];
         let mut lx: size_t = 0 as size_t;
         while *content.offset(cx as isize) as ::core::ffi::c_int != '\0' as ::core::ffi::c_int

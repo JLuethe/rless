@@ -56,20 +56,47 @@ def bind(rows, bindings, root=ROOT):
             raise ValueError('missing or escaping implementation path')
         if item['coverage_scope'] not in ('partial', 'complete') or not item.get('scope_notes'):
             raise ValueError('missing implementation scope')
-        report = validate_report(item['report'], root)
         relative = str(path.relative_to(root.resolve()))
-        if report['input_fingerprints']['files'].get(relative) != sha(path):
-            raise ValueError('implementation is not bound to the executed source fingerprint')
-        matches = [x for x in report['records'] if x['name'] == item['record_name']]
-        if len(matches) != 1:
-            raise ValueError('missing or duplicate evidence selector')
-        executed = matches[0]
-        for field in ('scenario_id', 'variant', 'profile'):
-            if executed[field] != row[field]:
-                raise ValueError('executed oracle does not match row')
-        if item['coverage_scope']=='complete' and executed.get('coverage_scope')!='complete':
-            raise ValueError('partial or undeclared executed coverage cannot be promoted by a binding')
-        result[key].update(status='passed' if item['coverage_scope'] == 'complete' else 'not-verified',
+        executions = item.get('executions')
+        if executions is None:
+            executions = [dict(report=item['report'], record_name=item['record_name'],
+                               oracle_metadata=item.get('oracle_metadata'))]
+        elif any(field in item for field in ('report', 'record_name', 'oracle_metadata')):
+            raise ValueError('ambiguous single/multiple execution binding')
+        if not isinstance(executions, list) or not executions:
+            raise ValueError('empty executed oracle selection')
+        execution_ids = set()
+        findings = set()
+        for selection in executions:
+            report_path = Path(selection['report'])
+            report_path = report_path if report_path.is_absolute() else root / report_path
+            identity = (str(report_path.resolve()), selection['record_name'])
+            if identity in execution_ids:
+                raise ValueError('duplicate executed oracle selection')
+            execution_ids.add(identity)
+            # Selecting an oracle does not approve unrelated campaign records.
+            report = validate_report(report_path, root, record_names=[selection['record_name']],
+                                     allow_open_findings=True)
+            if report['input_fingerprints']['files'].get(relative) != sha(path):
+                raise ValueError('implementation is not bound to the executed source fingerprint')
+            matches = [x for x in report['records'] if x['name'] == selection['record_name']]
+            if len(matches) != 1:
+                raise ValueError('missing or duplicate evidence selector')
+            executed = matches[0]
+            for field in ('scenario_id', 'variant', 'profile'):
+                if executed[field] != row[field]:
+                    raise ValueError('executed oracle does not match row')
+            if selection.get('oracle_metadata') != executed.get('oracle_metadata'):
+                raise ValueError('binding changed executed hook/ABI/corpus/seed metadata')
+            if item['coverage_scope']=='complete' and executed.get('coverage_scope')!='complete':
+                raise ValueError('partial or undeclared executed coverage cannot be promoted by a binding')
+            findings.update(executed.get('finding_ids', []))
+        is_finding = bool(findings)
+        if is_finding and item['coverage_scope'] == 'complete':
+            raise ValueError('an open finding cannot close a safety acceptance row')
+        result[key].update(status='finding-open' if is_finding else (
+                               'passed' if item['coverage_scope'] == 'complete' else 'not-verified'),
+                           finding_ids=sorted(findings),
                            implementation_path=item['implementation_path'], evidence=item)
     return result
 

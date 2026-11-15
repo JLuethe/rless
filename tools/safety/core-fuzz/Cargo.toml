@@ -1,0 +1,28 @@
+[package]
+name = "rless-core-preparation-fuzz"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.10"
+rless-safe-core = { path = "../core", features = ["fault-testing"] }
+
+[[bin]]
+name = "core_actions"
+path = "core_actions.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "oracle_fault"
+path = "oracle_fault.rs"
+test = false
+doc = false
+bench = false

@@ -81,6 +81,16 @@ impl<'a> Visit<'a> for Inventory {
         syn::visit::visit_expr_unsafe(self, item);
     }
     fn visit_item_static(&mut self, item: &'a syn::ItemStatic) {
+        // A shared binding may still be mutated through Atomic*, UnsafeCell or a
+        // wrapper/type alias. Inventory every static rather than guessing from
+        // the spelling of its type. Keep the old mutable event for consumers of
+        // historical inventories.
+        self.emit("static_definition", item.span(), item.ident.to_string());
+        self.emit(
+            "static_declared_type",
+            item.span(),
+            item.ty.to_token_stream().to_string(),
+        );
         if matches!(item.mutability, syn::StaticMutability::Mut(_)) {
             self.emit(
                 "mutable_static_definition",

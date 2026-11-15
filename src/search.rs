@@ -2842,8 +2842,25 @@ pub unsafe extern "C" fn set_filter_pattern(
             free(filter as *mut ::core::ffi::c_void);
             return;
         }
+        #[cfg(feature = "safety-injection")]
+        if crate::fault::hit(crate::fault::Site::FilterBefore) {
+            clear_pattern(filter);
+            free(filter.cast());
+            error(
+                b"Injected filter commit failure\0".as_ptr().cast(),
+                ::core::ptr::null_mut(),
+            );
+            return;
+        }
         (*filter).next = filter_infos as *mut pattern_info;
         filter_infos = filter as *mut pattern_info;
+        #[cfg(feature = "safety-injection")]
+        if crate::fault::hit(crate::fault::Site::FilterAfter) {
+            error(
+                b"Injected post-commit failure\0".as_ptr().cast(),
+                ::core::ptr::null_mut(),
+            );
+        }
     }
     screen_trashed();
 }

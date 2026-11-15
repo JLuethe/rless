@@ -1,0 +1,39 @@
+[
+  {
+    "id": "config-inline-over-file",
+    "capability_ids": [
+      "surface:startup-order",
+      "surface:lesskey-language"
+    ],
+    "argv": [
+      "-X",
+      "--no-keypad",
+      "--no-paste",
+      "-Ps@@READY@@",
+      "-Pm@@READY@@",
+      "-PM@@READY@@",
+      "input.txt"
+    ],
+    "mode": "pty",
+    "files": {
+      ".lesskey": {
+        "text": "#env\nLESS = -N\n"
+      }
+    },
+    "env": {
+      "LESSKEY_CONTENT": "#env;LESS=-S"
+    },
+    "events": [
+      {
+        "await": [
+          "@@READY@@"
+        ],
+        "snapshot": true
+      },
+      {
+        "send": "q"
+      }
+    ],
+    "fixture_set": "pager"
+  }
+]

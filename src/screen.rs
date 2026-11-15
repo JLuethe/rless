@@ -332,7 +332,27 @@ pub unsafe extern "C" fn raw_mode(mut on: lbool) {
         s = save_term;
     }
     fsync(tty);
-    tcsetattr(tty, 1 as ::core::ffi::c_int, &raw mut s);
+    loop {
+        // Cleanup owns the saved termios value until restoration succeeds.
+        // An interrupted native call has not committed the requested mode.
+        #[cfg(feature = "safety-injection")]
+        let interrupted = on.0 == 0 && crate::fault::hit(crate::fault::Site::Cleanup);
+        #[cfg(not(feature = "safety-injection"))]
+        let interrupted = false;
+        let result = if interrupted {
+            -1
+        } else {
+            tcsetattr(tty, 1 as ::core::ffi::c_int, &raw mut s)
+        };
+        if result == 0 {
+            break;
+        }
+        if *libc::__errno_location() != libc::EINTR {
+            // Preserve the actual mode state; a failed restore is not a commit.
+            // Reporting permanent terminal errors remains a tracked legacy gap.
+            return;
+        }
+    }
     in_raw_mode = on;
 }
 static mut hardcopy: lbool = lbool::LFALSE;
@@ -952,6 +972,10 @@ unsafe extern "C" fn ltgoto(
 }
 static mut costcount: ::core::ffi::c_int = 0;
 unsafe extern "C" fn inc_costcount(mut c: ::core::ffi::c_int) -> ::core::ffi::c_int {
+    #[cfg(feature = "safety-injection")]
+    if crate::fault::hit(crate::fault::Site::Callback) {
+        return -1;
+    }
     costcount += 1;
     return c;
 }

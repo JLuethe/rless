@@ -1,0 +1,152 @@
+{
+ "P1_read_end_accepted": {
+  "observed": {
+   "returncode": 1,
+   "stdout": "",
+   "stderr": "Cannot allocate memory\n"
+  },
+  "expected": "exit 2 with \"rless safety injection:\" before pager start (writable-end validation)"
+ },
+ "P2_broken_channel": {
+  "observed": {
+   "returncode": -13,
+   "stdout": "",
+   "stderr": ""
+  },
+  "expected": "controlled failed-evidence path (documented: missing marker), not death by SIGPIPE (-13)"
+ },
+ "P2b_control": {
+  "observed": {
+   "returncode": 1,
+   "stdout": "",
+   "stderr": "Cannot allocate memory\n"
+  },
+  "trace_ok": true
+ },
+ "P3a_socket_rejected": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: trace descriptor must be a pipe\n"
+  },
+  "expected": "exit 2"
+ },
+ "P3b_devnull_rejected": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: trace descriptor must be a pipe\n"
+  },
+  "expected": "exit 2"
+ },
+ "P4_fd2": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: trace descriptor must be a dedicated pipe FD greater than 2\n"
+  }
+ },
+ "P4_closed": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: trace pipe must already be nonblocking\n"
+  }
+ },
+ "P4_plus_sign": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  }
+ },
+ "P4_leading_zero": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  }
+ },
+ "P4_space": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: trace descriptor must be a dedicated pipe FD greater than 2\n"
+  }
+ },
+ "P5_fd_without_plan": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: trace descriptor supplied without a fault plan\n"
+  }
+ },
+ "P5_empty_plan": {
+  "observed": {
+   "returncode": 2,
+   "stdout": "",
+   "stderr": "rless safety injection: expected SITE:POSITIVE_ORDINAL\n"
+  }
+ },
+ "P6_child_env": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  },
+  "child_env": "RLESS_FAULT_FD=4\nRLESS_FAULT=close:999999\n",
+  "note": "FD is CLOEXEC (closed in child) but plan variables are inherited"
+ },
+ "P7_read_eio_rless_normal": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "",
+   "stderr": ""
+  }
+ },
+ "P7_read_eio_reference_less": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "",
+   "stderr": ""
+  }
+ },
+ "P7_read_control": {
+  "rless": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  },
+  "reference": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  }
+ },
+ "P8_write_eio_rless_normal": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "",
+   "stderr": ""
+  }
+ },
+ "P8_write_eio_reference_less": {
+  "observed": {
+   "returncode": 0,
+   "stdout": "",
+   "stderr": ""
+  }
+ },
+ "P8_write_control": {
+  "rless": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  },
+  "reference": {
+   "returncode": 0,
+   "stdout": "payload\n",
+   "stderr": ""
+  }
+ }
+}

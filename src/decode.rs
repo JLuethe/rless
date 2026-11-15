@@ -25,6 +25,7 @@ extern "C" {
         -> *mut ::core::ffi::c_char;
     fn strlen(__s: *const ::core::ffi::c_char) -> size_t;
     fn xbuf_init(xbuf: *mut xbuffer);
+    fn xbuf_deinit(xbuf: *mut xbuffer);
     fn save(s: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn ecalloc(count: size_t, size: size_t) -> *mut ::core::ffi::c_void;
     fn secure_allow(features: ::core::ffi::c_uint) -> lbool;
@@ -468,6 +469,9 @@ pub struct tablelist {
     pub t_next: *mut tablelist,
     pub t_start: *mut ::core::ffi::c_uchar,
     pub t_end: *mut ::core::ffi::c_uchar,
+    // Private to this module: static command bytes and temporary environment
+    // buffers are borrowed; parsed/expanded tables transfer their allocation.
+    owns_buffer: bool,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -2025,18 +2029,28 @@ unsafe extern "C" fn add_cmd_table(
     mut tlist: *mut *mut tablelist,
     mut buf: *mut ::core::ffi::c_uchar,
     mut len: size_t,
+    owns_buffer: bool,
 ) -> ::core::ffi::c_int {
+    // An owned buffer is consumed on every return, including empty tables and
+    // allocation failure. Borrowed bytes are never released here or by a node.
     let mut t: *mut tablelist = ::core::ptr::null_mut::<tablelist>();
     if len == 0 as size_t {
+        if owns_buffer {
+            free(buf.cast());
+        }
         return 0 as ::core::ffi::c_int;
     }
     t = calloc(1 as size_t, ::core::mem::size_of::<tablelist>()) as *mut tablelist;
     if t.is_null() {
+        if owns_buffer {
+            free(buf.cast());
+        }
         return -1 as ::core::ffi::c_int;
     }
     (*t).t_start = buf;
     (*t).t_end = buf.offset(len as isize);
     (*t).t_next = ::core::ptr::null_mut::<tablelist>();
+    (*t).owns_buffer = owns_buffer;
     if (*tlist).is_null() {
         *tlist = t;
     } else {
@@ -2049,16 +2063,24 @@ unsafe extern "C" fn add_cmd_table(
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn add_fcmd_table(mut buf: *mut ::core::ffi::c_uchar, mut len: size_t) {
-    if add_cmd_table(&raw mut list_fcmd_tables, buf, len) < 0 as ::core::ffi::c_int {
+unsafe extern "C" fn add_fcmd_table(
+    mut buf: *mut ::core::ffi::c_uchar,
+    mut len: size_t,
+    owns_buffer: bool,
+) {
+    if add_cmd_table(&raw mut list_fcmd_tables, buf, len, owns_buffer) < 0 as ::core::ffi::c_int {
         error(
             lmsg(lessmsg_id::LM_some_commands_disabled),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
         );
     }
 }
-unsafe extern "C" fn add_ecmd_table(mut buf: *mut ::core::ffi::c_uchar, mut len: size_t) {
-    if add_cmd_table(&raw mut list_ecmd_tables, buf, len) < 0 as ::core::ffi::c_int {
+unsafe extern "C" fn add_ecmd_table(
+    mut buf: *mut ::core::ffi::c_uchar,
+    mut len: size_t,
+    owns_buffer: bool,
+) {
+    if add_cmd_table(&raw mut list_ecmd_tables, buf, len, owns_buffer) < 0 as ::core::ffi::c_int {
         error(
             lmsg(lessmsg_id::LM_some_edit_commands_disabled),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
@@ -2078,7 +2100,7 @@ unsafe extern "C" fn add_var_table(
     };
     xbuf_init(&raw mut xbuf);
     expand_evars(buf as *mut ::core::ffi::c_char, len, &raw mut xbuf);
-    if add_cmd_table(tlist, xbuf.data, xbuf.end) < 0 as ::core::ffi::c_int {
+    if add_cmd_table(tlist, xbuf.data, xbuf.end, true) < 0 as ::core::ffi::c_int {
         error(
             lmsg(lessmsg_id::LM_environment_variables_from_lesskey_file_unavailable),
             ::core::ptr::null_mut::<::core::ffi::c_void>() as *mut PARG,
@@ -2098,10 +2120,12 @@ pub unsafe extern "C" fn init_cmds() {
     add_fcmd_table(
         &raw mut cmdtable as *mut ::core::ffi::c_uchar,
         ::core::mem::size_of::<[::core::ffi::c_uchar; 915]>(),
+        false,
     );
     add_ecmd_table(
         &raw mut edittable as *mut ::core::ffi::c_uchar,
         ::core::mem::size_of::<[::core::ffi::c_uchar; 526]>(),
+        false,
     );
     add_sysvar_table(
         udflt_vartable,
@@ -2143,10 +2167,31 @@ pub unsafe extern "C" fn init_cmds() {
     );
     let mut t: *mut tablelist = find_stop_table(list_fcmd_tables);
     if !t.is_null() {
-        (*t).t_next = ::core::ptr::null_mut::<tablelist>();
-        list_fcmd_tables = t;
+        retain_cmd_table(&raw mut list_fcmd_tables, t);
     }
 }
+unsafe fn release_cmd_table(t: *mut tablelist) {
+    if (*t).owns_buffer {
+        free((*t).t_start.cast());
+    }
+    free(t.cast());
+}
+
+unsafe fn retain_cmd_table(tlist: *mut *mut tablelist, keep: *mut tablelist) {
+    // Called during initialization, before command decoding can lend out table
+    // bytes. Save the successor before releasing each discarded owner.
+    let mut current = *tlist;
+    while !current.is_null() {
+        let next = (*current).t_next;
+        if current != keep {
+            release_cmd_table(current);
+        }
+        current = next;
+    }
+    (*keep).t_next = ::core::ptr::null_mut();
+    *tlist = keep;
+}
+
 unsafe extern "C" fn pop_cmd_table(mut tlist: *mut *mut tablelist) {
     let mut t: *mut tablelist = ::core::ptr::null_mut::<tablelist>();
     if (*tlist).is_null() {
@@ -2164,7 +2209,7 @@ unsafe extern "C" fn pop_cmd_table(mut tlist: *mut *mut tablelist) {
         t = (*e).t_next;
         (*e).t_next = ::core::ptr::null_mut::<tablelist>();
     }
-    free(t as *mut ::core::ffi::c_void);
+    release_cmd_table(t);
 }
 unsafe extern "C" fn mouse_wheel_down() -> ::core::ffi::c_int {
     if emouse & (1 as ::core::ffi::c_int) << 1 as ::core::ffi::c_int == 0 {
@@ -2852,7 +2897,11 @@ pub unsafe extern "C" fn lgetenv_ext(
         }
         env_end = e;
     }
-    add_cmd_table(&raw mut list_var_tables, env_buf, env_end);
+    // Empty input and failed node allocation add no temporary node. Popping in
+    // either case would remove a persistent variable table instead.
+    if env_end == 0 || add_cmd_table(&raw mut list_var_tables, env_buf, env_end, false) < 0 {
+        return lgetenv(var);
+    }
     r = lgetenv(var);
     pop_cmd_table(&raw mut list_var_tables);
     return r;
@@ -2870,7 +2919,11 @@ unsafe extern "C" fn lesskey_text(
     mut content: lbool,
 ) -> ::core::ffi::c_int {
     let mut r: ::core::ffi::c_int = 0;
-    static mut tables: lesskey_tables = lesskey_tables {
+    // The parser borrows this staging descriptor only for the current call.
+    // Published tables retain the allocated byte buffers, never this descriptor.
+    // A fresh descriptor also makes pre-initialization parse failures harmless:
+    // they cannot release buffers published by an earlier successful parse.
+    let mut tables: lesskey_tables = lesskey_tables {
         currtable: ::core::ptr::null_mut::<lesskey_table>(),
         cmdtable: lesskey_table {
             names: ::core::ptr::null::<lesskey_cmdname>(),
@@ -2915,15 +2968,26 @@ unsafe extern "C" fn lesskey_text(
         parse_lesskey(filename, &raw mut tables)
     };
     if r != 0 as ::core::ffi::c_int {
+        // Parsing has not published any of these buffers. Release all staged
+        // owners before the next init_tables resets their pointers, including
+        // failure after an earlier line already appended command/variable data.
+        xbuf_deinit(&raw mut tables.cmdtable.buf);
+        xbuf_deinit(&raw mut tables.edittable.buf);
+        xbuf_deinit(&raw mut tables.vartable.buf);
         return r;
     }
-    add_fcmd_table(tables.cmdtable.buf.data, tables.cmdtable.buf.end);
-    add_ecmd_table(tables.edittable.buf.data, tables.edittable.buf.end);
+    add_fcmd_table(tables.cmdtable.buf.data, tables.cmdtable.buf.end, true);
+    add_ecmd_table(tables.edittable.buf.data, tables.edittable.buf.end, true);
     if sysvar.0 != 0 {
         add_sysvar_table(tables.vartable.buf.data, tables.vartable.buf.end);
     } else {
         add_uvar_table(tables.vartable.buf.data, tables.vartable.buf.end);
     }
+    // Variable expansion copies into the published table's own xbuffer. The
+    // parser's input bytes are not retained there; release them before the next
+    // parse reinitializes tables and loses this owner. Command/edit buffers, in
+    // contrast, are retained directly by their published table lists.
+    xbuf_deinit(&raw mut tables.vartable.buf);
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
@@ -3096,4 +3160,85 @@ pub unsafe extern "C" fn editchar(
 #[repr(C)]
 pub struct lesskey_cmdname {
     _private: [u8; 0],
+}
+
+#[cfg(test)]
+mod table_ownership_tests {
+    use super::*;
+
+    // This is the only unit test that owns the environment-table globals.
+    #[test]
+    fn empty_temporary_environment_preserves_persistent_variable_table() {
+        unsafe {
+            assert!(list_var_tables.is_null());
+            let mut bytes = b"RLESS_TABLE_OWNERSHIP_TEST\0\x81retained\0".to_vec();
+            assert_eq!(
+                add_cmd_table(
+                    &raw mut list_var_tables,
+                    bytes.as_mut_ptr(),
+                    bytes.len(),
+                    false
+                ),
+                0
+            );
+            let existing = list_var_tables;
+            for _ in 0..3 {
+                let value = lgetenv_ext(
+                    c"RLESS_TABLE_OWNERSHIP_TEST".as_ptr(),
+                    ::core::ptr::null_mut(),
+                    0,
+                );
+                assert_eq!(std::ffi::CStr::from_ptr(value).to_bytes(), b"retained");
+                assert_eq!(list_var_tables, existing);
+            }
+            pop_cmd_table(&raw mut list_var_tables);
+            assert!(list_var_tables.is_null());
+        }
+    }
+
+    #[test]
+    fn stop_pruning_releases_owned_neighbors_and_keeps_borrowed_bytes_valid() {
+        unsafe {
+            let mut list = ::core::ptr::null_mut();
+            let before = calloc(4, 1).cast::<u8>();
+            let after = calloc(4, 1).cast::<u8>();
+            assert!(!before.is_null() && !after.is_null());
+            let mut retained = [0u8, 103, 0];
+            assert_eq!(add_cmd_table(&raw mut list, before, 4, true), 0);
+            assert_eq!(
+                add_cmd_table(&raw mut list, retained.as_mut_ptr(), retained.len(), false),
+                0
+            );
+            let keep = (*list).t_next;
+            assert_eq!(add_cmd_table(&raw mut list, after, 4, true), 0);
+            retain_cmd_table(&raw mut list, keep);
+            assert_eq!(list, keep);
+            assert!((*keep).t_next.is_null());
+            assert_eq!((*keep).t_start, retained.as_mut_ptr());
+            pop_cmd_table(&raw mut list);
+            assert!(list.is_null());
+            retained[0] = b'q';
+            assert_eq!(retained, [b'q', 103, 0]);
+        }
+    }
+
+    #[test]
+    fn empty_owned_table_does_not_replace_an_existing_node() {
+        unsafe {
+            let mut list = ::core::ptr::null_mut();
+            let mut bytes = [b'q', 0, 1];
+            assert_eq!(
+                add_cmd_table(&raw mut list, bytes.as_mut_ptr(), bytes.len(), false),
+                0
+            );
+            let existing = list;
+            let empty = calloc(8, 1).cast::<u8>();
+            assert!(!empty.is_null());
+            assert_eq!(add_cmd_table(&raw mut list, empty, 0, true), 0);
+            assert_eq!(list, existing);
+            assert!((*existing).t_next.is_null());
+            pop_cmd_table(&raw mut list);
+            assert!(list.is_null());
+        }
+    }
 }

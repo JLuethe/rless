@@ -212,6 +212,7 @@ def run_pty(argv, env, work, case, norm):
     decoder = codecs.getincrementaldecoder('utf8')('replace')
     transcript = bytearray()
     checkpoints = []
+    resource_checkpoints = []
     status = None
     pending_terminal = bytearray()
     def terminal_feed(data):
@@ -340,6 +341,16 @@ def run_pty(argv, env, work, case, norm):
                 wait(event['await'], start)
             if event.get('snapshot'):
                 checkpoints.append(screen.state())
+            if event.get('resources'):
+                # Supplemental safety cases only. Callers must establish the
+                # existing input barrier before inspecting this live process.
+                if 'await' not in event:
+                    raise ValueError('resource observation requires an input checkpoint')
+                proc = Path('/proc') / str(pid)
+                descriptors = sorted(norm(os.readlink(p).encode()).decode('utf8', 'backslashreplace')
+                                     for p in (proc / 'fd').iterdir())
+                children = (proc / 'task' / str(pid) / 'children').read_text().split()
+                resource_checkpoints.append(dict(descriptors=descriptors, children=children))
         deadline = time.monotonic() + case.get('timeout', 5)
         while time.monotonic() < deadline:
             receive(0.01)
@@ -357,12 +368,20 @@ def run_pty(argv, env, work, case, norm):
             checkpoint['rows'] = [line.replace(str(work), '{ROOT}') for line in checkpoint['rows']]
         final = screen.state()
         final['rows'] = [line.replace(str(work), '{ROOT}') for line in final['rows']]
-        return dict(status=status, checkpoints=checkpoints, final_terminal=final,
-                    termios_restored=before == after)
+        observed = dict(status=status, checkpoints=checkpoints, final_terminal=final,
+                        termios_restored=before == after)
+        if resource_checkpoints:
+            observed['resource_checkpoints'] = resource_checkpoints
+        return observed
     finally:
         if status is None:
             try:
-                os.kill(pid, signal.SIGKILL)
+                # Reap the test session's helpers too when an oracle fails.
+                # The child may not have reached setsid yet on an early error.
+                try:
+                    os.killpg(pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    os.kill(pid, signal.SIGKILL)
                 os.waitpid(pid, 0)
             except (ProcessLookupError, ChildProcessError):
                 pass

@@ -1,0 +1,35 @@
+
+=================================================================
+==1074405==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 6 byte(s) in 1 object(s) allocated from:
+    #0 0x557803c63519 in calloc /rustc/llvm/src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:74:3
+    #1 0x557803cccb6d in ecalloc /home/john/Code/rless/src/pager.rs:866:13
+    #2 0x557803cccedc in saven /home/john/Code/rless/src/pager.rs:833:43
+    #3 0x557803cff8bc in rless::lmsg::lmsg_line::h2e8b92dc39e5aaf7 /home/john/Code/rless/src/lmsg.rs:2547:11
+    #4 0x557803d00216 in lmsg_init /home/john/Code/rless/src/lmsg.rs:2594:9
+    #5 0x557803ccb028 in rless::pager::main_0::h0c46dceca492cd2c /home/john/Code/rless/src/pager.rs:642:5
+    #6 0x557803ccad4c in rless::pager::main::heb1234156ca0a4ae /home/john/Code/rless/src/pager.rs:984:30
+    #7 0x557803c917df in rless::main::h3ab3693e74ba837b /home/john/Code/rless/src/bin/rless.rs:3:5
+    #8 0x557803c9178d in core::ops::function::FnOnce::call_once::h6804f4100f508038 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+    #9 0x557803c91a00 in std::sys::backtrace::__rust_begin_short_backtrace::h7f003a2bf273fab3 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/backtrace.rs:158:18
+    #10 0x557803c919b3 in std::rt::lang_start::_$u7b$$u7b$closure$u7d$$u7d$::h292d76cb418b3a77 /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/rt.rs:206:18
+    #11 0x557803d75f5f in core::ops::function::impls::_$LT$impl$u20$core..ops..function..FnOnce$LT$A$GT$$u20$for$u20$$RF$F$GT$::call_once::h1c9bfa347d1c1bf9 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/core/src/ops/function.rs:287:21
+    #12 0x557803d75f5f in std::panicking::catch_unwind::do_call::h8fefcbc8f68af590 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:590:40
+    #13 0x557803d75f5f in std::panicking::catch_unwind::h1d277c413bad30fb /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19
+    #14 0x557803d75f5f in std::panic::catch_unwind::h3f13904d15858cb8 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14
+    #15 0x557803d75f5f in std::rt::lang_start_internal::_$u7b$$u7b$closure$u7d$$u7d$::h8d30a79a701f3658 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:175:24
+    #16 0x557803d75f5f in std::panicking::catch_unwind::do_call::h20e3ee8c528e7474 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:590:40
+    #17 0x557803d75f5f in std::panicking::catch_unwind::hc0ebd6ee5d722ceb /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panicking.rs:553:19
+    #18 0x557803d75f5f in std::panic::catch_unwind::hc8f7f3a47dd60ea5 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/panic.rs:359:14
+    #19 0x557803d75f5f in std::rt::lang_start_internal::hb277082aa14cdf53 /rustc/4645a7988177c286f61609cc667ecae4c571a2e8/library/std/src/rt.rs:171:5
+    #20 0x557803c9191f in std::rt::lang_start::hd307e6cdf062929a /home/john/Code/rless-env/safety/rustup/toolchains/nightly-2025-09-18-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/rt.rs:205:5
+    #21 0x557803c91810 in main (/home/john/Code/rless/compat/.runs/luna56-stop-asan-build/x86_64-unknown-linux-gnu/debug/rless+0x227810) (BuildId: 67ab207f484cc650ecd5d1a7f4d48392a58db86e)
+    #22 0x7f1a5e427780 in __libc_start_call_main /usr/src/debug/glibc/glibc/csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #23 0x7f1a5e4278b8 in __libc_start_main /usr/src/debug/glibc/glibc/csu/../csu/libc-start.c:372:3
+    #24 0x557803bd60f4 in _start (/home/john/Code/rless/compat/.runs/luna56-stop-asan-build/x86_64-unknown-linux-gnu/debug/rless+0x16c0f4) (BuildId: 67ab207f484cc650ecd5d1a7f4d48392a58db86e)
+
+Objects leaked above:
+0x7b3a5d5e0090 (6 bytes)
+
+SUMMARY: AddressSanitizer: 6 byte(s) leaked in 1 allocation(s).

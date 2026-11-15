@@ -1,0 +1,133 @@
+{
+  "record_type": "WIP checkpoint test summary; not a safety acceptance report",
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-24T19:58:27.724691+00:00",
+  "branch": "implement/m0-review-faults-verification",
+  "base_commit": "3f0e96e54abebabc08f8e22d3f186e6b6f7c486f",
+  "tested_working_tree": true,
+  "checkpoint_commit": "The commit containing this record; source input digest excludes documentation.",
+  "source_input_sha256": "4f35e57fafb65fd03e723dcbaa84bbc9c951060173f8830fdc503f3a250ced78",
+  "source_input_file_count": 191,
+  "changed_input_sha256": {
+    "src/ch.rs": "eb1eef41e7c1c57d481b0000bbcf64c6d53dd8b4a9f790d45c77a0589ac1c696",
+    "src/command.rs": "4e366f4983f35c2f832646bfe3eca63203ba6d8a55a92dd07c7a9512752b753b",
+    "src/fault.rs": "77b7485f504d257f0aa4a0e94d943cf77bc8aea06c190dfce374c7e7ac270654",
+    "src/lesskey_parse.rs": "0a41416d6b8590bbe5ef568f26281b473894e555babf1c61a60cb5ffa3de4b42",
+    "src/lsystem.rs": "0b3560e07f741d55c673fd463ac2b18769d9b1f16ffb6e00e9df694ab9a3e8be",
+    "src/optfunc.rs": "a54b7ab962dcf9e72947d7d3b90e367d29db38217cee545d2b57ab3df84727af",
+    "src/os.rs": "e370a2a3dcb5f19175aa559568f647931492166c2f97cd9bea26c53b0d601d7a",
+    "src/output.rs": "95d17993bfca389cda5f311c8c6cea8a45dff7fbfcbbb92f67458e38f907b01d",
+    "src/pattern.rs": "8a78d45e9a6335b5c31b5673d7155c471ebb7e9fbf4849d9b502ab02ba4cd62b",
+    "src/runtime.rs": "c644576e53f7eade71e4b567f42f1759711cb66bf59a44f4611feea0d51397e9",
+    "src/screen.rs": "29cb245fe715b8f0f57135aee7931adcb0ecf342a747eca55f078c430173f136",
+    "src/search.rs": "2a2359d53017843a10fc59b45be3a0d0b19ac9c532dd1655fab84413698ad5bf",
+    "src/xbuf.rs": "f1d7019bbe688c82b876c5411ff756ef46b5ccee5aac9e2678d2712ca2a519f6",
+    "tools/safety/test_hooks.py": "d16ecfe859a537416142a8457da53714364ec3c977abcfe2135112ccfedff7c8"
+  },
+  "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": "cargo fmt --all -- --check",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": null,
+      "local_log": "compat/.runs/wip-checkpoint/fmt.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-tests",
+      "command": "cargo test --locked --offline",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": 7,
+      "local_log": "compat/.runs/wip-checkpoint/native-test.log",
+      "log_sha256": "a1f17095ab1395e73ce69e948334b320e5018fa27bc0bfafafbfffa94a32bc40"
+    },
+    {
+      "name": "native-build",
+      "command": "cargo build --locked --offline --bins",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": null,
+      "local_log": "compat/.runs/wip-checkpoint/native-build.log",
+      "log_sha256": "6d77f64dfc8c5325b90fdbe05d8be367bdd578bcccec24f275c5ffee7d03dd6e"
+    },
+    {
+      "name": "feature-tests",
+      "command": "cargo test --locked --offline --features safety-injection --target-dir compat/.runs/m0-wip-feature",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": 9,
+      "local_log": "compat/.runs/wip-checkpoint/feature-test.log",
+      "log_sha256": "913c54fa29f1653d83c50b65beaa4ebb4d6e14058b8d7e2b9b948e91801d19bc"
+    },
+    {
+      "name": "feature-build",
+      "command": "cargo build --locked --offline --bins --features safety-injection --target-dir compat/.runs/m0-wip-feature",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": null,
+      "local_log": "compat/.runs/wip-checkpoint/feature-build.log",
+      "log_sha256": "6d77f64dfc8c5325b90fdbe05d8be367bdd578bcccec24f275c5ffee7d03dd6e"
+    },
+    {
+      "name": "allocation-controls",
+      "command": "python tools/safety/test_hooks.py --normal target/debug/rless --injected compat/.runs/m0-wip-feature/debug/rless",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": 7,
+      "local_log": "compat/.runs/wip-checkpoint/hook-tests.log",
+      "log_sha256": "7921604a18f55f196d455df5ed043d135a8211f8fbecdef5caf572881e0944c3"
+    },
+    {
+      "name": "safety-infrastructure",
+      "command": "python tools/safety/test_safety.py",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": 18,
+      "local_log": "compat/.runs/wip-checkpoint/safety-tests.log",
+      "log_sha256": "941a48d6f5daa67df4980a6fd504dd3b64121860fface73489f2b74569f8480e"
+    },
+    {
+      "name": "closure-controls",
+      "command": "python tools/safety/test_closure.py",
+      "exit_status": 0,
+      "status": "passed",
+      "tests_passed": 13,
+      "local_log": "compat/.runs/wip-checkpoint/closure-tests.log",
+      "log_sha256": "add09fa83d328379cefc08af2e723f08c6564f3ff69d7e65aae17cea7fbfcc6d"
+    }
+  ],
+  "status": "WIP / M0 not verified",
+  "not_run_on_complete_wip": [
+    "release tests",
+    "full compatibility corpus and stress/install",
+    "ASan/LSan",
+    "Miri",
+    "production coverage-guided fuzz",
+    "glibc 2.41 replay and safety profiles",
+    "independent review"
+  ],
+  "earlier_snapshot": {
+    "scope": "leak fixes before expanded hooks; complete input fingerprint not captured",
+    "debug_rust_tests": 7,
+    "release_rust_tests": 7,
+    "debug_compatibility_cases": "809/809",
+    "local_log": "compat/.runs/m0-review-leak-debug.log",
+    "transfers_to_current_source": false
+  },
+  "outstanding": {
+    "ownership_reviews_pending_at_published_baseline": 688,
+    "new_completed_reviews": 0,
+    "new_complete_acceptance_rows": 0,
+    "affected_historical_source_bindings": "stale",
+    "cleanup_hook": "parsed but unwired",
+    "new_site_oracles": "not implemented beyond prior allocation controls"
+  },
+  "review": {
+    "secrets": "No candidates from bounded manual diff review and common-pattern scan; no dedicated scanner installed; not a guarantee.",
+    "generated_outputs": "Excluded; ignored logs and build products remain local.",
+    "frozen_compatibility_inputs": "Unchanged"
+  }
+}

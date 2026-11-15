@@ -1,5 +1,42 @@
 # M0 safety infrastructure
 
+## Resumed leak and fault regressions
+
+`leaks.py` builds isolated normal or pinned ASan/LSan binaries, runs the real
+ownership unit regressions, and compares eight new PTY cases with the explicitly
+hashed rebuilt reference recorded in `docs/verification/glibc241-baseline.json`.
+That reference differs from the original frozen capture binary. The runner does
+not change the frozen observer, corpus, expectations or capture guard. An early
+attempt to use that guard with the rebuilt reference is retained as a failed run.
+
+```sh
+source ../rless-env/activate.sh
+python tools/safety/leaks.py --profile asan --reference "$RLESS_REFERENCE" \
+  --tool-home ../rless-env/safety --output compat/.runs/leaks-new
+python tools/safety/fault_paths.py --profile native --repetitions 100 \
+  --output compat/.runs/fault-paths-new
+python tools/safety/fault_paths.py --profile asan --repetitions 100 \
+  --tool-home ../rless-env/safety --output compat/.runs/fault-paths-asan-new
+```
+
+`fault_paths.py` builds ordinary and feature binaries separately and compiles
+test-only native interposers. It exercises all 16 hook IDs through actual pager
+paths, including cleanup EINTR before terminal restoration and real short-write
+recovery. The native counterparts interrupt `tcsetattr` or perform a real partial
+`write`; neither helper is linked into a pager. Cleanup repeats inspect exact
+screen/terminal state; SIGTERM preserves status 15. A shell recovery test checks
+file effects and that the trace FD is closed across exec. Mutation controls reject
+wrong hit/status/screen/mode/bell/file observations. Missing markers do not pass.
+
+The aggregate deliberately remains **not-verified / nonzero** while permanent
+read/write EIO silently return success (M0-IO-001/002) and required acceptance work
+is incomplete. Tests named `diagnostic_*` reproduce findings; they are not passing
+safety oracles. Callback reachability does not establish error propagation. Parser
+partial commits, all native counterparts, every ordinal and repeated in-process
+FD/child/live-byte conservation are still incomplete. These regressions do not
+close any whole variant/profile row, pay production fuzz budgets, provide
+independent review, or instrument system GNU regex/terminfo internals.
+
 These tools implement the first infrastructure slices of M0. They do not make the
 translated pager safe or implement every final acceptance variant. Generated logs,
 corpora, binaries and full syntax inventories stay under ignored `compat/.runs/`.

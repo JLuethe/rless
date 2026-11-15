@@ -1174,6 +1174,10 @@ pub unsafe extern "C" fn ch_close() {
             && (*thisfile).flags & (0o4 as ::core::ffi::c_int | 0o10 as ::core::ffi::c_int) == 0
         {
             close((*thisfile).file);
+            // Linux may report a close failure after releasing the descriptor.
+            // Never skip the actual close or retry a potentially reused FD.
+            #[cfg(feature = "safety-injection")]
+            let _ = crate::fault::hit(crate::fault::Site::Close);
         }
         (*thisfile).file = -1 as ::core::ffi::c_int;
     } else {

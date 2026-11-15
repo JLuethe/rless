@@ -6,6 +6,48 @@ from run_v2 import ROOT, load, replay_expectations, run_case
 
 
 class Checkpoints(unittest.TestCase):
+    def test_live_resources_observe_open_close_and_child_reaping(self):
+        helper = '''import os, termios, tty
+saved = termios.tcgetattr(0)
+tty.setraw(0)
+try:
+    os.write(1, b"READY")
+    assert os.read(0, 1) == b"a"
+    fd = os.open("held", os.O_CREAT | os.O_RDWR, 0o600)
+    child = os.fork()
+    if child == 0:
+        os._exit(0)
+    os.write(1, b"HELD")
+    assert os.read(0, 1) == b"b"
+    os.close(fd)
+    os.waitpid(child, 0)
+    os.write(1, b"CLEAN")
+    assert os.read(0, 1) == b"q"
+finally:
+    termios.tcsetattr(0, termios.TCSANOW, saved)
+'''
+        actual = run_case(Path('/usr/bin/python3'), dict(
+            id='observer-live-resources', mode='pty', argv=['helper.py'],
+            files={'helper.py': {'text': helper}}, events=[
+                {'await': ['READY'], 'resources': True},
+                {'send': 'a', 'await': ['HELD'], 'resources': True},
+                {'send': 'b', 'await': ['CLEAN'], 'resources': True}, {'send': 'q'}]))
+        baseline, held, clean = actual['resource_checkpoints']
+        self.assertEqual(actual['status'], 0)
+        self.assertTrue(actual['termios_restored'])
+        self.assertEqual(baseline['children'], [])
+        self.assertEqual(len(held['children']), 1)
+        self.assertEqual(len(held['descriptors']), len(baseline['descriptors']) + 1)
+        self.assertIn('{ROOT}/held', held['descriptors'])
+        self.assertEqual(clean, baseline)
+
+    def test_live_resources_require_an_input_barrier(self):
+        with self.assertRaisesRegex(ValueError, 'requires an input checkpoint'):
+            run_case(Path('/usr/bin/python3'), dict(
+                id='observer-resource-barrier', mode='pty', argv=['helper.py'],
+                files={'helper.py': {'text': 'import os\nos.read(0, 1)\n'}},
+                events=[{'resources': True}]))
+
     def test_one_resize_event_delivers_one_signal(self):
         import hashlib
         helper = '''import os, signal, termios, tty

@@ -21,7 +21,7 @@
     712,
     20261023
   ],
-  "instrumentation_scope": "Rust application and Rust dependencies instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. No native shims exist yet. Record this gap; no native-internals audit is claimed.",
+  "instrumentation_scope": "Rust application and Rust dependencies are instrumented; prebuilt Rust standard library and system GNU regex/terminfo/libc internals are not instrumented. Test-only C failure counterparts exercise selected native boundaries; they are not production boundary replacements and are not themselves compiled with memory sanitizers. The scoped calloc wrapper forwards unselected calls to the active allocator/interceptor. No native-internals safety audit is claimed.",
   "abi_profiles": [
     {
       "id": "REFERENCE-GLIBC-2.41",
@@ -40,5 +40,18 @@
     "sha256": "2280b50b059bb0337d5d80ff5888e843267a7d6fa45fb3745a9dede7f25a4ee8"
   },
   "cargo_fuzz_version": "0.13.1",
-  "libfuzzer_sys_version": "0.4.10"
+  "libfuzzer_sys_version": "0.4.10",
+  "reference_bundle": {
+    "upstream": {
+      "repository": "https://github.com/gwsw/less.git",
+      "version": "712",
+      "commit": "7f46e9ff46216f3e560cd1f41ddf3b36b11eec0e"
+    },
+    "regex": "gnu",
+    "files_sha256": {
+      "less": "1dd4f58aa0255d82943b8cf2763d4d471050fb3521a459de0329350f63f9c771",
+      "lessecho": "6aa653970a3a0f490a0def514ef8f4e17c21ac438f75145f0430f527bc24d1d6",
+      "less-osc8-open.sh": "67597ae3d23d064662c8ea5c8df469cc21f65dabe4832daf2e7fa92c05e6d062"
+    }
+  }
 }

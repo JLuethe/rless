@@ -48,6 +48,19 @@ pub(crate) fn take_interrupt() -> bool {
 /// flag check followed by read has a lost-wakeup race if SIGWINCH arrives in
 /// between them; the descriptor could then block with an unprocessed resize.
 pub(crate) unsafe fn read_interruptible(fd: i32, buffer: *mut u8, len: usize) -> isize {
+    #[cfg(feature = "safety-injection")]
+    {
+        use crate::fault::{hit, Site};
+        if hit(Site::Read) || hit(Site::ReadEintr) {
+            return -1;
+        }
+    }
+    #[cfg(feature = "safety-injection")]
+    let len = if crate::fault::hit(crate::fault::Site::ReadShort) {
+        len.min(1)
+    } else {
+        len
+    };
     if fd < 0 || len == 0 {
         return libc::read(fd, buffer.cast(), len);
     }

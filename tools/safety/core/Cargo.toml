@@ -1,0 +1,16 @@
+[package]
+name = "rless-safe-core"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+
+[workspace]
+
+[features]
+default = []
+# Component-only deterministic pre-reserve failures; never a production hook.
+fault-testing = []
+
+[lib]
+path = "../../../src/safe_core/mod.rs"

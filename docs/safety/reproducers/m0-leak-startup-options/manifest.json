@@ -1,0 +1,193 @@
+{
+  "binary": "/home/john/Code/rless/compat/.runs/ownership-audit-20261030/lmsg-postfix/target/x86_64-unknown-linux-gnu/debug/rless",
+  "binary_sha256": "ee832d98ef7bd9cc1361f4f13f15773d2744206ffc8d12d3f943cbe12d72419d",
+  "optfunc_sha256": "4c2fa37a21f8b5cb5c384fd58fcef8e28cb4f24d2f058bb180a55c2f92959d8b",
+  "option_sha256": "0f7c72fc3a85a02af62064ea13c5bb9c981cbde0c035f797c23f08108b41e327",
+  "cases": {
+    "header-one": {
+      "argv": [
+        "--header=one",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "header-one.stderr"
+    },
+    "header-two": {
+      "argv": [
+        "--header=one",
+        "--header=two",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "480efc4b17c3be404980767f62de5708560cc9e89c2b015703bf9a50d6de46b5",
+      "leak": true,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 1 byte(s) leaked in 1 allocation(s)."
+      ],
+      "stderr_file": "header-two.stderr"
+    },
+    "log-one": {
+      "argv": [
+        "-oone",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "log-one.stderr"
+    },
+    "log-two": {
+      "argv": [
+        "-oone",
+        "-otwo",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "996d5d1f7fb7df1f7cc60840295498307963164fb9e50e3af7c26df1310cf42b",
+      "leak": true,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s)."
+      ],
+      "stderr_file": "log-two.stderr"
+    },
+    "tag-one": {
+      "argv": [
+        "-tone",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "tag-one.stderr"
+    },
+    "tag-two": {
+      "argv": [
+        "-tone",
+        "-ttwo",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "3d5e9057c3c9c173d7a7491351332751e0b1cc5aa0b6500f3e972daec59578a7",
+      "leak": true,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s)."
+      ],
+      "stderr_file": "tag-two.stderr"
+    },
+    "tags-one": {
+      "argv": [
+        "-Tone",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "tags-one.stderr"
+    },
+    "tags-two": {
+      "argv": [
+        "-Tone",
+        "-Ttwo",
+        "-V"
+      ],
+      "exit": 0,
+      "stderr_sha256": "0f83dc5f16f5121ec85ffc66b7ad90dfc2aad4731ef205141340995ec72e2604",
+      "leak": true,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s)."
+      ],
+      "stderr_file": "tags-two.stderr"
+    },
+    "more-p-one": {
+      "argv": [
+        "-pone",
+        "-V"
+      ],
+      "env": {
+        "LESS_IS_MORE": "1"
+      },
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "more-p-one.stderr"
+    },
+    "more-p-two": {
+      "argv": [
+        "-pone",
+        "-ptwo",
+        "-V"
+      ],
+      "env": {
+        "LESS_IS_MORE": "1"
+      },
+      "exit": 0,
+      "stderr_sha256": "1444915a43ae84d5db13e9b00ce9babd146271be21ccfa40f89820411d18f36b",
+      "leak": true,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s)."
+      ],
+      "stderr_file": "more-p-two.stderr"
+    },
+    "more-plus-one": {
+      "argv": [
+        "++one",
+        "-V"
+      ],
+      "env": {
+        "LESS_IS_MORE": "1"
+      },
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "more-plus-one.stderr"
+    },
+    "more-plus-two": {
+      "argv": [
+        "++one",
+        "++two",
+        "-V"
+      ],
+      "env": {
+        "LESS_IS_MORE": "1"
+      },
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "more-plus-two.stderr"
+    },
+    "less-plus-one": {
+      "argv": [
+        "++one",
+        "-V"
+      ],
+      "env": {},
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "less-plus-one.stderr"
+    },
+    "less-plus-two": {
+      "argv": [
+        "++one",
+        "++two",
+        "-V"
+      ],
+      "env": {},
+      "exit": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "leak": false,
+      "summary": [],
+      "stderr_file": "less-plus-two.stderr"
+    }
+  }
+}

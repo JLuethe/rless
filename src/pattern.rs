@@ -549,7 +549,11 @@ unsafe extern "C" fn compile_pattern2(
                 << 1 as ::core::ffi::c_int)
                 << 1 as ::core::ffi::c_int,
     );
-    if !re_compile_pattern(pattern, strlen(pattern), comp).is_null() {
+    #[cfg(feature = "safety-injection")]
+    let injected_failure = crate::fault::hit(crate::fault::Site::Regex);
+    #[cfg(not(feature = "safety-injection"))]
+    let injected_failure = false;
+    if injected_failure || !re_compile_pattern(pattern, strlen(pattern), comp).is_null() {
         free(comp as *mut ::core::ffi::c_void);
         if show_error != 0 {
             error(
@@ -680,13 +684,21 @@ unsafe extern "C" fn match_pattern1(
             nsp,
         );
     } else {
+        // Only the complete match is consumed below. Keep its registers in
+        // caller-owned storage (GNU REGS_FIXED), rather than requesting native
+        // arrays on every search. GNU may free a half-allocated register pair on
+        // failure without clearing its pointer, so blindly freeing returned raw
+        // arrays is not a sound cleanup strategy. re_search does not retain this
+        // storage; offsets are copied into line-relative results before return.
+        let mut starts = [0 as regoff_t; 1];
+        let mut ends = [0 as regoff_t; 1];
         let mut search_regs: re_registers = re_registers {
-            num_regs: 0,
-            start: ::core::ptr::null_mut::<regoff_t>(),
-            end: ::core::ptr::null_mut::<regoff_t>(),
+            num_regs: 1,
+            start: starts.as_mut_ptr(),
+            end: ends.as_mut_ptr(),
         };
         (*pattern).set_not_bol(notbol as ::core::ffi::c_uint as ::core::ffi::c_uint);
-        (*pattern).set_regs_allocated(0 as ::core::ffi::c_uint as ::core::ffi::c_uint);
+        (*pattern).set_regs_allocated(2 as ::core::ffi::c_uint);
         matched = (re_search(
             pattern,
             line,
@@ -783,6 +795,72 @@ pub unsafe extern "C" fn match_pattern(
 #[no_mangle]
 pub unsafe extern "C" fn pattern_lib_name() -> *const ::core::ffi::c_char {
     return b"GNU\0".as_ptr() as *const ::core::ffi::c_char;
+}
+
+#[cfg(test)]
+mod ownership_tests {
+    use super::*;
+    use std::ffi::CString;
+
+    // One test owns all GNU syntax mutations; no other test compiles patterns.
+    #[test]
+    fn fixed_registers_preserve_gnu_ranges_and_repeated_lifetimes() {
+        unsafe {
+            for (expression, input, offset, notbol, expected) in [
+                ("(a|aa)", "xaa", 0, 0, Some((1, 3))),
+                ("((a)(b))\\1", "zabab", 0, 0, Some((1, 5))),
+                ("(a*)b\\1", "zaabaa", 0, 0, Some((1, 6))),
+                ("()", "abc", 0, 0, Some((0, 0))),
+                ("a*", "bbb", 1, 0, Some((1, 1))),
+                ("$", "abc", 3, 0, Some((3, 3))),
+                ("^a", "abc", 0, 1, None),
+                ("(a)\\1", "abab", 0, 0, None),
+            ] {
+                let expression = CString::new(expression).unwrap();
+                let input = CString::new(input).unwrap();
+                let line = input.as_ptr();
+                let mut compiled = std::ptr::null_mut();
+                assert_eq!(
+                    compile_pattern2(expression.as_ptr(), 0, &raw mut compiled, 0),
+                    0
+                );
+                // Reuse a compiled pattern after the previous stack registers
+                // have gone out of scope; LSan must also see no per-match growth.
+                for _ in 0..256 {
+                    let mut starts = [std::ptr::null(); 2];
+                    let mut ends = [std::ptr::null(); 2];
+                    let found = match_pattern1(
+                        compiled,
+                        expression.as_ptr(),
+                        line,
+                        input.as_bytes().len(),
+                        offset,
+                        starts.as_mut_ptr(),
+                        ends.as_mut_ptr(),
+                        2,
+                        notbol,
+                        0,
+                    );
+                    assert_eq!(found.0 != 0, expected.is_some());
+                    if let Some((start, end)) = expected {
+                        assert_eq!(starts[0].offset_from(line), start);
+                        assert_eq!(ends[0].offset_from(line), end);
+                        assert!(starts[1].is_null() && ends[1].is_null());
+                    }
+                }
+                uncompile_pattern(&raw mut compiled);
+                assert!(compiled.is_null());
+                uncompile_pattern(&raw mut compiled);
+            }
+            // A rejected replacement must retain the old compiled owner.
+            let mut compiled = std::ptr::null_mut();
+            assert_eq!(compile_pattern2(c"a".as_ptr(), 0, &raw mut compiled, 0), 0);
+            let previous = compiled;
+            assert_eq!(compile_pattern2(c"[".as_ptr(), 0, &raw mut compiled, 0), -1);
+            assert_eq!(compiled, previous);
+            uncompile_pattern(&raw mut compiled);
+        }
+    }
 }
 
 #[repr(C)]

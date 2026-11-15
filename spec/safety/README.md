@@ -1,5 +1,10 @@
 # rless safety migration specification
 
+The [M2–M5 implementation refinement](m2-m5-implementation.md) and its
+[packet manifest](m2-m5-plan.json) specify concrete remaining interfaces, ownership
+transfers, tests and integration gates. Isolated pure Rust preparation does not
+authorize production migration before M0/M1 prerequisites pass.
+
 Version: **0.2.0**. Status: **specified; M0 infrastructure in progress; application migration and full safety verification pending**.
 Target: the existing `linux-gnu-712` compatibility profile, Linux x86_64/glibc.
 

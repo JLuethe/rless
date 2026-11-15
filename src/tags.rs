@@ -921,6 +921,11 @@ unsafe extern "C" fn findgtag(
     total = 0 as ::core::ffi::c_int;
     if r#type == C2Rust_Unnamed_0::T_CTAGS_X.0 as ::core::ffi::c_int {
         fp = stdin;
+        // The selected "-" tags filename is owned. Resetting to the borrowed
+        // default must release it; the tag search argument has a separate owner.
+        if tags != &raw const ztags as *const ::core::ffi::c_char {
+            free(tags as *mut ::core::ffi::c_void);
+        }
         tags = &raw const ztags as *const ::core::ffi::c_char;
     } else {
         let mut command: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();

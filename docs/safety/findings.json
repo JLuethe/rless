@@ -161,7 +161,9 @@
       "blocks_final_safety_gate": true,
       "fix_commit": null,
       "regression": null,
-      "rerun_evidence": null
+      "rerun_evidence": null,
+      "candidate_validation": "docs/verification/resume-m0-checkpoint.json",
+      "candidate_status": "Focused/full host ASan and matching glibc 2.41 native regressions pass; glibc 2.41 ASan and independent approval remain pending. Finding remains open."
     },
     {
       "id": "M0-LEAK-002",
@@ -183,6 +185,180 @@
       "blocks_final_safety_gate": true,
       "fix_commit": null,
       "regression": null,
+      "rerun_evidence": null,
+      "candidate_validation": "docs/verification/resume-m0-checkpoint.json",
+      "candidate_status": "Focused/full host ASan and matching glibc 2.41 native regressions pass; glibc 2.41 ASan and independent approval remain pending. Finding remains open."
+    },
+    {
+      "id": "M0-IO-001",
+      "title": "A read EIO can discard unread input and exit success without a diagnostic",
+      "status": "open",
+      "classification": "reproduced production-path fault and native EIO behavior; first-error behavior matches pinned C reference at 4862cf9",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.2",
+      "requirement_ids": [
+        "SAFE-STATE-004"
+      ],
+      "evidence_refs": [
+        "tools/safety/test_fault_paths.py:test_diagnostic_read_error_reproduces_unreported_legacy_failure",
+        "compat/.runs/resume-fault-paths-native-4/summary.json",
+        "compat/.runs/resume-fault-paths-asan-2/summary.json",
+        "docs/verification/claude-m0-probes-2026-10-30.json",
+        "docs/safety/claude-m0-review-2026-10-30.md"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "test_diagnostic_read_error_reproduces_unreported_legacy_failure",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-IO-002",
+      "title": "A write EIO can discard pending output and exit success without a diagnostic",
+      "status": "open",
+      "classification": "reproduced production-path fault and native EIO behavior; first-error behavior matches pinned C reference at 4862cf9",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M4.3",
+      "requirement_ids": [
+        "SAFE-FFI-004"
+      ],
+      "evidence_refs": [
+        "tools/safety/test_fault_paths.py:test_diagnostic_write_error_reproduces_unreported_legacy_failure",
+        "compat/.runs/resume-fault-paths-native-4/summary.json",
+        "compat/.runs/resume-fault-paths-asan-2/summary.json",
+        "docs/verification/claude-m0-probes-2026-10-30.json",
+        "docs/safety/claude-m0-review-2026-10-30.md"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "test_diagnostic_write_error_reproduces_unreported_legacy_failure",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-003",
+      "title": "Parsed lesskey variable bytes lose their owner when a later parse initializes tables",
+      "status": "open",
+      "classification": "reproduced 16-byte LeakSanitizer finding; candidate parser-buffer release under validation",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "reproducer": "docs/safety/reproducers/m0-leak-lesskey.json",
+      "diagnostic": "docs/safety/reproducers/m0-leak-lesskey.log",
+      "diagnostic_sha256": "9f64bd213d6310b9dcf27ce009b8a14f7e841a08e3af36854e93e4b9ed28d29e",
+      "source_commit": "d513f97a1a45557091bdb173eacf8d8cc8f01b33",
+      "tested_working_tree": true,
+      "source_input_sha256": "86a0ef8a56667941a3d5696de2d64a454fea9bf721b402dde3930bd788d8ddcf",
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "tools/safety/leaks.py:LEAK-lesskey-file-then-inline and LEAK-lesskey-repeated-variables",
+      "rerun_evidence": null,
+      "candidate_validation": "docs/verification/resume-m0-checkpoint.json",
+      "candidate_status": "Focused/full host ASan and matching glibc 2.41 native regressions pass; glibc 2.41 ASan and independent approval remain pending. Finding remains open."
+    },
+    {
+      "id": "M0-LEAK-004",
+      "title": "Lesskey #stop discards command-table nodes and owned buffers without releasing them",
+      "status": "open",
+      "classification": "Independent LSAN reproduction: default tablelist allocation leaks 24 bytes; Codex ownership fix awaiting independent validation",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "evidence_refs": [
+        "src/decode.rs:init_cmds",
+        "docs/safety/reproducers/m0-leak-stop-table.log",
+        "compat/.runs/luna56-stop-lsan-20261030T063"
+      ],
+      "diagnostic": "docs/safety/reproducers/m0-leak-stop-table.log",
+      "diagnostic_sha256": "7fb4b4bf842d9529d62bcb36cb9f0ad1f9ec47ac55b15ee8133c3accc77e7d1d",
+      "source_commit": "4862cf9dcc09565a1fe419e66cce97cdfbefbe24",
+      "tested_working_tree": true,
+      "source_files_sha256": {
+        "src/decode.rs": "d64a0bee4f6d14ab39421d199d2c7e1ef0b5737ad9a6b35e67df2f43050df951"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_stop_directive_releases_discarded_command_table_owners",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-MEM-002",
+      "title": "Temporary environment lookup pops a persistent table when no temporary node was inserted",
+      "status": "open",
+      "classification": "Independent source-inspection finding: empty input or calloc failure; candidate fix under validation",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "evidence_refs": [
+        "src/decode.rs:lgetenv_ext",
+        "src/decode.rs:add_cmd_table",
+        "compat/.runs/ownership-audit-20261030/source-review.md"
+      ],
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "decode::table_ownership_tests::empty_temporary_environment_preserves_persistent_variable_table",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-005",
+      "title": "Repeated LESSMSG definitions orphan previous allocated message or help text",
+      "status": "open",
+      "classification": "Independent LSAN reproduction: duplicate No_such_file definition leaks 6 bytes; candidate owner tracking under validation",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "evidence_refs": [
+        "src/lmsg.rs:lmsg_line",
+        "docs/safety/reproducers/m0-leak-message-override.log",
+        "compat/.runs/ownership-audit-20261030/lmsg-repro/manifest.json"
+      ],
+      "diagnostic": "docs/safety/reproducers/m0-leak-message-override.log",
+      "diagnostic_sha256": "4a490e4c16a2f07d4e3561ce64298ac4b378ccab0e22cc65aaebb3960beb8cdc",
+      "source_commit": "4862cf9dcc09565a1fe419e66cce97cdfbefbe24",
+      "tested_working_tree": true,
+      "source_files_sha256": {
+        "src/lmsg.rs": "34bec4c61b308b5e699e043a282a57175e993424c19afdf22efcc6df3efa3c0a"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_duplicate_message_and_help_definitions_release_previous_overrides",
+      "rerun_evidence": null
+    },
+    {
+      "id": "M0-LEAK-006",
+      "title": "Saved startup option strings lose previous owners on replacement or stdin tags reset",
+      "status": "open",
+      "classification": "Independent single/duplicate ASan comparisons confirm five startup replacements; PTY stdin-tags reset independently leaks 2 bytes. Codex candidate fixes await complete independent qualification.",
+      "severity": "not exploit-assessed",
+      "delivery_packet": "M3.1",
+      "requirement_ids": [
+        "SAFE-MEM-005",
+        "SAFE-STATE-005"
+      ],
+      "evidence_refs": [
+        "docs/safety/reproducers/m0-leak-startup-options/manifest.json",
+        "compat/.runs/ownership-audit-20261030/source-review.md",
+        "docs/safety/reproducers/m0-leak-startup-options/pty-tag-reset.json",
+        "docs/safety/reproducers/m0-leak-startup-options/pty-tag-control.json"
+      ],
+      "source_commit": "73c641151dcb998c9714163d095493aa56bc14fb",
+      "source_files_sha256": {
+        "src/optfunc.rs": "4c2fa37a21f8b5cb5c384fd58fcef8e28cb4f24d2f058bb180a55c2f92959d8b",
+        "src/tags.rs": "5f757a969fce4634665063e9a8d129a97e52c49c72f3a59a3c6c9e36b9283726"
+      },
+      "blocks_final_safety_gate": true,
+      "fix_commit": null,
+      "regression": "tools/safety/test_fault_paths.py:ActualFaultPaths.test_duplicate_startup_options_release_previous_saved_strings and ActualFaultPaths.test_stdin_tags_reset_releases_saved_filename",
       "rerun_evidence": null
     }
   ]
